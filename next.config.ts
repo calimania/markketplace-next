@@ -1,12 +1,13 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  output: 'export',
+const BUILD_MODE = process.env.BUILD_MODE || 'static' || 'api';
+
+const nextConfig = {
+  output: BUILD_MODE === 'static' ? 'export' : undefined,
   images: {
-    unoptimized: true,
+    unoptimized: BUILD_MODE === 'static',
   },
   basePath: '',
-};
+}
 
 export default nextConfig;
