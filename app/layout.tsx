@@ -1,11 +1,34 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { strapiClient } from '@/markket/api';
 import "./globals.css";
+
+async function generateMetadata(): Promise<Metadata> {
+  const { data: [store] } = await strapiClient.getStore();
+  const seo = store?.SEO;
+  const favicon = store?.Favicon?.url;
+
+  return {
+    title: seo?.metaTitle || "Markket Next",
+    description: seo?.metaDescription || "Dashboard for Markket storefronts",
+    keywords: seo?.metaKeywords,
+    authors: seo?.metaAuthor ? [{ name: seo.metaAuthor }] : undefined,
+    openGraph: {
+      title: seo?.metaTitle,
+      description: seo?.metaDescription,
+      images: [seo?.socialImage?.url as string],
+    },
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
+      apple: favicon,
+    },
+  };
+};
 
 import '@mantine/core/styles.css';
 
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,10 +40,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Markket Next",
-  description: "Dashboard for Markket storefronts",
-};
+export const metadata: Metadata = await generateMetadata();
 
 export default function RootLayout({
   children,
