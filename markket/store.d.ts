@@ -1,28 +1,27 @@
 export interface Store {
   id: number;
-  attributes: {
-    title: string;
-    Description: string;
-    slug: string;
-    Logo: {
-      data: {
-        attributes: {
-          url: string;
-          width: number;
-          height: number;
-        };
-      };
-    };
-    SEO: {
-      title: string;
-      description: string;
-      socialImage?: {
-        data: {
-          attributes: {
-            url: string;
-          };
-        };
-      };
+  title: string;
+  Description: string;
+  slug: string;
+  documentId: string;
+  Description: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  STRIPE_CUSTOMER_ID: string;
+  Logo: {
+    url: string;
+  };
+  Favicon: {
+    url: string;
+  },
+  SEO: {
+    metaDescription: string;
+    metaKeywords: string;
+    metaTitle: string;
+    metaAuthor: string;
+    socialImage?: {
+      url: string;
     };
   };
 };

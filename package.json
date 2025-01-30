@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "static": "next build && next export"
+    "static": "next build"
   },
   "dependencies": {
     "@mantine/core": "^7.16.2",

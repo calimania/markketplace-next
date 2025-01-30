@@ -2,9 +2,11 @@ import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
 import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 
+const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
+
 export default async function Home() {
-  const { data: [store] } = await strapiClient.getStore();
-  console.log({ store });
+  const a = await strapiClient.getStore();
+  const store = a.data[0];
 
   return (
     <Container size="lg" className="py-20">
@@ -12,15 +14,17 @@ export default async function Home() {
         {/* Hero Section */}
         <div className="text-center">
           <img
-            src="https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png"
-            alt="Markket Logo"
+            src={store?.Logo?.url || defaultLogo}
+            alt={store?.SEO?.metaTitle || 'Markket Logo'}
             width={200}
             height={200}
             className="mx-auto mb-8"
           />
-          <Title className="text-4xl md:text-5xl mb-4">Welcome to Markket</Title>
+          <Title className="text-4xl md:text-5xl mb-4">
+            Welcome to {store?.SEO?.metaTitle || 'Markket'}
+          </Title>
           <Text size="xl" c="dimmed" className="mx-auto mb-8">
-            Build beautiful storefronts with modern technology stack
+            {store?.SEO?.metaDescription || 'eCommerce'}
           </Text>
         </div>
 

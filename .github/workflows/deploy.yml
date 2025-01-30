@@ -28,7 +28,7 @@ jobs:
         run: npm run build
 
       - name: Export static files
-        run: npm run export
+        run: npm run static
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'

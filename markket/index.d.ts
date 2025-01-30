@@ -23,9 +23,8 @@ export interface StrapiResponse<T> {
  */
 export interface FetchOptions {
   contentType: string;
-  filter?: string;
+  filters?: Record<string, string | number | ojbect>;
   populate?: string;
-  single?: string;
   paginate?: {
     limit?: number;
     page?: number;
