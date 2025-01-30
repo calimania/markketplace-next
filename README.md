@@ -28,6 +28,19 @@ The markkët API is powered by Strapi, Postgres, Docker & Redis
 
 This client uses typescript, react, tailwind, mantine, tabler & is open to community contributions
 
+### Static Pages (GitHub Pages)
+The following pages are pre-rendered at build time:
+- Home page
+- About page
+- Documentation
+- Landing pages
+
+### Dynamic Pages (Digital Ocean)
+The following pages are server-rendered:
+- Products listing & details
+- Store management
+- User account
+
 ### NextJS
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
@@ -45,6 +58,8 @@ pnpm dev
 # or
 bun dev
 ```
+
+Opens by default in port `4020`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
