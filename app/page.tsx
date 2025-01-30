@@ -1,7 +1,11 @@
 import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
 import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode } from "@tabler/icons-react";
+import { strapiClient } from '@/markket/api';
 
-export default function Home() {
+export default async function Home() {
+  const { data: [store] } = await strapiClient.getStore();
+  console.log({ store });
+
   return (
     <Container size="lg" className="py-20">
       <Stack gap="xl">
