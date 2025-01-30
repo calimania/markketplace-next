@@ -31,6 +31,7 @@ jobs:
         env:
           MARKKET_URL: ${{ secrets.MARKKET_URL }}
           MARKKET_STORE_SLUG: next
+          BUILD_MODE: static
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4

@@ -8,6 +8,9 @@ const nextConfig = {
     unoptimized: BUILD_MODE === 'static',
   },
   basePath: '',
+  experimental: {
+    excludeRoutes: BUILD_MODE === 'static' ? ['/api/*'] : []
+  },
 }
 
 export default nextConfig;
