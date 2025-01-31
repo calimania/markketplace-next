@@ -2,11 +2,9 @@ import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { Store } from "@/markket/store.d";
 
-
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
-
-export const getCollection = async (key: string) => {
+const getCollection = async (key: string) => {
   let collection: Store[] = [];
 
   if (key === 'stores') {
@@ -22,10 +20,15 @@ export const getCollection = async (key: string) => {
   };
 };
 
-
-export default async function Home({ params }: { params: Record<string, string> }) {
+/**
+ * Displays a page or collection matching the slug
+ *
+ * @param {Object} props - The props object
+ * @returns
+ */
+export default async function AnyPage({ params }: { params: Promise<{ slug: string }> }) {
   const a = await strapiClient.getStore();
-  const page_slug = params.slug;
+  const page_slug = (await params).slug;
 
   const collection = await getCollection(page_slug);
   const store = a.data[0];
