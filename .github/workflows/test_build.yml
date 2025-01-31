@@ -32,9 +32,3 @@ jobs:
           MARKKET_URL: ${{ secrets.MARKKET_URL }}
           MARKKET_STORE_SLUG: next
           BUILD_MODE: static
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
