@@ -25,8 +25,10 @@ export interface FetchOptions {
   contentType: string;
   filters?: Record<string, string | number | ojbect>;
   populate?: string;
+  sort?: string;
   paginate?: {
     limit?: number;
     page?: number;
+    pageSize?: number;
   };
 }

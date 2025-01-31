@@ -1,6 +1,8 @@
 import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store.d';
 
+export type { StrapiResponse, FetchOptions };
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;
@@ -8,18 +10,6 @@ export class StrapiClient {
   constructor() {
     this.baseUrl = process.env.MARKKET_URL || 'https://api.markket.place/';
     this.storeSlug = process.env.MARKKET_STORE_SLUG || 'next';
-  }
-
-  private transformFilters(filters: Record<string, number | string | object>): string {
-    return Object.entries(filters)
-      .map(([key, value]) => {
-        if (typeof value === 'object') {
-          const [nestedKey, operator] = Object.entries(value)[0];
-          return `filters[${key}][${nestedKey}][$eq]=${operator}`;
-        }
-        return `filters[${key}][$eq]=${value}`;
-      })
-      .join('&');
   }
 
   private buildUrl(options: FetchOptions): string {
@@ -41,6 +31,8 @@ export class StrapiClient {
     if (paginate?.limit) params.append('pagination[limit]', paginate.limit.toString());
 
     if (paginate?.page) params.append('pagination[page]', paginate.page.toString());
+
+    if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
 
     const url = new URL('api/' + contentType, this.baseUrl);
     url.search = params.toString();
@@ -94,6 +86,25 @@ export class StrapiClient {
       populate: 'Logo,SEO.socialImage,Favicon'
     });
   }
+
+  /**
+   * Requests stores from the strapi / markket api, including pagination, to display in our /stores ,
+   * including filters to search for by some attributes like name, slug, title or description using the same keyword
+   */
+  async getStores(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
+    const { filter, sort } = options;
+
+    return await this.fetch<Store>({
+      contentType: 'stores',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon',
+      filters: filter && {
+        '$or][0][title': filter,
+      } || {},
+      paginate,
+      sort,
+    });
+  };
+
 }
 
 export const strapiClient = new StrapiClient();
