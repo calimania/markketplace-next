@@ -15,6 +15,10 @@ export interface Store {
   Favicon: {
     url: string;
   },
+  URLS: {
+    Label: string;
+    URL: string;
+  }[],
   SEO: {
     metaDescription: string;
     metaKeywords: string;

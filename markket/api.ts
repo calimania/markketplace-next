@@ -13,7 +13,7 @@ export class StrapiClient {
   }
 
   private buildUrl(options: FetchOptions): string {
-    const { contentType, filters, populate, paginate } = options;
+    const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
 
     // Handle filters
@@ -33,6 +33,8 @@ export class StrapiClient {
     if (paginate?.page) params.append('pagination[page]', paginate.page.toString());
 
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
+
+    if (sort) params.append('sort', sort);
 
     const url = new URL('api/' + contentType, this.baseUrl);
     url.search = params.toString();
@@ -96,7 +98,7 @@ export class StrapiClient {
 
     return await this.fetch<Store>({
       contentType: 'stores',
-      populate: 'Logo,SEO,SEO.socialImage,Favicon',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
       filters: filter && {
         '$or][0][title': filter,
       } || {},
