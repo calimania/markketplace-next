@@ -16,7 +16,7 @@ const getCollection = async (key: string) => {
   }
 
   if (key === 'docs') {
-    const response = await strapiClient.getPosts({ page: 1, pageSize: 30 }, { filter: '', sort: '' });
+    const response = await strapiClient.getPosts({ page: 1, pageSize: 30 }, { filter: '', sort: 'updatedAt:desc' });
     collection = response?.data as Store[] || [];
   }
 
