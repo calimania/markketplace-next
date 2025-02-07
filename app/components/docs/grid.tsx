@@ -1,11 +1,11 @@
 import { SimpleGrid } from '@mantine/core';
 import { BlogPostCard } from './card';
 
-interface BlogGridProps {
+interface DocsGridProps {
   posts: any[];
 }
 
-export function BlogGrid({ posts }: BlogGridProps) {
+export function DocsGrid({ posts }: DocsGridProps) {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
       {posts.map((post) => (
@@ -15,4 +15,4 @@ export function BlogGrid({ posts }: BlogGridProps) {
   );
 };
 
-export default BlogGrid;
+export default DocsGrid;
