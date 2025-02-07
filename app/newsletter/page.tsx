@@ -37,7 +37,7 @@ export function NewsletterPage({ storeId, storeName }: SubscribeFormProps) {
   });
 
   const handleSubmit = async (values: { email: string }) => {
-    const MARKKET_URL = process.env.MARKKET_URL || 'https://api.markket.place';
+    const MARKKET_URL = process.env.NEXT_PUBLIC_MARKKET_URL || 'https://api.markket.place';
 
     try {
       const res = await fetch(`${MARKKET_URL}/api/subscribers`, {
