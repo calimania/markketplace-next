@@ -4,17 +4,13 @@ import React from 'react';
 import { TextInput, Button, Text, Modal } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
-import { strapiClient } from '@/markket/api';
 
 interface SubscribeFormProps {
   store: {
     id: string;
+    title: string;
   }
 }
-
-const pages = await strapiClient.getPage('newsletter');
-
-const page = pages?.data?.[0];
 
 /**
  * Displays a newsletter subscription form
