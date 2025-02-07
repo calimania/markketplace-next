@@ -8,6 +8,10 @@ interface StoreCardProps {
     title: string;
     slug: string;
     Description: string;
+    URLS: {
+      Label: string;
+      URL: string;
+    }[];
     Logo: {
       url: string;
       width: number;
@@ -50,11 +54,14 @@ export function StoreCard({ store }: StoreCardProps) {
 
       <Button
         component={Link}
-        href={`/stores/${store.slug}`}
+        href={
+          store.URLS?.[0]?.URL ||
+          `https://markket.place/stores/${store.slug}`}
         color="blue"
         fullWidth
         mt="md"
         radius="md"
+        target='_blank'
         rightSection={<IconArrowRight size={14} />}
       >
         Visit Store
