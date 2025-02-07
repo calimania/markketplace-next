@@ -97,6 +97,23 @@ export class StrapiClient {
   }
 
   /**
+   * Returns a page by its slug
+   * @param slug
+   * @returns
+   */
+  async getPage(slug: string, storeSlug: string = this.storeSlug) {
+
+    return this.fetch<Store>({
+      contentType: `pages`,
+      filters: {
+        '$and][0][store][slug': storeSlug,
+        '$and][1][slug': slug
+      },
+      populate: 'SEO.socialImage,store'
+    });
+  }
+
+  /**
    * Requests stores from the strapi / markket api, including pagination, to display in our /stores ,
    * including filters to search for by some attributes like name, slug, title or description using the same keyword
    */

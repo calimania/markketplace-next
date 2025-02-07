@@ -1,5 +1,5 @@
 import { Container, Title, Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc } from "@tabler/icons-react";
+import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 import { FeatureCard } from "./components/ui/feature.card";
 
@@ -20,7 +20,8 @@ const features = [
     icon: IconCode,
     title: "Developer Friendly",
     description: "Plugin ecosystem & custom integrations"
-  }
+  },
+
 ];
 
 const links = [
@@ -42,6 +43,13 @@ const links = [
     icon: IconBrandGithub,
     label: "GitHub",
     variant: "light"
+  },
+  {
+    href: '/newsletter',
+    icon: IconRadio,
+    label: 'Newsletter',
+    variant: 'gradient',
+    gradient: { from: '#1b57ad', to: '#367de4' }
   }
 ];
 
