@@ -2,13 +2,15 @@ import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { Store } from "@/markket/store.d";
 
+import StoreGrid from '@/app/components/stores/grid';
+
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
 const getCollection = async (key: string) => {
   let collection: Store[] = [];
 
   if (key === 'stores') {
-    const response = await strapiClient.getStores({ page: 1, pageSize: 12 }, { filter: '', sort: 'title' });
+    const response = await strapiClient.getStores({ page: 1, pageSize: 30 }, { filter: '', sort: 'title' });
     collection = response?.data as Store[] || [];
   }
 
@@ -58,30 +60,10 @@ export default async function AnyPage({ params }: { params: Promise<{ slug: stri
 
         </Group>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-          {/* // stores list @TODO we replace for dynamic component larter */}
-          {collection.data.map((store) => {
-            if (!store.slug || !store.SEO?.metaTitle) return null;
+        {page_slug === 'stores' && (
+          <StoreGrid stores={collection.data} />
+        )}
 
-            return (
-              <div>
-                <h3>{store?.SEO?.metaTitle}</h3>
-                <div>
-                  <ul>
-                    {store.URLS?.map((url: { Label: string, URL: string }) => {
-                      return (
-                        <li>
-                          <a href={url.URL} target="_blank">{url.Label}</a>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              </div>
-            )
-          })}
-        </div>
       </Stack>
     </Container>
   );
