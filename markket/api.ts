@@ -65,11 +65,19 @@ export class StrapiClient {
     });
   }
 
-  async getPosts() {
+  async getPosts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
+    const { filter, sort } = options;
+
     return this.fetch({
-      contentType: 'article',
-      filters: { store: { slug: { $eq: this.storeSlug } } },
-      populate: 'SEO.socialImage,Tags,store,cover'
+      contentType: 'articles',
+      sort,
+      filters: filter && {
+        '$and][0][store][slug': this.storeSlug,
+        '$or][0][title': filter,
+      } || {
+        '$and][0][store][slug': this.storeSlug,
+      },
+      populate: 'SEO.socialImage,Tags,cover',
     });
   }
 
@@ -80,7 +88,6 @@ export class StrapiClient {
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
-
   async getStore(slug = this.storeSlug) {
     return this.fetch<Store>({
       contentType: `stores`,
