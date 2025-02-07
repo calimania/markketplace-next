@@ -10,15 +10,11 @@ export const Default = {
     stores: [
       {
         id: 1,
-        title: 'Demo Store',
+        Title: 'Demo Store',
         slug: 'demo',
         Description: 'A demo store',
-        Logo: {
-          data: {
-            attributes: {
-              url: 'https://placehold.co/600x400'
-            }
-          }
+        cover: {
+          url: 'https://placehold.co/600x400'
         }
       }
     ]
