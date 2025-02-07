@@ -25,6 +25,7 @@ interface StoreCardProps {
 
 export function StoreCard({ store }: StoreCardProps) {
   const logoUrl = store.Logo?.url || 'https://placehold.co/800x400';
+  const homepageUrl = store.URLS?.[0]?.URL;
 
   return (
     <Card
@@ -55,7 +56,7 @@ export function StoreCard({ store }: StoreCardProps) {
       <Button
         component={Link}
         href={
-          store.URLS?.[0]?.URL ||
+          homepageUrl ||
           `https://markket.place/stores/${store.slug}`}
         color="blue"
         fullWidth
@@ -64,7 +65,7 @@ export function StoreCard({ store }: StoreCardProps) {
         target='_blank'
         rightSection={<IconArrowRight size={14} />}
       >
-        Visit Store
+        {homepageUrl ? 'Homepage' : 'View Details'}
       </Button>
     </Card>
   );
