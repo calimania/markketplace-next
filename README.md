@@ -64,6 +64,20 @@ pnpm dev
 bun dev
 ```
 
+### Debugging
+
+Use `--legacy-peer-deps` to install if there are errors, react 19 is not fully supported, and swagger-ui-react causes some peer dependency issues
+
+```
+npm ci --legacy-peer-deps
+
+# or
+
+npm i --legacy-peer-deps
+
+```
+
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
