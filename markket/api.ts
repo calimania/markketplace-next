@@ -1,5 +1,6 @@
 import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store.d';
+import { Page } from './page.d';
 
 export type { StrapiResponse, FetchOptions };
 
@@ -103,7 +104,7 @@ export class StrapiClient {
    */
   async getPage(slug: string, storeSlug: string = this.storeSlug) {
 
-    return this.fetch<Store>({
+    return this.fetch<Page>({
       contentType: `pages`,
       filters: {
         '$and][0][store][slug': storeSlug,
