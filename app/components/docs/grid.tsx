@@ -8,8 +8,8 @@ interface DocsGridProps {
 export function DocsGrid({ posts }: DocsGridProps) {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-      {posts.map((post) => (
-        <BlogPostCard key={post.id} post={post} />
+      {posts.map((post, index) => (
+        <BlogPostCard key={index} post={post} />
       ))}
     </SimpleGrid>
   );

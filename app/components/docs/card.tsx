@@ -50,8 +50,8 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
       </Text>
 
       <Group gap="xs">
-        {post.Tags?.map((tag) => (
-          <Badge key={tag.name} variant="light">
+        {post.Tags?.map((tag, index) => (
+          <Badge key={index} variant="light">
             <IconTag size={14} className="mr-1" />
             {tag.name}
           </Badge>
