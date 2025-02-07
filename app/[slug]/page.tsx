@@ -3,6 +3,7 @@ import { strapiClient } from '@/markket/api';
 import { Store } from "@/markket/store.d";
 
 import StoreGrid from '@/app/components/stores/grid';
+import DocsGrid from '@/app/components/docs/grid';
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
@@ -14,7 +15,12 @@ const getCollection = async (key: string) => {
     collection = response?.data as Store[] || [];
   }
 
-  console.log({ collection })
+  if (key === 'docs') {
+    const response = await strapiClient.getPosts({ page: 1, pageSize: 30 }, { filter: '', sort: 'updatedAt:desc' });
+    collection = response?.data as Store[] || [];
+  }
+
+  console.log({ collection: collection.length, key });
 
   return {
     data: collection || [],
@@ -62,6 +68,15 @@ export default async function AnyPage({ params }: { params: Promise<{ slug: stri
 
         {page_slug === 'stores' && (
           <StoreGrid stores={collection.data} />
+        )}
+
+        {page_slug === 'docs' && (
+          <>
+            <Title order={2} className="text-center mb-8">
+              Documentation & Articles
+            </Title>
+            <DocsGrid posts={collection.data} />
+          </>
         )}
 
       </Stack>

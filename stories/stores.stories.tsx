@@ -1,13 +1,13 @@
-import { StoreGrid } from '../app/components/stores/grid';
+import { DocsGrid } from '../app/components/docs/grid';
 
 export default {
-  title: 'Components/StoreGrid',
-  component: StoreGrid,
+  title: 'Components/DocsGrid',
+  component: DocsGrid,
 };
 
 export const Default = {
   args: {
-    stores: [
+    posts: [
       {
         id: 1,
         title: 'Demo Store',
