@@ -1,8 +1,57 @@
-import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode } from "@tabler/icons-react";
+import { Container, Title, Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
+import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
+import { FeatureCard } from "./components/ui/feature.card";
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
+
+const features = [
+  {
+    icon: IconRocket,
+    title: "Fast & Modern",
+    description: "Built with Next.js and Astro for optimal performance"
+  },
+  {
+    icon: IconBuildingStore,
+    title: "Ready to Sell",
+    description: "Supported by Stripe connect"
+  },
+  {
+    icon: IconCode,
+    title: "Developer Friendly",
+    description: "Plugin ecosystem & custom integrations"
+  },
+
+];
+
+const links = [
+  {
+    href: "/stores",
+    icon: IconShoppingBag,
+    label: "Browse Stores",
+    variant: "gradient",
+    gradient: { from: 'indigo', to: 'cyan' }
+  },
+  {
+    href: "/docs",
+    icon: IconFileTypeDoc,
+    label: "Documentation",
+    variant: "light"
+  },
+  {
+    href: "https://github.com/calimania/markketplace-next",
+    icon: IconBrandGithub,
+    label: "GitHub",
+    variant: "light"
+  },
+  {
+    href: '/newsletter',
+    icon: IconRadio,
+    label: 'Newsletter',
+    variant: 'gradient',
+    gradient: { from: '#1b57ad', to: '#367de4' }
+  }
+];
 
 export default async function Home() {
   const a = await strapiClient.getStore();
@@ -30,58 +79,27 @@ export default async function Home() {
 
         {/* Links Section */}
         <Group justify="center" gap="md" wrap="wrap">
-          <Button
-            component="a"
-            href="https://astro.markket.place"
-            leftSection={<IconBuildingStore size={20} />}
-            variant="gradient"
-            gradient={{ from: 'indigo', to: 'cyan' }}
-            target="_blank"
-          >
-            View Demo Store
-          </Button>
-
-          <Button
-            component="a"
-            href="https://github.com/calimania/markketplace-next"
-            leftSection={<IconBrandGithub size={20} />}
-            target="_blank"
-            variant="light"
-          >
-            Next.js Repo
-          </Button>
-
-          <Button
-            component="a"
-            href="https://github.com/calimania/markketplace-astro"
-            leftSection={<IconCode size={20} />}
-            target="_blank"
-            variant="light"
-          >
-            Astro Repo
-          </Button>
+          {links.map((link) => (
+            <Button
+              key={link.href}
+              component="a"
+              href={link.href}
+              leftSection={<link.icon size={20} />}
+              variant={link.variant}
+              gradient={link.gradient}
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+            >
+              {link.label}
+            </Button>
+          ))}
         </Group>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-          <div className="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
-            <IconRocket className="text-blue-500 mb-4" size={32} />
-            <h3 className="text-xl font-bold mb-2">Open Source</h3>
-            <Text c="dimmed">Open standards & a modern stack</Text>
-          </div>
-
-          <div className="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
-            <IconBuildingStore className="text-blue-500 mb-4" size={32} />
-            <h3 className="text-xl font-bold mb-2">Ready to Sell</h3>
-            <Text c="dimmed">Supported by Stripe connect</Text>
-          </div>
-
-          <div className="p-6 rounded-lg border border-gray-200 dark:border-gray-800">
-            <IconCode className="text-blue-500 mb-4" size={32} />
-            <h3 className="text-xl font-bold mb-2">Developer Friendly</h3>
-            <Text c="dimmed">Plugin ecosystem & custom integrations</Text>
-          </div>
-        </div>
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
+          {features.map((feature) => (
+            <FeatureCard key={feature.title} {...feature} />
+          ))}
+        </SimpleGrid>
       </Stack>
     </Container>
   );
