@@ -139,7 +139,7 @@ export class StrapiClient {
         '$and][0][store][slug': slug || this.storeSlug,
         '$and][1][id': id
       },
-      populate: 'SEO.socialImage,Tags',
+      populate: 'SEO.socialImage,Tags,cover',
     });
   }
 }
