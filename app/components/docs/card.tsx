@@ -4,7 +4,8 @@ import { Article } from '@/markket/article';
 
 export interface BlogPostCardProps {
   post: Article;
-}
+  prefix?: string;
+};
 
 function createSlug(title: string): string {
   return title
@@ -13,7 +14,7 @@ function createSlug(title: string): string {
     .replace(/^-+|-+$/g, '')
 };
 
-export function BlogPostCard({ post }: BlogPostCardProps) {
+export function BlogPostCard({ post, prefix }: BlogPostCardProps) {
   const slug = `${post.id}-${createSlug(post.Title)}`;
 
   return (
@@ -30,7 +31,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500} size="lg" lineClamp={2}>
-          <a href={`/docs/${slug}`}>{post.Title}</a>
+          <a href={`/${prefix || 'docs'}/${slug}`}>{post.Title}</a>
         </Text>
         <Group gap="xs">
           <IconCalendar size={14} />

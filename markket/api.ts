@@ -66,17 +66,17 @@ export class StrapiClient {
     });
   }
 
-  async getPosts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
+  async getPosts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, slug?: string) {
     const { filter, sort } = options;
 
     return this.fetch({
       contentType: 'articles',
       sort,
       filters: filter && {
-        '$and][0][store][slug': this.storeSlug,
+        '$and][0][store][slug': slug || this.storeSlug,
         '$or][0][title': filter,
       } || {
-        '$and][0][store][slug': this.storeSlug,
+        '$and][0][store][slug': slug || this.storeSlug,
       },
       populate: 'SEO.socialImage,Tags,cover',
     });
@@ -132,11 +132,11 @@ export class StrapiClient {
     });
   };
 
-  async getPost(id: string) {
+  async getPost(id: string, slug?: string) {
     return await this.fetch({
       contentType: 'articles',
       filters: {
-        '$and][0][store][slug': this.storeSlug,
+        '$and][0][store][slug': slug || this.storeSlug,
         '$and][1][id': id
       },
       populate: 'SEO.socialImage,Tags',

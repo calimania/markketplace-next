@@ -1,6 +1,9 @@
-import { Container, Title, Text, Stack } from "@mantine/core";
+
 import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
+import { Container, Title, Text, Stack, Group, Button } from "@mantine/core";
+import { IconNews, IconShoppingBag, IconFiles } from '@tabler/icons-react';
+
 import {
   BlocksRenderer,
   type BlocksContent,
@@ -45,6 +48,33 @@ export default async function StorePage({
           <Text size="xl" c="dimmed" className="mx-auto mb-8">
             {store.SEO?.metaDescription}
           </Text>
+
+          <Group justify="center" gap="md">
+            <Button
+              component="a"
+              href={`/store/${store.slug}/blog`}
+              variant="light"
+              leftSection={<IconNews size={20} />}
+            >
+              Blog
+            </Button>
+            <Button
+              component="a"
+              href={`#/store/${store.slug}/products`}
+              variant="light"
+              leftSection={<IconShoppingBag size={20} />}
+            >
+              Products
+            </Button>
+            <Button
+              component="a"
+              href={`#/store/${store.slug}/pages`}
+              variant="light"
+              leftSection={<IconFiles size={20} />}
+            >
+              Pages
+            </Button>
+          </Group>
         </div>
 
         <section className="">
