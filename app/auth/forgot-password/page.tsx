@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-  PasswordInput,
+  TextInput,
   Paper,
   Title,
   Container,
@@ -14,75 +14,57 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface ResetPasswordForm {
-  password: string;
-  passwordConfirmation: string;
-  code: string;
+  email: string;
 }
 
 export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const code = searchParams.get('code');
-
-  // Redirect if no code is present
-  if (!code) {
-    router.push('/auth/forgot-password');
-    return null;
-  }
 
   const form = useForm<ResetPasswordForm>({
     initialValues: {
-      password: '',
-      passwordConfirmation: '',
-      code: code,
+      email: '',
     },
     validate: {
-      password: (val) => (val.length < 6 ? 'Password should be at least 6 characters' : null),
-      passwordConfirmation: (val, values) =>
-        val !== values.password ? 'Passwords do not match' : null,
+      email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
     },
   });
 
   const handleSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/markket?path=/api/auth/reset-password', {
+      const response = await fetch('/api/markket?path=/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          code: values.code,
-          password: values.password,
-          passwordConfirmation: values.passwordConfirmation,
-        }),
+        body: JSON.stringify(values),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to reset password');
+        throw new Error(data.error?.message || 'Failed to send reset email');
       }
 
       notifications.show({
-        title: 'Success!',
-        message: 'Your password has been reset successfully',
+        title: 'Check your email',
+        message: 'If an account exists with this email, you will receive a password reset link',
         color: 'green',
         icon: <IconCheck size="1.1rem" />,
         autoClose: 5000,
       });
 
-      // Redirect to login after successful reset
-      setTimeout(() => router.push('/dashboard'), 1000);
+      // Redirect to login after a short delay
+      setTimeout(() => router.push('/auth/login'), 5000);
 
     } catch (error: any) {
       notifications.show({
         title: 'Error',
-        message: error.message || 'Something went wrong. Please try again.',
+        message: 'Something went wrong. Please try again.',
         color: 'red',
         icon: <IconX size="1.1rem" />,
         autoClose: 3000,
@@ -95,31 +77,24 @@ export default function ResetPasswordPage() {
   return (
     <Container size={420} my={40}>
       <Title ta="center" fw={900}>
-        Create new password
+        Reset your password
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Please enter your new password
+        Enter your email address and we'll send you a reset link
       </Text>
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
-            <PasswordInput
-              label="New Password"
-              placeholder="Your new password"
+            <TextInput
+              label="Email"
+              placeholder="you@markket.place"
               required
-              {...form.getInputProps('password')}
-            />
-
-            <PasswordInput
-              label="Confirm Password"
-              placeholder="Confirm your new password"
-              required
-              {...form.getInputProps('passwordConfirmation')}
+              {...form.getInputProps('email')}
             />
 
             <Button loading={loading} type="submit" fullWidth>
-              Reset Password
+              Send reset link
             </Button>
 
             <Anchor

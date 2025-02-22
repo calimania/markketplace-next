@@ -42,7 +42,7 @@ export default function LoginPage() {
   const handleSubmit = async (values: LoginForm) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/markket/auth/local', {
+      const response = await fetch('/api/markket?path=/api/auth/local', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 component="button"
                 type="button"
                 c="dimmed"
-                onClick={() => router.push('/auth/reset-password')}
+                onClick={() => router.push('/auth/forgot-password')}
                 size="xs"
               >
                 Forgot password?

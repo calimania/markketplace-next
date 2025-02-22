@@ -46,7 +46,7 @@ export default function RegisterPage() {
   const handleSubmit = async (values: RegisterForm) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/markket/auth/local/register', {
+      const response = await fetch('/api/markket?path=/api/auth/local/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

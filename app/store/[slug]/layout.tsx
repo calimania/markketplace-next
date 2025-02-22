@@ -1,9 +1,10 @@
 import {strapiClient} from "@/markket/api";
 import { ClientLayout } from "@/app/components/layout/store.layout";
 
-interface LayoutProps {
+
+type LayoutProps = {
   children: React.ReactNode;
-  params: { slug: string }; // Next.js automatically passes params
+  params: { slug: string };
 }
 
 async function getStore(slug: string) {
@@ -12,7 +13,10 @@ async function getStore(slug: string) {
   return response?.data?.[0];
 }
 
-export default async function StoreLayout({ children, params }: LayoutProps) {
+export default async function StoreLayout({
+  children,
+  params,
+}: LayoutProps) {
   const store = await getStore(params.slug);
 
   return (
@@ -20,4 +24,4 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
       {children}
     </ClientLayout>
   );
-};
+}

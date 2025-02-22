@@ -2,32 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const MARKKET_URL = process.env.MARKKET_URL || 'https://api.markket.place/';
 
-async function handler(
-  req: NextRequest,
-  { params }: { params: { slug: string[] } } // Fix: correct params type
-) {
+async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
-  const path = requestUrl.pathname.replace('/api/markket', '/api');
-  console.log({ params });
+  const path = requestUrl.searchParams.get('path');
 
-  // Construct the target URL
-  const targetUrl = new URL(path, MARKKET_URL);
-  targetUrl.search = requestUrl.search;
+  if (!path) {
+    return NextResponse.json(
+      { error: 'Path parameter is required' },
+      { status: 400 }
+    );
+  }
 
+  // Construct the target URL (ensure path starts with /)
+  const targetUrl = new URL(
+    path.startsWith('/') ? path : `/${path}`,
+    MARKKET_URL
+  );
 
-  console.log({ targetUrl: targetUrl.toString() });
+  console.log('API Proxy:', { targetUrl: targetUrl.toString() });
+
+  // Forward all other query params except 'path'
+  requestUrl.searchParams.delete('path');
+  targetUrl.search = requestUrl.searchParams.toString();
+
+  console.info('API Proxy:', { targetUrl: targetUrl.toString() });
 
   try {
     const response = await fetch(targetUrl.toString(), {
       method: req.method,
       headers: {
         'Content-Type': 'application/json',
-        // Forward authorization header if present
         ...(req.headers.get('authorization') && {
           'Authorization': req.headers.get('authorization') || ''
         })
       },
-      // Forward the body for POST/PUT/PATCH requests
       ...(req.method !== 'GET' && req.method !== 'HEAD' && {
         body: JSON.stringify(await req.json())
       })
@@ -49,7 +57,7 @@ async function handler(
       { status: 500 }
     );
   }
-};
+}
 
 export const GET = handler;
 export const POST = handler;
