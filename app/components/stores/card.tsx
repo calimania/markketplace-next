@@ -56,16 +56,14 @@ export function StoreCard({ store }: StoreCardProps) {
       <Button
         component={Link}
         href={
-          homepageUrl ||
-          `https://markket.place/stores/${store.slug}`}
+          `store/${store.slug}`}
         color="blue"
         fullWidth
         mt="md"
         radius="md"
-        target='_blank'
         rightSection={<IconArrowRight size={14} />}
       >
-        {homepageUrl ? 'Homepage' : 'View Details'}
+        {'View Store'}
       </Button>
     </Card>
   );
