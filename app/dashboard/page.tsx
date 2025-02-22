@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store.d';
+import ProtectedRoute from '@/app/components/protectedRoute';
+import { useAuth } from '@/app/providers/auth';
 
 import {
   AppShell,
@@ -73,6 +75,7 @@ function MainLink({ icon: Icon, label, notifications }: {
 export default function DashboardPage() {
   const [opened, { toggle }] = useDisclosure();
   const [store, setStore] = useState({} as Store);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchStore() {
@@ -115,7 +118,7 @@ export default function DashboardPage() {
           </Group>
           <Group>
             <IconUserCircle size={24} style={{ color: '#228be6' }} />
-            <Text fw={500}>Admin</Text>
+            <Text fw={500}>{user?.username}</Text>
           </Group>
         </Group>
       </AppShell.Header>
@@ -138,32 +141,33 @@ export default function DashboardPage() {
         <Alert icon={<IconAlertCircle size="1rem" />} title="Coming Soon!" color="yellow">
           We&apos;e working hard to bring you amazing features. Stay tuned!
         </Alert>
+        <ProtectedRoute>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} mt="md" spacing="md">
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <IconShoppingCart size={24} style={{ marginBottom: rem(10) }} />
+              <Title order={3}>Products</Title>
+              <Text c="dimmed" size="sm">
+                Manage your store products
+              </Text>
+            </Card>
 
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} mt="md" spacing="md">
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <IconShoppingCart size={24} style={{ marginBottom: rem(10) }} />
-            <Title order={3}>Products</Title>
-            <Text c="dimmed" size="sm">
-              Manage your store products
-            </Text>
-          </Card>
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <IconArticle size={24} style={{ marginBottom: rem(10) }} />
+              <Title order={3}>Articles</Title>
+              <Text c="dimmed" size="sm">
+                Blog posts and news
+              </Text>
+            </Card>
 
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <IconArticle size={24} style={{ marginBottom: rem(10) }} />
-            <Title order={3}>Articles</Title>
-            <Text c="dimmed" size="sm">
-              Blog posts and news
-            </Text>
-          </Card>
-
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <IconSettings size={24} style={{ marginBottom: rem(10) }} />
-            <Title order={3}>Analytics</Title>
-            <Text c="dimmed" size="sm">
-              Store performance metrics
-            </Text>
-          </Card>
-        </SimpleGrid>
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <IconSettings size={24} style={{ marginBottom: rem(10) }} />
+              <Title order={3}>Analytics</Title>
+              <Text c="dimmed" size="sm">
+                Store performance metrics
+              </Text>
+            </Card>
+          </SimpleGrid>
+        </ProtectedRoute>
       </AppShell.Main>
     </AppShell>
   );
