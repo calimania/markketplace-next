@@ -4,10 +4,11 @@ const MARKKET_URL = process.env.MARKKET_URL || 'https://api.markket.place/';
 
 async function handler(
   req: NextRequest,
-  { params }: { params: Record<string, string> }
+  { params }: { params: { slug: string[] } } // Fix: correct params type
 ) {
   const requestUrl = new URL(req.url);
   const path = requestUrl.pathname.replace('/api/markket', '/api');
+  console.log({ params });
 
   // Construct the target URL
   const targetUrl = new URL(path, MARKKET_URL);
@@ -48,6 +49,10 @@ async function handler(
       { status: 500 }
     );
   }
-}
+};
 
-export { handler as GET, handler as POST, handler as PUT, handler as DELETE, handler as PATCH };
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const DELETE = handler;
+export const PATCH = handler;
