@@ -17,6 +17,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/auth';
 
 interface RegisterForm {
   email: string;
@@ -27,6 +28,7 @@ interface RegisterForm {
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const form = useForm<RegisterForm>({
     initialValues: {
@@ -57,6 +59,13 @@ export default function RegisterPage() {
       if (!response.ok) {
         throw new Error(data.error?.message || 'Registration failed');
       }
+
+      login({
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        jwt: data.jwt,
+      });
 
       notifications.show({
         title: 'Success!',
