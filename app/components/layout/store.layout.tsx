@@ -31,9 +31,14 @@ function StoreNavigation({ slug }: { slug: string }) {
           About
         </Button>
       </Link>
+      <Link href="/stores">
+        <Button variant="outline">
+          Back to Stores
+        </Button>
+      </Link>
       <Link href="/">
         <Button variant="outline">
-          Back to Markket
+          Back to Markkët
         </Button>
       </Link>
     </Group>

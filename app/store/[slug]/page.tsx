@@ -1,6 +1,10 @@
 import { Container, Title, Text, Stack, Group } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
+import {
+  BlocksRenderer,
+  type BlocksContent,
+} from "@strapi/blocks-react-renderer";
 
 export default async function StorePage({
   params
@@ -9,7 +13,13 @@ export default async function StorePage({
 }) {
   const response = await strapiClient.getStore(params.slug);
 
+  const pageQuery = await strapiClient.getPage('home', params.slug);
+
+  const homePage = pageQuery?.data?.[0];
+
+
   const store = response?.data?.[0];
+
 
   if (!store) {
     notFound();
@@ -33,6 +43,12 @@ export default async function StorePage({
             {store.SEO?.metaDescription}
           </Text>
         </div>
+
+        <section className="">
+          <BlocksRenderer
+            content={homePage?.Content || ([] as BlocksContent[])}
+          />
+        </section>
 
         {/* Products Section */}
         {store.Products?.length > 0 && (
