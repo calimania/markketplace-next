@@ -55,14 +55,15 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
       setIsSuccess(true);
       form.reset();
     } catch (err) {
+      console.error(err);
       setError('Failed to subscribe. Please try again.');
     }
   };
 
   return (
     <>
-
       <form onSubmit={form.onSubmit(handleSubmit)}>
+        {error && <Text color="red">{error}</Text>}
         <Text size="sm" fw={500} mb="md">
           Subscribe to {store?.title}&apos;s newsletter
         </Text>

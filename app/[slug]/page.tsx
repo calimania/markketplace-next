@@ -1,6 +1,7 @@
-import { Container, Title, Text, Button, Group, Stack } from "@mantine/core";
+import { Container, Title, Text, Group, Stack } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { Store } from "@/markket/store.d";
+import { Article } from "@/markket/article.d";
 
 import StoreGrid from '@/app/components/stores/grid';
 import DocsGrid from '@/app/components/docs/grid';
@@ -35,10 +36,10 @@ const getCollection = async (key: string) => {
  * @returns
  */
 export default async function AnyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const a = await strapiClient.getStore();
-  const page_slug = (await params).slug;
 
-  const collection = await getCollection(page_slug);
+  const collection = await getCollection(slug);
   const store = a.data[0];
 
   return (
@@ -66,16 +67,16 @@ export default async function AnyPage({ params }: { params: Promise<{ slug: stri
 
         </Group>
 
-        {page_slug === 'stores' && (
-          <StoreGrid stores={collection.data} />
+        {slug === 'stores' && (
+          <StoreGrid stores={collection.data as Store[]} />
         )}
 
-        {page_slug === 'docs' && (
+        {slug === 'docs' && (
           <>
             <Title order={2} className="text-center mb-8">
               Documentation & Articles
             </Title>
-            <DocsGrid posts={collection.data} />
+            <DocsGrid posts={collection.data as unknown as Article[]} />
           </>
         )}
 

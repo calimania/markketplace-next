@@ -15,6 +15,7 @@
     "@mantine/core": "^7.16.2",
     "@mantine/form": "^7.16.2",
     "@mantine/hooks": "^7.16.2",
+    "@mantine/notifications": "^7.17.0",
     "@storybook/blocks": "^8.5.3",
     "@storybook/react": "^8.5.3",
     "@storybook/testing-library": "^0.2.2",

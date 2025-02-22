@@ -1,31 +1,14 @@
 import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBuilding, IconArrowRight } from '@tabler/icons-react';
 import Link from 'next/link';
+import { Store } from "@/markket/store.d";
 
-interface StoreCardProps {
-  store: {
-    id: number;
-    title: string;
-    slug: string;
-    Description: string;
-    URLS: {
-      Label: string;
-      URL: string;
-    }[];
-    Logo: {
-      url: string;
-      width: number;
-      height: number;
-    };
-    SEO: {
-      metaDescription: string;
-    };
-  };
+export interface StoreCardProps {
+  store: Store;
 }
 
 export function StoreCard({ store }: StoreCardProps) {
   const logoUrl = store.Logo?.url || 'https://placehold.co/800x400';
-  const homepageUrl = store.URLS?.[0]?.URL;
 
   return (
     <Card
@@ -56,16 +39,14 @@ export function StoreCard({ store }: StoreCardProps) {
       <Button
         component={Link}
         href={
-          homepageUrl ||
-          `https://markket.place/stores/${store.slug}`}
+          `store/${store.slug}`}
         color="blue"
         fullWidth
         mt="md"
         radius="md"
-        target='_blank'
         rightSection={<IconArrowRight size={14} />}
       >
-        {homepageUrl ? 'Homepage' : 'View Details'}
+        {'View Store'}
       </Button>
     </Card>
   );

@@ -1,8 +1,9 @@
 import { SimpleGrid } from '@mantine/core';
 import { BlogPostCard } from './card';
+import { Article } from '@/markket/article.d';
 
 interface DocsGridProps {
-  posts: any[];
+  posts: Article[];
 }
 
 export function DocsGrid({ posts }: DocsGridProps) {

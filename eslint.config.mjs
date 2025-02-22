@@ -13,9 +13,12 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
-export default {
+export default [
   ...eslintConfig,
-  rules: {
-    '@next/next/no-img-element': 'off',
+  {
+    rules: {
+      '@next/next/no-img-element': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    }
   }
-};
+];

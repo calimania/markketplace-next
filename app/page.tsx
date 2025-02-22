@@ -1,5 +1,5 @@
-import { Container, Title, Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio } from "@tabler/icons-react";
+import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from "@mantine/core";
+import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 import { FeatureCard } from "./components/ui/feature.card";
 
@@ -53,9 +53,16 @@ const links = [
   }
 ];
 
+
+
+/**
+ * Default page displayed to the user, when a main store exists we display the store's logo and description
+ *
+ * @returns {JSX.Element}
+ */
 export default async function Home() {
   const a = await strapiClient.getStore();
-  const store = a.data[0];
+  const store = a.data?.[0];
 
   return (
     <Container size="lg" className="py-20">
@@ -100,6 +107,45 @@ export default async function Home() {
             <FeatureCard key={feature.title} {...feature} />
           ))}
         </SimpleGrid>
+
+
+        <Paper
+          shadow="sm"
+          p="xl"
+          mt="xl"
+          withBorder
+          className="bg-gradient-to-r from-gray-50 to-gray-100"
+        >
+          <Stack align="center" gap="md">
+            <Title order={2} size="h3" ta="center">
+              Ready to start your store?
+            </Title>
+            <Text c="dimmed" size="lg" ta="center" maw={600}>
+              Create your account today and join our growing community
+            </Text>
+            <Group mt="md">
+              <Button
+                component="a"
+                href="/auth/register"
+                size="lg"
+                leftSection={<IconHeartCode size={20} />}
+                variant="gradient"
+                gradient={{ from: 'blue', to: 'cyan' }}
+              >
+                Create Account
+              </Button>
+              <Button
+                component="a"
+                href="/auth/login"
+                size="lg"
+                leftSection={<IconLogin2 size={20} />}
+                variant="light"
+              >
+                Sign In
+              </Button>
+            </Group>
+          </Stack>
+        </Paper>
       </Stack>
     </Container>
   );

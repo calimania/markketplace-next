@@ -1,23 +1,9 @@
 import { Card, Image, Text, Badge, Group } from '@mantine/core';
 import { IconCalendar, IconTag } from '@tabler/icons-react';
+import { Article } from '@/markket/article';
 
-interface BlogPostCardProps {
-  post: {
-    Title: string;
-    Content: string;
-    publishedAt: string;
-    SEO: {
-      metaDescription: string;
-    };
-    Tags: Array<{ name: string }>;
-    cover: {
-      data: {
-        attributes: {
-          url: string;
-        };
-      };
-    };
-  };
+export interface BlogPostCardProps {
+  post: Article;
 }
 
 export function BlogPostCard({ post }: BlogPostCardProps) {
