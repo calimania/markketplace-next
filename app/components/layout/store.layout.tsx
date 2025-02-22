@@ -1,65 +1,97 @@
 'use client';
 
-import { AppShell, Burger, Container, Group, Button, Text } from "@mantine/core";
-import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle } from "@tabler/icons-react";
+import { AppShell, Burger, Container, Group, Button, Text, Stack } from "@mantine/core";
+import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
 
-
-export interface ClientLayoutProps {
-  children: React.ReactNode;
-  store: Store | null;
-}
-
-/**
- * Menu inside /store/[slug] pages
- *
- * @param param0
- * @returns
- */
-function StoreNavigation({ slug }: { slug: string }) {
+function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () => void }) {
   return (
-    <Group gap="xs" w="100%">
-      <Link href={`/store/${slug}`}>
-        <Button variant="subtle" leftSection={<IconHome size={16} />}>
-          Home
-        </Button>
-      </Link>
-      <Link href={`#/store/${slug}/products`}>
-        <Button variant="subtle" leftSection={<IconShoppingCart size={16} />}>
-          Products
-        </Button>
-      </Link>
-      <Link href={`/store/${slug}/blog`}>
-        <Button variant="subtle" leftSection={<IconArticle size={16} />}>
-          Articles
-        </Button>
-      </Link>
-      <Link href={`/store/${slug}/about`}>
-        <Button variant="subtle" leftSection={<IconInfoCircle size={16} />}>
-          About
-        </Button>
-      </Link>
-      <Link href="/stores">
-        <Button variant="outline">
-          Back to Stores
-        </Button>
-      </Link>
-      <Link href="/">
-        <Button variant="outline">
-          Back to Markkët
-        </Button>
-      </Link>
-    </Group>
+    <Stack gap="md" w="100%">
+      <Stack gap="xs">
+        <Link href={`/store/${slug}`} onClick={onNavigate}>
+          <Button
+            variant="subtle"
+            leftSection={<IconHome size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            Home
+          </Button>
+        </Link>
+        <Link href={`/store/${slug}/products`} onClick={onNavigate}>
+          <Button
+            variant="subtle"
+            leftSection={<IconShoppingCart size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            Products
+          </Button>
+        </Link>
+        <Link href={`/store/${slug}/blog`} onClick={onNavigate}>
+          <Button
+            variant="subtle"
+            leftSection={<IconArticle size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            Articles
+          </Button>
+        </Link>
+        <Link href={`/store/${slug}/about`} onClick={onNavigate}>
+          <Button
+            variant="subtle"
+            leftSection={<IconInfoCircle size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            About
+          </Button>
+        </Link>
+      </Stack>
+
+      <Stack gap="xs" className="mt-auto pt-4 border-t border-gray-200">
+        <Link href="/stores" onClick={onNavigate}>
+          <Button
+            variant="light"
+            leftSection={<IconArrowLeft size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            All Stores
+          </Button>
+        </Link>
+        <Link href="/" onClick={onNavigate}>
+          <Button
+            variant="light"
+            leftSection={<IconArrowLeft size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            Markkët Home
+          </Button>
+        </Link>
+      </Stack>
+    </Stack>
   );
 }
+
+type ClientLayoutProps = {
+  children: React.ReactNode;
+  store: Store;
+};
 
 export function ClientLayout({
   children,
   store,
 }: ClientLayoutProps) {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure();
+
+  const handleNavigation = () => {
+    close();
+  };
 
   return (
     <AppShell
@@ -77,14 +109,13 @@ export function ClientLayout({
       <AppShell.Header>
         <Container size="lg">
           <Group justify="space-between" h="60px">
-            <Group>
+            <Group gap="md">
               <Burger
                 opened={opened}
                 onClick={toggle}
                 size="sm"
-                // Remove hiddenFrom to show burger on all screen sizes
               />
-              <Link href={`/store/${store?.slug}`}>
+              <Link href={`/store/${store?.slug}`} onClick={handleNavigation}>
                 <img
                   src={store?.Logo?.url}
                   alt={store?.SEO?.metaTitle}
@@ -97,12 +128,15 @@ export function ClientLayout({
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <Text size="sm" fw={500} mb="md">
-          Store Navigation
-        </Text>
-        <div className="flex flex-col gap-2">
-          <StoreNavigation slug={store?.slug as string} />
-        </div>
+        <Stack h="100%">
+          <Text size="sm" fw={500} c="dimmed" className="uppercase tracking-wider">
+            Store Navigation
+          </Text>
+          <StoreNavigation
+            slug={store?.slug as string}
+            onNavigate={handleNavigation}
+          />
+        </Stack>
       </AppShell.Navbar>
 
       <AppShell.Main>
@@ -111,5 +145,3 @@ export function ClientLayout({
     </AppShell>
   );
 };
-
-

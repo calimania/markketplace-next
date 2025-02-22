@@ -4,6 +4,21 @@ import { Page } from './page.d';
 
 export type { StrapiResponse, FetchOptions };
 
+interface FilterOperator {
+  operator: '$eq' | '$contains' | '$in' | '$gt' | '$lt' | '$gte' | '$lte' | '$ne';
+  value: string | number | boolean | Array<any>;
+};
+
+interface FilterValue {
+  [key: string]: string | number | boolean | FilterOperator | { [key: string]: FilterValue };
+};
+
+interface EnhancedFetchOptions extends Omit<FetchOptions, 'filters'> {
+  filters?: {
+    [key: string]: FilterValue | string | number | boolean;
+  };
+};
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;
@@ -13,15 +28,34 @@ export class StrapiClient {
     this.storeSlug = process.env.MARKKET_STORE_SLUG || 'next';
   }
 
-  private buildUrl(options: FetchOptions): string {
+  private buildFilterString(filters: any, prefix = ''): Array<[string, string]> {
+    const params: Array<[string, string]> = [];
+
+    Object.entries(filters).forEach(([key, value]) => {
+      const fullKey = prefix ? `${prefix}[${key}]` : key;
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        if ('operator' in value && 'value' in value) {
+          params.push([`filters[${fullKey}][${value.operator}]`, (value.value as string | number | boolean).toString()]);
+        } else {
+          params.push(...this.buildFilterString(value, `filters[${fullKey}]`));
+        }
+      } else {
+        params.push([`filters[${fullKey}][$eq]`, (value as string | boolean | number).toString()]);
+      }
+    });
+
+    return params;
+  }
+
+
+  private buildUrl(options: EnhancedFetchOptions): string {
     const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
 
-    // Handle filters
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        params.append(`filters[${key}][$eq]`, value.toString());
-      });
+      const filterParams = this.buildFilterString(filters);
+      filterParams.forEach(([key, value]) => params.append(key, value));
     }
 
     if (populate) {
@@ -30,11 +64,8 @@ export class StrapiClient {
     }
 
     if (paginate?.limit) params.append('pagination[limit]', paginate.limit.toString());
-
     if (paginate?.page) params.append('pagination[page]', paginate.page.toString());
-
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
-
     if (sort) params.append('sort', sort);
 
     const url = new URL('api/' + contentType, this.baseUrl);
@@ -45,7 +76,9 @@ export class StrapiClient {
 
   async fetch<T>(options: FetchOptions): Promise<StrapiResponse<T>> {
     const url = this.buildUrl(options);
+
     console.info({ url });
+
     const response = await fetch(url, {
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
@@ -57,12 +90,30 @@ export class StrapiClient {
     return response.json();
   }
 
-  // Convenience methods
-  async getProducts() {
+  async getProducts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, store_slug: string) {
+    const { sort, filter } = options;
+
     return this.fetch({
-      contentType: 'product',
-      filters: { store: { slug: { $eq: this.storeSlug } } },
-      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES'
+      contentType: 'products',
+      filters:
+      {
+        active: true,
+        stores: {
+          slug: {
+            operator: '$eq',
+            value: `[${store_slug}]`
+          }
+        }
+      },
+      ...(filter ? [{
+        Name: {
+          operator: '$contains',
+          value: filter
+        }
+      }] : []),
+      sort,
+      paginate,
+      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
     });
   }
 

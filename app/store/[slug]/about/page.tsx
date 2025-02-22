@@ -45,7 +45,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
           )}
       </div>
       <Suspense fallback={<LoadingOverlay visible />}>
-        <PageList pages={pages.filter(p => !(p.slug == 'about'))} storeSlug={slug} />
+        <PageList pages={pages.filter(p => !(p.slug == 'about')).sort((a, b) => a.Title.localeCompare(b.Title))} storeSlug={slug} />
         <div className='mt-10 mb-4'>
           {image && (
             <img src={image.url} alt={aboutPage?.SEO?.metaTitle || store?.SEO?.metaTitle} />
