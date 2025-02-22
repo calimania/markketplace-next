@@ -60,7 +60,7 @@ export default async function StorePage({
             </Button>
             <Button
               component="a"
-              href={`#/store/${store.slug}/products`}
+              href={`/store/${store.slug}/products`}
               variant="light"
               leftSection={<IconShoppingBag size={20} />}
             >
