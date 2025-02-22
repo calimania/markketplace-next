@@ -3,8 +3,8 @@ import { Suspense } from 'react';
 import { LoadingOverlay } from '@mantine/core';
 import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api';
-import { generateSEOMetadata } from '@/markket/metadata';
 import { Article } from '@/markket/article';
+import { generateSEOMetadata } from '@/markket/metadata';
 
 export interface BlogPageProps {
   params: Promise<{
@@ -22,13 +22,12 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
   }
 
   const post = response?.data?.[0] as Article;
-  console.log({ post });
 
   return generateSEOMetadata({
     slug,
     entity: {
       SEO: post?.SEO,
-      title: post?.Title,
+      title: post?.Title || 'Blog Post',
       id: post?.id?.toString(),
       url: `/store/${slug}/blog/${id}`,
     },

@@ -4,10 +4,36 @@ import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
 import { Store } from "@/markket/store.d";
 import { Article } from "@/markket/article";
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
 }
+
+export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  let response;
+  if (slug) {
+    response = await strapiClient.getPage('blog', slug);
+  }
+
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      SEO: page?.SEO,
+      title: page?.Title || 'Blog',
+      id: page?.id?.toString(),
+      url: `/store/${slug}/blog`,
+    },
+    type: 'article',
+    defaultTitle: `${page?.Title}` || 'Blog',
+  });
+};
 
 export default async function StoreBlogPage({ params }: BlogPageProps) {
   // Get store and its blog posts

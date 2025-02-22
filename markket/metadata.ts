@@ -9,6 +9,7 @@ interface SEOProps {
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
+    excludeFromSearch?: boolean;
     socialImage?: {
       url: string;
       width?: number;
@@ -58,7 +59,7 @@ export async function generateSEOMetadata({
   const keywords = entity?.SEO?.metaKeywords ||
     store?.SEO?.metaKeywords;
 
-  const canonical = entity?.url || `https://de.markket.place/store/${slug}`;
+  const canonical = entity?.url || `/store/${slug}`;
 
   return {
     title,
@@ -90,8 +91,8 @@ export async function generateSEOMetadata({
       images: image_url ? [image_url] : undefined,
     },
     robots: {
-      index: true,
-      follow: true,
+      index: !entity?.SEO?.excludeFromSearch,
+      follow: !entity?.SEO?.excludeFromSearch,
     }
   };
 };
