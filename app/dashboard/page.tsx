@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Store } from '@/markket/store.d';
 
 import {
   AppShell,
@@ -71,7 +72,7 @@ function MainLink({ icon: Icon, label, notifications }: {
  */
 export default function DashboardPage() {
   const [opened, { toggle }] = useDisclosure();
-  const [store, setStore] = useState({});
+  const [store, setStore] = useState({} as Store);
 
   useEffect(() => {
     async function fetchStore() {

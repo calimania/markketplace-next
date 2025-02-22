@@ -96,7 +96,7 @@ export function ClientLayout({
           Store Navigation
         </Text>
         <div className="flex flex-col gap-2">
-          <StoreNavigation slug={store?.slug} />
+          <StoreNavigation slug={store?.slug as string} />
         </div>
       </AppShell.Navbar>
 

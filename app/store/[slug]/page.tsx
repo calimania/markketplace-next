@@ -52,23 +52,7 @@ export default async function StorePage({
             content={homePage?.Content || ([] as BlocksContent[])}
           />
         </section>
-
-        {/* Products Section */}
-        {store.Products?.length > 0 && (
-          <div>
-            <Title order={2} className="mb-4">Products</Title>
-            {/* Add your ProductGrid component here */}
-          </div>
-        )}
-
-        {/* Articles Section */}
-        {store.Articles?.length > 0 && (
-          <div>
-            <Title order={2} className="mb-4">Latest Articles</Title>
-            {/* Add your ArticlesGrid component here */}
-          </div>
-        )}
       </Stack>
     </Container>
   );
-}
+};

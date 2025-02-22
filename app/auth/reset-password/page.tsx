@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import {
   PasswordInput,
   Paper,
@@ -10,6 +10,7 @@ import {
   Stack,
   Text,
   Anchor,
+  LoadingOverlay,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -22,7 +23,7 @@ interface ResetPasswordForm {
   code: string;
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -137,3 +138,13 @@ export default function ResetPasswordPage() {
     </Container>
   );
 };
+
+
+// Main page component with Suspense
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingOverlay visible />}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}

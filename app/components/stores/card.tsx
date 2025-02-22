@@ -1,26 +1,10 @@
 import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBuilding, IconArrowRight } from '@tabler/icons-react';
 import Link from 'next/link';
+import { Store } from "@/markket/store.d";
 
 export interface StoreCardProps {
-  store: {
-    id: number;
-    title: string;
-    slug: string;
-    Description: string;
-    URLS: {
-      Label: string;
-      URL: string;
-    }[];
-    Logo: {
-      url: string;
-      width: number;
-      height: number;
-    };
-    SEO: {
-      metaDescription: string;
-    };
-  };
+  store: Store;
 }
 
 export function StoreCard({ store }: StoreCardProps) {
