@@ -21,17 +21,17 @@ function StoreNavigation({ slug }: { slug: string }) {
           Home
         </Button>
       </Link>
-      <Link href={`/store/${slug}/products`}>
+      <Link href={`#/store/${slug}/products`}>
         <Button variant="subtle" leftSection={<IconShoppingCart size={16} />}>
           Products
         </Button>
       </Link>
-      <Link href={`/store/${slug}/articles`}>
+      <Link href={`/store/${slug}/blog`}>
         <Button variant="subtle" leftSection={<IconArticle size={16} />}>
           Articles
         </Button>
       </Link>
-      <Link href={`/store/${slug}/about`}>
+      <Link href={`#/store/${slug}/about`}>
         <Button variant="subtle" leftSection={<IconInfoCircle size={16} />}>
           About
         </Button>
