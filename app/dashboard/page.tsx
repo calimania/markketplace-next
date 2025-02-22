@@ -44,8 +44,7 @@ const mainLinks = [
   { icon: IconMessageChatbot, label: 'Inbox' },
   { icon: IconSubscript, label: 'Subscribers' },
   { icon: IconMoodEdit, label: 'Newsletters' },
-  { icon: IconBuildingStore, label: 'Store Settings' },
-  { icon: IconSettings, label: 'Account Settings' },
+  { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
 

@@ -1,73 +1,70 @@
 'use client';
 
-import { Tabs } from '@mantine/core';
+import { useAuth } from '@/app/providers/auth';
 import {
-  IconUserCircle,
-  IconBuildingStore,
-  IconBell,
-  IconKey
-} from '@tabler/icons-react';
-import { usePathname, useRouter } from 'next/navigation';
+  Container,
+  Paper,
+  Text,
+  Group,
+  Avatar,
+  Title,
+  Stack,
+  Button,
+  Badge,
+} from '@mantine/core';
+import { IconEdit } from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
 
-const settingsTabs = [
-  {
-    value: 'profile',
-    label: 'Profile',
-    icon: IconUserCircle,
-    description: 'Manage your personal information'
-  },
-  {
-    value: 'store',
-    label: 'Store Settings',
-    icon: IconBuildingStore,
-    description: 'Configure your store preferences'
-  },
-  {
-    value: 'notifications',
-    label: 'Notifications',
-    icon: IconBell,
-    description: 'Control your notification settings'
-  },
-  {
-    value: 'security',
-    label: 'Security',
-    icon: IconKey,
-    description: 'Manage your account security'
-  },
-];
-
-export default function SettingsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SettingsPage() {
+  const { user } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const activeTab = pathname.split('/').pop() || 'profile';
+
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="p-4">
-      <Tabs
-        value={activeTab}
-        onChange={(value) => router.push(`/dashboard/settings/${value}`)}
-        variant="outline"
-      >
-        <Tabs.List>
-          {settingsTabs.map((tab) => (
-            <Tabs.Tab
-              key={tab.value}
-              value={tab.value}
-              leftSection={<tab.icon size="0.8rem" />}
+    <Container size="md" py="xl">
+      <Paper withBorder p="xl" radius="md" mb="xl">
+        <Group justify="space-between" align="flex-start">
+          <Group>
+            <Avatar
+              src={user.avatar}
+              size="xl"
+              radius="md"
+              color="blue"
             >
-              {tab.label}
-            </Tabs.Tab>
-          ))}
-        </Tabs.List>
+              {user.username?.charAt(0).toUpperCase()}
+            </Avatar>
 
-        <div className="mt-6">
-          {children}
-        </div>
-      </Tabs>
-    </div>
+            <Stack gap="xs">
+              <div>
+                <Title order={3}>{user.username}</Title>
+                <Text size="sm" c="dimmed">ID: {user.id}</Text>
+              </div>
+              <Group gap="xs">
+                <Badge variant="light" color="blue">
+                  Store Owner
+                </Badge>
+                <Text size="sm" c="dimmed">·</Text>
+                <Text size="sm" c="dimmed">
+                  Member since {new Date(user.createdAt).toLocaleDateString()}
+                </Text>
+              </Group>
+            </Stack>
+          </Group>
+
+          <Button
+            variant="light"
+            leftSection={<IconEdit size={16} />}
+            onClick={() => router.push('/dashboard/settings/profile')}
+          >
+            Edit Profile
+          </Button>
+        </Group>
+      </Paper>
+
+      {/* Settings tabs will be rendered below through layout */}
+    </Container>
   );
 };
