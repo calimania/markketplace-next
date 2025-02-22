@@ -7,7 +7,7 @@ export interface BlogPostCardProps {
   prefix?: string;
 };
 
-function createSlug(title: string): string {
+function createSlug(title: string = ''): string {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
