@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 
 import {
@@ -23,12 +24,22 @@ import {
   IconBuildingStore,
   IconUserCircle,
   IconAlertCircle,
+  IconShoppingBagEdit,
+  IconTicket,
+  IconSubscript,
+  IconMessageChatbot,
+  IconMoodEdit,
 } from '@tabler/icons-react';
 
 const mainLinks = [
   { icon: IconShoppingCart, label: 'Products', notifications: 4 },
   { icon: IconArticle, label: 'Articles', notifications: 2 },
   { icon: IconFileTypeDoc, label: 'Pages' },
+  { icon: IconShoppingBagEdit, label: 'Orders' },
+  { icon: IconTicket, label: 'Events' },
+  { icon: IconMessageChatbot, label: 'Inbox' },
+  { icon: IconSubscript, label: 'Subscribers' },
+  { icon: IconMoodEdit, label: 'Newsletters' },
   { icon: IconBuildingStore, label: 'Store Settings' },
   { icon: IconSettings, label: 'Account Settings' },
 ];
@@ -39,19 +50,8 @@ function MainLink({ icon: Icon, label, notifications }: {
   notifications?: number;
 }) {
   return (
-    <UnstyledButton
-      sx={(theme) => ({
-        display: 'block',
-        width: '100%',
-        padding: theme.spacing.xs,
-        borderRadius: theme.radius.sm,
-        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
-        '&:hover': {
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-        },
-      })}
-    >
-      <Group>
+    <UnstyledButton>
+      <Group align="right" style={{ width: '100%' }} py={3} className='hover:bg-gray-300'>
         <Icon style={{ width: rem(20), height: rem(20) }} />
         <Text size="sm">{label}</Text>
         {notifications && (
@@ -64,6 +64,11 @@ function MainLink({ icon: Icon, label, notifications }: {
   );
 }
 
+/**
+ * Initial dashboard page we display to the user
+ *
+ * @returns {JSX.Element}
+ */
 export default function DashboardPage() {
   const [opened, { toggle }] = useDisclosure();
   const [store, setStore] = useState({});
@@ -88,8 +93,8 @@ export default function DashboardPage() {
       }}
       padding="md"
     >
-      <AppShell.Header p="md">
-        <Group justify="space-between">
+      <AppShell.Header p="md" style={{ borderBottom: '1px solid #eee' }}>
+        <Group justify="space-between" h="100%">
           <Group>
             <Burger
               opened={opened}
@@ -97,22 +102,37 @@ export default function DashboardPage() {
               hiddenFrom="sm"
               size="sm"
             />
-            {console.log({store})}
-            <img src={store?.Logo?.url} alt={store?.SEO?.metaTitle} width={70} />
+            <img
+              src={store?.Logo?.url}
+              alt={store?.SEO?.metaTitle}
+              style={{
+                height: '30px',
+                width: 'auto',
+                marginLeft: rem(12)
+              }}
+            />
           </Group>
           <Group>
-            <IconUserCircle size={24} />
-            <Text>Admin</Text>
+            <IconUserCircle size={24} style={{ color: '#228be6' }} />
+            <Text fw={500}>Admin</Text>
           </Group>
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">
+      <AppShell.Navbar
+        p="md"
+        style={{
+          borderRight: '1px solid #eee',
+          background: '#f8f9fa'
+        }}
+      >
+        <Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="md">
+          Dashboard
+        </Text>
         {mainLinks.map((link) => (
           <MainLink {...link} key={link.label} />
         ))}
       </AppShell.Navbar>
-
       <AppShell.Main>
         <Alert icon={<IconAlertCircle size="1rem" />} title="Coming Soon!" color="yellow">
           We're working hard to bring you amazing features. Stay tuned!
@@ -146,4 +166,4 @@ export default function DashboardPage() {
       </AppShell.Main>
     </AppShell>
   );
-}
+};
