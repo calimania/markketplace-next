@@ -48,6 +48,8 @@ export async function generateSEOMetadata({
     store?.title ||
     'markkëtplace';
 
+  console.log({ title, entity })
+
   const description = entity?.SEO?.metaDescription ||
     store?.SEO?.metaDescription ||
     'Open ecommerce ecosystem';

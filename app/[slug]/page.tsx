@@ -8,6 +8,33 @@ import DocsGrid from '@/app/components/docs/grid';
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
+
+interface AnyPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: AnyPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  let response;
+  if (slug == 'docs') {
+    response = await strapiClient.getPage('blog');
+  }
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      url: `/${slug}`,
+      SEO: page?.SEO,
+    },
+    type: 'article',
+  });
+};
+
 const getCollection = async (key: string) => {
   let collection: Store[] = [];
 
@@ -35,7 +62,7 @@ const getCollection = async (key: string) => {
  * @param {Object} props - The props object
  * @returns
  */
-export default async function AnyPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function AnyPage({ params }: AnyPageProps) {
   const { slug } = await params;
   const a = await strapiClient.getStore();
 
