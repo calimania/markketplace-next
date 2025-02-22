@@ -135,7 +135,7 @@ export default function DashboardPage() {
       </AppShell.Navbar>
       <AppShell.Main>
         <Alert icon={<IconAlertCircle size="1rem" />} title="Coming Soon!" color="yellow">
-          We're working hard to bring you amazing features. Stay tuned!
+          We&apos;e working hard to bring you amazing features. Stay tuned!
         </Alert>
 
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} mt="md" spacing="md">

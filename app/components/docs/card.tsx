@@ -1,7 +1,7 @@
 import { Card, Image, Text, Badge, Group } from '@mantine/core';
 import { IconCalendar, IconTag } from '@tabler/icons-react';
 
-interface BlogPostCardProps {
+export interface BlogPostCardProps {
   post: {
     Title: string;
     Content: string;

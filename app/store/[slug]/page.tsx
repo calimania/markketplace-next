@@ -1,4 +1,4 @@
-import { Container, Title, Text, Stack, Group } from "@mantine/core";
+import { Container, Title, Text, Stack } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
 import {

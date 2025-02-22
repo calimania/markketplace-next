@@ -2,7 +2,7 @@ import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBuilding, IconArrowRight } from '@tabler/icons-react';
 import Link from 'next/link';
 
-interface StoreCardProps {
+export interface StoreCardProps {
   store: {
     id: number;
     title: string;
@@ -25,7 +25,6 @@ interface StoreCardProps {
 
 export function StoreCard({ store }: StoreCardProps) {
   const logoUrl = store.Logo?.url || 'https://placehold.co/800x400';
-  const homepageUrl = store.URLS?.[0]?.URL;
 
   return (
     <Card

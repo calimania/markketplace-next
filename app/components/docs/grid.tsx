@@ -1,8 +1,8 @@
 import { SimpleGrid } from '@mantine/core';
-import { BlogPostCard } from './card';
+import { BlogPostCard, type BlogPostCardProps } from './card';
 
 interface DocsGridProps {
-  posts: any[];
+  posts: BlogPostCardProps["post"][];
 }
 
 export function DocsGrid({ posts }: DocsGridProps) {

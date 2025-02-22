@@ -1,8 +1,8 @@
 import { SimpleGrid } from '@mantine/core';
-import { StoreCard } from './card';
+import { StoreCard, type StoreCardProps } from './card';
 
 interface StoreGridProps {
-  stores: any[];
+  stores: StoreCardProps["store"][];
 }
 
 export function StoreGrid({ stores }: StoreGridProps) {

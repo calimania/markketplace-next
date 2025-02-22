@@ -12,7 +12,6 @@ import {
   Text,
   Anchor,
   Group,
-  Divider,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -74,6 +73,7 @@ export default function LoginPage() {
 
       router.push('/dashboard');
     } catch (error: any) {
+      console.warn({ error });
       notifications.show({
         title: 'Error',
         message: 'Something went wrong. Please try again.',
@@ -92,7 +92,7 @@ export default function LoginPage() {
         Welcome back!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Don't have an account yet?{' '}
+        Don&apos;t have an account yet?{' '}
         <Anchor size="sm" component="button" onClick={() => router.push('/auth/register')}>
           Create account
         </Anchor>

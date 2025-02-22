@@ -60,8 +60,8 @@ export default function ResetPasswordPage() {
 
       // Redirect to login after a short delay
       setTimeout(() => router.push('/auth/login'), 5000);
-
     } catch (error: any) {
+      console.warn({ error });
       notifications.show({
         title: 'Error',
         message: 'Something went wrong. Please try again.',
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
         Reset your password
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Enter your email address and we'll send you a reset link
+        Enter your email address and we&apos;ll send you a reset link
       </Text>
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">

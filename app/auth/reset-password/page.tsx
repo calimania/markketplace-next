@@ -28,17 +28,11 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
 
-  // Redirect if no code is present
-  if (!code) {
-    router.push('/auth/forgot-password');
-    return null;
-  }
-
   const form = useForm<ResetPasswordForm>({
     initialValues: {
       password: '',
       passwordConfirmation: '',
-      code: code,
+      code: code || '',
     },
     validate: {
       password: (val) => (val.length < 6 ? 'Password should be at least 6 characters' : null),
@@ -46,6 +40,12 @@ export default function ResetPasswordPage() {
         val !== values.password ? 'Passwords do not match' : null,
     },
   });
+
+  // Redirect if no code is present
+  if (!code) {
+    router.push('/auth/forgot-password');
+    return null;
+  }
 
   const handleSubmit = async (values: ResetPasswordForm) => {
     setLoading(true);
@@ -78,7 +78,6 @@ export default function ResetPasswordPage() {
 
       // Redirect to login after successful reset
       setTimeout(() => router.push('/dashboard'), 1000);
-
     } catch (error: any) {
       notifications.show({
         title: 'Error',

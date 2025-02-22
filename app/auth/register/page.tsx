@@ -11,8 +11,6 @@ import {
   Stack,
   Text,
   Anchor,
-  Center,
-  Box,
   rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -69,6 +67,7 @@ export default function RegisterPage() {
 
       // Store the token or handle auth state here
       router.push('/dashboard');
+      // @eslint-ignore-next-line
     } catch (error: any) {
       notifications.show({
         title: 'Error',
