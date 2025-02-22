@@ -122,7 +122,7 @@ export class StrapiClient {
    */
   async getPage(slug: string, storeSlug: string = this.storeSlug) {
 
-    return this.fetch<Page>({
+    return await this.fetch<Page>({
       contentType: `pages`,
       filters: {
         '$and][0][store][slug': storeSlug,
