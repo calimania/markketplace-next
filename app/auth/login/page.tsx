@@ -18,6 +18,8 @@ import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { IconCheck, IconX } from '@tabler/icons-react';
 
+import { useAuth } from '@/app/providers/auth';
+
 interface LoginForm {
   identifier: string; // Strapi uses 'identifier' for email/username
   password: string;
@@ -26,6 +28,7 @@ interface LoginForm {
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const form = useForm<LoginForm>({
     initialValues: {
@@ -62,6 +65,13 @@ export default function LoginPage() {
         });
         throw new Error(data.error?.message || 'Login failed');
       }
+
+      login({
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        jwt: data.jwt,
+      });
 
       notifications.show({
         title: 'Welcome back!',

@@ -16,6 +16,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/providers/auth';
 
 interface ResetPasswordForm {
   password: string;
@@ -28,6 +29,7 @@ function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
+  const { login } = useAuth();
 
   const form = useForm<ResetPasswordForm>({
     initialValues: {
@@ -68,6 +70,13 @@ function ResetPasswordForm() {
       if (!response.ok) {
         throw new Error(data.error?.message || 'Failed to reset password');
       }
+
+      login({
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        jwt: data.jwt,
+      });
 
       notifications.show({
         title: 'Success!',
