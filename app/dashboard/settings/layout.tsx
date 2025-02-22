@@ -50,6 +50,7 @@ export default function SettingsLayout({
       <Tabs
         value={activeTab}
         onChange={(value) => router.push(`/dashboard/settings/${value}`)}
+        defaultValue={activeTab}
         variant="outline"
       >
         <Tabs.List>

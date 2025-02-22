@@ -37,6 +37,8 @@ export default function ProfileSettings() {
   });
 
   const handleSubmit = async (values: ProfileForm) => {
+    console.log('Form values:', values);
+
     try {
       // Add your update profile API call here
       notifications.show({
