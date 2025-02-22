@@ -4,13 +4,11 @@ import React from 'react';
 import { TextInput, Button, Text, Modal } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
+import { Store } from '@/markket/store.d';
 
 interface SubscribeFormProps {
-  store: {
-    id: string;
-    title: string;
-  }
-}
+  store: Store;
+};
 
 /**
  * Displays a newsletter subscription form

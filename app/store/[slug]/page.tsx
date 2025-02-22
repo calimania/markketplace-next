@@ -68,7 +68,7 @@ export default async function StorePage({
             </Button>
             <Button
               component="a"
-              href={`#/store/${store.slug}/pages`}
+              href={`/store/${store.slug}/about`}
               variant="light"
               leftSection={<IconFiles size={20} />}
             >
@@ -79,7 +79,7 @@ export default async function StorePage({
 
         <section className="">
           <BlocksRenderer
-            content={homePage?.Content || ([] as BlocksContent[])}
+            content={homePage?.Content as unknown as BlocksContent || ([] as BlocksContent)}
           />
         </section>
       </Stack>

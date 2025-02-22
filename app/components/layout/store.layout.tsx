@@ -12,7 +12,12 @@ export interface ClientLayoutProps {
   store: Store | null;
 }
 
-// Make a separate component for the navigation links
+/**
+ * Menu inside /store/[slug] pages
+ *
+ * @param param0
+ * @returns
+ */
 function StoreNavigation({ slug }: { slug: string }) {
   return (
     <Group gap="xs" w="100%">
@@ -31,7 +36,7 @@ function StoreNavigation({ slug }: { slug: string }) {
           Articles
         </Button>
       </Link>
-      <Link href={`#/store/${slug}/about`}>
+      <Link href={`/store/${slug}/about`}>
         <Button variant="subtle" leftSection={<IconInfoCircle size={16} />}>
           About
         </Button>
