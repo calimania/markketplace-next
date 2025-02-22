@@ -17,11 +17,12 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
   const { id, slug } = await params;
 
   let response;
-  if (!id || !slug) {
+  if (id && slug) {
     response = await strapiClient.getPost(id.split('-')[0], slug);
   }
 
   const post = response?.data?.[0] as Article;
+  console.log({ post });
 
   return generateSEOMetadata({
     slug,
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       SEO: post?.SEO,
       title: post?.Title,
       id: post?.id?.toString(),
+      url: `/store/${slug}/blog/${id}`,
     },
     type: 'article',
     defaultTitle: `Blog - ${post?.Title || 'Post'}`

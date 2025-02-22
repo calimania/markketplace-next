@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api';
 
+const BASE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://de.markket.place';
+
 interface SEOProps {
   url?: string;
   SEO?: {
@@ -35,11 +37,7 @@ export async function generateSEOMetadata({
   defaultTitle?: string;
   }): Promise<Metadata> {
 
-  let storeResponse;
-  if (!entity?.id) {
-    storeResponse = await strapiClient.getStore(slug);
-  }
-
+  const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
 
   const title = entity?.SEO?.metaTitle ||
@@ -66,7 +64,7 @@ export async function generateSEOMetadata({
     title,
     description,
     keywords,
-    metadataBase: new URL('https://markket.place'),
+    metadataBase: new URL(BASE_URL),
     alternates: {
       canonical: canonical,
     },
