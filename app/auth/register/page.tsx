@@ -11,38 +11,42 @@ import {
   Stack,
   Text,
   Anchor,
-  Group,
-  Divider,
+  Center,
+  Box,
+  rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconLock } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
-interface LoginForm {
-  identifier: string; // Strapi uses 'identifier' for email/username
+interface RegisterForm {
+  email: string;
+  username: string;
   password: string;
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const form = useForm<LoginForm>({
+  const form = useForm<RegisterForm>({
     initialValues: {
-      identifier: '',
+      email: '',
+      username: '',
       password: '',
     },
     validate: {
-      identifier: (val) => (val.length < 3 ? 'Invalid email or username' : null),
+      email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
       password: (val) => (val.length < 6 ? 'Password should be at least 6 characters' : null),
+      username: (val) => (val.length < 3 ? 'Username should be at least 3 characters' : null),
     },
   });
 
-  const handleSubmit = async (values: LoginForm) => {
+  const handleSubmit = async (values: RegisterForm) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/markket/auth/local', {
+      const response = await fetch('/api/markket/auth/local/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,13 +57,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Login failed');
+        throw new Error(data.error?.message || 'Registration failed');
       }
 
       notifications.show({
-        title: 'Welcome back!',
-        message: 'Successfully logged in',
+        title: 'Success!',
+        message: 'Your account has been created, check your inbox for a confirmation email',
         color: 'green',
+        icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
       });
 
       // Store the token or handle auth state here
@@ -67,7 +72,7 @@ export default function LoginPage() {
     } catch (error: any) {
       notifications.show({
         title: 'Error',
-        message: error.message || 'Invalid credentials',
+        message: error.message || 'Something went wrong',
         color: 'red',
       });
     } finally {
@@ -78,12 +83,12 @@ export default function LoginPage() {
   return (
     <Container size={420} my={40}>
       <Title ta="center" fw={900}>
-        Welcome back!
+        Welcome to Markket.ts!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Don't have an account yet?{' '}
-        <Anchor size="sm" component="button" onClick={() => router.push('/register')}>
-          Create account
+        Already have an account?{' '}
+        <Anchor size="sm" component="button" onClick={() => router.push('/auth/login')}>
+          Login
         </Anchor>
       </Text>
 
@@ -91,37 +96,32 @@ export default function LoginPage() {
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <TextInput
-              label="Email or Username"
+              label="Email"
               placeholder="de@markket.place"
               required
-              {...form.getInputProps('identifier')}
+              {...form.getInputProps('email')}
+            />
+
+            <TextInput
+              label="Username"
+              placeholder="anteater"
+              required
+              {...form.getInputProps('username')}
             />
 
             <PasswordInput
               label="Password"
-              placeholder="Your password"
+              placeholder="hunter2"
               required
               {...form.getInputProps('password')}
             />
 
-            <Group justify="space-between">
-              <Anchor
-                component="button"
-                type="button"
-                c="dimmed"
-                onClick={() => router.push('/reset-password')}
-                size="xs"
-              >
-                Forgot password?
-              </Anchor>
-            </Group>
-
-            <Button loading={loading} type="submit" fullWidth>
-              Sign in
+            <Button loading={loading} type="submit" fullWidth mt="xl">
+              Register
             </Button>
           </Stack>
         </form>
       </Paper>
     </Container>
   );
-}
+};
