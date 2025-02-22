@@ -1,3 +1,5 @@
+import Store from '@/markket/store.d';
+
 interface BlockText {
   text: string;
   type?: 'text';
@@ -83,11 +85,7 @@ export interface Page {
   locale: string;
   menuOrder: number | null;
   documentId: string;
-  store?: {
-    id: string;
-    title: string;
-    documentId: string;
-  };
+  store?: Store;
   SEO?: SEO;
 };
 
