@@ -5,16 +5,16 @@ import {
   BlocksRenderer,
   type BlocksContent,
 } from "@strapi/blocks-react-renderer";
+import { Article } from "@/markket/article.d";
 
 interface DocsPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function DocsPage({ params }: DocsPageProps) {
-  const response = await strapiClient.getPost((params.id as string).split('-')[0]);
-  const post = response?.data?.[0];
+  const { id } = await params;
+  const response = await strapiClient.getPost((id as string).split('-')[0]);
+  const post = response?.data?.[0] as Article;
 
   if (!post) {
     notFound();

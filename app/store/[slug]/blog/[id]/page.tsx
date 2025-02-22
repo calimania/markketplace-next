@@ -5,18 +5,19 @@ import {
   BlocksRenderer,
   type BlocksContent,
 } from "@strapi/blocks-react-renderer";
+import { Article } from "@/markket/article.d";
 
-interface DocsPageProps {
-  params: {
+interface BlogPostPageProps {
+  params: Promise<{
     id: string;
     slug: string;
-  };
+  }>;
 }
 
-export default async function DocsPage({ params }: DocsPageProps) {
+export default async function DocsPage({ params }: BlogPostPageProps) {
   const { id, slug } = await params;
   const response = await strapiClient.getPost((id as string ).split('-')[0], slug);
-  const post = response?.data?.[0];
+  const post = response?.data?.[0] as Article
 
   if (!post) {
     notFound();
