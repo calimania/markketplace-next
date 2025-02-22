@@ -32,7 +32,7 @@ export default function ProfileSettings() {
     initialValues: {
       username: user?.username || '',
       email: user?.email || '',
-      bio: user?.bio || '',
+      bio: '',
     },
   });
 
@@ -55,7 +55,7 @@ export default function ProfileSettings() {
   return (
     <Paper p="xl" radius="md" withBorder>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack spacing="xl">
+        <Stack gap="lg">
           <div>
             <Title order={2}>Profile Settings</Title>
             <Text c="dimmed" size="sm">
@@ -67,7 +67,7 @@ export default function ProfileSettings() {
             <Avatar
               size={100}
               radius="md"
-              src={user?.avatar}
+              src={null}
             />
             <Button variant="light" size="sm">
               Change Avatar

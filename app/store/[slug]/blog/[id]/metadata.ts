@@ -2,10 +2,16 @@ import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api';
 import { Article } from "@/markket/article.d";
 
-export async function generateMetadata({ params }: {
-  params: { id: string; slug: string }
-}): Promise<Metadata> {
-  const { id, slug } = params;
+
+export interface BlogPageProps {
+  params: Promise<{
+    slug: string;
+    id: string;
+  }>;
+}
+
+export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
+  const { id, slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
 

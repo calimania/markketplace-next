@@ -29,7 +29,7 @@ export default function SettingsPage() {
         <Group justify="space-between" align="flex-start">
           <Group>
             <Avatar
-              src={user.avatar}
+              src={null}
               size="xl"
               radius="md"
               color="blue"
@@ -48,7 +48,7 @@ export default function SettingsPage() {
                 </Badge>
                 <Text size="sm" c="dimmed">·</Text>
                 <Text size="sm" c="dimmed">
-                  Member since {new Date(user.createdAt).toLocaleDateString()}
+                  Member since 2025
                 </Text>
               </Group>
             </Stack>

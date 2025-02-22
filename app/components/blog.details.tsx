@@ -12,11 +12,22 @@ import { useEffect, useState } from 'react';
 import { LoadingOverlay } from '@mantine/core';
 
 
+interface BlogPostDetailsProps {
+  params: {
+    id: string;
+    slug: string;
+  };
+}
+
+/**
+ * Uses id and slug to fetch a blog post from Strapi
+ *
+ * @param param0
+ * @returns
+ */
 export default function BlogPostPage({
   params: { id, slug }
-}: {
-  params: { id: string; slug: string }
-}) {
+}: BlogPostDetailsProps) {
   const [post, setPost] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
