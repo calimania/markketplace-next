@@ -1,12 +1,6 @@
 import {strapiClient} from "@/markket/api";
 import { ClientLayout } from "@/app/components/layout/store.layout";
 
-
-export interface LayoutProps {
-  children: React.ReactNode;
-  params: { slug: string };
-}
-
 async function getStore(slug: string) {
   'use server';
   const response = await strapiClient.getStore(slug);
@@ -16,8 +10,12 @@ async function getStore(slug: string) {
 export default async function StoreLayout({
   children,
   params,
-}: LayoutProps) {
-  const store = await getStore(params.slug);
+}: {
+  children: React.ReactNode;
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const store = await getStore(slug);
 
   return (
     <ClientLayout store={store}>

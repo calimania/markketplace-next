@@ -35,10 +35,10 @@ const getCollection = async (key: string) => {
  * @returns
  */
 export default async function AnyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const a = await strapiClient.getStore();
-  const page_slug = (await params).slug;
 
-  const collection = await getCollection(page_slug);
+  const collection = await getCollection(slug);
   const store = a.data[0];
 
   return (
@@ -66,11 +66,11 @@ export default async function AnyPage({ params }: { params: Promise<{ slug: stri
 
         </Group>
 
-        {page_slug === 'stores' && (
+        {slug === 'stores' && (
           <StoreGrid stores={collection.data} />
         )}
 
-        {page_slug === 'docs' && (
+        {slug === 'docs' && (
           <>
             <Title order={2} className="text-center mb-8">
               Documentation & Articles

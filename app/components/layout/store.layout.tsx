@@ -9,7 +9,7 @@ import { Store } from '@/markket/store.d';
 
 export interface ClientLayoutProps {
   children: React.ReactNode;
-  store: Store;
+  store: Store | null;
 }
 
 // Make a separate component for the navigation links
