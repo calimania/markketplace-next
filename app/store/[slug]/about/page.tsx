@@ -3,6 +3,7 @@ import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageList } from '@/app/components/ui/pages.list';
+import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
@@ -25,16 +26,31 @@ export default async function AboutPage({ params }: AboutPageProps) {
     a.Title.localeCompare(b.Title)
   ) || [];
 
+  const image = aboutPage?.SEO?.socialImage || store?.SEO?.socialImage;
+
+
   return (
     <Container size="lg" py="xl">
       <div className="text-center mb-12">
         <Title className="mb-4">{aboutPage?.Title || `About ${store.SEO?.metaTitle}`}</Title>
-        <Text c="dimmed" size="lg">
-          {aboutPage?.SEO?.metaDescription || store.SEO?.metaDescription}
-        </Text>
+
+
+        {aboutPage?.Content ?
+          (<BlocksRenderer content={aboutPage.Content as BlocksContent} />) :
+          (
+
+            <Text c="dimmed" size="lg">
+              {aboutPage?.SEO?.metaDescription || store.SEO?.metaDescription}
+            </Text>
+          )}
       </div>
       <Suspense fallback={<LoadingOverlay visible />}>
-        <PageList pages={pages} storeSlug={slug} />
+        <PageList pages={pages.filter(p => !(p.slug == 'about'))} storeSlug={slug} />
+        <div className='mt-10 mb-4'>
+          {image && (
+            <img src={image.url} alt={aboutPage?.SEO?.metaTitle || store?.SEO?.metaTitle} />
+          )}
+        </div>
       </Suspense>
     </Container>
   );
