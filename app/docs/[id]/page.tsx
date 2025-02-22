@@ -13,7 +13,7 @@ interface DocsPageProps {
 }
 
 export default async function DocsPage({ params }: DocsPageProps) {
-  const response = await strapiClient.getPost(params.id);
+  const response = await strapiClient.getPost((params.id as string).split('-')[0]);
   const post = response?.data?.[0];
 
   if (!post) {
