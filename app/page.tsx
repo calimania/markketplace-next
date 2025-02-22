@@ -1,5 +1,5 @@
 import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode } from "@tabler/icons-react";
+import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode, IconBrandMysql } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 import { FeatureCard } from "./components/ui/feature.card";
 
@@ -24,34 +24,42 @@ const features = [
 
 ];
 
-const links = [
-  {
-    href: "/stores",
-    icon: IconShoppingBag,
-    label: "Browse Stores",
-    variant: "gradient",
-    gradient: { from: 'indigo', to: 'cyan' }
-  },
-  {
-    href: "/docs",
-    icon: IconFileTypeDoc,
-    label: "Documentation",
-    variant: "light"
-  },
-  {
-    href: "https://github.com/calimania/markketplace-next",
-    icon: IconBrandGithub,
-    label: "GitHub",
-    variant: "light"
-  },
-  {
-    href: '/newsletter',
-    icon: IconRadio,
-    label: 'Newsletter',
-    variant: 'gradient',
-    gradient: { from: '#1b57ad', to: '#367de4' }
-  }
-];
+const create_links = (prefix?: string) => {
+  return [
+    {
+      href: "/stores",
+      icon: IconShoppingBag,
+      label: "Browse Stores",
+      variant: "gradient",
+      gradient: { from: 'indigo', to: 'cyan' }
+    },
+    {
+      href: `${prefix}/blog`,
+      icon: IconFileTypeDoc,
+      label: "Documentation",
+      variant: "light"
+    },
+    {
+      href: `${prefix}/about`,
+      icon: IconBrandMysql,
+      label: "About",
+      variant: "light"
+    },
+    {
+      href: "https://github.com/calimania/markketplace-next",
+      icon: IconBrandGithub,
+      label: "GitHub",
+      variant: "light"
+    },
+    {
+      href: `${prefix}/about/newsletter`,
+      icon: IconRadio,
+      label: 'Newsletter',
+      variant: 'gradient',
+      gradient: { from: '#1b57ad', to: '#367de4' }
+    }
+  ];
+}
 
 
 
@@ -63,6 +71,8 @@ const links = [
 export default async function Home() {
   const a = await strapiClient.getStore();
   const store = a.data?.[0];
+
+  const links = create_links(store ? `/store/${store?.slug}` : '');
 
   return (
     <Container size="lg" className="py-20">
