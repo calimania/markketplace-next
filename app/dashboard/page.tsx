@@ -76,7 +76,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchStore() {
       const store = await strapiClient.getStore();
-      setStore(store?.data[0]);
+      setStore(store?.data?.[0]);
     }
 
     fetchStore();

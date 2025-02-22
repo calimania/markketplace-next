@@ -62,7 +62,7 @@ const links = [
  */
 export default async function Home() {
   const a = await strapiClient.getStore();
-  const store = a.data[0];
+  const store = a.data?.[0];
 
   return (
     <Container size="lg" className="py-20">

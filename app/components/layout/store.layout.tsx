@@ -7,6 +7,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
 
 
+export interface ClientLayoutProps {
+  children: React.ReactNode;
+  store: Store;
+}
+
 // Make a separate component for the navigation links
 function StoreNavigation({ slug }: { slug: string }) {
   return (
@@ -48,10 +53,7 @@ function StoreNavigation({ slug }: { slug: string }) {
 export function ClientLayout({
   children,
   store,
-}: {
-  children: React.ReactNode;
-  store: Store;
-}) {
+}: ClientLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
 
   return (

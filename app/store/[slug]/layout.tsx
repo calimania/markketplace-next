@@ -2,7 +2,7 @@ import {strapiClient} from "@/markket/api";
 import { ClientLayout } from "@/app/components/layout/store.layout";
 
 
-type LayoutProps = {
+export interface LayoutProps {
   children: React.ReactNode;
   params: { slug: string };
 }

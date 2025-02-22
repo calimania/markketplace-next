@@ -6,11 +6,11 @@ import {
   type BlocksContent,
 } from "@strapi/blocks-react-renderer";
 
+import { type LayoutProps } from './layout';
+
 export default async function StorePage({
   params
-}: {
-  params: { slug: string }
-}) {
+}: LayoutProps) {
   const response = await strapiClient.getStore(params.slug);
 
   const pageQuery = await strapiClient.getPage('home', params.slug);
