@@ -97,6 +97,24 @@ export class StrapiClient {
     });
   }
 
+
+  /**
+   * Returns a page by its slug
+   * @param slug
+   * @returns
+   */
+  async getPages(storeSlug: string = this.storeSlug) {
+
+    return this.fetch<Page>({
+      contentType: `pages`,
+      filters: {
+        '$and][0][store][slug': storeSlug,
+        '$and][1][Active': true
+      },
+      populate: 'SEO.socialImage'
+    });
+  };
+
   /**
    * Returns a page by its slug
    * @param slug
@@ -112,7 +130,7 @@ export class StrapiClient {
       },
       populate: 'SEO.socialImage,store'
     });
-  }
+  };
 
   /**
    * Requests stores from the strapi / markket api, including pagination, to display in our /stores ,
