@@ -62,13 +62,13 @@ export default function RegisterPage() {
 
       notifications.show({
         title: 'Success!',
-        message: 'Your account has been created',
+        message: 'Your account has been created, check your inbox for a confirmation email',
         color: 'green',
         icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
       });
 
       // Store the token or handle auth state here
-      router.push('/coming-soon');
+      router.push('/dashboard');
     } catch (error: any) {
       notifications.show({
         title: 'Error',
