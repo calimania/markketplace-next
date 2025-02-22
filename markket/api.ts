@@ -132,6 +132,16 @@ export class StrapiClient {
     });
   };
 
+  async getPost(id: string) {
+    return await this.fetch({
+      contentType: 'articles',
+      filters: {
+        '$and][0][store][slug': this.storeSlug,
+        '$and][1][id': id
+      },
+      populate: 'SEO.socialImage,Tags',
+    });
+  }
 }
 
 export const strapiClient = new StrapiClient();

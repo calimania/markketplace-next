@@ -21,7 +21,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500} size="lg" lineClamp={2}>
-          {post?.Title}
+          <a href={`/docs/${post.id}`}>{post.Title}</a>
         </Text>
         <Group gap="xs">
           <IconCalendar size={14} />
