@@ -17,6 +17,7 @@ import {
   IconUserPlus,
   IconLogin,
   IconKey,
+  IconHomeHeart
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
@@ -30,6 +31,13 @@ export default function AuthPage() {
       icon: IconLogin,
       action: () => router.push('/auth/login'),
       variant: 'filled',
+    },
+    {
+      title: 'Homepage',
+      description: 'Not all those who wander are lost',
+      icon: IconHomeHeart,
+      action: () => router.push('/'),
+      variant: 'subtle',
     },
     {
       title: 'Create Account',
