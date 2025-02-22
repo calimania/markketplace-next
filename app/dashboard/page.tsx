@@ -32,6 +32,7 @@ import {
   IconSubscript,
   IconMessageChatbot,
   IconMoodEdit,
+  IconHomeHeart,
 } from '@tabler/icons-react';
 
 const mainLinks = [
@@ -45,18 +46,24 @@ const mainLinks = [
   { icon: IconMoodEdit, label: 'Newsletters' },
   { icon: IconBuildingStore, label: 'Store Settings' },
   { icon: IconSettings, label: 'Account Settings' },
+  { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
 
-function MainLink({ icon: Icon, label, notifications }: {
+function MainLink({ icon: Icon, label, notifications, href }: {
   icon: typeof IconSettings;
   label: string;
   notifications?: number;
+  href?: string;
 }) {
   return (
     <UnstyledButton>
-      <Group align="right" style={{ width: '100%' }} py={3} className='hover:bg-gray-300'>
+      <Group align="right" style={{ width: '100%' }} py={3} >
         <Icon style={{ width: rem(20), height: rem(20) }} />
-        <Text size="sm">{label}</Text>
+        <Text size="sm">
+          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300">
+            {label}
+          </a>
+        </Text>
         {notifications && (
           <Text size="xs" color="blue" fw={700}>
             {notifications}
