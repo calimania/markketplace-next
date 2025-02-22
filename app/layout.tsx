@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { strapiClient } from '@/markket/api';
 import "./globals.css";
 import { AuthProvider } from '@/app/providers/auth';
+import { GlobalBanner } from '@/app/components/global.banner';
 
 async function generateMetadata(): Promise<Metadata> {
   const { data: [store] } = await strapiClient.getStore();
@@ -57,7 +58,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <MantineProvider>{children}</MantineProvider>
+          <MantineProvider>
+            <GlobalBanner />
+            {children}
+          </MantineProvider>
         </AuthProvider>
       </body>
     </html>
