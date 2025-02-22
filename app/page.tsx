@@ -2,6 +2,26 @@ import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from 
 import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode, IconBrandMysql } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 import { FeatureCard } from "./components/ui/feature.card";
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+
+  const response = await strapiClient.getPage('home');
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug: process.env.MARKKET_STORE_SLUG as string,
+    entity: {
+      SEO: page?.SEO,
+      title: page?.Title || 'Homepage',
+      url: `/`,
+    },
+    type: 'website',
+    defaultTitle: `${page?.Title}` || 'Homepage',
+  });
+};
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
