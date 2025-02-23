@@ -1,16 +1,12 @@
 'use client';
 
-import { Container, Title, Text, Stack, Paper, Image } from "@mantine/core";
+import { Container, Title, Text, Stack, Image } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { useRouter } from 'next/navigation';
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
+import PageContent from "@/app/components/ui/page.content";
 import { Article } from "@/markket/article.d";
 import { useEffect, useState } from 'react';
 import { LoadingOverlay } from '@mantine/core';
-
 
 interface BlogPostDetailsProps {
   params: {
@@ -92,9 +88,7 @@ export default function BlogPostPage({
           )}
         </div>
 
-        <Paper p="md" withBorder>
-          <BlocksRenderer content={post.Content as BlocksContent} />
-        </Paper>
+        <PageContent params={{ post }} />
       </Stack>
     </Container>
   );
