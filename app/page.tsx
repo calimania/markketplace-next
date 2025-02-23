@@ -12,8 +12,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const response = await strapiClient.getPage('home');
   const page = response?.data?.[0] as Page;
 
-  console.log({ page, response })
-
   return generateSEOMetadata({
     slug: process.env.MARKKET_STORE_SLUG as string,
     entity: {
@@ -183,7 +181,7 @@ export default async function Home() {
           </Stack>
         </Paper>
 
-        {page.Content && (
+        {page?.Content && (
           <PageContent params={{ page }} />
         )}
       </Stack>

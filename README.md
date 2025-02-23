@@ -54,14 +54,10 @@ NODE_ENV=development
 
 First, run the development server:
 
+We recommend using Turbo
+
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+turbo dev
 ```
 
 ### Debugging
@@ -115,3 +111,4 @@ To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+- [Turbo](https://turbo.build/repo/docs/getting-started/add-to-existing-repository)

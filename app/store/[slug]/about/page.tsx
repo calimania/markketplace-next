@@ -17,7 +17,6 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
 
   const response = await strapiClient.getPage('about', slug);
   const page = response?.data?.[0] as Page;
-  console.log({ page });
 
   return generateSEOMetadata({
     slug,

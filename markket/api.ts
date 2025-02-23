@@ -24,7 +24,7 @@ export class StrapiClient {
   private storeSlug: string;
 
   constructor() {
-    this.baseUrl = process.env.MARKKET_URL || 'https://api.markket.place/';
+    this.baseUrl = process.env.PUBLIC_NEXT_PUBLIC_MARKKET_URL || 'https://api.markket.place/';
     this.storeSlug = process.env.MARKKET_STORE_SLUG || 'next';
   }
 
@@ -203,17 +203,17 @@ export class StrapiClient {
     });
   };
 
-  async getPost(id: string, slug?: string) {
+  async getPost(article_slug: string, slug?: string) {
     return await this.fetch({
       contentType: 'articles',
       filters: {
         '$and][0][store][slug': slug || this.storeSlug,
-        '$and][1][id': id
+        '$and][1][slug': article_slug,
       },
       paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,Tags,cover',
     });
   }
-}
+};
 
 export const strapiClient = new StrapiClient();

@@ -52,11 +52,12 @@ $markket-cyan: #00ffff;
     @apply my-6 space-y-2;
 
     .list-item {
-      // @apply relative pl-6 text-gray-700;
+      @apply relative pl-6 text-gray-700;
+      list-style: none; // Prevent default bullets
 
       &::before {
-        content: 'x';
-        @apply absolute left-0 top-[0.6em] w-3 h-3 rounded-full;
+        content: '';
+        @apply absolute left-0 top-[0.6em] w-2.5 h-2.5 rounded-full;
         background: linear-gradient(135deg, $markket-blue, $markket-pink);
         transform: scale(0.4);
         transition: transform 0.2s ease;

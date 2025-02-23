@@ -9,16 +9,16 @@ import { generateSEOMetadata } from '@/markket/metadata';
 export interface BlogPageProps {
   params: Promise<{
     slug: string;
-    id: string;
+    article_slug: string;
   }>;
 }
 
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
-  const { id, slug } = await params;
+  const { article_slug, slug } = await params;
 
   let response;
-  if (id && slug) {
-    response = await strapiClient.getPost(id.split('-')[0], slug);
+  if (article_slug && slug) {
+    response = await strapiClient.getPost(article_slug, slug);
   }
 
   const post = response?.data?.[0] as Article;
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       SEO: post?.SEO,
       title: post?.Title || 'Blog Post',
       id: post?.id?.toString(),
-      url: `/store/${slug}/blog/${id}`,
+      url: `/store/${slug}/blog/${article_slug}`,
     },
     type: 'article',
     defaultTitle: `Blog - ${post?.Title || 'Post'}`
@@ -45,11 +45,11 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
 export default async function BlogPostPageContainer({
   params
 }: BlogPageProps) {
-  const { id, slug } = await params;
+  const { article_slug, slug } = await params;
 
   return (
     <Suspense fallback={<LoadingOverlay visible />}>
-      <BlogPostPage params={{ id, slug }} />
+      <BlogPostPage params={{ article_slug, slug }} />
     </Suspense>
   );
 };

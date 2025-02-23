@@ -2,6 +2,7 @@
   "name": "markket-next",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@9.8.1",
   "scripts": {
     "dev": "next dev  --port 4020 --turbopack",
     "build": "next build",
@@ -9,6 +10,7 @@
     "lint": "next lint",
     "build-storybook": "sb build",
     "storybook": "sb dev -p 6006",
+    "check-types": "tsc --noEmit",
     "chromatic": "npx chromatic --project-token=chpt_8fc520326071d33"
   },
   "dependencies": {
@@ -50,6 +52,7 @@
     "postcss-simple-vars": "^7.0.1",
     "storybook": "^8.5.3",
     "tailwindcss": "^3.4.1",
+    "turbo": "^2.4.2",
     "typescript": "^5"
   }
 }

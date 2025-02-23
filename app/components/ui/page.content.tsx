@@ -1,4 +1,4 @@
-import { Paper } from '@mantine/core';
+import { Paper, Title } from '@mantine/core';
 import { Page } from "@/markket/page.d";
 import { Article } from '@/markket/article';
 
@@ -90,7 +90,15 @@ export default function PageContent({ params }: PageContentProps) {
     return <span key={key}>{node.text}</span>;
   };
 
+  /**
+   * For the content blocks that are lists, we need to render them recursively
+   * @param node
+   * @param key
+   * @returns
+   */
   const renderListItem = (node: Block['children'][0], key: number) => {
+    if (node.type !== 'list-item') return null;
+
     return (
       <li key={key} className="list-item">
         {node.children?.map((child, i) => renderInline(child, i))}
@@ -131,17 +139,18 @@ export default function PageContent({ params }: PageContentProps) {
 
     switch (block.type) {
       case 'heading':
-        const HeadingTag = `h${block.level || '1'}` as keyof JSX.IntrinsicElements;
         return (
-          <HeadingTag>
+          <Title size={block.level || 1} className="heading">
             {block.children.map((child, i) => renderInline(child, i))}
-          </HeadingTag>
+          </Title>
         );
 
       case 'list':
         return (
           <ul className="list-container">
-            {block.children.map((child, i) => renderListItem(child, i))}
+            {block.children
+              .filter(child => child.type === 'list-item')
+              .map((child, i) => renderListItem(child, i))}
           </ul>
         );
 

@@ -10,7 +10,7 @@ import { LoadingOverlay } from '@mantine/core';
 
 interface BlogPostDetailsProps {
   params: {
-    id: string;
+    article_slug: string;
     slug: string;
   };
 }
@@ -22,7 +22,7 @@ interface BlogPostDetailsProps {
  * @returns
  */
 export default function BlogPostPage({
-  params: { id, slug }
+  params: { article_slug, slug }
 }: BlogPostDetailsProps) {
   const [post, setPost] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,25 +31,26 @@ export default function BlogPostPage({
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await strapiClient.getPost(id.split('-')[0], slug);
+        const response = await strapiClient.getPost(article_slug, slug);
+        console.log({ response });
         const post = response?.data?.[0];
 
-        if (!post) {
-          router.push('/404');
-          return;
-        }
+        // if (!post) {
+        //   router.push('/404');
+        //   return;
+        // }
 
         setPost(post as Article);
       } catch (error) {
         console.error('Failed to fetch post:', error);
-        router.push('/404');
+        // router.push('/404');
       } finally {
         setLoading(false);
       }
     };
 
     fetchPost();
-  }, [id, slug, router]);
+  }, [article_slug, slug, router]);
 
   if (loading) {
     return <LoadingOverlay visible />;
