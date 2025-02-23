@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const post = response?.data?.[0] as Article;
 
   return generateSEOMetadata({
-    slug: process.env.MARKKET_STORE_SLUG as string,
+    slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
     entity: {
       url: `/docs/${id}`,
       SEO: post?.SEO,

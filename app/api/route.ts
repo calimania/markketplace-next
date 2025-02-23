@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server'
 import { strapiClient } from '@/markket/api'
+import { version } from '@/package.json';
 
 export async function GET() {
   const store = await strapiClient.getStore();
 
   return NextResponse.json(
     {
-      markket: 'markket',
-      markket_url: process.env.NEXT_PUBLIC_MARKKET_API,
-      markket_store_slug: store?.data?.[0]?.slug,
-      markket_place_url: process.env.NEXT_PUBLIC_MARKKET_PLACE_URL,
-      title: store?.data?.[0]?.title,
+      markket: `markket@${version}`,
+      markket_api: process.env.NEXT_PUBLIC_MARKKET_API || '',
+      markket_store_slug: store?.data?.[0]?.slug || '',
+      markketplace_url: process.env.NEXT_PUBLIC_MARKKETPLACE_URL || '',
+      title: store?.data?.[0]?.title || '',
     },
-    { status: 200 }
+    { status: store?.data ? 200 : 420 }
   )
 };
