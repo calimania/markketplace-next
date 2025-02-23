@@ -1,14 +1,30 @@
-import { Container, Title, Paper, Stack } from '@mantine/core';
+import { Container, Title, Stack } from '@mantine/core';
 import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
+import PageContent from '@/app/components/ui/page.content';
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ page_slug: string, slug: string }>;
 }
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug, page_slug } = await params;
+
+  const response = await strapiClient.getPage(page_slug, slug);
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      url: `/${slug}`,
+      SEO: page?.SEO,
+    },
+    type: 'article',
+  });
+};
 
 export default async function AboutPage({ params }: PageProps) {
   const { page_slug, slug } = await params;
@@ -37,9 +53,7 @@ export default async function AboutPage({ params }: PageProps) {
 
         <Title order={1}>{page.Title}</Title>
 
-        <Paper p="md" withBorder>
-          <BlocksRenderer content={page.Content as BlocksContent} />
-        </Paper>
+        <PageContent params={{ page }} />
       </Stack>
     </Container>
   );

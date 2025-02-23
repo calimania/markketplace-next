@@ -8,6 +8,39 @@ import DocsGrid from '@/app/components/docs/grid';
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
+import PageContent from "../components/ui/page.content";
+
+interface AnyPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: AnyPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  let response;
+  if (slug == 'docs') {
+    response = await strapiClient.getPage('blog');
+  }
+
+  if (slug == 'stores') {
+    response = await strapiClient.getPage('stores');
+  }
+
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      url: `/${slug}`,
+      SEO: page?.SEO,
+    },
+    type: 'article',
+  });
+};
+
 const getCollection = async (key: string) => {
   let collection: Store[] = [];
 
@@ -35,12 +68,23 @@ const getCollection = async (key: string) => {
  * @param {Object} props - The props object
  * @returns
  */
-export default async function AnyPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function AnyPage({ params }: AnyPageProps) {
   const { slug } = await params;
   const a = await strapiClient.getStore();
 
   const collection = await getCollection(slug);
   const store = a.data[0];
+
+  let page;
+  if (slug == 'stores') {
+    const response = await strapiClient.getPage('stores');
+    page = response?.data?.[0] as Page;
+  }
+
+  if (slug == 'docs') {
+    const response = await strapiClient.getPage('blog');
+    page = response?.data?.[0] as Page;
+  }
 
   return (
     <Container size="lg" className="py-20">
@@ -79,7 +123,7 @@ export default async function AnyPage({ params }: { params: Promise<{ slug: stri
             <DocsGrid posts={collection.data as unknown as Article[]} />
           </>
         )}
-
+        <PageContent params={{ page }} />
       </Stack>
     </Container>
   );

@@ -1,7 +1,30 @@
 import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode } from "@tabler/icons-react";
+import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode, IconBrandMysql } from "@tabler/icons-react";
 import { strapiClient } from '@/markket/api';
 import { FeatureCard } from "./components/ui/feature.card";
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
+import PageContent from '@/app/components/ui/page.content';
+
+export async function generateMetadata(): Promise<Metadata> {
+
+  const response = await strapiClient.getPage('home');
+  const page = response?.data?.[0] as Page;
+
+  console.log({ page, response })
+
+  return generateSEOMetadata({
+    slug: process.env.MARKKET_STORE_SLUG as string,
+    entity: {
+      SEO: page?.SEO,
+      title: page?.Title || 'Homepage',
+      url: `/`,
+    },
+    type: 'website',
+    defaultTitle: `${page?.Title}` || 'Homepage',
+  });
+};
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
@@ -24,34 +47,42 @@ const features = [
 
 ];
 
-const links = [
-  {
-    href: "/stores",
-    icon: IconShoppingBag,
-    label: "Browse Stores",
-    variant: "gradient",
-    gradient: { from: 'indigo', to: 'cyan' }
-  },
-  {
-    href: "/docs",
-    icon: IconFileTypeDoc,
-    label: "Documentation",
-    variant: "light"
-  },
-  {
-    href: "https://github.com/calimania/markketplace-next",
-    icon: IconBrandGithub,
-    label: "GitHub",
-    variant: "light"
-  },
-  {
-    href: '/newsletter',
-    icon: IconRadio,
-    label: 'Newsletter',
-    variant: 'gradient',
-    gradient: { from: '#1b57ad', to: '#367de4' }
-  }
-];
+const create_links = (prefix?: string) => {
+  return [
+    {
+      href: "/stores",
+      icon: IconShoppingBag,
+      label: "Browse Stores",
+      variant: "gradient",
+      gradient: { from: 'indigo', to: 'cyan' }
+    },
+    {
+      href: `${prefix}/blog`,
+      icon: IconFileTypeDoc,
+      label: "Documentation",
+      variant: "light"
+    },
+    {
+      href: `${prefix}/about`,
+      icon: IconBrandMysql,
+      label: "About",
+      variant: "light"
+    },
+    {
+      href: "https://github.com/calimania/markketplace-next",
+      icon: IconBrandGithub,
+      label: "GitHub",
+      variant: "light"
+    },
+    {
+      href: `${prefix}/about/newsletter`,
+      icon: IconRadio,
+      label: 'Newsletter',
+      variant: 'gradient',
+      gradient: { from: '#1b57ad', to: '#367de4' }
+    }
+  ];
+}
 
 
 
@@ -63,6 +94,11 @@ const links = [
 export default async function Home() {
   const a = await strapiClient.getStore();
   const store = a.data?.[0];
+
+  const pageResponse = await strapiClient.getPage('home');
+  const page = pageResponse?.data?.[0] as Page;
+
+  const links = create_links(store ? `/store/${store?.slug}` : '');
 
   return (
     <Container size="lg" className="py-20">
@@ -146,7 +182,11 @@ export default async function Home() {
             </Group>
           </Stack>
         </Paper>
+
+        {page.Content && (
+          <PageContent params={{ page }} />
+        )}
       </Stack>
     </Container>
   );
-}
+};

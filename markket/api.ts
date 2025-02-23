@@ -179,6 +179,7 @@ export class StrapiClient {
         '$and][0][store][slug': storeSlug,
         '$and][1][slug': slug
       },
+      paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,store'
     });
   };
@@ -195,7 +196,8 @@ export class StrapiClient {
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
       filters: filter && {
         '$or][0][title': filter,
-      } || {},
+      } || {
+      },
       paginate,
       sort,
     });
@@ -208,6 +210,7 @@ export class StrapiClient {
         '$and][0][store][slug': slug || this.storeSlug,
         '$and][1][id': id
       },
+      paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,Tags,cover',
     });
   }

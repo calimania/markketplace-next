@@ -6,10 +6,33 @@ import {
   type BlocksContent,
 } from "@strapi/blocks-react-renderer";
 import { Article } from "@/markket/article.d";
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Metadata } from "next";
 
 interface DocsPageProps {
   params: Promise<{ id: string }>;
 }
+
+export async function generateMetadata({ params }: DocsPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  let response;
+  if (id) {
+    response = await strapiClient.getPost(id.split('-')[0]);
+  }
+  const post = response?.data?.[0] as Article;
+  console.log({ post, id, })
+
+  return generateSEOMetadata({
+    slug: process.env.MARKKET_STORE_SLUG as string,
+    entity: {
+      url: `/docs/${id}`,
+      SEO: post?.SEO,
+      title: post?.Title,
+    },
+    type: 'article',
+  });
+};
 
 export default async function DocsPage({ params }: DocsPageProps) {
   const { id } = await params;

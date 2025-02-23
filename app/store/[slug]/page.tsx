@@ -3,29 +3,41 @@ import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
 import { Container, Title, Text, Stack, Group, Button } from "@mantine/core";
 import { IconNews, IconShoppingBag, IconFiles } from '@tabler/icons-react';
+import PageContent from '@/app/components/ui/page.content';
 
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Store } from "@/markket/store.d";
+import { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const response = await strapiClient.getStore(slug);
+  const store = response?.data?.[0] as Store;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      url: `/${slug}`,
+      SEO: store?.SEO,
+      id: store?.id?.toString(),
+    },
+    type: 'article',
+  });
+};
 
 export default async function StorePage({
   params
 }: PageProps) {
   const { slug } = await params;
   const response = await strapiClient.getStore(slug);
-
   const pageQuery = await strapiClient.getPage('home', slug);
-
   const homePage = pageQuery?.data?.[0];
-
-
   const store = response?.data?.[0];
-
 
   if (!store) {
     notFound();
@@ -60,7 +72,7 @@ export default async function StorePage({
             </Button>
             <Button
               component="a"
-              href={`#/store/${store.slug}/products`}
+              href={`/store/${store.slug}/products`}
               variant="light"
               leftSection={<IconShoppingBag size={20} />}
             >
@@ -76,12 +88,7 @@ export default async function StorePage({
             </Button>
           </Group>
         </div>
-
-        <section className="">
-          <BlocksRenderer
-            content={homePage?.Content as unknown as BlocksContent || ([] as BlocksContent)}
-          />
-        </section>
+        <PageContent params={{ page: homePage }} />
       </Stack>
     </Container>
   );
