@@ -1,0 +1,119 @@
+$markket-yellow: #fbda0f;
+$markket-blue: #0051ba;
+$markket-pink: #e4007c;
+$markket-cyan: #00ffff;
+
+
+
+.blocks-content {
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold mb-6;
+    background: linear-gradient(90deg, $markket-blue, $markket-pink);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  h1 { @apply text-4xl md:text-5xl; }
+  h2 { @apply text-3xl md:text-4xl; }
+  h3 { @apply text-2xl md:text-3xl; }
+  h4 { @apply text-xl md:text-2xl; }
+
+  // Paragraphs with better readability
+  p {
+    @apply text-gray-800 mb-6 leading-relaxed;
+
+    strong {
+      color: $markket-pink;
+    }
+  }
+
+  // Funky lists
+  ul, ol {
+    @apply mb-6 pl-6;
+  }
+
+  ul {
+    @apply list-disc;
+    li {
+      @apply mb-3 text-gray-800;
+      &::marker {
+        color: $markket-blue;
+      }
+      &:nth-child(2n)::marker {
+        color: $markket-pink;
+      }
+      &:nth-child(3n)::marker {
+        color: $markket-yellow;
+      }
+    }
+  }
+
+  // Links with hover effects
+  a {
+    color: $markket-blue;
+    @apply relative inline-block;
+
+    &::after {
+      content: '';
+      @apply absolute bottom-0 left-0 w-full h-0.5 bg-markket-yellow;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      color: $markket-pink;
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  // Blockquotes with style
+  blockquote {
+    @apply my-8 pl-6 py-2;
+    border-image: linear-gradient(to bottom, $markket-blue, $markket-pink) 1;
+    border-left-width: 4px;
+    border-left-style: solid;
+
+    p {
+      @apply text-gray-700 italic;
+    }
+  }
+
+  // Code blocks with CMY theme
+  pre {
+    background: linear-gradient(45deg, rgba($markket-cyan, 0.1), rgba($markket-pink, 0.1));
+    @apply p-4 rounded-lg mb-6 overflow-x-auto;
+  }
+
+  code {
+    @apply font-mono px-1.5 py-0.5 rounded;
+    background-color: rgba($markket-yellow, 0.2);
+  }
+
+  // Tables with personality
+  table {
+    @apply w-full border-collapse mb-6;
+
+    th {
+      @apply p-3 font-semibold;
+      background: linear-gradient(90deg, rgba($markket-blue, 0.1), rgba($markket-pink, 0.1));
+    }
+
+    td {
+      @apply p-3 border-b border-gray-200;
+    }
+
+    tr:hover {
+      background-color: rgba($markket-yellow, 0.05);
+    }
+  }
+
+  // Special callouts
+  .callout {
+    @apply p-4 rounded-lg mb-6;
+    background: linear-gradient(135deg, rgba($markket-blue, 0.1), rgba($markket-pink, 0.1));
+    border-left: 4px solid $markket-yellow;
+  }
+}

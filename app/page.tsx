@@ -5,11 +5,14 @@ import { FeatureCard } from "./components/ui/feature.card";
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
+import PageContent from '@/app/components/ui/page.content';
 
 export async function generateMetadata(): Promise<Metadata> {
 
   const response = await strapiClient.getPage('home');
   const page = response?.data?.[0] as Page;
+
+  console.log({ page, response })
 
   return generateSEOMetadata({
     slug: process.env.MARKKET_STORE_SLUG as string,
@@ -91,6 +94,9 @@ const create_links = (prefix?: string) => {
 export default async function Home() {
   const a = await strapiClient.getStore();
   const store = a.data?.[0];
+
+  const pageResponse = await strapiClient.getPage('home');
+  const page = pageResponse?.data?.[0] as Page;
 
   const links = create_links(store ? `/store/${store?.slug}` : '');
 
@@ -176,7 +182,11 @@ export default async function Home() {
             </Group>
           </Stack>
         </Paper>
+
+        {page.Content && (
+          <PageContent params={{ page }} />
+        )}
       </Stack>
     </Container>
   );
-}
+};
