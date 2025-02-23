@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = response?.data?.[0] as Page;
 
   return generateSEOMetadata({
-    slug: process.env.MARKKET_STORE_SLUG as string,
+    slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
     entity: {
       SEO: page?.SEO,
       title: page?.Title || 'Homepage',

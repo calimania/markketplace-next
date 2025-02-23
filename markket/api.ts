@@ -24,8 +24,8 @@ export class StrapiClient {
   private storeSlug: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_MARKKET_URL || 'https://api.markket.place/';
-    this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_SLUG || 'next';
+    this.baseUrl = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
+    this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
   private buildFilterString(filters: any, prefix = ''): Array<[string, string]> {
