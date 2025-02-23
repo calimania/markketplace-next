@@ -32,7 +32,8 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
 
 export default async function DocsPage({ params }: DocsPageProps) {
   const { id } = await params;
-  const response = await strapiClient.getPost((id as string).split('-')[0]);
+
+  const response = await strapiClient.getPost(id);
   const post = response?.data?.[0] as Article;
 
   if (!post) {

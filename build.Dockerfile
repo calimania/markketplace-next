@@ -6,16 +6,18 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies with legacy peer deps
+RUN npm install --global turbo
 RUN npm ci --legacy-peer-deps
 
 # Copy rest of the application
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN turbo build
 
 # Expose the port
 EXPOSE 8080
 
 # Start the application
 CMD ["npm", "start"]
+

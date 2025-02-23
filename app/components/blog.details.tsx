@@ -7,6 +7,7 @@ import PageContent from "@/app/components/ui/page.content";
 import { Article } from "@/markket/article.d";
 import { useEffect, useState } from 'react';
 import { LoadingOverlay } from '@mantine/core';
+import { notFound } from 'next/navigation';
 
 interface BlogPostDetailsProps {
   params: {
@@ -35,15 +36,14 @@ export default function BlogPostPage({
         console.log({ response });
         const post = response?.data?.[0];
 
-        // if (!post) {
-        //   router.push('/404');
-        //   return;
-        // }
+        if (!post) {
+          return notFound();
+        }
 
         setPost(post as Article);
       } catch (error) {
         console.error('Failed to fetch post:', error);
-        // router.push('/404');
+        // notFound();
       } finally {
         setLoading(false);
       }
