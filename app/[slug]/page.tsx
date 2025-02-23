@@ -11,6 +11,7 @@ const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
+import PageContent from "../components/ui/page.content";
 
 interface AnyPageProps {
   params: Promise<{ slug: string }>;
@@ -23,6 +24,11 @@ export async function generateMetadata({ params }: AnyPageProps): Promise<Metada
   if (slug == 'docs') {
     response = await strapiClient.getPage('blog');
   }
+
+  if (slug == 'stores') {
+    response = await strapiClient.getPage('stores');
+  }
+
   const page = response?.data?.[0] as Page;
 
   return generateSEOMetadata({
@@ -69,6 +75,12 @@ export default async function AnyPage({ params }: AnyPageProps) {
   const collection = await getCollection(slug);
   const store = a.data[0];
 
+  let page;
+  if (slug == 'stores') {
+    const response = await strapiClient.getPage('stores');
+    page = response?.data?.[0] as Page;
+  }
+
   return (
     <Container size="lg" className="py-20">
       <Stack gap="xl">
@@ -106,7 +118,7 @@ export default async function AnyPage({ params }: AnyPageProps) {
             <DocsGrid posts={collection.data as unknown as Article[]} />
           </>
         )}
-
+        <PageContent params={{ page }} />
       </Stack>
     </Container>
   );
