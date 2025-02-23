@@ -30,21 +30,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 };
 
-
-
 export default async function StorePage({
   params
 }: PageProps) {
   const { slug } = await params;
   const response = await strapiClient.getStore(slug);
-
   const pageQuery = await strapiClient.getPage('home', slug);
-
   const homePage = pageQuery?.data?.[0];
-
-
   const store = response?.data?.[0];
-
 
   if (!store) {
     notFound();
