@@ -81,6 +81,11 @@ export default async function AnyPage({ params }: AnyPageProps) {
     page = response?.data?.[0] as Page;
   }
 
+  if (slug == 'docs') {
+    const response = await strapiClient.getPage('blog');
+    page = response?.data?.[0] as Page;
+  }
+
   return (
     <Container size="lg" className="py-20">
       <Stack gap="xl">
