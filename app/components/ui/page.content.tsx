@@ -12,10 +12,17 @@ interface PageContentProps {
 }
 
 export default function PageContent({ params }: PageContentProps) {
+
+  const content = params?.page?.Content;
+
+  if (!content?.length) {
+    return null;
+  }
+
   return (
     <Paper p="md" withBorder>
       <div className="blocks-content">
-        <BlocksRenderer content={params.page?.Content as BlocksContent} />
+        <BlocksRenderer content={(content || []) as BlocksContent} />
       </div>
     </Paper>
   )
