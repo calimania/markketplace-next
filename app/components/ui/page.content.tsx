@@ -20,7 +20,7 @@ export default function PageContent({ params }: PageContentProps) {
   }
 
   return (
-    <Paper p="md" withBorder>
+    <Paper p="md" mt={33}>
       <div className="blocks-content">
         <BlocksRenderer content={(content || []) as BlocksContent} />
       </div>

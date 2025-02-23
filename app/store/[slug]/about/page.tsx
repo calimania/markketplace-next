@@ -3,11 +3,30 @@ import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageList } from '@/app/components/ui/pages.list';
-import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
+import PageContent from '@/app/components/ui/page.content';
+import { generateSEOMetadata } from '@/markket/metadata';
+import { Page } from "@/markket/page";
+import { Metadata } from "next";
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
 }
+
+export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const response = await strapiClient.getPage('about');
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug,
+    entity: {
+      url: `/${slug}`,
+      SEO: page?.SEO,
+    },
+    type: 'article',
+  });
+};
 
 export default async function AboutPage({ params }: AboutPageProps) {
   const { slug } = await params;
@@ -36,9 +55,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
 
 
         {aboutPage?.Content ?
-          (<BlocksRenderer content={aboutPage.Content as BlocksContent} />) :
+          (<PageContent params={{ page: aboutPage }} />) :
           (
-
             <Text c="dimmed" size="lg">
               {aboutPage?.SEO?.metaDescription || store.SEO?.metaDescription}
             </Text>
