@@ -48,7 +48,12 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
 
   const blogResponse = await strapiClient.getPage('blog', slug);
   const page = blogResponse?.data?.[0] as Page;
-  const postsResponse = await strapiClient.getPosts({ page: 1, pageSize: 30 }, { filter: '', sort: 'createdAt:desc' }, slug);
+  const postsResponse = await strapiClient.getPosts({
+    page: 1,
+    pageSize: 50
+  }, {
+    sort: 'createdAt:desc'
+  }, slug);
   const posts = postsResponse?.data || [] as Article[];
   const description = page?.SEO?.metaDescription || `Blog posts for ${store?.SEO?.metaTitle}`;
 

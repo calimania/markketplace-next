@@ -1,6 +1,7 @@
 import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store.d';
 import { Page } from './page.d';
+import qs from 'qs';
 
 export type { StrapiResponse, FetchOptions };
 
@@ -28,35 +29,19 @@ export class StrapiClient {
     this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
-  private buildFilterString(filters: any, prefix = ''): Array<[string, string]> {
-    const params: Array<[string, string]> = [];
-
-    Object.entries(filters).forEach(([key, value]) => {
-      const fullKey = prefix ? `${prefix}[${key}]` : key;
-
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        if ('operator' in value && 'value' in value) {
-          params.push([`filters[${fullKey}][${value.operator}]`, (value.value as string | number | boolean).toString()]);
-        } else {
-          params.push(...this.buildFilterString(value, `filters[${fullKey}]`));
-        }
-      } else {
-        params.push([`filters[${fullKey}][$eq]`, (value as string | boolean | number).toString()]);
-      }
+  private buildFilterString(filters: any): string {
+    return qs.stringify({ filters }, {
+      arrayFormat: 'brackets',
+      encodeValuesOnly: true,
     });
-
-    return params;
-  }
+  };
 
 
   private buildUrl(options: EnhancedFetchOptions): string {
     const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
 
-    if (filters) {
-      const filterParams = this.buildFilterString(filters);
-      filterParams.forEach(([key, value]) => params.append(key, value));
-    }
+    const filterString = this.buildFilterString(filters);
 
     if (populate) {
       const fields = Array.isArray(populate) ? populate : populate.split(',');
@@ -68,8 +53,7 @@ export class StrapiClient {
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
     if (sort) params.append('sort', sort);
 
-    const url = new URL('api/' + contentType, this.baseUrl);
-    url.search = params.toString();
+    const url = new URL(`api/${contentType}?${filterString}&${params.toString()}`, this.baseUrl);
 
     return url.toString();
   }
@@ -88,48 +72,43 @@ export class StrapiClient {
     }
 
     return response.json();
+  };
+
+
+  async getProduct(product_slug: string, store_slug: string) {
+    return this.fetch({
+      contentType: 'products',
+      filters:
+      {
+        stores: {
+          slug: {
+            $eq: store_slug || this.storeSlug,
+          }
+        },
+        slug: {
+          $eq: product_slug
+        }
+      },
+      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
+    });
   }
 
   async getProducts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, store_slug: string) {
-    const { sort, filter } = options;
+    const { sort } = options;
 
     return this.fetch({
       contentType: 'products',
       filters:
       {
-        active: true,
         stores: {
           slug: {
-            operator: '$eq',
-            value: `[${store_slug}]`
+            $eq: store_slug,
           }
         }
       },
-      ...(filter ? [{
-        Name: {
-          operator: '$contains',
-          value: filter
-        }
-      }] : []),
       sort,
       paginate,
       populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
-    });
-  }
-
-  async getPosts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, slug?: string) {
-    const { filter, sort } = options;
-
-    return this.fetch({
-      contentType: 'articles',
-      sort,
-      filters: filter && {
-        '$and][0][store][slug': slug || this.storeSlug,
-        '$or][0][title': filter,
-      } || {
-        '$and][0][store][slug': slug || this.storeSlug,
-      },
-      populate: 'SEO.socialImage,Tags,cover',
     });
   }
 
@@ -140,6 +119,7 @@ export class StrapiClient {
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
+
   async getStore(slug = this.storeSlug) {
     return await this.fetch<Store>({
       contentType: `stores`,
@@ -154,13 +134,19 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPages(storeSlug: string = this.storeSlug) {
+  async getPages(store_slug: string = this.storeSlug) {
 
     return this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        '$and][0][store][slug': storeSlug,
-        '$and][1][Active': true
+        Active: {
+          $eq: true
+        },
+        store: {
+          slug: {
+            $eq: store_slug
+          }
+        }
       },
       populate: 'SEO.socialImage'
     });
@@ -171,13 +157,19 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPage(slug: string, storeSlug: string = this.storeSlug) {
+  async getPage(slug: string, store_slug: string = this.storeSlug) {
 
     return await this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        '$and][0][store][slug': storeSlug,
-        '$and][1][slug': slug
+        store: {
+          slug: {
+            $eq: store_slug
+          }
+        },
+        slug: {
+          $eq: slug
+        },
       },
       paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,store'
@@ -189,31 +181,55 @@ export class StrapiClient {
    * including filters to search for by some attributes like name, slug, title or description using the same keyword
    */
   async getStores(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
-    const { filter, sort } = options;
+    const { sort } = options;
 
     return await this.fetch<Store>({
       contentType: 'stores',
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
-      filters: filter && {
-        '$or][0][title': filter,
-      } || {
+      filters: {
+        active: {
+          $eq: true
+        }
       },
       paginate,
       sort,
     });
   };
 
-  async getPost(article_slug: string, slug?: string) {
+  async getPosts(paginate: { page: number; pageSize: number }, options: { filter?: string, sort: string }, store_slug?: string) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'articles',
+      sort,
+      filters: {
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
+      },
+      paginate,
+      populate: 'SEO.socialImage,Tags,cover,store',
+    });
+  }
+
+  async getPost(article_slug: string, store_slug?: string) {
 
     return await this.fetch({
       contentType: 'articles',
       filters: {
-        '$and][0][store][slug': slug || this.storeSlug,
-        '$and][1][slug]': article_slug,
+        slug: {
+          $eq: article_slug
+        },
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
       },
-      paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,Tags,cover',
-      sort: 'createdAt:desc'
+      populate: 'SEO.socialImage,Tags,cover,store',
+      sort: 'createdAt:desc',
     });
   }
 };

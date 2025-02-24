@@ -7,22 +7,19 @@ import { Metadata } from "next";
 import PageContent from "@/app/components/ui/page.content";
 
 interface DocsPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ article_slug: string }>;
 }
 
 export async function generateMetadata({ params }: DocsPageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { article_slug } = await params;
 
-  let response;
-  if (id) {
-    response = await strapiClient.getPost(id.split('-')[0]);
-  }
-  const post = response?.data?.[0] as Article;
+  const { data: [_post]} =  await strapiClient.getPost(article_slug);
+  const post = _post as Article;
 
   return generateSEOMetadata({
     slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
     entity: {
-      url: `/docs/${id}`,
+      url: `/docs/${article_slug}`,
       SEO: post?.SEO,
       title: post?.Title,
     },
@@ -31,10 +28,12 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
 };
 
 export default async function DocsPage({ params }: DocsPageProps) {
-  const { id } = await params;
+  const { article_slug } = await params;
 
-  const response = await strapiClient.getPost(id);
+  const response = await strapiClient.getPost(article_slug);
   const post = response?.data?.[0] as Article;
+
+  console.log({post});
 
   if (!post) {
     notFound();
