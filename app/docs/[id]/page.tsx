@@ -1,13 +1,10 @@
-import { Container, Title, Text, Stack, Paper, Image } from "@mantine/core";
+import { Container, Title, Text, Stack, Image } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { notFound } from 'next/navigation';
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
 import { Article } from "@/markket/article.d";
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Metadata } from "next";
+import PageContent from "@/app/components/ui/page.content";
 
 interface DocsPageProps {
   params: Promise<{ id: string }>;
@@ -21,10 +18,9 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
     response = await strapiClient.getPost(id.split('-')[0]);
   }
   const post = response?.data?.[0] as Article;
-  console.log({ post, id, })
 
   return generateSEOMetadata({
-    slug: process.env.MARKKET_STORE_SLUG as string,
+    slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
     entity: {
       url: `/docs/${id}`,
       SEO: post?.SEO,
@@ -36,7 +32,8 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
 
 export default async function DocsPage({ params }: DocsPageProps) {
   const { id } = await params;
-  const response = await strapiClient.getPost((id as string).split('-')[0]);
+
+  const response = await strapiClient.getPost(id);
   const post = response?.data?.[0] as Article;
 
   if (!post) {
@@ -71,10 +68,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
             </div>
           )}
         </div>
-
-        <Paper p="md" withBorder>
-          <BlocksRenderer content={post.Content as BlocksContent} />
-        </Paper>
+        <PageContent params={{ post }} />
       </Stack>
     </Container>
   );

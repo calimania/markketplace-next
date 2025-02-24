@@ -46,3 +46,5 @@ storybook-static
 
 # Draft
 *.draft*
+
+.turbo

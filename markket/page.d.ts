@@ -14,12 +14,18 @@ interface BlockLink {
 
 type BlockChild = BlockText | BlockLink;
 
-interface ContentBlock {
-  type: 'paragraph' | 'heading';
+export interface ContentBlock {
+  type: 'paragraph' | 'heading' | 'list' | 'list-item' | 'image' | 'link';
+  type: string;
   level?: number;
-  children: BlockChild[];
+  children: Array<{
+    type: string;
+    text?: string;
+    bold?: boolean;
+    url?: string;
+    children?: Array<{ text: string; type: string; }>;
+  }>;
 };
-
 
 interface ImageFormat {
   ext: string;

@@ -6,7 +6,6 @@ $markket-cyan: #00ffff;
 
 
 .blocks-content {
-
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold mb-6;
     background: linear-gradient(90deg, $markket-blue, $markket-pink);
@@ -49,7 +48,27 @@ $markket-cyan: #00ffff;
     }
   }
 
-  // Links with hover effects
+  .list-container {
+    @apply my-6 space-y-2;
+
+    .list-item {
+      @apply relative pl-6 text-gray-700;
+      list-style: none; // Prevent default bullets
+
+      &::before {
+        content: '';
+        @apply absolute left-0 top-[0.6em] w-2.5 h-2.5 rounded-full;
+        background: linear-gradient(135deg, $markket-blue, $markket-pink);
+        transform: scale(0.4);
+        transition: transform 0.2s ease;
+      }
+
+      &:hover::before {
+        transform: scale(0.5);
+      }
+    }
+  }
+
   a {
     color: $markket-blue;
     @apply relative inline-block;
@@ -69,7 +88,6 @@ $markket-cyan: #00ffff;
     }
   }
 
-  // Blockquotes with style
   blockquote {
     @apply my-8 pl-6 py-2;
     border-image: linear-gradient(to bottom, $markket-blue, $markket-pink) 1;
@@ -81,7 +99,6 @@ $markket-cyan: #00ffff;
     }
   }
 
-  // Code blocks with CMY theme
   pre {
     background: linear-gradient(45deg, rgba($markket-cyan, 0.1), rgba($markket-pink, 0.1));
     @apply p-4 rounded-lg mb-6 overflow-x-auto;
@@ -92,7 +109,6 @@ $markket-cyan: #00ffff;
     background-color: rgba($markket-yellow, 0.2);
   }
 
-  // Tables with personality
   table {
     @apply w-full border-collapse mb-6;
 
@@ -110,10 +126,35 @@ $markket-cyan: #00ffff;
     }
   }
 
-  // Special callouts
   .callout {
     @apply p-4 rounded-lg mb-6;
     background: linear-gradient(135deg, rgba($markket-blue, 0.1), rgba($markket-pink, 0.1));
     border-left: 4px solid $markket-yellow;
+  }
+
+
+
+  .image-container {
+    @apply my-8 relative;
+
+    img {
+      @apply rounded-xl shadow-lg transition-all duration-300;
+
+      &:hover {
+        @apply shadow-xl transform -translate-y-1;
+      }
+    }
+
+    figcaption {
+      @apply mt-3 text-sm text-left text-gray-600;
+      background: linear-gradient(90deg, $markket-blue, $markket-pink);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .image-gallery {
+    @apply grid gap-6 my-8;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }

@@ -54,7 +54,7 @@ const getCollection = async (key: string) => {
     collection = response?.data as Store[] || [];
   }
 
-  console.log({ collection: collection.length, key });
+  console.log({ key, collection: collection.length, });
 
   return {
     data: collection || [],

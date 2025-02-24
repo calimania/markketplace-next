@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MARKKET_URL = process.env.MARKKET_URL || 'https://api.markket.place/';
+const MARKKET_API = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
 
 async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
@@ -16,7 +16,7 @@ async function handler(req: NextRequest) {
   // Construct the target URL (ensure path starts with /)
   const targetUrl = new URL(
     path.startsWith('/') ? path : `/${path}`,
-    MARKKET_URL
+    MARKKET_API
   );
 
   console.log('API Proxy:', { targetUrl: targetUrl.toString() });

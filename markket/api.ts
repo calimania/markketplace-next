@@ -24,8 +24,8 @@ export class StrapiClient {
   private storeSlug: string;
 
   constructor() {
-    this.baseUrl = process.env.MARKKET_URL || 'https://api.markket.place/';
-    this.storeSlug = process.env.MARKKET_STORE_SLUG || 'next';
+    this.baseUrl = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
+    this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
   private buildFilterString(filters: any, prefix = ''): Array<[string, string]> {
@@ -80,7 +80,7 @@ export class StrapiClient {
     console.info({ url });
 
     const response = await fetch(url, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -141,7 +141,7 @@ export class StrapiClient {
     });
   }
   async getStore(slug = this.storeSlug) {
-    return this.fetch<Store>({
+    return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
       populate: 'Logo,SEO.socialImage,Favicon'
@@ -203,17 +203,19 @@ export class StrapiClient {
     });
   };
 
-  async getPost(id: string, slug?: string) {
+  async getPost(article_slug: string, slug?: string) {
+
     return await this.fetch({
       contentType: 'articles',
       filters: {
         '$and][0][store][slug': slug || this.storeSlug,
-        '$and][1][id': id
+        '$and][1][slug]': article_slug,
       },
       paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,Tags,cover',
+      sort: 'createdAt:desc'
     });
   }
-}
+};
 
 export const strapiClient = new StrapiClient();

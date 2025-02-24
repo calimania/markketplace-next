@@ -1,5 +1,6 @@
 export interface Article {
   id: number;
+  slug: string;
   Title: string;
   documentId: string;
   createdAt: string;
