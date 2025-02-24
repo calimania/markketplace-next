@@ -53,7 +53,6 @@ export class StrapiClient {
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
     if (sort) params.append('sort', sort);
 
-    console.log({ filterString, params: params.toString() });
     const url = new URL(`api/${contentType}?${filterString}&${params.toString()}`, this.baseUrl);
 
     return url.toString();
@@ -187,7 +186,11 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: 'stores',
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
-      filters: {},
+      filters: {
+        active: {
+          $eq: true
+        }
+      },
       paginate,
       sort,
     });
