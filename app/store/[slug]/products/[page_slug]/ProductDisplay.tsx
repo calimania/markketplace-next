@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Product, Slide } from "@/markket/product";
 
 export default function ProductDisplay({ product }: { product: Product }) {
-  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides[0]); // ✅ Default to first image
+  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides[0]);
 
   return (
     <div className="max-w-7xl mx-auto mb-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">

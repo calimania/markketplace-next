@@ -3,11 +3,11 @@ import { Product } from "@/markket/product";
 import { notFound } from "next/navigation";
 import ProductDisplay from "./ProductDisplay";
 
-interface ProductPageProps {
-  params: { slug: string; page_slug: string };
+interface ProductSlugPageProps {
+  params: Promise<{ slug: string; page_slug: string }>;
 }
 
-export default async function ProductSlugPage({ params }: ProductPageProps) {
+export default async function ProductSlugPage({ params }: ProductSlugPageProps) {
   const { slug, page_slug } = await params;
 
   const storeResponse = await strapiClient.getStore(slug);
@@ -30,5 +30,5 @@ export default async function ProductSlugPage({ params }: ProductPageProps) {
     return <div>Product not found</div>;
   }
 
-  return <ProductDisplay product={product} />; // ✅ Pass product to Client Component
+  return <ProductDisplay product={product} />;
 }
