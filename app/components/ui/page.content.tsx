@@ -1,5 +1,5 @@
 import { Paper, Title } from '@mantine/core';
-import { Page } from "@/markket/page.d";
+import { Page, ContentBlock } from "@/markket/page.d";
 import { Article } from '@/markket/article';
 
 interface PageContentProps {
@@ -9,16 +9,6 @@ interface PageContentProps {
   };
 };
 
-interface Block {
-  type: string;
-  level?: number;
-  children: Array<{
-    type: string;
-    text?: string;
-    url?: string;
-    children?: Array<{ text: string; type: string; }>;
-  }>;
-};
 
 export default function PageContent({ params }: PageContentProps) {
   const content = params?.page?.Content || params?.post?.Content;
@@ -28,8 +18,7 @@ export default function PageContent({ params }: PageContentProps) {
     return null;
   }
 
-
-  const renderImage = (node: Block['children'][0], key: number) => {
+  const renderImage = (node: ContentBlock['children'][0], key: number) => {
     if (!node.url || renderedImages.has(node.url)) {
       return null;
     }
@@ -65,7 +54,7 @@ export default function PageContent({ params }: PageContentProps) {
     );
   };
 
-  const renderInline = (node: Block['children'][0], key: number) => {
+  const renderInline = (node: ContentBlock['children'][0], key: number) => {
     if (node.type === 'link') {
       const isImage = node.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
@@ -96,7 +85,7 @@ export default function PageContent({ params }: PageContentProps) {
    * @param key
    * @returns
    */
-  const renderListItem = (node: Block['children'][0], key: number) => {
+  const renderListItem = (node: ContentBlock['children'][0], key: number) => {
     if (node.type !== 'list-item') return null;
 
     return (
@@ -106,7 +95,7 @@ export default function PageContent({ params }: PageContentProps) {
     );
   };
 
-  const renderBlock = (block: Block) => {
+  const renderBlock = (block: ContentBlock) => {
     if (block.type === 'paragraph') {
       const imageNodes = block.children.filter(
         child => child.type === 'link' &&
@@ -162,7 +151,7 @@ export default function PageContent({ params }: PageContentProps) {
   return (
     <Paper p="md" mt={33} className='blocks-content'>
       <div className="space-y-6">
-        {content.map((block: Block, index: number) => (
+        {content.map((block: ContentBlock, index: number) => (
           <div key={index}>{renderBlock(block)}</div>
         ))}
       </div>

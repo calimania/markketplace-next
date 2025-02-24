@@ -33,7 +33,6 @@ export default function BlogPostPage({
     const fetchPost = async () => {
       try {
         const response = await strapiClient.getPost(article_slug, slug);
-        console.log({ response });
         const post = response?.data?.[0];
 
         if (!post) {

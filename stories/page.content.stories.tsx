@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import PageContent from '../app/components/ui/page.content';
+import PageContent from '@/app/components/ui/page.content';
+import { ContentBlock, Page } from '@/markket/page';
+
 
 const meta: Meta<typeof PageContent> = {
   title: 'Components/PageContent',
@@ -11,11 +13,6 @@ const meta: Meta<typeof PageContent> = {
 
 export default meta;
 type Story = StoryObj<typeof PageContent>;
-
-type ContentBlock =
-  | { type: 'heading'; level: number; children: { text: string; type: 'text' }[] }
-  | { type: 'paragraph'; children: { text: string; type: 'text'; bold?: boolean; url?: string; children?: { text: string; type: 'text' }[] }[] }
-  | { type: 'list'; format: 'unordered'; children: { type: 'list-item'; children: { text: string; type: 'text' }[] }[] };
 
 const mockContent: ContentBlock[] = [
   {
@@ -49,7 +46,6 @@ const mockContent: ContentBlock[] = [
   },
   {
     type: 'list',
-    format: 'unordered',
     children: [
       {
         type: 'list-item',
@@ -100,7 +96,7 @@ export const Default: Story = {
         Title: 'Sample Page',
         Active: true,
         slug: 'sample',
-      },
+      } as Page,
     },
   },
 };
@@ -118,7 +114,7 @@ export const WithoutImages: Story = {
         Title: 'Text Only Content',
         Active: true,
         slug: 'text-only',
-      },
+      } as Page,
     },
   },
 };
@@ -142,7 +138,7 @@ export const OnlyImages: Story = {
         Title: 'Image Gallery',
         Active: true,
         slug: 'gallery',
-      },
+      } as Page,
     },
   },
 };

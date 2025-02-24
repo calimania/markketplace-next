@@ -73,6 +73,18 @@ npm i --legacy-peer-deps
 
 ```
 
+## ENV VARS
+
+Configure your instance with the following variables, refer to `.env.example` for defaults
+
+
+```bash
+NODE_ENV=development
+NEXT_PUBLIC_POSTHOG_ID=
+NEXT_PUBLIC_MARKKET_STORE_SLUG=next
+NEXT_PUBLIC_MARKKET_API=https://api.markket.place/
+NEXT_PUBLIC_MARKKETPLACE_URL=http://localhost:4020/
+```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
