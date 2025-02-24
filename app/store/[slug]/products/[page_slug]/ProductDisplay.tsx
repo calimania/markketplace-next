@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Product, Slide } from "@/markket/product";
 
 export default function ProductDisplay({ product }: { product: Product }) {
-  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides[0]);
+  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides?.[0]);
 
   return (
     <div className="max-w-7xl mx-auto mb-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
@@ -14,7 +14,7 @@ export default function ProductDisplay({ product }: { product: Product }) {
         </div>
         <div className="mt-10 flex w-full flex-col justify-end">
           <div className="grid grid-cols-6 gap-2">
-            {product.Slides.map((slide) => (
+            {product?.Slides?.map((slide) => (
               <SlideImage
                 key={slide.id}
                 slide={slide}
@@ -58,8 +58,8 @@ function SlideImage({
       onClick={onClick}
     >
       <img
-        src={slide.formats?.thumbnail?.url || ""}
-        alt={slide.alternativeText || ""}
+        src={slide?.formats?.thumbnail?.url || ""}
+        alt={slide?.alternativeText || ""}
         className="h-full w-full cursor-pointer object-cover object-center transition-opacity hover:opacity-75"
       />
     </div>
@@ -69,12 +69,12 @@ function SlideImage({
 function MainImage({ image, title }: { image: Slide; title: string }) {
   return (
     <div className="relative overflow-hidden rounded-xl">
-      <img
-        src={image.formats?.thumbnail?.url || ""}
-        alt={image.alternativeText || title}
+      {image?.url && (<img
+        src={image?.formats?.thumbnail?.url || ""}
+        alt={image?.alternativeText || title}
         className="object-cover transform transition-transform h-full w-full"
         loading="eager"
-      />
+      />)}
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
     </div>
   );
