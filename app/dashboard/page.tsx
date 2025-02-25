@@ -73,11 +73,6 @@ function MainLink({ icon: Icon, label, notifications, href }: {
   );
 }
 
-/**
- * Initial dashboard page we display to the user
- *
- * @returns {JSX.Element}
- */
 export default function DashboardPage() {
   const [opened, { toggle }] = useDisclosure();
   const [store, setStore] = useState({} as Store);

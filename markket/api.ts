@@ -29,6 +29,74 @@ export class StrapiClient {
     this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
+  private _token = () => {
+    const _string = localStorage.getItem('markket.auth');
+    const _json = _string ? JSON.parse(_string) : {};
+    const { jwt } = _json;
+    return jwt;
+  };
+
+  public me = async () => {
+    if (!localStorage) { return null; }
+
+    const token = this._token();
+
+    if (!token) {
+      return null;
+    }
+    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  };
+
+  private async authenticatedFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+    const token = this._token();
+
+    if (!token) throw new Error('XXX');
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.statusText}`);
+    }
+
+    return response.json();
+  };
+
+
+  async updateProfile(data: FormData) {
+    if (!localStorage) return null;
+
+    try {
+      const url = new URL('api/user/me', this.baseUrl);
+
+      return await this.authenticatedFetch(url.toString(), {
+        method: 'PUT',
+        body: data,
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  }
+
   private buildFilterString(filters: any): string {
     return qs.stringify({ filters }, {
       arrayFormat: 'brackets',
@@ -64,6 +132,9 @@ export class StrapiClient {
     console.info({ url });
 
     const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
       next: { revalidate: 0 },
     });
 
