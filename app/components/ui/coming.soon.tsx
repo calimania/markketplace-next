@@ -1,18 +1,8 @@
 'use client';
 
-import {
-  Container,
-  Title,
-  Text,
-  Button,
-  Group,
-  Card,
-  ThemeIcon,
-  Badge,
-  rem,
-} from '@mantine/core';
-import { IconRocket, IconBuildingStore, IconUsers } from '@tabler/icons-react';
-import {  useState } from 'react';
+import { Container, Title, Text, Stack } from '@mantine/core';
+import { IconTrafficCone } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 
 interface ComingSoonProps {
   title?: string;
@@ -20,86 +10,50 @@ interface ComingSoonProps {
 }
 
 export default function ComingSoon({
-  title = "This feature is coming soon!",
-  description = "We're working hard to bring you amazing features. Stay tuned!"
+  title = "Coming Soon!",
+  description = "Perdone la molestia..."
 }: ComingSoonProps) {
-  const [count, setCount] = useState(0);
+  const [rotate, setRotate] = useState(0);
 
-  const features = [
-    {
-      icon: IconRocket,
-      title: 'Lightning Fast',
-      description: 'Optimized for speed and performance',
-    },
-    {
-      icon: IconBuildingStore,
-      title: 'Store Management',
-      description: 'Easy to use dashboard for your store',
-    },
-    {
-      icon: IconUsers,
-      title: 'Built Together',
-      description: 'Community driven development',
-    },
-  ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotate(prev => (prev + 1) % 360);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <Container size="lg" py="xl">
-      <Card withBorder radius="md" p="xl" bg="var(--mantine-color-body)">
-        <Group justify="center" mb="xl">
-          <Badge
-            size="lg"
-            radius="sm"
-            variant="gradient"
-            gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-          >
-            Coming Soon
-          </Badge>
-        </Group>
-
-        <Title order={2} ta="center" mt="sm">
+    <Container size="md" py="xl">
+      <Stack align="center" gap="xl">
+        <IconTrafficCone
+          size={180}
+          color="var(--mantine-color-orange-6)"
+          style={{
+            transform: `rotate(${rotate}deg)`,
+            transition: 'transform 0.1s ease',
+            cursor: 'pointer',
+          }}
+          onClick={() => setRotate(prev => prev + 45)}
+        />
+        <Title
+          order={1}
+          style={{
+            background: 'linear-gradient(45deg, var(--mantine-color-orange-4), var(--mantine-color-yellow-4))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           {title}
         </Title>
-
-        <Text c="dimmed" ta="center" mt="md">
+        <Text
+          size="xl"
+          c="dimmed"
+          ta="center"
+          style={{ maxWidth: '400px' }}
+        >
           {description}
         </Text>
-
-        <Group justify="center" mt="lg">
-          <Button
-            variant="light"
-            size="md"
-            onClick={() => setCount(c => c + 1)}
-          >
-            {count === 0 ? 'Get Notified' : `Thanks! #${count} in line`}
-          </Button>
-        </Group>
-
-        <Group mt={rem(50)} justify="center" gap={rem(50)}>
-          {features.map((feature) => (
-            <div key={feature.title} style={{ textAlign: 'center' }}>
-              <ThemeIcon
-                size={60}
-                radius="md"
-                variant="light"
-                color="blue"
-                mb="sm"
-              >
-                <feature.icon
-                  style={{ width: rem(30), height: rem(30) }}
-                  stroke={1.5}
-                />
-              </ThemeIcon>
-              <Text size="sm" fw={500}>
-                {feature.title}
-              </Text>
-              <Text size="xs" c="dimmed" mt={4}>
-                {feature.description}
-              </Text>
-            </div>
-          ))}
-        </Group>
-      </Card>
+      </Stack>
     </Container>
   );
 };

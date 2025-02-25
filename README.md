@@ -80,7 +80,6 @@ Configure your instance with the following variables, refer to `.env.example` fo
 
 ```bash
 NODE_ENV=development
-NEXT_PUBLIC_POSTHOG_ID=
 NEXT_PUBLIC_MARKKET_STORE_SLUG=next
 NEXT_PUBLIC_MARKKET_API=https://api.markket.place/
 NEXT_PUBLIC_MARKKETPLACE_URL=http://localhost:4020/
