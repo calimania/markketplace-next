@@ -62,7 +62,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
     console.log(newTotal);
     setTotal(newTotal);
     setSelectedPrice(price || ({} as Price));
-  }, [selectedPriceId, quantity, tip]);
+  }, [selectedPriceId, quantity, tip, prices, product.SKU]);
 
   const redirectToPaymentLink = async (event: any) => {
     event.preventDefault();
@@ -91,7 +91,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
     <>
       {/* Modal Trigger Button */}
       <button
-        className="w-full mb-5 flex items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
+        className="w-full mb-5 flex items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
         onClick={() => {
           setIsModalOpen(true);
         }}
@@ -153,7 +153,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
                   id="price"
                   name="price"
                   data-input="product.prices"
-                  className="block w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-accent-500 focus:outline-none focus:ring-accent-500 dark:border-gray-300 dark:bg-gray-400"
+                  className="block w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
                   onChange={handlePriceChange}
                 >
                   <option value=""></option>
@@ -175,7 +175,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
                   id="quantity"
                   value={quantity}
                   data-input="quantity"
-                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-accent-500 focus:outline-none focus:ring-accent-500 dark:border-gray-300 dark:bg-gray-400"
+                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
                   onChange={handleQuantityChange}
                 />
               </div>
@@ -189,7 +189,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
                   id="custom-price"
                   placeholder="0"
                   name="custom-price"
-                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-accent-500 focus:outline-none focus:ring-accent-500 dark:border-gray-300 dark:bg-gray-400"
+                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
                   onChange={handleTipChange}
                 />
               </div>
@@ -206,7 +206,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
                   disabled={total <= 0}
                   data-action-button="submit"
                   type="submit"
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={redirectToPaymentLink}
                 >
                   Continue to Payment
