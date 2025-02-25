@@ -29,6 +29,37 @@ export class StrapiClient {
     this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
+  private _token = () => {
+    const _string = localStorage.getItem('markket.auth');
+    const _json = _string ? JSON.parse(_string) : {};
+    const { jwt } = _json;
+    return jwt;
+  };
+
+  public me = async () => {
+    if (!localStorage) { return null; }
+
+    const token = this._token();
+
+    if (!token) {
+      return null;
+    }
+    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  };
+
   private buildFilterString(filters: any): string {
     return qs.stringify({ filters }, {
       arrayFormat: 'brackets',
@@ -64,6 +95,9 @@ export class StrapiClient {
     console.info({ url });
 
     const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
       next: { revalidate: 0 },
     });
 

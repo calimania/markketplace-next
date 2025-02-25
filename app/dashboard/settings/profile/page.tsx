@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import {
@@ -12,44 +10,84 @@ import {
   Button,
   Group,
   Avatar,
+  FileButton,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '@/app/providers/auth';
 import { notifications } from '@mantine/notifications';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import { strapiClient } from '@/markket/api';
+import { useState } from 'react';
 
 interface ProfileForm {
   username: string;
   email: string;
   bio: string;
+  displayName: string;
   avatar?: File;
 }
 
 export default function ProfileSettings() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    user?.avatar?.url || null
+  );
+
+
 
   const form = useForm<ProfileForm>({
     initialValues: {
       username: user?.username || '',
       email: user?.email || '',
-      bio: '',
+      bio: user?.bio || '',
+      displayName: user?.displayName || '',
     },
   });
 
-  const handleSubmit = async (values: ProfileForm) => {
-    console.log('Form values:', values);
-
-    try {
-      // Add your update profile API call here
-      notifications.show({
-        title: 'Profile updated',
-        message: 'Your profile has been successfully updated',
-        color: 'green',
-        icon: <IconCheck size="1.1rem" />,
-      });
-    } catch (error) {
-      console.error('Failed to update profile:', error);
+  const handleAvatarChange = (file: File | null) => {
+    if (file) {
+      // Create preview
+      const objectUrl = URL.createObjectURL(file);
+      setAvatarPreview(objectUrl);
+      form.setFieldValue('avatar', file);
     }
+  };
+
+  const handleSubmit = async (values: ProfileForm) => {
+    console.log('values:', values);
+    strapiClient.me();
+    // try {
+    //   const formData = new FormData();
+
+    //   // Append text fields
+    //   formData.append('username', values.username);
+    //   formData.append('email', values.email);
+    //   formData.append('bio', values.bio);
+    //   formData.append('displayName', values.displayName);
+
+    //   // Append avatar if changed
+    //   if (values.avatar) {
+    //     formData.append('files.avatar', values.avatar);
+    //   }
+
+    //   // await strapiClient.updateUserProfile(user!.id, formData);
+    //   // await refreshUser(); // Refresh user data in context
+
+    //   notifications.show({
+    //     title: 'Profile updated',
+    //     message: 'Your profile has been successfully updated',
+    //     color: 'green',
+    //     icon: <IconCheck size="1.1rem" />,
+    //   });
+    // } catch (error) {
+    //   console.error('Failed to update profile:', error);
+    //   notifications.show({
+    //     title: 'Update failed',
+    //     message: 'Failed to update profile. Please try again.',
+    //     color: 'red',
+    //     icon: <IconX size="1.1rem" />,
+    //   });
+    // }
   };
 
   return (
@@ -67,12 +105,25 @@ export default function ProfileSettings() {
             <Avatar
               size={100}
               radius="md"
-              src={null}
+              src={avatarPreview}
             />
-            <Button variant="light" size="sm">
-              Change Avatar
-            </Button>
+            <FileButton
+              onChange={handleAvatarChange}
+              accept="image/png,image/jpeg,image/gif"
+            >
+              {(props) => (
+                <Button variant="light" size="sm" {...props}>
+                  Change Avatar
+                </Button>
+              )}
+            </FileButton>
           </Group>
+
+          <TextInput
+            label="Display Name"
+            placeholder="How should we call you?"
+            {...form.getInputProps('displayName')}
+          />
 
           <TextInput
             label="Username"
@@ -90,6 +141,7 @@ export default function ProfileSettings() {
             label="Bio"
             placeholder="Tell us about yourself"
             minRows={3}
+            maxLength={500}
             {...form.getInputProps('bio')}
           />
 

@@ -3,7 +3,7 @@
 import { Group, ActionIcon, Container, Paper } from '@mantine/core';
 import { IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useAuth } from '../providers/auth';
+import { useAuth } from '@/app/providers/auth';
 
 interface GlobalBannerProps {
   extraActions?: React.ReactNode;
