@@ -15,7 +15,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth';
 
@@ -72,6 +72,7 @@ export default function RegisterPage() {
         message: 'Your account has been created, check your inbox for a confirmation email',
         color: 'green',
         icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
+        autoClose: 3000,
       });
 
       // Store the token or handle auth state here
@@ -82,6 +83,8 @@ export default function RegisterPage() {
         title: 'Error',
         message: error.message || 'Something went wrong',
         color: 'red',
+        icon: <IconX size="1.1rem" />,
+        autoClose: 3000,
       });
     } finally {
       setLoading(false);

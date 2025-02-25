@@ -13,7 +13,7 @@ export default function AuthLayout({
       minHeight: '100vh',
       background: 'linear-gradient(to bottom right, #f1f3f5, #e9ecef)'
     }}>
-      <Notifications position="top-right" zIndex={1000} />
+      <Notifications position="top-right" zIndex={1000} className='top-0 absolute right-0 z-[1000]'/>
       {children}
     </Container>
   );
