@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@next/swc-win32-x64-msvc": "^15.1.7",
     "@storybook/addon-essentials": "^8.5.3",
     "@storybook/nextjs": "^8.5.3",
     "@storybook/types": "^8.5.3",
