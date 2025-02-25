@@ -41,10 +41,8 @@ export const createPaymentLink = async (
 
   const url = response?.data?.link?.response?.url;
 
-  console.log(url)
   if (request.ok && url) {
     window.location.href = url;
   }
-
   return request;
 };

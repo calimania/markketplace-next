@@ -99,7 +99,7 @@ function SlideImage({
   );
 }
 
-function MainImage({ image, title }: { image: Slide; title: string }) {
+export const MainImage = ({ image, title }: { image: Slide; title: string }) => {
   return (
     <div className="relative overflow-hidden rounded-xl">
       {image?.url && (
