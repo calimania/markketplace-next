@@ -1,5 +1,5 @@
 import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
-import { IconBuilding, IconArrowRight } from '@tabler/icons-react';
+import { IconBuilding, IconCannabisFilled } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Store } from "@/markket/store.d";
 
@@ -44,9 +44,8 @@ export function StoreCard({ store }: StoreCardProps) {
         fullWidth
         mt="md"
         radius="md"
-        rightSection={<IconArrowRight size={14} />}
+        rightSection={<IconCannabisFilled size={14} />}
       >
-        {'View Store'}
       </Button>
     </Card>
   );

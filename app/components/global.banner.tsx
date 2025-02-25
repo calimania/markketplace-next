@@ -2,15 +2,22 @@
 
 import { Group, ActionIcon, Container, Paper, Text } from "@mantine/core";
 import { IconHome, IconUserCircle } from "@tabler/icons-react";
-import Link from "next/link";
-import { useAuth } from "../providers/auth";
+import Link from 'next/link';
+import { useAuth } from '@/app/providers/auth';
+import { useEffect, useState } from 'react';
 
 interface GlobalBannerProps {
   extraActions?: React.ReactNode;
 }
 
 export function GlobalBanner({ extraActions }: GlobalBannerProps) {
-  const { user } = useAuth();
+  const { maybe } = useAuth();
+  const [isMaybe, setIsMaybe] = useState(false);
+
+  useEffect(() => {
+    const ismaybe = maybe();
+    setIsMaybe(ismaybe);
+  }, [maybe]);
 
   return (
     <Paper
@@ -26,8 +33,12 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
       <Container size="lg">
         <Group justify="space-between">
           <Group>
-            <Link href={user?.id ? "/dashboard" : "/"}>
-              <ActionIcon variant="subtle" size="md" aria-label="Home">
+            <Link href={isMaybe ? '/dashboard' : '/'}>
+              <ActionIcon
+                variant="subtle"
+                size="md"
+                aria-label="Home"
+              >
                 <IconHome size={18} />
               </ActionIcon>
             </Link>
