@@ -1,24 +1,33 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/providers/auth';
-import { LoadingOverlay } from '@mantine/core';
+import { Skeleton } from '@mantine/core';
+
+const SKKELETRON = () => {
+  return (
+    <>
+      <Skeleton height={50} circle mb="xl" />
+      <Skeleton height={8} radius="xl" />
+      <Skeleton height={8} mt={6} radius="xl" />
+      <Skeleton height={8} mt={6} width="70%" radius="xl" />
+    </>
+  );
+};
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+
   const router = useRouter();
+  const [isMaybe, setIsMaybe] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/auth/login');
+    const _string = localStorage.getItem('markket.auth');
+    setIsMaybe(!!_string);
+
+    if (!_string) {
+      router.push('/auth/ ');
     }
-  }, [user, isLoading, router]);
+  }, [isMaybe, router]);
 
-  if (isLoading) {
-    return <LoadingOverlay visible={true} />;
-  }
-
-  return user ? <>{children}</> : <>
-  please login or regisgter</>;
+  return isMaybe ? <>{children}</> : <SKKELETRON />;
 };

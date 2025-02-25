@@ -60,6 +60,43 @@ export class StrapiClient {
     return response.json();
   };
 
+  private async authenticatedFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+    const token = this._token();
+
+    if (!token) throw new Error('XXX');
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.statusText}`);
+    }
+
+    return response.json();
+  };
+
+
+  async updateProfile(data: FormData) {
+    if (!localStorage) return null;
+
+    try {
+      const url = new URL('api/user/me', this.baseUrl);
+
+      return await this.authenticatedFetch(url.toString(), {
+        method: 'PUT',
+        body: data,
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  }
+
   private buildFilterString(filters: any): string {
     return qs.stringify({ filters }, {
       arrayFormat: 'brackets',

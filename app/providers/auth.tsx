@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   isLoading: boolean;
+  maybe: () => boolean;
   refreshUser: () => Promise<void>;
 }
 
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   login: () => {},
   logout: () => {},
   isLoading: true,
+  maybe: () => false,
   refreshUser: async () => { },
 });
 
@@ -78,6 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('markket.auth', JSON.stringify(userData));
   };
 
+  const maybe = () => {
+    const _string = localStorage.getItem('markket.auth');
+
+    return !!_string;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('markket.auth');
@@ -85,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, refreshUser }}>
+    <AuthContext.Provider value={{ user, login, maybe, logout, isLoading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
