@@ -1,28 +1,32 @@
-import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from "@mantine/core";
-import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode, IconBrandMysql } from "@tabler/icons-react";
-import { strapiClient } from '@/markket/api';
+"use client";
+
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Group,
+  Stack,
+  SimpleGrid,
+  Paper,
+} from "@mantine/core";
+import {
+  IconRocket,
+  IconBrandGithub,
+  IconBuildingStore,
+  IconCode,
+  IconShoppingBag,
+  IconFileTypeDoc,
+  IconRadio,
+  IconLogin2,
+  IconHeartCode,
+  IconBrandMysql,
+} from "@tabler/icons-react";
+import { strapiClient } from "@/markket/api";
 import { FeatureCard } from "./components/ui/feature.card";
-import { generateSEOMetadata } from '@/markket/metadata';
-import { Page } from "@/markket/page";
-import { Metadata } from "next";
-import PageContent from '@/app/components/ui/page.content';
-
-export async function generateMetadata(): Promise<Metadata> {
-
-  const response = await strapiClient.getPage('home');
-  const page = response?.data?.[0] as Page;
-
-  return generateSEOMetadata({
-    slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
-    entity: {
-      SEO: page?.SEO,
-      title: page?.Title || 'Homepage',
-      url: `/`,
-    },
-    type: 'website',
-    defaultTitle: `${page?.Title}` || 'Homepage',
-  });
-};
+import PageContent from "@/app/components/ui/page.content";
+import { useEffect, useState } from "react";
+import { useAuth } from "./providers/auth";
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
@@ -30,19 +34,18 @@ const features = [
   {
     icon: IconRocket,
     title: "Fast & Modern",
-    description: "Built with Next.js and Astro for optimal performance"
+    description: "Built with Next.js and Astro for optimal performance",
   },
   {
     icon: IconBuildingStore,
     title: "Ready to Sell",
-    description: "Supported by Stripe connect"
+    description: "Supported by Stripe connect",
   },
   {
     icon: IconCode,
     title: "Developer Friendly",
-    description: "Plugin ecosystem & custom integrations"
+    description: "Plugin ecosystem & custom integrations",
   },
-
 ];
 
 const create_links = (prefix?: string) => {
@@ -52,51 +55,58 @@ const create_links = (prefix?: string) => {
       icon: IconShoppingBag,
       label: "Browse Stores",
       variant: "gradient",
-      gradient: { from: 'indigo', to: 'cyan' }
+      gradient: { from: "indigo", to: "cyan" },
     },
     {
       href: `${prefix}/blog`,
       icon: IconFileTypeDoc,
       label: "Documentation",
-      variant: "light"
+      variant: "light",
     },
     {
       href: `${prefix}/about`,
       icon: IconBrandMysql,
       label: "About",
-      variant: "light"
+      variant: "light",
     },
     {
       href: "https://github.com/calimania/markketplace-next",
       icon: IconBrandGithub,
       label: "GitHub",
-      variant: "light"
+      variant: "light",
     },
     {
       href: `${prefix}/about/newsletter`,
       icon: IconRadio,
-      label: 'Newsletter',
-      variant: 'gradient',
-      gradient: { from: '#1b57ad', to: '#367de4' }
-    }
+      label: "Newsletter",
+      variant: "gradient",
+      gradient: { from: "#1b57ad", to: "#367de4" },
+    },
   ];
-}
-
-
+};
 
 /**
  * Default page displayed to the user, when a main store exists we display the store's logo and description
  *
  * @returns {JSX.Element}
  */
-export default async function Home() {
-  const a = await strapiClient.getStore();
-  const store = a.data?.[0];
+export default function Home() {
+  const { isLoggedIn } = useAuth();
+  const [store, setStore] = useState<any>(null);
+  const [page, setPage] = useState<any>(null);
+  console.log(isLoggedIn());
+  useEffect(() => {
+    async function fetchData() {
+      const storeResponse = await strapiClient.getStore();
+      setStore(storeResponse?.data?.[0]);
 
-  const pageResponse = await strapiClient.getPage('home');
-  const page = pageResponse?.data?.[0] as Page;
+      const pageResponse = await strapiClient.getPage("home");
+      setPage(pageResponse?.data?.[0]);
+    }
 
-  const links = create_links(store ? `/store/${store?.slug}` : '');
+    fetchData();
+  }, []);
+  const links = create_links(store ? `/store/${store?.slug}` : "");
 
   return (
     <Container size="lg" className="py-20">
@@ -105,16 +115,16 @@ export default async function Home() {
         <div className="text-center">
           <img
             src={store?.Logo?.url || defaultLogo}
-            alt={store?.SEO?.metaTitle || 'Markket Logo'}
+            alt={store?.SEO?.metaTitle || "Markket Logo"}
             width={200}
             height={200}
             className="mx-auto mb-8"
           />
           <Title className="text-4xl md:text-5xl mb-4">
-            Welcome to {store?.SEO?.metaTitle || 'Markket'}
+            Welcome to {store?.SEO?.metaTitle || "Markket"}
           </Title>
           <Text size="xl" c="dimmed" className="mx-auto mb-8">
-            {store?.SEO?.metaDescription || 'eCommerce'}
+            {store?.SEO?.metaDescription || "eCommerce"}
           </Text>
         </div>
 
@@ -128,7 +138,7 @@ export default async function Home() {
               leftSection={<link.icon size={20} />}
               variant={link.variant}
               gradient={link.gradient}
-              target={link.href.startsWith('http') ? '_blank' : undefined}
+              target={link.href.startsWith("http") ? "_blank" : undefined}
             >
               {link.label}
             </Button>
@@ -141,7 +151,6 @@ export default async function Home() {
             <FeatureCard key={feature.title} {...feature} />
           ))}
         </SimpleGrid>
-
 
         <Paper
           shadow="sm"
@@ -164,7 +173,7 @@ export default async function Home() {
                 size="lg"
                 leftSection={<IconHeartCode size={20} />}
                 variant="gradient"
-                gradient={{ from: 'blue', to: 'cyan' }}
+                gradient={{ from: "blue", to: "cyan" }}
               >
                 Create Account
               </Button>
@@ -180,11 +189,8 @@ export default async function Home() {
             </Group>
           </Stack>
         </Paper>
-
-        {page?.Content && (
-          <PageContent params={{ page }} />
-        )}
+        {page?.Content && <PageContent params={{ page }} />}
       </Stack>
     </Container>
   );
-};
+}

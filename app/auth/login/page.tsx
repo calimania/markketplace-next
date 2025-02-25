@@ -58,7 +58,7 @@ export default function LoginPage() {
         console.warn('Login failed:', data.error?.message);
         notifications.show({
           title: 'Login Failed',
-          message: 'Invalid email/username or password',
+          message: `${data.error?.message}`,
           color: 'red',
           icon: <IconX size="1.1rem" />,
           autoClose: 3000,
@@ -84,13 +84,13 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (error: any) {
       console.warn({ error });
-      notifications.show({
-        title: 'Error',
-        message: 'Something went wrong. Please try again.',
-        color: 'red',
-        icon: <IconX size="1.1rem" />,
-        autoClose: 3000,
-      });
+      // notifications.show({
+      //   title: 'Error',
+      //   message: 'Something went wrong. Please try again.',
+      //   color: 'red',
+      //   icon: <IconX size="1.1rem" />,
+      //   autoClose: 3000,
+      // });
     } finally {
       setLoading(false);
     }
