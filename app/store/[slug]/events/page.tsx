@@ -44,7 +44,6 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const eventsResponse = await strapiClient.getEvents(slug);
 
   const events = (eventsResponse?.data || []) as Event[];
-  console.log(events);
 
   return (
     <Container size="lg" py="xl">
