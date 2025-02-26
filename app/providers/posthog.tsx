@@ -8,6 +8,7 @@ const POSTHOG_API_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST as string;
 
 export function PostHogProvider({ children }: { children: JSX.Element }) {
+
   useEffect(() => {
     if (!POSTHOG_API_KEY) {
       return;
@@ -20,8 +21,10 @@ export function PostHogProvider({ children }: { children: JSX.Element }) {
   }, [])
 
   return (
-    <PHProvider client={posthog}>
-      {children}
-    </PHProvider>
+    POSTHOG_API_KEY ? (
+      <PHProvider client={posthog} >
+        {children}
+      </PHProvider>
+    ) : children
   )
 };
