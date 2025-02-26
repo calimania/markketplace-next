@@ -3,6 +3,7 @@
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { JSX, useEffect } from 'react'
+import PostHogPageView from "@/app/components/pageView"
 
 const POSTHOG_API_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST as string;
@@ -18,11 +19,12 @@ export function PostHogProvider({ children }: { children: JSX.Element }) {
       api_host: POSTHOG_HOST || 'https://i.posthog.com',
       capture_pageview: false
     })
-  }, [])
+  }, []);
 
   return (
     POSTHOG_API_KEY ? (
       <PHProvider client={posthog} >
+        <PostHogPageView />
         {children}
       </PHProvider>
     ) : children
