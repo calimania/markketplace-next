@@ -183,10 +183,33 @@ export class StrapiClient {
     });
   }
 
-  async getEvents() {
+  async getEvents(store_slug: string = this.storeSlug) {
     return this.fetch({
-      contentType: 'event',
-      filters: { store: { slug: { $eq: this.storeSlug } } },
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        }
+      },
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+    });
+  }
+
+  async getEventBySlug(event_slug: string, store_slug: string = this.storeSlug) {
+    return this.fetch({
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        },
+        slug: {
+          $eq: event_slug
+        }
+      },
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
