@@ -33,17 +33,19 @@ import {
   IconMessageChatbot,
   IconMoodEdit,
   IconHomeHeart,
+  IconHomeStar,
 } from '@tabler/icons-react';
 
 const mainLinks = [
-  { icon: IconShoppingCart, label: 'Products', notifications: 4 },
-  { icon: IconArticle, label: 'Articles', notifications: 2 },
-  { icon: IconFileTypeDoc, label: 'Pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders' },
-  { icon: IconTicket, label: 'Events' },
-  { icon: IconMessageChatbot, label: 'Inbox' },
-  { icon: IconSubscript, label: 'Subscribers' },
-  { icon: IconMoodEdit, label: 'Newsletters' },
+  { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
+  { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
+  { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
+  { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
+  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 2, href: '/dashboard/orders' },
+  { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
+  { icon: IconMessageChatbot, label: 'Inbox', notifications: 1, href: '/dashboard/inbox' },
+  { icon: IconSubscript, label: 'Subscribers', href: '/dashboard/subscribers' },
+  { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
@@ -56,10 +58,10 @@ function MainLink({ icon: Icon, label, notifications, href }: {
 }) {
   return (
     <UnstyledButton>
-      <Group align="right" style={{ width: '100%' }} py={3} >
+      <Group align="right" style={{ width: '100%' }} py={8}>
         <Icon style={{ width: rem(20), height: rem(20) }} />
         <Text size="sm">
-          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300">
+          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300 block py-1 cursor-pointer">
             {label}
           </a>
         </Text>
