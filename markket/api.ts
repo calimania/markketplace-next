@@ -218,7 +218,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon'
+      populate: 'Logo,SEO.socialImage,Favicon,URLS',
     });
   }
 
