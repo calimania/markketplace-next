@@ -7,6 +7,7 @@ import PageContent from "@/app/components/ui/page.content";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
+import { StoreTab } from "./tabs";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -37,9 +38,11 @@ export default async function StorePage({ params }: PageProps) {
   const pageQuery = await strapiClient.getPage("home", slug);
   const homePage = pageQuery?.data?.[0];
   const store = response?.data?.[0];
-  const urls = await strapiClient.getURLs(slug);
+  const StoreData = await strapiClient.getURLs(slug);
+  const URLsData = StoreData.data[0] as Store;
+  const urls = URLsData?.URLS.map((url, index) => ({ id: index, ...url }));
   console.log(urls);
-  
+
   if (!store) {
     notFound();
   }
@@ -90,6 +93,7 @@ export default async function StorePage({ params }: PageProps) {
           </Group>
         </div>
         <PageContent params={{ page: homePage }} />
+        <StoreTab urls={urls} />
       </Stack>
     </Container>
   );
