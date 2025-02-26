@@ -29,7 +29,7 @@ export default function Card({
 
   return (
     <li className="mb-8 w-full md:w-1/2 lg:w-1/3 px-4">
-      <article className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <article className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <a href={href} className="block group">
           {image?.url && (
             <div className="relative aspect-video overflow-hidden">
@@ -46,21 +46,21 @@ export default function Card({
           )}
           <div className="p-6">
             {secHeading ? (
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-500 transition-colors">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 transition-colors">
                 {title}
               </h3>
             ) : (
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-500 transition-colors">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 transition-colors">
                 {title}
               </h3>
             )}
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-3 py-1 text-xs font-medium bg-yellow-300 rounded-full">
+              <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700">
                 {new Date(pubDatetime).toLocaleDateString()}
               </span>
             </div>
-            <p className="text-gray-300 line-clamp-3 mb-4">{description}</p>
-            <div className="flex items-center text-yellow-400 font-medium">
+            <p className="text-gray-600 line-clamp-3 mb-4">{description}</p>
+            <div className="flex items-center text-gray-900 font-medium">
               Read more
               <svg
                 className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
