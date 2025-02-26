@@ -9,7 +9,12 @@ interface PageContentProps {
   };
 };
 
-
+/**
+ * Component designed to render Content Blocks from Strapi
+ * Stores, Pages & Articles store their .content attribute in this format
+ * @param props - PageContentProps
+ * @returns { JSX.Element }
+ */
 export default function PageContent({ params }: PageContentProps) {
   const content = params?.page?.Content || params?.post?.Content;
   const renderedImages = new Set<string>();

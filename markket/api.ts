@@ -232,23 +232,20 @@ export class StrapiClient {
     });
   }
 
-  async getEventBySlug(
-    event_slug: string,
-    store_slug: string = this.storeSlug
-  ) {
+  async getEventBySlug(event_slug: string, store_slug: string = this.storeSlug) {
     return this.fetch({
-      contentType: "events",
+      contentType: 'events',
       filters: {
         stores: {
           slug: {
             $eq: store_slug,
-          },
+          }
         },
         slug: {
-          $eq: event_slug,
-        },
+          $eq: event_slug
+        }
       },
-      populate: "SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores",
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
 
@@ -256,7 +253,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: "Logo,SEO.socialImage,Favicon,URLS",
+      populate: 'Logo,SEO.socialImage,Favicon,URLS',
     });
   }
 
