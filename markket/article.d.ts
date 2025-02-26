@@ -1,3 +1,5 @@
+import { type SEO } from './seo.d';
+
 export interface Article {
   id: number;
   slug: string;
@@ -12,17 +14,7 @@ export interface Article {
     Color?: string;
   }[];
   Content: any[];
-  SEO: {
-    metaDescription?: string;
-    metaKeywords?: string;
-    metaTitle?: string;
-    metaAuthor?: string;
-    metaUrl?: string;
-    metaDate?: string;
-    socialImage?: {
-      url: string;
-    };
-  };
+  SEO: SEO,
   cover: {
     url: string;
     formats?: {
