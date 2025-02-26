@@ -1,4 +1,5 @@
 import { type SEO } from './seo.d';
+import { type Tag } from './tag.d';
 
 export interface Article {
   id: number;
@@ -8,11 +9,7 @@ export interface Article {
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
-  Tags?: {
-    id: number;
-    Label: string;
-    Color?: string;
-  }[];
+  Tags?: Tag[];
   Content: any[];
   SEO: SEO,
   cover: {
