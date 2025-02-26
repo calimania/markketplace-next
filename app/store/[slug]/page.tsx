@@ -1,11 +1,10 @@
-
-import { strapiClient } from '@/markket/api';
-import { notFound } from 'next/navigation';
+import { strapiClient } from "@/markket/api";
+import { notFound } from "next/navigation";
 import { Container, Title, Text, Stack, Group, Button } from "@mantine/core";
-import { IconNews, IconShoppingBag, IconFiles } from '@tabler/icons-react';
-import PageContent from '@/app/components/ui/page.content';
+import { IconNews, IconShoppingBag, IconFiles } from "@tabler/icons-react";
+import PageContent from "@/app/components/ui/page.content";
 
-import { generateSEOMetadata } from '@/markket/metadata';
+import { generateSEOMetadata } from "@/markket/metadata";
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
 
@@ -13,7 +12,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
   const response = await strapiClient.getStore(slug);
@@ -26,19 +27,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       SEO: store?.SEO,
       id: store?.id?.toString(),
     },
-    type: 'article',
+    type: "article",
   });
-};
+}
 
-export default async function StorePage({
-  params
-}: PageProps) {
+export default async function StorePage({ params }: PageProps) {
   const { slug } = await params;
   const response = await strapiClient.getStore(slug);
-  const pageQuery = await strapiClient.getPage('home', slug);
+  const pageQuery = await strapiClient.getPage("home", slug);
   const homePage = pageQuery?.data?.[0];
   const store = response?.data?.[0];
-
+  const urls = await strapiClient.getURLs(slug);
+  console.log(urls);
+  
   if (!store) {
     notFound();
   }
@@ -92,4 +93,4 @@ export default async function StorePage({
       </Stack>
     </Container>
   );
-};
+}
