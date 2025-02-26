@@ -2,16 +2,14 @@ import ComingSoon from '@/app/components/ui/coming.soon';
 import { Container, Title } from '@mantine/core';
 
 type AnyDashboardPageProps = {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 };
 
-export default function AnyDashboardPage({
-  params: {
-    slug,
-  }
+export default async function AnyDashboardPage({
+  params,
 }: AnyDashboardPageProps) {
+  const { slug } = await params;
+
   return (
     <Container size="lg" py="xl">
       <Title>
