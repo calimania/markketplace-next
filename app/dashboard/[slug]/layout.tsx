@@ -4,17 +4,12 @@ import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store.d';
 import ProtectedRoute from '@/app/components/protectedRoute';
 import { useAuth } from '@/app/providers/auth';
-
 import {
   AppShell,
   Text,
-  Title,
   UnstyledButton,
   Group,
   rem,
-  Card,
-  SimpleGrid,
-  Alert,
   Burger,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -26,24 +21,29 @@ import {
   IconFileTypeDoc,
   IconBuildingStore,
   IconUserCircle,
-  IconAlertCircle,
   IconShoppingBagEdit,
   IconTicket,
   IconSubscript,
   IconMessageChatbot,
   IconMoodEdit,
   IconHomeHeart,
+  IconHomeStar,
 } from '@tabler/icons-react';
 
+type DashboardLayoutProps = {
+  children: React.ReactNode;
+};
+
 const mainLinks = [
-  { icon: IconShoppingCart, label: 'Products', notifications: 4 },
-  { icon: IconArticle, label: 'Articles', notifications: 2 },
-  { icon: IconFileTypeDoc, label: 'Pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders' },
-  { icon: IconTicket, label: 'Events' },
-  { icon: IconMessageChatbot, label: 'Inbox' },
-  { icon: IconSubscript, label: 'Subscribers' },
-  { icon: IconMoodEdit, label: 'Newsletters' },
+  { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
+  { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
+  { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
+  { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
+  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 2, href: '/dashboard/orders' },
+  { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
+  { icon: IconMessageChatbot, label: 'Inbox', notifications: 1, href: '/dashboard/inbox' },
+  { icon: IconSubscript, label: 'Subscribers', href: '/dashboard/subscribers' },
+  { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
@@ -56,10 +56,10 @@ function MainLink({ icon: Icon, label, notifications, href }: {
 }) {
   return (
     <UnstyledButton>
-      <Group align="right" style={{ width: '100%' }} py={3} >
+      <Group align="right" style={{ width: '100%' }} py={8}>
         <Icon style={{ width: rem(20), height: rem(20) }} />
         <Text size="sm">
-          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300">
+          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300 block py-1 cursor-pointer">
             {label}
           </a>
         </Text>
@@ -73,7 +73,7 @@ function MainLink({ icon: Icon, label, notifications, href }: {
   );
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [store, setStore] = useState({} as Store);
   const { user } = useAuth();
@@ -139,35 +139,8 @@ export default function DashboardPage() {
         ))}
       </AppShell.Navbar>
       <AppShell.Main>
-        <Alert icon={<IconAlertCircle size="1rem" />} title="Coming Soon!" color="yellow">
-          We&apos;e working hard to bring you amazing features. Stay tuned!
-        </Alert>
         <ProtectedRoute>
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} mt="md" spacing="md">
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <IconShoppingCart size={24} style={{ marginBottom: rem(10) }} />
-              <Title order={3}>Products</Title>
-              <Text c="dimmed" size="sm">
-                Manage your store products
-              </Text>
-            </Card>
-
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <IconArticle size={24} style={{ marginBottom: rem(10) }} />
-              <Title order={3}>Articles</Title>
-              <Text c="dimmed" size="sm">
-                Blog posts and news
-              </Text>
-            </Card>
-
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <IconSettings size={24} style={{ marginBottom: rem(10) }} />
-              <Title order={3}>Analytics</Title>
-              <Text c="dimmed" size="sm">
-                Store performance metrics
-              </Text>
-            </Card>
-          </SimpleGrid>
+          {children}
         </ProtectedRoute>
       </AppShell.Main>
     </AppShell>

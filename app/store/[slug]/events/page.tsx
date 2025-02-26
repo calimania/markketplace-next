@@ -1,53 +1,50 @@
-import { Container } from "@mantine/core";
+import { Event } from "@/markket/event.d";
+import { Store } from "@/markket/store.d";
 import { strapiClient } from "@/markket/api";
-import { notFound } from "next/navigation";
 import { generateSEOMetadata } from "@/markket/metadata";
-import { Page } from "@/markket/page";
-import { Metadata } from "next";
-import { Slide } from "@/markket/product";
-// import Card from "./Card";
+import { notFound } from "next/navigation";
+import { Container, Grid } from "@mantine/core";
+import Card from "./Card";
+import { MainImage } from "../products/[page_slug]/ProductDisplay";
 
-interface AboutPageProps {
+interface EventsPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: AboutPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: EventsPageProps) {
   const { slug } = await params;
-
-  const response = await strapiClient.getPage("events", slug);
-  const page = response?.data?.[0] as Page;
+  const response = await strapiClient.getStore(slug);
+  const store = response?.data?.[0] as Store;
 
   return generateSEOMetadata({
     slug,
     entity: {
-        SEO: page?.SEO,
-        title: page?.Title || 'Event',
-        id: page?.id?.toString(),
-        url: `/store/${slug}/events`,
+      SEO: store?.SEO,
+      title: `${store?.title} Events`,
+      id: store?.id?.toString(),
+      url: `/store/${slug}/events`,
     },
     type: "article",
-    defaultTitle: `${page?.Title}` || 'Event',
   });
 }
 
-export default async function EventPage({ params }: AboutPageProps) {
+export default async function StoreEventsPage({ params }: EventsPageProps) {
   const { slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
-  const store = storeResponse?.data?.[0];
+  const store = storeResponse?.data?.[0] as Store;
+
+  const response = await strapiClient.getPage("events", slug);
+  const eventPage = response?.data?.[0];
+  console.log(eventPage)
 
   if (!store) {
     notFound();
   }
 
-  
-  const eventPageResponse = await strapiClient.getPage("events", slug);
-  const eventPage = eventPageResponse?.data?.[0];
+  const eventsResponse = await strapiClient.getEvents(slug);
 
-  const events = await strapiClient.getEvents();
-  console.log(eventPage)
-  console.log(events)
+  const events = (eventsResponse?.data || []) as Event[];
+  console.log(events);
 
   return (
     <Container size="lg" py="xl">
@@ -58,45 +55,46 @@ export default async function EventPage({ params }: AboutPageProps) {
             image={eventPage.SEO?.socialImage}
           />
         )}
-        <h1 className="text-2xl tracking-wider sm:text-3xl">
+        <h1 className="mt-2 text-2xl tracking-wider sm:text-3xl">
           {eventPage.Title || store.title}
         </h1>
         <p>{eventPage.SEO?.metaDescription}</p>
       </section>
-
-      <ul className="-mx-4 flex flex-wrap">
-        {/* {events.map(({ data }) => (
-          <Card
-            key={data.id}
-            href={`/events/${data.slug || slugifyStr("2025" + data.title)}`}
-            tags={[]}
-            image={data.Thumbnail || data.SEO?.socialImage}
-            frontmatter={{
-              author: "x",
-              title: data.Name || data.SEO?.metaTitle || "---",
-              pubDatetime: new Date(data.startDate),
-              modDatetime: new Date(data.startDate),
-              description: data.SEO?.metaDescription || data.Description || "",
-            }}
-          />
-        ))} */}
-      </ul>
+      <Grid>
+        <ul className="mt-5 flex flex-wrap">
+          {events.map((event) => (
+            <Card
+              key={event.id}
+              href={`/store/${slug}/events/${event.slug}`}
+              tags={[]}
+              image={
+                event.Thumbnail
+                  ? {
+                      url: event.Thumbnail.url,
+                      alternativeText: event.Thumbnail.alternativeText || null,
+                      width: event.Thumbnail.width || 0,
+                      height: event.Thumbnail.height || 0,
+                    }
+                  : event.SEO?.socialImage && {
+                      url: event.SEO.socialImage.url,
+                      alternativeText:
+                        event.SEO.socialImage.alternativeText || null,
+                      width: event.SEO.socialImage.width || 0,
+                      height: event.SEO.socialImage.height || 0,
+                    }
+              }
+              frontmatter={{
+                author: "x",
+                title: event.Name || event.SEO?.metaTitle || "---",
+                pubDatetime: new Date(event.startDate),
+                modDatetime: new Date(event.startDate),
+                description:
+                  event.SEO?.metaDescription || event.Description || "",
+              }}
+            />
+          ))}
+        </ul>
+      </Grid>
     </Container>
-  );
-}
-
-function MainImage({ image, title }: { image: Slide; title: string }) {
-  return (
-    <div className="relative overflow-hidden rounded-xl">
-      {image?.url && (
-        <img
-          src={image?.formats?.thumbnail?.url || ""}
-          alt={image?.alternativeText || title}
-          className="object-cover transform transition-transform h-full w-full"
-          loading="eager"
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-    </div>
   );
 }
