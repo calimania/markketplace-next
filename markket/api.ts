@@ -171,10 +171,10 @@ export class StrapiClient {
     return response.json();
   }
 
-  async getURLs(store_slug: string) {
+  async getURLs(slug: string) {
     return this.fetch({
       contentType: "stores",
-      filters: { store_slug },
+      filters: { slug },
       populate: "URLS",
     });
   }

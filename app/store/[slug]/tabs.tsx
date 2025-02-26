@@ -11,5 +11,5 @@ export function StoreTab() {
         <Tabs.Tab value="third">Third tab</Tabs.Tab>
       </Tabs.List>
     </Tabs>
-  );
+  )
 }
