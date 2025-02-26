@@ -9,7 +9,7 @@ export function generateMetadata(): Metadata {
   };
 };
 
-export default function SettingsLayout({
+export default function DashboardRootLayout({
   children,
 }: {
   children: React.ReactNode;
