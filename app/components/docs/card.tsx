@@ -8,15 +8,8 @@ export interface BlogPostCardProps {
   prefix?: string;
 };
 
-function createSlug(title: string = ''): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-};
-
 export function BlogPostCard({ post, prefix }: BlogPostCardProps) {
-  const slug = `${post.id}-${createSlug(post.Title)}`;
+  const slug = post.slug;
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>

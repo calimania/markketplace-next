@@ -1,6 +1,7 @@
 import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store.d';
 import { Page } from './page.d';
+import qs from 'qs';
 
 export type { StrapiResponse, FetchOptions };
 
@@ -24,39 +25,91 @@ export class StrapiClient {
   private storeSlug: string;
 
   constructor() {
-    this.baseUrl = process.env.MARKKET_URL || 'https://api.markket.place/';
-    this.storeSlug = process.env.MARKKET_STORE_SLUG || 'next';
+    this.baseUrl = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
+    this.storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next';
   }
 
-  private buildFilterString(filters: any, prefix = ''): Array<[string, string]> {
-    const params: Array<[string, string]> = [];
+  private _token = () => {
+    const _string = localStorage.getItem('markket.auth');
+    const _json = _string ? JSON.parse(_string) : {};
+    const { jwt } = _json;
+    return jwt;
+  };
 
-    Object.entries(filters).forEach(([key, value]) => {
-      const fullKey = prefix ? `${prefix}[${key}]` : key;
+  public me = async () => {
+    if (!localStorage) { return null; }
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        if ('operator' in value && 'value' in value) {
-          params.push([`filters[${fullKey}][${value.operator}]`, (value.value as string | number | boolean).toString()]);
-        } else {
-          params.push(...this.buildFilterString(value, `filters[${fullKey}]`));
-        }
-      } else {
-        params.push([`filters[${fullKey}][$eq]`, (value as string | boolean | number).toString()]);
-      }
+    const token = this._token();
+
+    if (!token) {
+      return null;
+    }
+    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
     });
 
-    return params;
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  };
+
+  private async authenticatedFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+    const token = this._token();
+
+    if (!token) throw new Error('XXX');
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.statusText}`);
+    }
+
+    return response.json();
+  };
+
+
+  async updateProfile(data: FormData) {
+    if (!localStorage) return null;
+
+    try {
+      const url = new URL('api/user/me', this.baseUrl);
+
+      return await this.authenticatedFetch(url.toString(), {
+        method: 'PUT',
+        body: data,
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
   }
+
+  private buildFilterString(filters: any): string {
+    return qs.stringify({ filters }, {
+      arrayFormat: 'brackets',
+      encodeValuesOnly: true,
+    });
+  };
 
 
   private buildUrl(options: EnhancedFetchOptions): string {
     const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
 
-    if (filters) {
-      const filterParams = this.buildFilterString(filters);
-      filterParams.forEach(([key, value]) => params.append(key, value));
-    }
+    const filterString = this.buildFilterString(filters);
 
     if (populate) {
       const fields = Array.isArray(populate) ? populate : populate.split(',');
@@ -68,8 +121,7 @@ export class StrapiClient {
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
     if (sort) params.append('sort', sort);
 
-    const url = new URL('api/' + contentType, this.baseUrl);
-    url.search = params.toString();
+    const url = new URL(`api/${contentType}?${filterString}&${params.toString()}`, this.baseUrl);
 
     return url.toString();
   }
@@ -80,7 +132,10 @@ export class StrapiClient {
     console.info({ url });
 
     const response = await fetch(url, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -88,63 +143,82 @@ export class StrapiClient {
     }
 
     return response.json();
+  };
+
+
+  async getProduct(product_slug: string, store_slug: string) {
+    return this.fetch({
+      contentType: 'products',
+      filters:
+      {
+        stores: {
+          slug: {
+            $eq: store_slug || this.storeSlug,
+          }
+        },
+        slug: {
+          $eq: product_slug
+        }
+      },
+      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
+    });
   }
 
   async getProducts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, store_slug: string) {
-    const { sort, filter } = options;
+    const { sort } = options;
 
     return this.fetch({
       contentType: 'products',
       filters:
       {
-        active: true,
         stores: {
           slug: {
-            operator: '$eq',
-            value: `[${store_slug}]`
+            $eq: store_slug,
           }
         }
       },
-      ...(filter ? [{
-        Name: {
-          operator: '$contains',
-          value: filter
-        }
-      }] : []),
       sort,
       paginate,
       populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
     });
   }
 
-  async getPosts(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }, slug?: string) {
-    const { filter, sort } = options;
-
+  async getEvents(store_slug: string = this.storeSlug) {
     return this.fetch({
-      contentType: 'articles',
-      sort,
-      filters: filter && {
-        '$and][0][store][slug': slug || this.storeSlug,
-        '$or][0][title': filter,
-      } || {
-        '$and][0][store][slug': slug || this.storeSlug,
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        }
       },
-      populate: 'SEO.socialImage,Tags,cover',
-    });
-  }
-
-  async getEvents() {
-    return this.fetch({
-      contentType: 'event',
-      filters: { store: { slug: { $eq: this.storeSlug } } },
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
+
+  async getEventBySlug(event_slug: string, store_slug: string = this.storeSlug) {
+    return this.fetch({
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        },
+        slug: {
+          $eq: event_slug
+        }
+      },
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+    });
+  }
+
   async getStore(slug = this.storeSlug) {
-    return this.fetch<Store>({
+    return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon'
+      populate: 'Logo,SEO.socialImage,Favicon,URLS',
     });
   }
 
@@ -154,13 +228,19 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPages(storeSlug: string = this.storeSlug) {
+  async getPages(store_slug: string = this.storeSlug) {
 
     return this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        '$and][0][store][slug': storeSlug,
-        '$and][1][Active': true
+        Active: {
+          $eq: true
+        },
+        store: {
+          slug: {
+            $eq: store_slug
+          }
+        }
       },
       populate: 'SEO.socialImage'
     });
@@ -171,13 +251,19 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPage(slug: string, storeSlug: string = this.storeSlug) {
+  async getPage(slug: string, store_slug: string = this.storeSlug) {
 
     return await this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        '$and][0][store][slug': storeSlug,
-        '$and][1][slug': slug
+        store: {
+          slug: {
+            $eq: store_slug
+          }
+        },
+        slug: {
+          $eq: slug
+        },
       },
       paginate: { page: 1, pageSize: 10 },
       populate: 'SEO.socialImage,store'
@@ -189,31 +275,57 @@ export class StrapiClient {
    * including filters to search for by some attributes like name, slug, title or description using the same keyword
    */
   async getStores(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
-    const { filter, sort } = options;
+    const { sort } = options;
 
     return await this.fetch<Store>({
       contentType: 'stores',
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
-      filters: filter && {
-        '$or][0][title': filter,
-      } || {
+      filters: {
+        active: {
+          $eq: true
+        }
       },
       paginate,
       sort,
     });
   };
 
-  async getPost(id: string, slug?: string) {
+  async getPosts(paginate: { page: number; pageSize: number }, options: { filter?: string, sort: string }, store_slug?: string) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'articles',
+      sort,
+      filters: {
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
+      },
+      paginate,
+      populate: 'SEO.socialImage,Tags,cover,store',
+    });
+  }
+
+  async getPost(article_slug: string, store_slug?: string) {
+
     return await this.fetch({
       contentType: 'articles',
       filters: {
-        '$and][0][store][slug': slug || this.storeSlug,
-        '$and][1][id': id
+        slug: {
+          $eq: article_slug
+        },
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
       },
-      paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,Tags,cover',
+      populate: 'SEO.socialImage,Tags,cover,store',
+      sort: 'createdAt:desc',
     });
   }
-}
+};
 
 export const strapiClient = new StrapiClient();

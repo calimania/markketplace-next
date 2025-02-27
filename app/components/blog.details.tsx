@@ -1,20 +1,17 @@
 'use client';
 
-import { Container, Title, Text, Stack, Paper, Image } from "@mantine/core";
+import { Container, Title, Text, Stack, Image } from "@mantine/core";
 import { strapiClient } from '@/markket/api';
 import { useRouter } from 'next/navigation';
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
+import PageContent from "@/app/components/ui/page.content";
 import { Article } from "@/markket/article.d";
 import { useEffect, useState } from 'react';
 import { LoadingOverlay } from '@mantine/core';
-
+import { notFound } from 'next/navigation';
 
 interface BlogPostDetailsProps {
   params: {
-    id: string;
+    article_slug: string;
     slug: string;
   };
 }
@@ -26,7 +23,7 @@ interface BlogPostDetailsProps {
  * @returns
  */
 export default function BlogPostPage({
-  params: { id, slug }
+  params: { article_slug, slug }
 }: BlogPostDetailsProps) {
   const [post, setPost] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,25 +32,24 @@ export default function BlogPostPage({
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await strapiClient.getPost(id.split('-')[0], slug);
+        const response = await strapiClient.getPost(article_slug, slug);
         const post = response?.data?.[0];
 
         if (!post) {
-          router.push('/404');
-          return;
+          return notFound();
         }
 
         setPost(post as Article);
       } catch (error) {
         console.error('Failed to fetch post:', error);
-        router.push('/404');
+        // notFound();
       } finally {
         setLoading(false);
       }
     };
 
     fetchPost();
-  }, [id, slug, router]);
+  }, [article_slug, slug, router]);
 
   if (loading) {
     return <LoadingOverlay visible />;
@@ -92,9 +88,7 @@ export default function BlogPostPage({
           )}
         </div>
 
-        <Paper p="md" withBorder>
-          <BlocksRenderer content={post.Content as BlocksContent} />
-        </Paper>
+        <PageContent params={{ post }} />
       </Stack>
     </Container>
   );

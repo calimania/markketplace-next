@@ -15,7 +15,7 @@ interface AboutPageProps {
 export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const response = await strapiClient.getPage('about');
+  const response = await strapiClient.getPage('about', slug);
   const page = response?.data?.[0] as Page;
 
   return generateSEOMetadata({
@@ -52,8 +52,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
     <Container size="lg" py="xl">
       <div className="text-center mb-12">
         <Title className="mb-4">{aboutPage?.Title || `About ${store.SEO?.metaTitle}`}</Title>
-
-
+      </div>
+      <div className="mb-6">
         {aboutPage?.Content ?
           (<PageContent params={{ page: aboutPage }} />) :
           (

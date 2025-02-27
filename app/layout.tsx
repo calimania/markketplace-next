@@ -4,6 +4,7 @@ import { strapiClient } from '@/markket/api';
 import "./globals.css";
 import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth';
+import { PostHogProvider } from '@/app/providers/posthog';
 import { GlobalBanner } from '@/app/components/global.banner';
 
 async function generateMetadata(): Promise<Metadata> {
@@ -59,10 +60,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <MantineProvider>
-            <GlobalBanner />
-            {children}
-          </MantineProvider>
+          <PostHogProvider>
+            <MantineProvider>
+              <GlobalBanner />
+              {children}
+            </MantineProvider>
+          </PostHogProvider>
         </AuthProvider>
       </body>
     </html>

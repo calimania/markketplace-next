@@ -46,7 +46,9 @@ const getCollection = async (key: string) => {
 
   if (key === 'stores') {
     const response = await strapiClient.getStores({ page: 1, pageSize: 30 }, { filter: '', sort: 'title' });
-    collection = response?.data as Store[] || [];
+    collection = response?.data?.sort((a, b) =>
+      a.title.localeCompare(b.title)
+    ) as Store[] || [];
   }
 
   if (key === 'docs') {
@@ -54,7 +56,7 @@ const getCollection = async (key: string) => {
     collection = response?.data as Store[] || [];
   }
 
-  console.log({ collection: collection.length, key });
+  console.log({ key, collection: collection.length, });
 
   return {
     data: collection || [],
