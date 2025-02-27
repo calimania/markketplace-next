@@ -4,7 +4,7 @@ import { strapiClient } from "@/markket/api";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container } from "@mantine/core";
-import { EventMainImage } from "./EventMainImage";
+import { EventImageGallery } from "./EventImageGallery";
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -45,43 +45,12 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   console.log(event);
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="xl" py="xl">
       <main className="lg:px-8 product-page px-4 py-12 sm:px-6">
         <div className="mx-auto w-full">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start items-start gap-4">
             <div className="flex flex-col">
-              <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-l">
-                {event.SEO?.socialImage && (
-                  <EventMainImage
-                    title={event.Name}
-                    image={event.SEO?.socialImage}
-                  />
-                )}
-              </div>
-              <div className="flex flex-col">
-                {event.Slides?.length > 0 && (
-                  <div className="mt-8">
-                    <div className="grid grid-cols-6 gap-2">
-                      {event?.Slides?.map((slide: any) => (
-                        <div
-                          key={slide.id}
-                          className="product-slide aspect-w-3 aspect-h-4 overflow-hidden rounded-lg"
-                        >
-                          <img
-                            src={slide?.formats?.thumbnail?.url}
-                            alt={slide?.alternativeText || ""}
-                            data-astro-image={JSON.stringify(
-                              slide?.formats?.small
-                            )}
-                            className="h-full w-full cursor-pointer object-cover object-center transition-opacity hover:opacity-75"
-                            aria-label={slide?.caption || ""}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <EventImageGallery event={event} />
             </div>
             <div className="lg:mt-0 mt-10 px-4 sm:mt-16 sm:px-0">
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
