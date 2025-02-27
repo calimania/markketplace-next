@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import {
@@ -17,14 +15,43 @@ import {
   IconUserPlus,
   IconLogin,
   IconKey,
-  IconHomeHeart
+  IconHomeHeart,
+  IconLogout,
+  IconDashboard
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/auth';
 
 export default function AuthPage() {
   const router = useRouter();
+  const { maybe, logout } = useAuth();
+  const isLoggedIn = maybe();
 
-  const authOptions = [
+  const loggedInOptions = [
+    {
+      title: 'Dashboard',
+      description: 'Go to your dashboard',
+      icon: IconDashboard,
+      action: () => router.push('/dashboard/store'),
+      variant: 'filled',
+    },
+    {
+      title: 'Homepage',
+      description: 'Not all those who wander are lost',
+      icon: IconHomeHeart,
+      action: () => router.push('/'),
+      variant: 'subtle',
+    },
+    {
+      title: 'Sign Out',
+      description: 'See you soon!',
+      icon: IconLogout,
+      action: () => logout(),
+      variant: 'light',
+    },
+  ];
+
+  const loggedOutOptions = [
     {
       title: 'Sign In',
       description: 'Access your store and manage your products',
@@ -55,17 +82,19 @@ export default function AuthPage() {
     },
   ];
 
+  const options = isLoggedIn ? loggedInOptions : loggedOutOptions;
+
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
         Welcome to de.Markkët
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt="sm">
-        Choose an option to continue
+        {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
 
       <Stack mt={30}>
-        {authOptions.map((option, index) => (
+        {options.map((option, index) => (
           <Paper
             key={index}
             withBorder
@@ -105,4 +134,4 @@ export default function AuthPage() {
       </Stack>
     </Container>
   );
-}
+};
