@@ -24,10 +24,10 @@ export default function DashboardLayout({
 
   useEffect(() => {
     setStoreOptions(stores.map((store) => ({
-      value: store.id.toString(),
-      label: store.title,
-      image: store.Favicon?.url || store.Logo.formats.small.url,
-      slug: store.slug,
+      value: store?.id?.toString(),
+      label: store?.title,
+      image: store?.Favicon?.url || store?.Logo?.formats?.small?.url,
+      slug: store?.slug,
     })));
   }, [stores]);
 

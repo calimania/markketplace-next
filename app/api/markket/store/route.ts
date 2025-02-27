@@ -6,10 +6,12 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.p
 const ADMIN_TOKEN = process.env.MARKKET_API_KEY;
 
 interface CreateStorePayload {
-  title: string;
-  Description: string;
-  slug: string;
-}
+  store: {
+    title: string;
+    Description: string;
+    slug: string;
+  }
+};
 
 async function verifyToken(token: string) {
   const _url = new URL('api/users/me', STRAPI_URL);
@@ -239,11 +241,11 @@ export async function GET() {
  * @swagger
  * /api/markket/store:
  *   post:
- *     summary: Create a new store
+ *     summary: POST /api/markket/store - Create a new store
  *     description: |
- *       Creates a new store for the authenticated user.
- *       Requires a valid JWT token in the Authorization header.
- *       Uses admin token to create store in Strapi.
+ *       Creates a new store for the authenticated user
+ *       Requires a valid JWT token in the Authorization header
+ *       Uses admin token to create store in Strapi
  *     tags:
  *       - Stores
  *     security:
@@ -301,8 +303,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Verify user's JWT
-    const headersList = headers();
+    const headersList = await headers();
     const token = headersList.get('authorization')?.split('Bearer ')[1];
 
     if (!token) {
@@ -320,32 +321,41 @@ export async function POST(request: Request) {
       );
     }
 
+    const stores = await fetchUserStores(userData.id);
+
+    if (stores?.data?.length >= 2) {
+      return NextResponse.json(
+        { error: 'Maximum store limit reached', _stores: stores?.data?.length },
+        { status: 400 }
+      );
+    }
+
     // Validate request body
     const payload: CreateStorePayload = await request.json();
 
-    if (!payload.title || !payload.Description || !payload.slug) {
+    if (!payload?.store?.title || !payload?.store?.Description || !payload?.store?.slug) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    if (payload.slug.length < 5) {
+    if (payload?.store?.slug?.length < 5) {
       return NextResponse.json(
         { error: 'Slug must be at least 5 characters' },
         { status: 400 }
       );
     }
 
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload.slug)) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload?.store?.slug)) {
       return NextResponse.json(
         { error: 'Invalid slug format' },
         { status: 400 }
       );
     }
 
-    // Create store in Strapi
-    const response = await fetch(`${STRAPI_URL}/api/stores`, {
+    const url = new URL('api/stores', STRAPI_URL);
+    const response = await fetch(url.toString(), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${ADMIN_TOKEN}`,
@@ -353,7 +363,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         data: {
-          ...payload,
+          ...payload.store,
           users: [userData.id],
           active: true,
         }
