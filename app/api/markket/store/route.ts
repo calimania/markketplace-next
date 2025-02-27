@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import qs from 'qs';
+import { markketClient } from '@/markket/api';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
 const ADMIN_TOKEN = process.env.MARKKET_API_KEY;
 
 interface CreateStorePayload {
   store: {
+    id?: number | string;
     title: string;
     Description: string;
     slug: string;
+    SEO?: {
+      metaTitle?: string;
+      metaDescription?: string;
+      excludeFromSearch?: boolean;
+    }
   }
 };
 
@@ -36,6 +43,26 @@ async function verifyToken(token: string) {
     return null;
   }
 }
+
+async function validateUserAndToken() {
+  if (!STRAPI_URL || !ADMIN_TOKEN) {
+    throw new Error('API configuration missing');
+  }
+
+  const headersList = await headers();
+  const token = headersList.get('authorization')?.split('Bearer ')[1];
+
+  if (!token) {
+    throw new Error('No token provided');
+  }
+
+  const userData = await verifyToken(token);
+  if (!userData) {
+    throw new Error('Invalid token');
+  }
+
+  return userData;
+};
 
 async function fetchUserStores(userId: number) {
   const query = qs.stringify({
@@ -303,17 +330,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const headersList = await headers();
-    const token = headersList.get('authorization')?.split('Bearer ')[1];
+    const userData = await validateUserAndToken();
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'No token provided' },
-        { status: 401 }
-      );
-    }
-
-    const userData = await verifyToken(token);
     if (!userData) {
       return NextResponse.json(
         { error: 'Invalid token' },
@@ -323,14 +341,13 @@ export async function POST(request: Request) {
 
     const stores = await fetchUserStores(userData.id);
 
-    if (stores?.data?.length >= 2) {
+    if (stores?.data?.length >= 12) {
       return NextResponse.json(
         { error: 'Maximum store limit reached', _stores: stores?.data?.length },
         { status: 400 }
       );
     }
 
-    // Validate request body
     const payload: CreateStorePayload = await request.json();
 
     if (!payload?.store?.title || !payload?.store?.Description || !payload?.store?.slug) {
@@ -354,9 +371,146 @@ export async function POST(request: Request) {
       );
     }
 
-    const url = new URL('api/stores', STRAPI_URL);
-    const response = await fetch(url.toString(), {
-      method: 'POST',
+    const client = new markketClient();
+    const response = await client.post('api/stores', {
+      headers: {
+        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+      },
+      body: {
+        data: {
+          ...payload.store,
+          users: [userData.id],
+          active: true,
+        }
+      },
+    });
+
+    if (!response?.data?.id) {
+      return NextResponse.json({
+        error: 'Failed to create store',
+        details: {
+          ...(response?.error?.details || {}),
+          message: response?.error?.message || 'Unknown error',
+        },
+      }, { status: response?.status || 500 });
+    }
+
+    return NextResponse.json({
+      data: response?.data || {},
+    }, {
+      status: response.status || 201
+    });
+  } catch (error) {
+    console.error('Store creation error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+};
+
+/**
+ * @swagger
+ * /api/markket/store/{id}:
+ *   put:
+ *     summary: Update an existing store
+ *     description: |
+ *       Updates a store for the authenticated user
+ *       Requires a valid JWT token in the Authorization header
+ *       Uses admin token to update store in Strapi
+ *     tags:
+ *       - Stores
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Store ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               store:
+ *                 type: object
+ *                 properties:
+ *                   title:
+ *                     type: string
+ *                     example: "Updated Store Name"
+ *                   Description:
+ *                     type: string
+ *                     example: "Updated store description"
+ *                   slug:
+ *                     type: string
+ *                     minLength: 5
+ *                     pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+ *                     example: "updated-store-name"
+ *                   SEO:
+ *                     type: object
+ *                     properties:
+ *                       metaTitle:
+ *                         type: string
+ *                         example: "Store Meta Title"
+ *                       metaDescription:
+ *                         type: string
+ *                         example: "Store meta description for SEO"
+ *     responses:
+ *       200:
+ *         description: Store updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Store'
+ *       400:
+ *         description: Invalid request payload
+ *       401:
+ *         description: Authentication error
+ *       403:
+ *         description: Not authorized to update this store
+ *       404:
+ *         description: Store not found
+ *       500:
+ *         description: Internal server error
+ */
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const userData = await validateUserAndToken(request);
+    const stores = await fetchUserStores(userData.id);
+
+    const storeExists = stores.data.some((store: any) => store.id.toString() === params.id);
+
+    if (!storeExists) {
+      return NextResponse.json(
+        { error: 'Store not found or unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    const payload: CreateStorePayload = await request.json();
+
+    if (payload?.store?.slug && payload.store.slug.length < 5) {
+      return NextResponse.json(
+        { error: 'Slug must be at least 5 characters' },
+        { status: 400 }
+      );
+    }
+
+    if (payload.store.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload?.store?.slug)) {
+      return NextResponse.json(
+        { error: 'Invalid slug format' },
+        { status: 400 }
+      );
+    }
+
+    const url = new URL(`api/stores/${params.id}`, STRAPI_URL);
+    const client = new markketClient();
+    const response = await client.fetch(url.toString(), {
+      method: 'PUT',
       headers: {
         'Authorization': `Bearer ${ADMIN_TOKEN}`,
         'Content-Type': 'application/json',
@@ -364,22 +518,30 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         data: {
           ...payload.store,
+          // Maintain user association
           users: [userData.id],
-          active: true,
         }
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create store');
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update store');
     }
 
     const data = await response.json();
-
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data);
 
   } catch (error) {
-    console.error('Store creation error:', error);
+    console.error('Store update error:', error);
+    if (error instanceof Error) {
+      if (error.message === 'No token provided' || error.message === 'Invalid token') {
+        return NextResponse.json({ error: error.message }, { status: 401 });
+      }
+      if (error.message === 'API configuration missing') {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
