@@ -57,7 +57,7 @@ const settingsTabs = [
  * @returns {JSX.Element}
  */
 export default function SettingsPage() {
-  const { user, stores } = useAuth();
+  const { user, stores, fetchStores } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [showStoreForm, setShowStoreForm] = useState(false);
 
@@ -159,7 +159,10 @@ export default function SettingsPage() {
                 {showStoreForm && (
                   stores?.length >= 2 ?
                     (<></>) :
-                    (<StoreForm />)
+                    (<StoreForm onSubmit={() => {
+                      fetchStores();
+                      setShowStoreForm(false);
+                    }} />)
                 )}
 
                 {stores.length > 0 && (

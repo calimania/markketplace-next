@@ -14,14 +14,24 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconBuildingStore } from '@tabler/icons-react';
+import { markketClient } from '@/markket/api';
 
 interface StoreFormValues {
   title: string;
   Description: string;
   slug: string;
-}
+  SEO?: {
+    metaTitle: string;
+    metaDescription: string;
+  };
+};
 
-export default function StoreForm() {
+type StoreFormProps = {
+  onSubmit: (values: StoreFormValues) => void;
+};
+
+export default function StoreForm(props: StoreFormProps) {
+  const { onSubmit } = props;
   const [loading, setLoading] = useState(false);
 
   const form = useForm<StoreFormValues>({
@@ -29,6 +39,10 @@ export default function StoreForm() {
       title: '',
       Description: '',
       slug: '',
+      SEO: {
+        metaDescription: '',
+        metaTitle: '',
+      }
     },
     validate: {
       title: (value) => (value.length < 3 ? 'Title must be at least 3 characters' : null),
@@ -39,22 +53,26 @@ export default function StoreForm() {
         }
         return null;
       },
+      SEO: {
+        metaTitle: (value: string) => (value.length < 3 ? 'Meta title must be at least 3 characters' : null),
+        metaDescription: (value: string) => (value.length < 10 ? 'Meta description must be at least 10 characters' : null),
+      },
       Description: (value) => (value.length < 10 ? 'Description must be at least 10 characters' : null),
     },
   });
 
   const handleSubmit = async (values: StoreFormValues) => {
     setLoading(true);
+    const client = new markketClient();
+
     try {
-      const response = await fetch('/api/markket/store', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await client.post('/api/markket/store', {
+        body: {
+          store: values,
         },
-        body: JSON.stringify(values),
       });
 
-      if (!response.ok) {
+      if (!response?.data?.id) {
         throw new Error('Failed to create store');
       }
 
@@ -64,6 +82,7 @@ export default function StoreForm() {
         color: 'green',
       });
 
+      if (onSubmit) onSubmit(values);
       form.reset();
     } catch (error) {
       console.warn({ error });
@@ -112,6 +131,31 @@ export default function StoreForm() {
             minRows={3}
             {...form.getInputProps('Description')}
           />
+
+          <Stack mt="xl">
+            <Title order={5}>META Settings</Title>
+            <Text size="sm" c="dimmed">
+              This content is used by aggregators to better understand your store
+            </Text>
+
+            <TextInput
+              label="Meta Title"
+              placeholder="Your Store Name - Key Product or Service"
+              description="Title that appears in search engine results (50-60 characters recommended)"
+              required
+              {...form.getInputProps('SEO.metaTitle')}
+            />
+
+            <Textarea
+              label="Meta Description"
+              placeholder="Brief description of your store for search results..."
+              description="Short description that appears in search results (150-160 characters recommended)"
+              required
+              minRows={2}
+              maxLength={160}
+              {...form.getInputProps('SEO.metaDescription')}
+            />
+          </Stack>
 
           <Group justify="flex-end">
             <Button
