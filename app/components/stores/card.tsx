@@ -2,6 +2,7 @@ import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBuilding, IconCannabisFilled } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Store } from "@/markket/store.d";
+import "../docs/card.css";
 
 export interface StoreCardProps {
   store: Store;
@@ -16,7 +17,7 @@ export function StoreCard({ store }: StoreCardProps) {
       padding="lg"
       radius="md"
       withBorder
-      className="transform transition-all duration-300 hover:scale-105"
+      className="transform transition-all duration-300 hover:scale-105 justify-between"
     >
       <Image
         src={logoUrl}
