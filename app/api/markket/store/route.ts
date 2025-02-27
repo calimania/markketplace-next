@@ -63,11 +63,85 @@ async function fetchUserStores(userId: number) {
   }
 }
 
+/**
+ * @swagger
+ * /api/markket/store:
+ *   get:
+ *     summary: Retrieve stores for authenticated user
+ *     description: |
+ *       Fetches all stores associated with the authenticated user.
+ *       Requires a valid JWT token in the Authorization header.
+ *       Uses admin token to fetch from Strapi with user-specific filters.
+ *     tags:
+ *       - Stores
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of stores for the authenticated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       title:
+ *                         type: string
+ *                       slug:
+ *                         type: string
+ *                       Logo:
+ *                         type: object
+ *                       Favicon:
+ *                         type: object
+ *                       SEO:
+ *                         type: object
+ *                       URLS:
+ *                         type: array
+ *       400:
+ *         description: Missing API configuration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Bad request
+ *       401:
+ *         description: Authentication error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No token provided
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
 export async function GET() {
   if (!STRAPI_URL || !ADMIN_TOKEN) {
     return NextResponse.json(
-      { error: 'Bad request' },
-      { status: 400 }
+      {
+        error: 'Bad request', details:
+          { STRAPI_URL, ADMIN_TOKEN: (ADMIN_TOKEN as string).length }
+      },
+      { status: 400 },
     );
   };
 
