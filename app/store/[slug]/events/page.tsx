@@ -35,7 +35,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
   const response = await strapiClient.getPage("events", slug);
   const eventPage = response?.data?.[0];
-  console.log(eventPage)
+  console.log(eventPage);
 
   if (!store) {
     notFound();
@@ -48,7 +48,10 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
   return (
     <Container size="lg" py="xl">
-      <section id="about" className="mb-10 mx-auto prose-img:border-0 max-w-4xl">
+      <section
+        id="about"
+        className="mb-10 mx-auto prose-img:border-0 max-w-4xl"
+      >
         {eventPage.SEO?.socialImage && (
           <MainImage
             title={eventPage.Title}
@@ -67,22 +70,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               key={event.id}
               href={`/store/${slug}/events/${event.slug}`}
               tags={[]}
-              image={
-                event.Thumbnail
-                  ? {
-                      url: event.Thumbnail.url,
-                      alternativeText: event.Thumbnail.alternativeText || null,
-                      width: event.Thumbnail.width || 0,
-                      height: event.Thumbnail.height || 0,
-                    }
-                  : event.SEO?.socialImage && {
-                      url: event.SEO.socialImage.url,
-                      alternativeText:
-                        event.SEO.socialImage.alternativeText || null,
-                      width: event.SEO.socialImage.width || 0,
-                      height: event.SEO.socialImage.height || 0,
-                    }
-              }
+              image={event.SEO?.socialImage}
               frontmatter={{
                 author: "x",
                 title: event.Name || event.SEO?.metaTitle || "---",

@@ -23,7 +23,6 @@ export interface Event {
   Tag?: Tag[];
   stores?: Store[];
   Thumbnail?: {
-    [x: string]: null;
     url: string;
     formats?: {
       thumbnail?: { url: string };

@@ -8,7 +8,6 @@ export type SEO = {
   metaUrl?: string;
   metaDate?: string;
   socialImage?: {
-    [x: string]: null;
     url: string;
   };
 };
