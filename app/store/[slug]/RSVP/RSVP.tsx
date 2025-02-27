@@ -29,8 +29,10 @@ const RSVPModal: FC<Props> = ({ eventId }: Props) => {
 
     if (response?.ok) {
       console.log("RSVP submitted successfully");
+      setIsSubmitting(false);
     }
 
+    setIsSubmitting(false);
     close();
   };
 
@@ -91,7 +93,7 @@ const RSVPModal: FC<Props> = ({ eventId }: Props) => {
                         name: e.target.value,
                       }))
                     }
-                    className="py-3 px-4 mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    className="text-white py-3 px-4 mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                   />
                 </div>
 
@@ -109,7 +111,7 @@ const RSVPModal: FC<Props> = ({ eventId }: Props) => {
                         email: e.target.value,
                       }))
                     }
-                    className="py-3 px-4 mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    className="text-white py-3 px-4 mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                   />
                 </div>
 
