@@ -82,6 +82,23 @@ export class StrapiClient {
     return jwt;
   };
 
+  public create = async (endpoint: string, data: any) => {
+    const _url = new URL(`api/${endpoint}`, this.baseUrl);
+
+    try {
+      const response = await fetch(_url.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data }),
+      });
+
+      return response;
+    } catch (error) {
+      console.error("Record creation failed:", error);
+      return false;
+    }
+  };
+
   public me = async () => {
     if (!localStorage) { return null; }
 
@@ -90,7 +107,7 @@ export class StrapiClient {
     if (!token) {
       return null;
     }
-    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+    const url = new URL(`api/users/me`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {
