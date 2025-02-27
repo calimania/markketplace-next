@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { strapiClient } from '@/markket/api';
+import { strapiClient, markketClient } from '@/markket/api';
+import { Store } from '@/markket/store'
+import { resourceLimits } from 'worker_threads';
 
 interface User {
   id: number;
@@ -24,6 +26,8 @@ interface AuthContextType {
   isLoading: boolean;
   maybe: () => boolean;
   refreshUser: () => Promise<void>;
+  stores: Store[];
+  fetchStores: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -33,13 +37,34 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   maybe: () => false,
   refreshUser: async () => { },
+  stores: [],
+  fetchStores: async () => { },
 });
 
+/**
+ * Provider to manage authentication state, and stores associated with the user
+ *
+ * @param props
+ * @returns
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const [stores, setStores] = useState<Store[]>([]);
 
+  const fetchStores = async () => {
+    if (!maybe()) return;
+
+    try {
+      const client = new markketClient();
+      const response = await client.fetch('/api/markket/store', {});
+      const { data } = response;
+      setStores(data || []);
+    } catch (error) {
+      console.error('Failed to fetch stores:', error);
+    }
+  };
 
   const logout = useCallback(() => {
     setUser(null);
@@ -73,6 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, [verifyAndRefreshUser]);
 
+  useEffect(() => {
+    if (user?.id) {
+      fetchStores();
+    }
+
+  }, [user?.id]);
+
   const refreshUser = async () => {
     await verifyAndRefreshUser();
   };
@@ -92,9 +124,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!_string;
   };
 
+  const value = {
+    user,
+    login,
+    maybe,
+    logout,
+    isLoading,
+    refreshUser,
+    stores,
+    fetchStores,
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, maybe, logout, isLoading, refreshUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
