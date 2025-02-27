@@ -7,6 +7,7 @@ import {
   Paper,
   Text,
   Group,
+  Button,
   Avatar,
   Title,
   Stack,
@@ -20,6 +21,9 @@ import {
   IconBell,
   IconKey
 } from '@tabler/icons-react';
+
+import StoreForm from '@/app/components/ui/store.form';
+import Link from 'next/link';
 
 const settingsTabs = [
   {
@@ -48,9 +52,14 @@ const settingsTabs = [
   },
 ];
 
+/**
+ * Dashboard/settings page
+ * @returns {JSX.Element}
+ */
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, stores, fetchStores } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const [showStoreForm, setShowStoreForm] = useState(false);
 
   // Handle hash-based navigation
   useEffect(() => {
@@ -129,8 +138,50 @@ export default function SettingsPage() {
               <Stack>
                 <Title order={4}>Store Settings</Title>
                 <Text size="sm" c="dimmed" maw={600}>
-                  Configure your store preferences and settings.
                 </Text>
+                <Group justify="space-between" align="center">
+                  {stores?.length < 2 ? (
+                    <>
+                      <Text>You can create up to two stores</Text>
+                      <Button
+                        variant="light"
+                        onClick={() => setShowStoreForm(!showStoreForm)}
+                      >
+                        {showStoreForm ? 'Cancel' : 'Create New Store'}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Text><strong>{stores?.length} stores</strong></Text>
+                    </>
+                  )}
+                </Group>
+                {showStoreForm && (
+                  stores?.length >= 2 ?
+                    (<></>) :
+                    (<StoreForm onSubmit={() => {
+                      fetchStores();
+                      setShowStoreForm(false);
+                    }} />)
+                )}
+
+                {stores.length > 0 && (
+                  <Stack mt="xl">
+                    <Title order={5}>Your Stores</Title>
+                    {stores.map((store) => (
+                      <Paper key={store.id} withBorder p="md">
+                        <Group justify="space-between">
+                          <Text fw={500}>
+                            <Link href={`/store/${store.slug}`}>
+                              {store.title}
+                            </Link>
+                          </Text>
+                          <Badge>{store.slug}</Badge>
+                        </Group>
+                      </Paper>
+                    ))}
+                  </Stack>
+                )}
               </Stack>
             </Tabs.Panel>
 

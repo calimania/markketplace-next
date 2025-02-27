@@ -23,6 +23,8 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth';
 
+const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
+
 export default function AuthPage() {
   const router = useRouter();
   const { maybe, logout } = useAuth();
@@ -72,7 +74,6 @@ export default function AuthPage() {
       description: 'Sign in or create an account using GitHub',
       icon: IconBrandGithub,
       action: () => {
-        const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API;
         const url = new URL(`/api/connect/github`, STRAPI_URL);
         window.location.href = url.toString();
       },

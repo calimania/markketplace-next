@@ -1,6 +1,7 @@
 'use client';
 
 import { markketClient } from '@/markket/api';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   Container,
@@ -13,11 +14,12 @@ import {
   Grid,
   Card,
   Image,
+  Button,
   Badge,
   type ComboboxItem,
 } from '@mantine/core';
 import { Store } from '@/markket/store';
-import { IconBuildingStore, IconLink } from '@tabler/icons-react';
+import { IconBuildingStore, IconLink, IconEdit } from '@tabler/icons-react';
 
 type StoreOption = {
   value: string;
@@ -28,6 +30,7 @@ type StoreOption = {
 export default function StoreDashboardPage  ()   {
   const [ stores, setStores ] = useState<Store[]>([]);
   const [ store, setStore ] = useState<Store | null>(null);
+  const router = useRouter();
 
   const storeOptions: StoreOption[]= stores.map((s) => ({
     value: s.id.toString(),
@@ -66,12 +69,23 @@ export default function StoreDashboardPage  ()   {
 
   return (
     <Container size="lg" py="xl">
-      {stores.length > 0 && (
+
         <Paper shadow="sm" p="md" withBorder mb="xl">
           <Group justify="space-between">
+          <Group>
             <Text size="sm" fw={500} c="dimmed">
               Select Store
             </Text>
+          </Group>
+          <Group>
+            <Button
+              variant="light"
+              size="sm"
+              leftSection={<IconEdit size={16} />}
+              onClick={() => router.push('/dashboard/settings#store')}
+            >
+              {!stores?.length ? 'Create ' : 'Manage '} Stores
+            </Button>
             <Select
               value={store?.id.toString()}
               onChange={handleStoreChange}
@@ -92,8 +106,8 @@ export default function StoreDashboardPage  ()   {
               )}
             />
           </Group>
-        </Paper>
-      )}
+        </Group>
+      </Paper>
 
       {store && (
         <Stack gap="xl">
