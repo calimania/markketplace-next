@@ -7,49 +7,36 @@ interface StoreTabProps {
   urls?: { id: number; Label: string; URL: string }[];
 }
 
-export function StoreTab({ urls }: StoreTabProps) {
-  // Group links by Label
-  const groupedLinks = urls?.reduce((acc, link) => {
-    if (!acc[link.Label]) {
-      acc[link.Label] = [];
-    }
-    acc[link.Label].push(link);
-    return acc;
-  }, {} as Record<string, { id: number; URL: string }[]>);
-
-  const labels = groupedLinks ? Object.keys(groupedLinks) : [];
+export function StoreTab({ urls = [] }: StoreTabProps) {  // Default empty array
 
   return (
-    <Tabs defaultValue={labels[0] || "empty"}>
+    <Tabs defaultValue="links">
       <Tabs.List>
-        {labels.length > 0 ? (
-          labels.map((label) => <Tabs.Tab key={label} value={label}>{label}</Tabs.Tab>)
-        ) : (
-          <Tabs.Tab value="empty">No Links</Tabs.Tab>
-        )}
+        <Tabs.Tab value="links">Links</Tabs.Tab>
+        <Tabs.Tab value="contact">Contact Info</Tabs.Tab>
+        <Tabs.Tab value="addresses">Addresses</Tabs.Tab>
       </Tabs.List>
 
-      {labels.length > 0 ? (
-        labels.map((label) => (
-          <Tabs.Panel key={label} value={label}>
-            <Stack>
-              {groupedLinks && groupedLinks[label].map((link) => (
-                <NavLink
-                  key={link.id}
-                  label={link.URL}
-                  component="a"
-                  href={link.URL}
-                  target="_blank"
-                />
-              ))}
-            </Stack>
-          </Tabs.Panel>
-        ))
-      ) : (
-        <Tabs.Panel value="empty">
+      <Tabs.Panel value="links">
+        {urls.length > 0 ? (
+          <Stack>
+            {urls.map((link) => (
+              <NavLink
+                key={link.id}
+                label={link.Label}
+                component="a"
+                href={link.URL}
+                target="_blank"
+              />
+            ))}
+          </Stack>
+        ) : (
           <Text>No links available</Text>
-        </Tabs.Panel>
-      )}
+        )}
+      </Tabs.Panel>
+
+      <Tabs.Panel value="contact"><Text>Contact info coming soon</Text></Tabs.Panel>
+      <Tabs.Panel value="addresses"><Text>Addresses coming soon</Text></Tabs.Panel>
     </Tabs>
   );
 }
