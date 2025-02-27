@@ -1,4 +1,4 @@
-const MARKKET_API = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
+const MARKKET_API = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
 
 /**
  * Wrapper method to abstract the creation of records in Markket Strapi API
