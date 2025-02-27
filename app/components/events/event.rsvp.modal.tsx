@@ -1,7 +1,7 @@
 "use client";
 
 import { type FC, useState } from "react";
-import { createRecord } from "@/markket/strapi";
+import { strapiClient } from "@/markket/api";
 
 interface Props {
   eventId: string;
@@ -20,7 +20,9 @@ const RSVPModal: FC<Props> = ({ eventId }: Props) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const response = (await createRecord("rsvps", {
+    const client = strapiClient;
+
+    const response = (await client.create("rsvps", {
       name: formData.name,
       email: formData.email,
       event: eventId,

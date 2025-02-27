@@ -5,7 +5,7 @@ import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container, Title, Text, Paper, SimpleGrid, Group } from '@mantine/core';
 import Card from '@/app/components/events/event.card';
-import { MainImage } from "../products/[page_slug]/ProductDisplay";
+import { EventMainImage } from "@/app/components/events/event.main.image";
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
@@ -65,14 +65,9 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               overflow: 'hidden',
               borderRadius: 'var(--mantine-radius-md)',
             }}>
-              <MainImage
+              <EventMainImage
                 title={eventPage.Title}
                 image={eventPage.SEO.socialImage}
-                style={{
-                  objectFit: 'cover',
-                  width: '100%',
-                  height: '100%',
-                }}
               />
             </div>
           )}

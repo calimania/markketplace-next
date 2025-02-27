@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import qs from 'qs';
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API;
+const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
 const ADMIN_TOKEN = process.env.MARKKET_API_KEY;
 
 async function verifyToken(token: string) {
