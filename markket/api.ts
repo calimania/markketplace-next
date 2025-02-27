@@ -20,6 +20,52 @@ interface EnhancedFetchOptions extends Omit<FetchOptions, 'filters'> {
   };
 };
 
+type fetchOptions = {
+  method?: string;
+  headers?: any;
+  body?: any;
+};
+
+/**
+ * Utitilities to easily communitcate with our routes in /api/markket
+ */
+export class markketClient {
+  private baseUrl: string;
+  private token: string;
+
+  constructor() {
+    this.baseUrl = window.location.origin;
+    this.token = '';
+  };
+
+  public readToken = () => {
+    const _string = localStorage.getItem('markket.auth');
+    const _json = _string ? JSON.parse(_string) : {};
+    const { jwt } = _json;
+
+    this.token = jwt;
+    return jwt;
+  };
+
+  public fetch = async (url: string, options: fetchOptions) => {
+    const token = this.readToken();
+
+    const _url = new URL(url, this.baseUrl);
+
+    const response = await fetch(_url.toString(), {
+      ...options,
+      method: options?.method || 'GET',
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+
+    return await response.json();
+  };
+};
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;

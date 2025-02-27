@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-// import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api';
 
 interface User {
   id: number;
@@ -11,10 +11,11 @@ interface User {
   jwt: string;
   bio?: string;
   displayName?: string;
+  createdAt?: string;
   avatar?: {
     url: string;
   };
-}
+};
 
 interface AuthContextType {
   user: User | null;
@@ -39,25 +40,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const verifyAndRefreshUser = async () => {
-    // try {
-    //   const isValid = await strapiClient.verifyToken();
-    //   if (!isValid) {
-    //     logout();
-    //     return;
-    //   }
 
-    //   const userData = await strapiClient.getMe();
-    //   if (userData) {
-    //     const storedAuth = localStorage.getItem('markket.auth');
-    //     const { jwt } = JSON.parse(storedAuth || '{}');
-    //     setUser({ ...userData, jwt });
-    //   }
-    // } catch (error) {
-    //   console.error('Auth verification failed:', error);
-    //   logout();
-    // }
-  };
+  const logout = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('markket.auth');
+    router.push('/auth/');
+  }, [router]);
+
+  const verifyAndRefreshUser = useCallback(async () => {
+    try {
+      const userData = await strapiClient.me();
+      if (userData) {
+        const storedAuth = localStorage.getItem('markket.auth');
+        const { jwt } = JSON.parse(storedAuth || '{}');
+        setUser({ ...userData, jwt });
+      }
+    } catch (error) {
+      console.error('Auth verification failed:', error);
+      logout();
+    }
+  }, [logout]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -69,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
-  }, []);
+  }, [verifyAndRefreshUser]);
 
   const refreshUser = async () => {
     await verifyAndRefreshUser();
@@ -86,11 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!_string;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('markket.auth');
-    router.push('/auth/login');
-  };
 
   return (
     <AuthContext.Provider value={{ user, login, maybe, logout, isLoading, refreshUser }}>
