@@ -21,6 +21,7 @@ import {
   IconBell,
   IconKey
 } from '@tabler/icons-react';
+import { markketConfig } from '@/markket/config';
 
 import StoreForm from '@/app/components/ui/store.form';
 import Link from 'next/link';
@@ -140,7 +141,7 @@ export default function SettingsPage() {
                 <Text size="sm" c="dimmed" maw={600}>
                 </Text>
                 <Group justify="space-between" align="center">
-                  {stores?.length < 2 ? (
+                  {stores?.length < markketConfig?.max_stores_per_user ? (
                     <>
                       <Text>You can create up to two stores</Text>
                       <Button
@@ -157,7 +158,7 @@ export default function SettingsPage() {
                   )}
                 </Group>
                 {showStoreForm && (
-                  stores?.length >= 2 ?
+                  stores?.length >= markketConfig?.max_stores_per_user ?
                     (<></>) :
                     (<StoreForm onSubmit={() => {
                       fetchStores();
