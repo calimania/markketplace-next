@@ -90,7 +90,7 @@ export class StrapiClient {
     if (!token) {
       return null;
     }
-    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+    const url = new URL(`api/users/me`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {

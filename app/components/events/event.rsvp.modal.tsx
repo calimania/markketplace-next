@@ -17,7 +17,6 @@ const RSVPModal: FC<Props> = ({ eventId }: Props) => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("sumib");
     e.preventDefault();
     setIsSubmitting(true);
 

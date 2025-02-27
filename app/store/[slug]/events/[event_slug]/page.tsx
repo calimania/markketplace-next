@@ -4,8 +4,8 @@ import { strapiClient } from "@/markket/api";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container } from "@mantine/core";
-import { EventImageGallery } from "./EventImageGallery";
-import RSVPModal from "../../RSVP/RSVP";
+import { EventImageGallery } from "@/app/components/events/event.gallery.image";
+import RSVPModal from "@/app/components/events/event.rsvp.modal";
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -89,4 +89,4 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
       </main>
     </Container>
   );
-}
+};

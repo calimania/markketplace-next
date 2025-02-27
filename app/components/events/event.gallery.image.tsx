@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EventMainImage } from "./EventMainImage";
+import { EventMainImage } from "./event.main.image";
 import { Event } from "@/markket/event";
 
 interface EventImageGalleryProps {
@@ -42,4 +42,4 @@ export function EventImageGallery({ event }: EventImageGalleryProps) {
       </div>
     </div>
   );
-}
+};
