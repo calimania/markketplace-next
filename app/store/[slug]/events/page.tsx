@@ -35,7 +35,6 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
   const response = await strapiClient.getPage("events", slug);
   const eventPage = response?.data?.[0];
-  console.log(eventPage);
 
   if (!store) {
     notFound();
@@ -44,7 +43,6 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const eventsResponse = await strapiClient.getEvents(slug);
 
   const events = (eventsResponse?.data || []) as Event[];
-  console.log(events);
 
   return (
     <Container size="lg" py="xl">
@@ -52,16 +50,16 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
         id="about"
         className="mb-10 mx-auto prose-img:border-0 max-w-4xl"
       >
-        {eventPage.SEO?.socialImage && (
+        {eventPage?.SEO?.socialImage && (
           <MainImage
-            title={eventPage.Title}
-            image={eventPage.SEO?.socialImage}
+            title={eventPage?.Title}
+            image={eventPage?.SEO?.socialImage}
           />
         )}
         <h1 className="mt-2 text-2xl tracking-wider sm:text-3xl">
-          {eventPage.Title || store.title}
+          {eventPage?.Title || `${store?.title} Events`}
         </h1>
-        <p>{eventPage.SEO?.metaDescription}</p>
+        <p>{eventPage?.SEO?.metaDescription}</p>
       </section>
       <Grid>
         <ul className="mt-5 flex flex-wrap">
