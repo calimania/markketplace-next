@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useRouter } from 'next/navigation';
 import { strapiClient, markketClient } from '@/markket/api';
 import { Store } from '@/markket/store'
-import { resourceLimits } from 'worker_threads';
 
 interface User {
   id: number;
@@ -53,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [stores, setStores] = useState<Store[]>([]);
 
-  const fetchStores = async () => {
+  const fetchStores = useCallback(async () => {
     if (!maybe()) return;
 
     try {
@@ -64,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to fetch stores:', error);
     }
-  };
+  }, []);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -103,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       fetchStores();
     }
 
-  }, [user?.id]);
+  }, [user?.id, fetchStores]);
 
   const refreshUser = async () => {
     await verifyAndRefreshUser();

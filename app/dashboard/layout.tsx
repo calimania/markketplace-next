@@ -42,7 +42,6 @@ export default function DashboardLayout({
     }
   }, [selectedStore, stores]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getStores = async () => {
     const markket = new markketClient();
     try {

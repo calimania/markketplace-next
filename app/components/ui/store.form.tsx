@@ -66,6 +66,7 @@ export default function StoreForm() {
 
       form.reset();
     } catch (error) {
+      console.warn({ error });
       notifications.show({
         title: 'Error',
         message: 'Failed to create store',
@@ -86,7 +87,7 @@ export default function StoreForm() {
           </Group>
 
           <Text size="sm" c="dimmed">
-            Fill out the form below to create a new store. The slug will be used in your store's URL.
+            Fill out the form below to create a new store. The slug will be used in your store&apos;s URL.
           </Text>
 
           <TextInput
