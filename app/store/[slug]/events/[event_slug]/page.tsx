@@ -5,6 +5,7 @@ import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container } from "@mantine/core";
 import { EventImageGallery } from "./EventImageGallery";
+import RSVPModal from "../../RSVP/RSVP";
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -83,12 +84,7 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
               </a>
             </button>
           )}
-          {/* {!event?.SEO?.metaUrl && (
-            <RSVPModal
-              eventId={event?.id as string}
-              onClose={() => {}}
-            />
-          )} */}
+          {!event?.SEO?.metaUrl && <RSVPModal eventId={event?.id.toString()} />}
         </div>
       </main>
     </Container>
