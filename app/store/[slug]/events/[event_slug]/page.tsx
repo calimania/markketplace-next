@@ -4,6 +4,7 @@ import { strapiClient } from "@/markket/api";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container } from "@mantine/core";
+import { EventMainImage } from "./EventMainImage";
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -28,28 +29,6 @@ export async function generateMetadata({ params }: EventsPageProps) {
     type: "article",
   });
 }
-
-export const EventMainImage = ({
-  image,
-  title,
-}: {
-  image: any;
-  title: string;
-}) => {
-  return (
-    <div className="relative overflow-hidden rounded-xl">
-      {image?.url && (
-        <img
-          src={image?.formats?.thumbnail?.url || ""}
-          alt={image?.alternativeText || title}
-          className="object-cover transform transition-transform h-full w-full"
-          loading="eager"
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-    </div>
-  );
-};
 
 export default async function StoreEventPage({ params }: EventsPageProps) {
   const { slug, event_slug } = await params;
