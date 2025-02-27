@@ -16,6 +16,7 @@ export interface Store {
     url: string;
   },
   URLS: {
+    id: number;
     Label: string;
     URL: string;
   }[],
