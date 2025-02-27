@@ -1,6 +1,7 @@
-import { SEO } from './seo.d';
-import { Store } from './store.d';
-import { Tag } from './tag.d';
+import { Slide } from "./product";
+import { SEO } from "./seo.d";
+import { Store } from "./store.d";
+import { Tag } from "./tag.d";
 
 export interface Event {
   id: number;
@@ -8,6 +9,7 @@ export interface Event {
   Name: string;
   usd_price: number;
   startDate: string;
+  Slides: Slide[];
   endDate: string;
   Description: string;
   maxCapacity: number | null;
@@ -30,5 +32,5 @@ export interface Event {
       medium?: { url: string };
       large?: { url: string };
     };
-  }
-};
+  };
+}

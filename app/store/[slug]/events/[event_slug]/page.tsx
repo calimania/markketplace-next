@@ -79,12 +79,15 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                   />
                 )}
               </div>
-              {/* <div className="flex flex-col">
+              <div className="flex flex-col">
                 {event.Slides?.length > 0 && (
                   <div className="mt-8">
                     <div className="grid grid-cols-6 gap-2">
                       {event?.Slides?.map((slide: any) => (
-                        <div className="product-slide aspect-w-3 aspect-h-4 overflow-hidden rounded-lg">
+                        <div
+                          key={slide.id}
+                          className="product-slide aspect-w-3 aspect-h-4 overflow-hidden rounded-lg"
+                        >
                           <img
                             src={slide?.formats?.thumbnail?.url}
                             alt={slide?.alternativeText || ""}
@@ -92,14 +95,14 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                               slide?.formats?.small
                             )}
                             className="h-full w-full cursor-pointer object-cover object-center transition-opacity hover:opacity-75"
-                            aria-description={slide?.caption || ""}
+                            aria-label={slide?.caption || ""}
                           />
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </div> */}
+              </div>
             </div>
             <div className="lg:mt-0 mt-10 px-4 sm:mt-16 sm:px-0">
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
