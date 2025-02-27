@@ -477,12 +477,15 @@ export async function POST(request: Request) {
  *       500:
  *         description: Internal server error
  */
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+
+  const { id } = await params;
+
   try {
-    const userData = await validateUserAndToken(request);
+    const userData = await validateUserAndToken();
     const stores = await fetchUserStores(userData.id);
 
-    const storeExists = stores.data.some((store: any) => store.id.toString() === params.id);
+    const storeExists = stores.data.some((store: any) => store.id.toString() === id);
 
     if (!storeExists) {
       return NextResponse.json(
@@ -507,7 +510,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       );
     }
 
-    const url = new URL(`api/stores/${params.id}`, STRAPI_URL);
+    const url = new URL(`api/stores/${id}`, STRAPI_URL);
     const client = new markketClient();
     const response = await client.fetch(url.toString(), {
       method: 'PUT',
