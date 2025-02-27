@@ -83,6 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const maybe = () => {
+    if (!localStorage) {
+      return false;
+    }
+
     const _string = localStorage.getItem('markket.auth');
 
     return !!_string;
