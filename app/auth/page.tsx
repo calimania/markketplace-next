@@ -15,6 +15,7 @@ import {
   IconUserPlus,
   IconLogin,
   IconKey,
+  IconBrandGithub,
   IconHomeHeart,
   IconLogout,
   IconDashboard
@@ -60,13 +61,6 @@ export default function AuthPage() {
       variant: 'filled',
     },
     {
-      title: 'Homepage',
-      description: 'Not all those who wander are lost',
-      icon: IconHomeHeart,
-      action: () => router.push('/'),
-      variant: 'subtle',
-    },
-    {
       title: 'Create Account',
       description: 'Start selling with your own store',
       icon: IconUserPlus,
@@ -74,10 +68,28 @@ export default function AuthPage() {
       variant: 'light',
     },
     {
+      title: 'Continue with GitHub',
+      description: 'Sign in or create an account using GitHub',
+      icon: IconBrandGithub,
+      action: () => {
+        const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API;
+        const url = new URL(`/api/connect/github`, STRAPI_URL);
+        window.location.href = url.toString();
+      },
+      variant: 'filled',
+    },
+    {
       title: 'Reset Password',
       description: 'Forgot your password? No problem',
       icon: IconKey,
       action: () => router.push('/auth/forgot-password'),
+      variant: 'subtle',
+    },
+    {
+      title: 'Homepage',
+      description: 'Not all those who wander are lost',
+      icon: IconHomeHeart,
+      action: () => router.push('/'),
       variant: 'subtle',
     },
   ];
