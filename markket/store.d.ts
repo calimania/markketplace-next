@@ -11,6 +11,11 @@ export interface Store {
   STRIPE_CUSTOMER_ID: string;
   Logo: {
     url: string;
+    formats: {
+      small: {
+        url: string;
+      }
+    }
   };
   Favicon: {
     url: string;
