@@ -10,10 +10,10 @@ export interface Props {
     author?: string;
   };
   image?: {
-    url: string;
-    alternativeText: string | null;
-    width: number;
-    height: number;
+    url?: string;
+    alternativeText?: string | null;
+    width?: number;
+    height?: number;
   };
   secHeading?: boolean;
 }
