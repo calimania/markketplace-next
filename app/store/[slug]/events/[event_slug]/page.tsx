@@ -4,8 +4,13 @@ import { strapiClient } from "@/markket/api";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container } from "@mantine/core";
+<<<<<<< HEAD
 import { EventImageGallery } from "./EventImageGallery";
 import RSVPModal from "../../RSVP/RSVP";
+=======
+import { EventImageGallery } from "@/app/components/events/event.gallery.image";
+import RSVPModal from "@/app/components/events/event.rsvp.modal";
+>>>>>>> 2316a6155036eb6a18065ebe1222122b608d4756
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
