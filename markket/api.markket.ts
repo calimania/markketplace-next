@@ -29,6 +29,7 @@ export class markketClient {
 
   public readToken = () => {
     if (typeof window == 'undefined') { return null; }
+    if (!localStorage) { return null; }
 
     const _string = localStorage.getItem('markket.auth');
     const _json = _string ? JSON.parse(_string) : {};
