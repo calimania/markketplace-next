@@ -31,7 +31,10 @@ async function verifyToken(token: string) {
       },
     });
 
-    console.log('Token verification response:', response);
+    console.log('Token verification response:', {
+      status: response.status,
+      statusText: response.statusText
+    });
 
     if (!response.ok) {
       return null;
