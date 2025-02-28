@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import qs from 'qs';
 import { markketClient } from '@/markket/api';
+import { markketConfig } from '@/markket/config';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
 const ADMIN_TOKEN = process.env.MARKKET_API_KEY;
@@ -344,7 +345,7 @@ export async function POST(request: Request) {
 
     const stores = await fetchUserStores(userData.id);
 
-    if (stores?.data?.length >= 12) {
+    if (stores?.data?.length >= markketConfig.max_stores_per_user) {
       return NextResponse.json(
         { error: 'Maximum store limit reached', _stores: stores?.data?.length },
         { status: 400 }
