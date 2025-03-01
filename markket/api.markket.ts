@@ -40,17 +40,19 @@ export class markketClient {
   };
 
   public fetch = async (url: string, options: fetchOptions) => {
-    this.readToken();
+    if (!options?.headers?.Authorization) {
+      this.readToken();
+    }
 
     console.log({ url });
     const _url = new URL(url, this.baseUrl);
 
-    const response = await fetch(_url.toString(), {
+    const response = await fetch(_url, {
       ...options,
       method: options?.method || 'GET',
       body: ['POST', 'PUT'].includes(options?.method as string) ? JSON.stringify(options?.body || {}) : undefined,
       headers: {
-        'Authorization': `Bearer ${this.token}`,
+        'Authorization': options?.headers?.Authorization || `Bearer ${this.token}`,
         'Content-Type': 'application/json',
         ...(options.headers || {}),
       },

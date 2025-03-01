@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { version } from '@/package.json';
+import pkg from '@/package.json';
 
 const MARKKET_STORE_SLUG = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG;
 const MARKKET_API = process.env.NEXT_PUBLIC_MARKKET_API;
@@ -25,7 +25,8 @@ export async function GET() {
     {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      version,
+      version: pkg?.version,
+      name: pkg?.name,
       env: {
         store_slug: MARKKET_STORE_SLUG,
         api: MARKKET_API,
