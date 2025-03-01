@@ -87,7 +87,7 @@ function ResetPasswordForm() {
       });
 
       // Redirect to login after successful reset
-      setTimeout(() => router.push('/dashboard'), 1000);
+      setTimeout(() => router.push('/dashboard/store'), 1000);
     } catch (error: any) {
       notifications.show({
         title: 'Error',

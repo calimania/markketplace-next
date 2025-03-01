@@ -74,8 +74,7 @@ export default function RegisterPage() {
         icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
       });
 
-      // Store the token or handle auth state here
-      router.push('/dashboard');
+      router.push('/dashboard/store');
       // @eslint-ignore-next-line
     } catch (error: any) {
       notifications.show({

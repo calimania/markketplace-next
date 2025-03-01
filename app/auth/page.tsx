@@ -22,13 +22,33 @@ import {
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth';
+import { strapiClient } from '@/markket/api';
+import { useEffect, useState } from 'react';
+import { Store } from '@/markket/store';
+import { Remarkable } from 'remarkable';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
 
+/**
+ * /auth with useful account links
+ * @returns {JSX.Element}
+ */
 export default function AuthPage() {
   const router = useRouter();
   const { maybe, logout } = useAuth();
   const isLoggedIn = maybe();
+  const [store, setStore] = useState({} as Store);
+
+  useEffect(() => {
+    const fetchStore = async () => {
+      const { data: [_store] } = await strapiClient.getStore();
+      setStore(_store as Store);
+    };
+
+    fetchStore();
+  }, []);
+
+  const md = new Remarkable();
 
   const loggedInOptions = [
     {
@@ -100,7 +120,7 @@ export default function AuthPage() {
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
-        Welcome to de.Markkët
+        Welcome to {store?.title || 'Markket.ts'}!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt="sm">
         {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
@@ -145,6 +165,9 @@ export default function AuthPage() {
           </Paper>
         ))}
       </Stack>
+      <Paper withBorder p="lg" mt={30} radius="md">
+        <Stack gap="xs" dangerouslySetInnerHTML={{ __html: md.render(store?.Description || '') }} />
+      </Paper>
     </Container>
   );
 };

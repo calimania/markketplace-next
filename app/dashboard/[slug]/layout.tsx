@@ -11,6 +11,9 @@ import {
   Group,
   rem,
   Burger,
+  HoverCard,
+  Stack,
+  Divider
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { strapiClient } from '@/markket/api';
@@ -118,12 +121,41 @@ export default function DashboardPage({ children }: DashboardLayoutProps) {
             />
           </Group>
           <Group>
-            <IconUserCircle size={24} style={{ color: '#228be6' }} />
-            <Text fw={500}>{user?.username}</Text>
+            <HoverCard width={280} shadow="md" position="bottom-end">
+              <HoverCard.Target>
+                <UnstyledButton>
+                  <Group>
+                    <IconUserCircle size={24} style={{ color: '#228be6' }} />
+                    <Text fw={500}>{user?.username}</Text>
+                  </Group>
+                </UnstyledButton>
+              </HoverCard.Target>
+
+              <HoverCard.Dropdown>
+                <Stack>
+                  <Group>
+                    <IconUserCircle size={32} style={{ color: '#228be6' }} />
+                    <div>
+                      <Text fw={500}>{user?.username}</Text>
+                      <Text size="xs" c="dimmed">{user?.email}</Text>
+                    </div>
+                  </Group>
+                  <Divider />
+                  <UnstyledButton
+                    component="a"
+                    href="/auth"
+                    className="hover:bg-gray-100 p-2 rounded"
+                  >
+                    <Group>
+                      <Text size="sm">Auth Page</Text>
+                    </Group>
+                  </UnstyledButton>
+                </Stack>
+              </HoverCard.Dropdown>
+            </HoverCard>
           </Group>
         </Group>
       </AppShell.Header>
-
       <AppShell.Navbar
         p="md"
         style={{
