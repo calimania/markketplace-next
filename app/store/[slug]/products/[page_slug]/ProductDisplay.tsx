@@ -43,7 +43,7 @@ export default function ProductDisplay({ product }: { product: Product }) {
           </h1>
 
           {/* Product description is stored as markdown in the database */}
-          <div className="mt-6">
+          <div className="mt-6 blocks-content">
             <div
               className="space-y-6 text-base text-gray-700 dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: md.render(product?.Description || '') }} />
