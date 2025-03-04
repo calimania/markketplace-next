@@ -1,4 +1,4 @@
-import { Paper, Title } from '@mantine/core';
+import { Paper, Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
 import { Article } from '@/markket/article';
 
@@ -9,7 +9,12 @@ interface PageContentProps {
   };
 };
 
-
+/**
+ * Component designed to render Content Blocks from Strapi
+ * Stores, Pages & Articles store their .content attribute in this format
+ * @param props - PageContentProps
+ * @returns { JSX.Element }
+ */
 export default function PageContent({ params }: PageContentProps) {
   const content = params?.page?.Content || params?.post?.Content;
   const renderedImages = new Set<string>();
@@ -95,6 +100,30 @@ export default function PageContent({ params }: PageContentProps) {
     );
   };
 
+  const renderImageBlock = (imageData: any, key: number) => {
+    if (!imageData?.url) return null;
+
+    const caption = imageData.caption || imageData.alternativeText;
+
+    return (
+      <figure key={key} className="my-8">
+        <img
+          src={imageData.url}
+          alt={imageData.alternativeText || ''}
+          className="rounded-lg w-full max-w-3xl mx-auto"
+          width={imageData.width}
+          height={imageData.height}
+          loading="lazy"
+        />
+        {caption && (
+          <figcaption className="text-center text-sm text-gray-500 mt-2">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
+    );
+  };
+
   const renderBlock = (block: ContentBlock) => {
     if (block.type === 'paragraph') {
       const imageNodes = block.children.filter(
@@ -129,7 +158,7 @@ export default function PageContent({ params }: PageContentProps) {
     switch (block.type) {
       case 'heading':
         return (
-          <Title size={block.level || 1} className="heading">
+          <Title order={(block.level || 1) as 1 | 2 | 3 | 4 | 5 | 6} className="heading">
             {block.children.map((child, i) => renderInline(child, i))}
           </Title>
         );
@@ -142,6 +171,23 @@ export default function PageContent({ params }: PageContentProps) {
               .map((child, i) => renderListItem(child, i))}
           </ul>
         );
+
+      case 'quote':
+        return (
+          <blockquote className="border-l-4 border-markket-blue pl-4 my-4 italic text-gray-700">
+            {block.children.map((child, i) => renderInline(child, i))}
+          </blockquote>
+        );
+
+      case 'code':
+        return (
+          <Code block className="my-4 p-4" style={{ whiteSpace: 'pre' }}>
+            {block.children.map(child => child.text).join('\n')}
+          </Code>
+        );
+
+      case 'image':
+        return renderImageBlock(block.image, 0);
 
       default:
         return null;

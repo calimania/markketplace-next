@@ -3,6 +3,8 @@ import { Store } from './store.d';
 import { Page } from './page.d';
 import qs from 'qs';
 
+export { markketClient, MARKKET_URL } from './api.markket';
+
 export type { StrapiResponse, FetchOptions };
 
 interface FilterOperator {
@@ -20,6 +22,8 @@ interface EnhancedFetchOptions extends Omit<FetchOptions, 'filters'> {
   };
 };
 
+
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;
@@ -36,6 +40,23 @@ export class StrapiClient {
     return jwt;
   };
 
+  public create = async (endpoint: string, data: any) => {
+    const _url = new URL(`api/${endpoint}`, this.baseUrl);
+
+    try {
+      const response = await fetch(_url.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data }),
+      });
+
+      return response;
+    } catch (error) {
+      console.error("Record creation failed:", error);
+      return false;
+    }
+  };
+
   public me = async () => {
     if (!localStorage) { return null; }
 
@@ -44,7 +65,7 @@ export class StrapiClient {
     if (!token) {
       return null;
     }
-    const url = new URL(`api/users/me?populate=avatar`, this.baseUrl);
+    const url = new URL(`api/users/me`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {
@@ -183,10 +204,33 @@ export class StrapiClient {
     });
   }
 
-  async getEvents() {
+  async getEvents(store_slug: string = this.storeSlug) {
     return this.fetch({
-      contentType: 'event',
-      filters: { store: { slug: { $eq: this.storeSlug } } },
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        }
+      },
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+    });
+  }
+
+  async getEventBySlug(event_slug: string, store_slug: string = this.storeSlug) {
+    return this.fetch({
+      contentType: 'events',
+      filters: {
+        stores: {
+          slug: {
+            $eq: store_slug,
+          }
+        },
+        slug: {
+          $eq: event_slug
+        }
+      },
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
     });
   }
@@ -195,7 +239,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon'
+      populate: 'Logo,SEO.socialImage,Favicon,URLS',
     });
   }
 

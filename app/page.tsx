@@ -169,13 +169,13 @@ export default function Home() {
             <Group mt="md">
               <Button
                 component="a"
-                href="/auth/register"
+                href="/auth/"
                 size="lg"
                 leftSection={<IconHeartCode size={20} />}
                 variant="gradient"
                 gradient={{ from: "blue", to: "cyan" }}
               >
-                Create Account
+                Auth
               </Button>
               <Button
                 component="a"

@@ -75,8 +75,7 @@ export default function RegisterPage() {
         autoClose: 3000,
       });
 
-      // Store the token or handle auth state here
-      router.push('/dashboard');
+      router.push('/dashboard/store');
       // @eslint-ignore-next-line
     } catch (error: any) {
       notifications.show({

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Container, Title, Text, Stack, Group, Button } from "@mantine/core";
 import { IconNews, IconShoppingBag, IconFiles } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
+import { StoreTabs } from '@/app/components/ui/store.tabs';
 
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
@@ -89,6 +90,7 @@ export default async function StorePage({
           </Group>
         </div>
         <PageContent params={{ page: homePage }} />
+        <StoreTabs urls={store?.URLS} />
       </Stack>
     </Container>
   );

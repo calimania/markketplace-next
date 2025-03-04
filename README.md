@@ -50,6 +50,7 @@ Use the following ENV Vars to connect to our live API. This applications adds ex
 MARKKET_URL=https://api.markket.place/
 MARKKET_STORE_SLUG=next
 NODE_ENV=development
+MARKKET_API_KEY=
 ```
 
 First, run the development server:
@@ -59,6 +60,12 @@ We recommend using Turbo
 ```bash
 turbo dev
 ```
+
+### Admin || Markket instance
+
+When self-hosting the API, you can create an API KEY to perform administrative operations
+
+Is necesary to enable /dashboard and other functionalities for users in your instance
 
 ### Debugging
 

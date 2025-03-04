@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import {
@@ -17,19 +15,47 @@ import {
   IconUserPlus,
   IconLogin,
   IconKey,
-  IconHomeHeart
+  IconBrandGithub,
+  IconHomeHeart,
+  IconLogout,
+  IconDashboard
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/auth';
+import { strapiClient } from '@/markket/api';
+import { useEffect, useState } from 'react';
+import { Store } from '@/markket/store';
+import { Remarkable } from 'remarkable';
 
+const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
+
+/**
+ * /auth with useful account links
+ * @returns {JSX.Element}
+ */
 export default function AuthPage() {
   const router = useRouter();
+  const { maybe, logout } = useAuth();
+  const isLoggedIn = maybe();
+  const [store, setStore] = useState({} as Store);
 
-  const authOptions = [
+  useEffect(() => {
+    const fetchStore = async () => {
+      const { data: [_store] } = await strapiClient.getStore();
+      setStore(_store as Store);
+    };
+
+    fetchStore();
+  }, []);
+
+  const md = new Remarkable();
+
+  const loggedInOptions = [
     {
-      title: 'Sign In',
-      description: 'Access your store and manage your products',
-      icon: IconLogin,
-      action: () => router.push('/auth/login'),
+      title: 'Dashboard',
+      description: 'Go to your dashboard',
+      icon: IconDashboard,
+      action: () => router.push('/dashboard/store'),
       variant: 'filled',
     },
     {
@@ -40,11 +66,38 @@ export default function AuthPage() {
       variant: 'subtle',
     },
     {
+      title: 'Sign Out',
+      description: 'See you soon!',
+      icon: IconLogout,
+      action: () => logout(),
+      variant: 'light',
+    },
+  ];
+
+  const loggedOutOptions = [
+    {
+      title: 'Sign In',
+      description: 'Access your store and manage your products',
+      icon: IconLogin,
+      action: () => router.push('/auth/login'),
+      variant: 'filled',
+    },
+    {
       title: 'Create Account',
       description: 'Start selling with your own store',
       icon: IconUserPlus,
       action: () => router.push('/auth/register'),
       variant: 'light',
+    },
+    {
+      title: 'Continue with GitHub',
+      description: 'Sign in or create an account using GitHub',
+      icon: IconBrandGithub,
+      action: () => {
+        const url = new URL(`/api/connect/github`, STRAPI_URL);
+        window.location.href = url.toString();
+      },
+      variant: 'filled',
     },
     {
       title: 'Reset Password',
@@ -53,19 +106,28 @@ export default function AuthPage() {
       action: () => router.push('/auth/forgot-password'),
       variant: 'subtle',
     },
+    {
+      title: 'Homepage',
+      description: 'Not all those who wander are lost',
+      icon: IconHomeHeart,
+      action: () => router.push('/'),
+      variant: 'subtle',
+    },
   ];
+
+  const options = isLoggedIn ? loggedInOptions : loggedOutOptions;
 
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
-        Welcome to de.Markkët
+        Welcome to {store?.title || 'Markket.ts'}!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt="sm">
-        Choose an option to continue
+        {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
 
       <Stack mt={30}>
-        {authOptions.map((option, index) => (
+        {options.map((option, index) => (
           <Paper
             key={index}
             withBorder
@@ -103,6 +165,9 @@ export default function AuthPage() {
           </Paper>
         ))}
       </Stack>
+      <Paper withBorder p="lg" mt={30} radius="md">
+        <Stack gap="xs" dangerouslySetInnerHTML={{ __html: md.render(store?.Description || '') }} />
+      </Paper>
     </Container>
   );
-}
+};
