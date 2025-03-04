@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { Price, Product, Slide } from "@/markket/product";
 import CheckoutModal from "../../checkout/CheckoutModal";
+import { Remarkable } from 'remarkable';
 
 export default function ProductDisplay({ product }: { product: Product }) {
+
+  const md = new Remarkable();
   const [selectedImage, setSelectedImage] = useState<Slide>(
     product.Slides?.[0]
   );
@@ -39,11 +42,11 @@ export default function ProductDisplay({ product }: { product: Product }) {
             {product.Name}
           </h1>
 
-          {/* Product description */}
-          <div className="mt-6">
-            <div className="space-y-6 text-base text-gray-700 dark:prose-invert">
-              {product.Description}
-            </div>
+          {/* Product description is stored as markdown in the database */}
+          <div className="mt-6 blocks-content">
+            <div
+              className="space-y-6 text-base text-gray-700 dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: md.render(product?.Description || '') }} />
           </div>
         </div>
       </div>
@@ -104,7 +107,7 @@ export const MainImage = ({ image, title }: { image: Slide; title: string }) => 
     <div className="relative overflow-hidden rounded-xl">
       {image?.url && (
         <img
-          src={image?.formats?.thumbnail?.url || ""}
+          src={image?.formats?.large?.url || ""}
           alt={image?.alternativeText || title}
           className="object-cover transform transition-transform h-full w-full"
           loading="eager"

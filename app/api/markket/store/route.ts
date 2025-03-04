@@ -384,7 +384,7 @@ export async function POST(request: Request) {
         data: {
           ...payload.store,
           users: [userData.id],
-          active: true,
+          active: false,
         }
       },
     });
