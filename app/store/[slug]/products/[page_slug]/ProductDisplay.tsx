@@ -107,7 +107,7 @@ export const MainImage = ({ image, title }: { image: Slide; title: string }) => 
     <div className="relative overflow-hidden rounded-xl">
       {image?.url && (
         <img
-          src={image?.formats?.thumbnail?.url || ""}
+          src={image?.formats?.large?.url || ""}
           alt={image?.alternativeText || title}
           className="object-cover transform transition-transform h-full w-full"
           loading="eager"
