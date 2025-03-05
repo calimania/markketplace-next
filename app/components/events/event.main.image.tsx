@@ -1,3 +1,5 @@
+import { markketConfig } from "@/markket/config";
+
 export const EventMainImage = ({
   image,
   title,
@@ -9,7 +11,7 @@ export const EventMainImage = ({
     <div className="relative overflow-hidden rounded-xl">
       {image?.url && (
         <img
-          src={image?.formats?.thumbnail?.url || ""}
+          src={image?.formats?.medium?.url || image?.url || markketConfig.blank_image_url}
           alt={image?.alternativeText || title}
           className="object-cover transform transition-transform h-full w-full"
           loading="eager"

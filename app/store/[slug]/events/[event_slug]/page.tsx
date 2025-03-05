@@ -3,9 +3,10 @@ import { Store } from "@/markket/store.d";
 import { strapiClient } from "@/markket/api";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
-import { Container } from "@mantine/core";
+import { Container, Button } from "@mantine/core";
 import { EventImageGallery } from "@/app/components/events/event.gallery.image";
 import RSVPModal from "@/app/components/events/event.rsvp.modal";
+import Markdown from "@/app/components/ui/page.markdown";
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -58,22 +59,17 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                 {event.Name}
               </h1>
 
-              {/* Product description */}
               <div className="mt-6">
                 <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
-                  {event.Description.split("\n\n").map((line, index) => (
-                    <div key={index} className="">
-                      {line}
-                    </div>
-                  ))}
+                  <Markdown content={event?.Description || ""} />
                 </div>
               </div>
             </div>
           </div>
+          {!event?.SEO?.metaUrl && <RSVPModal eventId={event?.id.toString()} />}
           {event?.SEO?.metaUrl && (
-            <button
-              className="mt-8 text-accent-500 dark:text-accent-300 w-full"
-              disabled
+            <Button
+              className="mt-8 text-accent-500 dark:text-accent-300 w-full cursor-pointer"
             >
               <a
                 href={event?.SEO?.metaUrl}
@@ -82,9 +78,8 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
               >
                 RSVP in external site
               </a>
-            </button>
+            </Button>
           )}
-          {!event?.SEO?.metaUrl && <RSVPModal eventId={event?.id.toString()} />}
         </div>
       </main>
     </Container>

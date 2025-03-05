@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { strapiClient } from "@/markket/api";
-import { MainImage } from "../products/[page_slug]/ProductDisplay";
+import { MainImage } from "../../../components/ui/product.display";
 import { Store } from "@/markket/store";
 import { Page } from "@/markket/page";
 import SubscriptionModal from "./SubscriptionModal";

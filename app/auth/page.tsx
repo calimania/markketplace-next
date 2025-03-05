@@ -25,7 +25,7 @@ import { useAuth } from '@/app/providers/auth';
 import { strapiClient } from '@/markket/api';
 import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';
-import { Remarkable } from 'remarkable';
+import Markdown from '@/app/components/ui/page.markdown';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
 
@@ -47,8 +47,6 @@ export default function AuthPage() {
 
     fetchStore();
   }, []);
-
-  const md = new Remarkable();
 
   const loggedInOptions = [
     {
@@ -166,7 +164,7 @@ export default function AuthPage() {
         ))}
       </Stack>
       <Paper withBorder p="lg" mt={30} radius="md">
-        <Stack gap="xs" dangerouslySetInnerHTML={{ __html: md.render(store?.Description || '') }} />
+        <Markdown content={store?.Description} />
       </Paper>
     </Container>
   );
