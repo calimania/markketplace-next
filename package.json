@@ -28,6 +28,7 @@
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
     "axios": "^1.7.9",
+    "framer-motion": "^12.4.10",
     "next": "15.1.6",
     "next-swagger-doc": "^0.4.1",
     "posthog-js": "^1.223.3",
