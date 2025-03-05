@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { strapiClient, markketClient } from '@/markket/api';
-import { Store } from '@/markket/store'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { useRouter } from "next/navigation";
+import { strapiClient, markketClient } from "@/markket/api";
+import { Store } from "@/markket/store";
 
 interface User {
   id: number;
@@ -16,13 +22,14 @@ interface User {
   avatar?: {
     url: string;
   };
-};
+}
 
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
   isLoading: boolean;
+  isLoggedIn: () => boolean; // Function to check if user is logged in
   maybe: () => boolean;
   refreshUser: () => Promise<void>;
   stores: Store[];
@@ -34,10 +41,11 @@ const AuthContext = createContext<AuthContextType>({
   login: () => {},
   logout: () => {},
   isLoading: true,
+  isLoggedIn: () => false,
   maybe: () => false,
-  refreshUser: async () => { },
+  refreshUser: async () => {},
   stores: [],
-  fetchStores: async () => { },
+  fetchStores: async () => {},
 });
 
 /**
@@ -49,6 +57,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false); // Track client-side rendering
   const router = useRouter();
   const [stores, setStores] = useState<Store[]>([]);
 
@@ -57,37 +66,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const client = new markketClient();
-      const response = await client.fetch('/api/markket/store', {});
+      const response = await client.fetch("/api/markket/store", {});
       const { data } = response;
       setStores(data || []);
     } catch (error) {
-      console.error('Failed to fetch stores:', error);
+      console.error("Failed to fetch stores:", error);
     }
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('markket.auth');
-    router.push('/auth/');
+    localStorage.removeItem("markket.auth");
+    router.push("/auth/");
   }, [router]);
 
   const verifyAndRefreshUser = useCallback(async () => {
     try {
       const userData = await strapiClient.me();
       if (userData) {
-        const storedAuth = localStorage.getItem('markket.auth');
-        const { jwt } = JSON.parse(storedAuth || '{}');
+        const storedAuth = localStorage.getItem("markket.auth");
+        const { jwt } = JSON.parse(storedAuth || "{}");
         setUser({ ...userData, jwt });
       }
     } catch (error) {
-      console.error('Auth verification failed:', error);
+      console.error("Auth verification failed:", error);
       logout();
     }
   }, [logout]);
 
   useEffect(() => {
+    // Check if we are in the client-side
+    setIsClient(true);
+
+    // Check for stored auth data on mount (client-side only)
+    const storedAuth = localStorage.getItem("markket.auth");
+    if (storedAuth) {
+      const parsedUser: User = JSON.parse(storedAuth);
+      setUser(parsedUser);
+    }
+
+    setIsLoading(false);
     const initAuth = async () => {
-      const storedAuth = localStorage.getItem('markket.auth');
+      const storedAuth = localStorage.getItem("markket.auth");
       if (storedAuth) {
         await verifyAndRefreshUser();
       }
@@ -101,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user?.id) {
       fetchStores();
     }
-
   }, [user?.id, fetchStores]);
 
   const refreshUser = async () => {
@@ -110,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem('markket.auth', JSON.stringify(userData));
+    localStorage.setItem("markket.auth", JSON.stringify(userData));
   };
 
   const maybe = () => {
@@ -118,9 +137,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    const _string = localStorage.getItem('markket.auth');
+    const _string = localStorage.getItem("markket.auth");
 
     return !!_string;
+  };
+
+  // Function to check if user is logged in
+  const isLoggedIn = (): boolean => {
+    if (isClient) {
+      return !!localStorage.getItem("markket.auth");
+    }
+    return false;
   };
 
   const value = {
@@ -132,13 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser,
     stores,
     fetchStores,
+    isLoggedIn,
   };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

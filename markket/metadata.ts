@@ -1,7 +1,9 @@
-import { Metadata } from 'next';
-import { strapiClient } from '@/markket/api';
+import { Metadata } from "next";
+import { strapiClient } from "@/markket/api";
+import { Page } from "./page";
 
-const BASE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://de.markket.place';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_MARKKETPLACE_URL || "https://de.markket.place";
 
 interface SEOProps {
   url?: string;
@@ -16,7 +18,7 @@ interface SEOProps {
       height?: number;
     };
   };
-  title? : string;
+  title?: string;
   Title?: string;
   Logo?: {
     url: string;
@@ -24,40 +26,39 @@ interface SEOProps {
   Name?: string;
   Description?: string;
   id?: string;
-};
+}
 
 export async function generateSEOMetadata({
   slug,
   entity,
-  type = 'website',
+  type = "website",
   defaultTitle,
 }: {
   slug: string;
   entity?: SEOProps;
-  type?: 'website' | 'article';
+  type?: "website" | "article";
   defaultTitle?: string;
-  }): Promise<Metadata> {
-
+}): Promise<Metadata> {
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
 
-  const title = entity?.SEO?.metaTitle ||
+  const title =
+    entity?.SEO?.metaTitle ||
     entity?.title ||
     defaultTitle ||
     store?.SEO?.metaTitle ||
     store?.title ||
-    'markkëtplace';
+    "markkëtplace";
 
-  const description = entity?.SEO?.metaDescription ||
+  const description =
+    entity?.SEO?.metaDescription ||
     store?.SEO?.metaDescription ||
-    'Open ecommerce ecosystem';
+    "Open ecommerce ecosystem";
 
-  const image_url = entity?.SEO?.socialImage?.url ||
-    store?.SEO?.socialImage?.url;
+  const image_url =
+    entity?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url;
 
-
-  const keywords = entity?.SEO?.metaKeywords ||
-    store?.SEO?.metaKeywords;
+  const keywords = entity?.SEO?.metaKeywords || store?.SEO?.metaKeywords;
 
   const canonical = entity?.url || `/store/${slug}`;
 
@@ -73,19 +74,21 @@ export async function generateSEOMetadata({
       title,
       description,
       url: canonical,
-      siteName: store?.title || 'markkëtplace',
-      images: image_url ? [
-        {
-          url: image_url,
-          width: entity?.SEO?.socialImage?.width || 1200,
-          height: entity?.SEO?.socialImage?.height || 630,
-          alt: description,
-        }
-      ] : undefined,
+      siteName: store?.title || "markkëtplace",
+      images: image_url
+        ? [
+            {
+              url: image_url,
+              width: entity?.SEO?.socialImage?.width || 1200,
+              height: entity?.SEO?.socialImage?.height || 630,
+              alt: description,
+            },
+          ]
+        : undefined,
       type,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: image_url ? [image_url] : undefined,
@@ -93,6 +96,22 @@ export async function generateSEOMetadata({
     robots: {
       index: !entity?.SEO?.excludeFromSearch,
       follow: !entity?.SEO?.excludeFromSearch,
-    }
+    },
   };
-};
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const response = await strapiClient.getPage("home");
+  const page = response?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG as string,
+    entity: {
+      SEO: page?.SEO,
+      title: page?.Title || "Homepage",
+      url: `/`,
+    },
+    type: "website",
+    defaultTitle: `${page?.Title}` || "Homepage",
+  });
+}
