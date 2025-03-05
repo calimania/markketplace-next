@@ -54,6 +54,11 @@ $markket-cyan: #00ffff;
     @apply my-6 space-y-2;
 
     .list-item {
+
+      span, strong {
+        @apply text-blue-800;
+      }
+
       @apply relative pl-6 text-gray-700;
       list-style: none; // Prevent default bullets
 
