@@ -1,6 +1,7 @@
 import { Paper, Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
 import { Article } from '@/markket/article';
+import { CodeHighlight } from '@mantine/code-highlight';
 
 interface PageContentProps {
   params: {
@@ -60,6 +61,14 @@ export default function PageContent({ params }: PageContentProps) {
   };
 
   const renderInline = (node: ContentBlock['children'][0], key: number) => {
+    if (node.code) {
+      return (
+        <code key={key} className="inline-code">
+          {node.text}
+        </code>
+      );
+    }
+
     if (node.type === 'link') {
       const isImage = node.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
@@ -161,6 +170,21 @@ export default function PageContent({ params }: PageContentProps) {
           <Title order={(block.level || 1) as 1 | 2 | 3 | 4 | 5 | 6} className="heading">
             {block.children.map((child, i) => renderInline(child, i))}
           </Title>
+        );
+
+      case 'code':
+        return (
+          <div className="code-block-wrapper">
+            <CodeHighlight
+              code={block.children
+                .map(child => child.code ? child.text : '')
+                .filter(Boolean)
+                .join('\n')}
+              language="tsx"
+              copyLabel="Copy code"
+              withCopyButton
+            />
+          </div>
         );
 
       case 'list':

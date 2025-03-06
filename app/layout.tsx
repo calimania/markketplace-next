@@ -6,6 +6,7 @@ import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth';
 import { PostHogProvider } from '@/app/providers/posthog';
 import { GlobalBanner } from '@/app/components/global.banner';
+import '@mantine/code-highlight/styles.css';
 
 async function generateMetadata(): Promise<Metadata> {
   const { data: [store] } = await strapiClient.getStore();
