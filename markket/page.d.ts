@@ -32,6 +32,7 @@ export interface ContentBlock {
   },
   children: Array<{
     type: string;
+    code?: boolean;
     text?: string;
     bold?: boolean;
     url?: string;
