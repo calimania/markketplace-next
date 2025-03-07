@@ -126,7 +126,7 @@ export default function AuthPage() {
         {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
 
-      {!isConfirmed && (
+      {isLoggedIn && !isConfirmed && (
         <Text c="red" ta="center" mt="sm">
           Please confirm your email address to view the dashboard,
           logout and retry if this message persists.
