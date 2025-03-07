@@ -14,7 +14,7 @@ import {
   ActionIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications, showNotification } from '@mantine/notifications';
+import { showNotification } from '@mantine/notifications';
 import { IconUpload, IconTrash, IconUser } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth';
 import { markketClient } from '@/markket/api.markket';

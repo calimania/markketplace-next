@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markketConfig } from '@/markket/config';
+import { validateUserAndToken } from '../store/route';
 
 const MARKKET_API = markketConfig.api;
 const ADMIN_TOKEN = markketConfig.admin_token;
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   if (!MARKKET_API || !ADMIN_TOKEN) {
     return NextResponse.json(
@@ -16,7 +16,24 @@ export async function PUT(
   }
 
   try {
+    const userData = await validateUserAndToken();
+
+    if (!userData) {
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
+
+    if (userData?.id !== body?.id) {
+      return NextResponse.json(
+        { error: 'Invalid user contacting the FBI' },
+        { status: 401 }
+      );
+    }
+
     const url = new URL(`/api/users/${body.id}`, MARKKET_API);
     console.log('User update:', { url: url.toString(), body });
 
@@ -46,21 +63,3 @@ export async function PUT(
     );
   }
 };
-
-/**
- *   "username": "omard.skp+1@gmail.com",
-    "email": "omard.skp+1@gmail.com",
-    "provider": "local",
-    "confirmed": true,
-    "blocked": false,
-    "createdAt": "2025-03-01T00:59:39.904Z",
-    "updatedAt": "2025-03-07T22:47:22.696Z",
-    "uuid": null,
-    "documentId": "s8es3j6jbmlyle2vofgwd7jy",
-    "publishedAt": "2025-03-01T00:59:39.904Z",
-    "bio": null,
-    "displayName": null,
-    "role": {
-        "id": 3,
-        "name": "Store Owners",
- */
