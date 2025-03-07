@@ -74,7 +74,7 @@ export default function RegisterPage() {
         icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
       });
 
-      router.push('/dashboard/store');
+      router.push('/auth');
       // @eslint-ignore-next-line
     } catch (error: any) {
       notifications.show({
