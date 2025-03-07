@@ -10,6 +10,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
 import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
+import { markketConfig } from '@/markket/config';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -50,7 +51,7 @@ export default async function StorePage({
       <Stack gap="xl">
         <div className="text-center">
           <img
-            src={store.Logo?.url}
+            src={store.Logo?.url || store?.SEO?.socialImage?.url || markketConfig.blank_image_url}
             alt={store.SEO?.metaTitle}
             width={200}
             height={200}
