@@ -28,9 +28,14 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
+    const pathname = window?.location?.pathname;
     const x = confirmed();
     if (!x) {
       return router.replace('/auth');
+    }
+
+    if (pathname === '/dashboard') {
+      return router.replace('/dashboard/store');
     }
 
     setStoreOptions(stores.map((store) => ({
