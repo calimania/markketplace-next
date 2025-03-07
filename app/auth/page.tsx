@@ -23,7 +23,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth';
 import { strapiClient } from '@/markket/api';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';
 import Markdown from '@/app/components/ui/page.markdown';
 
@@ -35,7 +35,7 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.p
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout, confirmed } = useAuth();
+  const { maybe, logout, confirmed, refreshUser } = useAuth();
   const [store, setStore] = useState({} as Store);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -48,6 +48,11 @@ export default function AuthPage() {
 
     fetchStore();
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) refreshUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
 
   useEffect(() => {
     setIsLoggedIn(maybe());

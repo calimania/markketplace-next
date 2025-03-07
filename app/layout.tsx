@@ -7,6 +7,8 @@ import { AuthProvider } from '@/app/providers/auth';
 import { PostHogProvider } from '@/app/providers/posthog';
 import { GlobalBanner } from '@/app/components/global.banner';
 import '@mantine/code-highlight/styles.css';
+import '@mantine/notifications/styles.css';
+import { Notifications } from '@mantine/notifications';
 
 async function generateMetadata(): Promise<Metadata> {
   const { data: [store] } = await strapiClient.getStore();
@@ -63,6 +65,7 @@ export default function RootLayout({
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider>
+              <Notifications />
               <GlobalBanner />
               {children}
             </MantineProvider>
