@@ -7,6 +7,7 @@ import PageContent from '@/app/components/ui/page.content';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
+import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
@@ -51,8 +52,9 @@ export default async function AboutPage({ params }: AboutPageProps) {
   return (
     <Container size="lg" py="xl">
       <div className="text-center mb-12">
-        <Title className="mb-4">{aboutPage?.Title || `About ${store.SEO?.metaTitle}`}</Title>
+        <Title className="mb-4">{aboutPage?.Title || `About ${store.SEO?.metaTitle || store?.title}`}</Title>
       </div>
+      <StoreHeaderButtons store={store} />
       <div className="mb-6">
         {aboutPage?.Content ?
           (<PageContent params={{ page: aboutPage }} />) :

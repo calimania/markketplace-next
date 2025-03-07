@@ -2,6 +2,8 @@ import { Product } from "@/markket/product.d";
 import { strapiClient } from "@/markket/api";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
+import Markdown from "@/app/components/ui/page.markdown";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -27,11 +29,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-          Our Products
+          {store?.title} Products
         </h1>
-        <p className="mt-4 text-xl text-gray-500">
-          Discover our unique collection
-        </p>
+        <StoreHeaderButtons store={store} />
+        <Markdown content={store?.Description} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
