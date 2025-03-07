@@ -8,6 +8,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import PageContent from "@/app/components/ui/page.content";
+import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -27,12 +28,11 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     slug,
     entity: {
       SEO: page?.SEO,
-      title: page?.Title || 'Blog',
+      title: page?.Title || `${slug} Blog`,
       id: page?.id?.toString(),
       url: `/store/${slug}/blog`,
     },
-    type: 'article',
-    defaultTitle: `${page?.Title}` || 'Blog',
+    type: 'website',
   });
 };
 
@@ -54,16 +54,19 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   }, {
     sort: 'createdAt:desc'
   }, slug);
+
   const posts = postsResponse?.data || [] as Article[];
-  const description = page?.SEO?.metaDescription || `Blog posts for ${store?.SEO?.metaTitle}`;
+
+  const description = page?.SEO?.metaDescription || `Blog posts for ${store?.title || store?.SEO?.metaTitle}`;
 
   return (
     <Container size="lg" py="xl">
       <Stack gap="xl">
         <div className="text-center">
           <Title order={1}>
-            {page?.Title || `Blog`}
+            {page?.Title || `${store?.title} Blog`}
           </Title>
+          <StoreHeaderButtons store={store} />
           <Text c="dimmed" size="lg">
             {description}
           </Text>

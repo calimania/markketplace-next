@@ -5,6 +5,7 @@
   "packageManager": "npm@9.8.1",
   "scripts": {
     "dev": "next dev  --port 4020 --turbopack",
+    "dev:api": "next dev  --port 4200 --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
