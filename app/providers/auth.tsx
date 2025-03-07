@@ -27,6 +27,7 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   stores: Store[];
   fetchStores: () => Promise<void>;
+  confirmed: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -38,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   refreshUser: async () => { },
   stores: [],
   fetchStores: async () => { },
+  confirmed: () => false,
 });
 
 /**
@@ -123,11 +125,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!_string;
   };
 
+  const confirmed = () => {
+    if (!localStorage) {
+      return false;
+    }
+
+    const _string = localStorage.getItem('markket.auth');
+
+    const _json = JSON.parse(_string || '{}');
+
+    return !!_json?.jwt;
+  };
+
   const value = {
     user,
     login,
     maybe,
     logout,
+    confirmed,
     isLoading,
     refreshUser,
     stores,

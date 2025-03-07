@@ -4,6 +4,8 @@ import { markketClient } from '@/markket/api';
 import { useEffect, useState } from 'react';
 // import { Paper, Select, Group, Avatar, Text } from '@mantine/core';
 import { Store } from '@/markket/store';
+import { useAuth } from '@/app/providers/auth';
+import { useRouter } from 'next/navigation';
 
 type StoreOption = {
   value: string;
@@ -21,6 +23,16 @@ export default function DashboardLayout({
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [, setStoreOptions] = useState<StoreOption[]>([]);
   const [, setStore] = useState<Store | null>(null);
+
+  const { confirmed, } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    const x = confirmed();
+    if (!x) {
+      return router.replace('/auth');
+    }
+  }, [confirmed, router]);
 
   useEffect(() => {
     setStoreOptions(stores.map((store) => ({

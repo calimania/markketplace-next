@@ -49,7 +49,7 @@ export default function StoreDashboardPage  ()   {
     try {
       const stores = await markket.fetch('/api/markket/store ', {});
       setStores(stores?.data || []);
-      setStore(stores?.data[0] || null);
+      setStore(stores?.data?.[0] || null);
 
     } catch (error) {
       console.error('Failed to fetch stores:', error);

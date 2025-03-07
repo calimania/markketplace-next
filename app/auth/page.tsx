@@ -35,8 +35,9 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.p
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout } = useAuth();
+  const { maybe, logout, confirmed } = useAuth();
   const isLoggedIn = maybe();
+  const isConfirmed = confirmed();
   const [store, setStore] = useState({} as Store);
 
   useEffect(() => {
@@ -120,9 +121,17 @@ export default function AuthPage() {
       <Title ta="center" fw={900}>
         Welcome to {store?.title || 'Markket.ts'}!
       </Title>
+
       <Text c="dimmed" size="sm" ta="center" mt="sm">
         {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
+
+      {isLoggedIn && !isConfirmed && (
+        <Text c="red" ta="center" mt="sm">
+          Please confirm your email address to view the dashboard,
+          logout and retry if this message persists.
+        </Text>
+      )}
 
       <Stack mt={30}>
         {options.map((option, index) => (

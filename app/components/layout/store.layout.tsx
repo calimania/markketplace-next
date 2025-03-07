@@ -1,7 +1,7 @@
 'use client';
 
 import { AppShell, Burger, Container, Group, Button, Text, Stack } from "@mantine/core";
-import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft } from "@tabler/icons-react";
+import { IconHome, IconShoppingCart, IconLockBolt, IconArticle, IconInfoCircle, IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
@@ -17,7 +17,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             fullWidth
             className="justify-start h-12"
           >
-            Home
+            Store Home
           </Button>
         </Link>
         <Link href={`/store/${slug}/products`} onClick={onNavigate}>
@@ -71,6 +71,16 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             className="justify-start h-12"
           >
             Markkët Home
+          </Button>
+        </Link>
+        <Link href="/auth" onClick={onNavigate}>
+          <Button
+            variant="light"
+            leftSection={<IconLockBolt size={18} />}
+            fullWidth
+            className="justify-start h-12"
+          >
+            Auth Page
           </Button>
         </Link>
       </Stack>
