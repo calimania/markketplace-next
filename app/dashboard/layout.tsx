@@ -32,14 +32,16 @@ export default function DashboardLayout({
     if (!x) {
       return router.replace('/auth');
     }
+  }, [confirmed, router]);
 
+  useEffect(() => {
     setStoreOptions(stores.map((store) => ({
       value: store?.id?.toString(),
       label: store?.title,
       image: store?.Favicon?.url || store?.Logo?.formats?.small?.url,
       slug: store?.slug,
     })));
-  }, [stores, confirmed, router]);
+  }, [stores]);
 
   useEffect(() => {
 
