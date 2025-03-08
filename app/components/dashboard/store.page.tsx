@@ -20,6 +20,8 @@ import {
 } from '@mantine/core';
 import { Store } from '@/markket/store';
 import { IconBuildingStore, IconLink, IconEdit } from '@tabler/icons-react';
+import Link from 'next/link';
+import Markdown from "@/app/components/ui/page.markdown";
 
 type StoreOption = {
   value: string;
@@ -84,7 +86,8 @@ export default function StoreDashboardPage  ()   {
               leftSection={<IconEdit size={16} />}
               onClick={() => router.push('/dashboard/settings#store')}
             >
-              {!stores?.length ? 'Create ' : 'Manage '} Stores
+              {!stores?.length && 'Create Stores'}
+              {!!stores?.length && 'Manage Stores'}
             </Button>
             <Select
               value={store?.id.toString()}
@@ -122,19 +125,16 @@ export default function StoreDashboardPage  ()   {
                 <Text fz="lg" fw={500} mb={3}>
                   {store.title}
                 </Text>
-                <Text c="dimmed" size="sm" mb="md">
-                  {store.Description}
-                </Text>
+                <Markdown content={store.Description || ''} />
                 <Group gap="xs">
                   <Badge color="blue">Active</Badge>
                   {store.URLS?.length > 0 && (
-                    <Badge color="teal">Custom Domain</Badge>
+                    <Badge color="teal">URLs</Badge>
                   )}
                 </Group>
               </div>
             </Group>
           </Paper>
-
           <Grid>
             <Grid.Col span={{ base: 12, md: 4 }}>
               <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -146,7 +146,10 @@ export default function StoreDashboardPage  ()   {
                 </Card.Section>
                 <Stack gap="xs" mt="md">
                   <Text size="sm">
-                    <b>Slug:</b> {store.slug}
+                    <b>Slug: </b>
+                    <Link href={`/store/${store?.slug}`} title={store?.title} className='cursor-pointer'>
+                      {store.slug}
+                    </Link>
                   </Text>
                   <Text size="sm">
                     <b>Created:</b> {new Date(store.createdAt).toLocaleDateString()}

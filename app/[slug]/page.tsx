@@ -5,6 +5,7 @@ import { Article } from "@/markket/article.d";
 
 import StoreGrid from '@/app/components/stores/grid';
 import DocsGrid from '@/app/components/docs/grid';
+import { notFound } from 'next/navigation';
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 
@@ -74,6 +75,10 @@ export default async function AnyPage({ params }: AnyPageProps) {
   const { slug } = await params;
   const a = await strapiClient.getStore();
 
+  if (!['home', 'docs', 'stores'].includes(slug)) {
+    return notFound();
+  }
+
   const collection = await getCollection(slug);
   const store = a.data[0];
 
@@ -110,7 +115,6 @@ export default async function AnyPage({ params }: AnyPageProps) {
 
         {/* Links Section */}
         <Group justify="center" gap="md" wrap="wrap">
-
         </Group>
 
         {slug === 'stores' && (
