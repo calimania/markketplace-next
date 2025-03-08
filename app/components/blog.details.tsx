@@ -1,7 +1,7 @@
 'use client';
 
 import { Container, Title, Text, Stack, Image } from "@mantine/core";
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { useRouter } from 'next/navigation';
 import PageContent from "@/app/components/ui/page.content";
 import { Article } from "@/markket/article.d";

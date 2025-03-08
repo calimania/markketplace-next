@@ -1,4 +1,4 @@
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 import { Product } from "@/markket/product";
 import ProductDisplay from '@/app/components/ui/product.display';
 import { Page } from "@/markket/page";

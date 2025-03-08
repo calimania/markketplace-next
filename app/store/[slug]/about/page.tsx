@@ -1,5 +1,5 @@
 import { Container, Title, Text, LoadingOverlay } from '@mantine/core';
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageList } from '@/app/components/ui/pages.list';

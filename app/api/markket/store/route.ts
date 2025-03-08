@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import qs from 'qs';
-import { markketClient } from '@/markket/api';
+import { markketClient, strapiClient } from '@/markket/api';
 import { markketConfig } from '@/markket/config';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place/';
@@ -375,19 +375,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const client = new markketClient();
-    const response = await client.post('api/stores', {
+    const response = await strapiClient.create('stores', {
       headers: {
         'Authorization': `Bearer ${ADMIN_TOKEN}`,
       },
-      body: {
-        data: {
-          ...payload.store,
-          users: [userData.id],
-          active: false,
-        }
-      },
+      data: {
+        ...payload.store,
+        users: [userData.id],
+        active: false,
+      }
     });
+
+    console.log({ response })
 
     if (!response?.data?.id) {
       return NextResponse.json({

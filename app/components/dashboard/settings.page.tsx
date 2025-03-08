@@ -7,7 +7,6 @@ import {
   Paper,
   Text,
   Group,
-  Button,
   Avatar,
   Title,
   Stack,
@@ -21,12 +20,9 @@ import {
   IconBell,
   IconKey
 } from '@tabler/icons-react';
-import { markketConfig } from '@/markket/config';
 
-import StoreForm from '@/app/components/ui/store.form';
 import ProfileForm from '@/app/components/ui/profile.form';
-
-import Link from 'next/link';
+import StoreList from '@/app/components/ui/store.list';
 
 const settingsTabs = [
   {
@@ -62,7 +58,6 @@ const settingsTabs = [
 export default function SettingsPage() {
   const { user, stores, fetchStores } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
-  const [showStoreForm, setShowStoreForm] = useState(false);
 
   // Handle hash-based navigation
   useEffect(() => {
@@ -138,51 +133,9 @@ export default function SettingsPage() {
             <Tabs.Panel value="store">
               <Stack>
                 <Title order={4}>Store Settings</Title>
-                <Text size="sm" c="dimmed" maw={600}>
-                </Text>
-                <Group justify="space-between" align="center">
-                  {stores?.length < markketConfig?.max_stores_per_user ? (
-                    <>
-                      <Text>You can create up to two stores</Text>
-                      <Button
-                        variant="light"
-                        onClick={() => setShowStoreForm(!showStoreForm)}
-                      >
-                        {showStoreForm ? 'Cancel' : 'Create New Store'}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Text><strong>{stores?.length} stores</strong></Text>
-                    </>
-                  )}
-                </Group>
-                {showStoreForm && (
-                  stores?.length >= markketConfig?.max_stores_per_user ?
-                    (<></>) :
-                    (<StoreForm onSubmit={() => {
-                      fetchStores();
-                      setShowStoreForm(false);
-                    }} />)
-                )}
-
-                {stores.length > 0 && (
-                  <Stack mt="xl">
-                    <Title order={5}>Your Stores</Title>
-                    {stores.map((store) => (
-                      <Paper key={store.id} withBorder p="md">
-                        <Group justify="space-between">
-                          <Text fw={500}>
-                            <Link href={`/store/${store.slug}`}>
-                              {store.title}
-                            </Link>
-                          </Text>
-                          <Badge>{store.slug}</Badge>
-                        </Group>
-                      </Paper>
-                    ))}
-                  </Stack>
-                )}
+                <StoreList stores={stores} onCreate={() => {
+                  fetchStores();
+                }} />
               </Stack>
             </Tabs.Panel>
 

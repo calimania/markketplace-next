@@ -16,7 +16,7 @@ import {
   Divider
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import {
   IconSettings,
   IconShoppingCart,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import "./globals.css";
 import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth';

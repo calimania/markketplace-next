@@ -17,7 +17,7 @@ import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import { IconUpload, IconTrash, IconUser } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth';
-import { markketClient } from '@/markket/api.markket';
+import { strapiClient, markketClient } from '@/markket/api';
 
 interface ProfileFormValues {
   username: string;
@@ -97,6 +97,37 @@ export default function ProfileForm() {
     }
   };
 
+  const handleAvatarUpload = async (file: File) => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      const response = await strapiClient.uploadAvatar(file, { id: user.id });
+
+      if (response.status === 201) {
+        showNotification({
+          title: 'Success',
+          message: 'Avatar uploaded successfully',
+          color: 'green',
+        });
+      } else {
+        console.warn('Avatar upload failed:', response);
+      }
+
+      await refreshUser();
+    } catch (error) {
+      console.error('Avatar upload failed:', error);
+
+      showNotification({
+        title: 'Error',
+        message: 'Failed to upload avatar',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Paper withBorder p="md" radius="md">
       <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -118,7 +149,7 @@ export default function ProfileForm() {
               </Avatar>
               <Stack gap="xs">
                 <FileButton
-                  onChange={setAvatar}
+                  onChange={(file) => file && handleAvatarUpload(file)}
                   accept="image/png,image/jpeg"
                 >
                   {(props) => (
@@ -126,7 +157,6 @@ export default function ProfileForm() {
                       variant="light"
                       size="xs"
                       leftSection={<IconUpload size={14} />}
-                      disabled
                       {...props}
                     >
                       Upload avatar

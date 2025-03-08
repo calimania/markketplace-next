@@ -1,5 +1,5 @@
 import { Stack, Title, LoadingOverlay } from '@mantine/core';
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { SubscribeForm } from '@/app/components/ui/subscribe.form';
 import { Store } from '@/markket/store';
 import { Suspense } from 'react';

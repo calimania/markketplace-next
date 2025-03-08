@@ -1,5 +1,5 @@
 import { Product } from "@/markket/product.d";
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";

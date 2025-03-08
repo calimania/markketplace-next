@@ -2,7 +2,7 @@ import BlogPostPage from '@/app/components/blog.details';
 import { Suspense } from 'react';
 import { LoadingOverlay } from '@mantine/core';
 import { Metadata } from 'next';
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { Article } from '@/markket/article';
 import { generateSEOMetadata } from '@/markket/metadata';
 

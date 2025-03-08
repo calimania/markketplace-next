@@ -1,6 +1,6 @@
 import { Event } from "@/markket/event.d";
 import { Store } from "@/markket/store.d";
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container, Button } from "@mantine/core";
