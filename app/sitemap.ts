@@ -1,4 +1,4 @@
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://de.markket.place';
 import { Store } from "@/markket/store";
 

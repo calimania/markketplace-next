@@ -1,4 +1,4 @@
-import {strapiClient} from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 import { ClientLayout } from "@/app/components/layout/store.layout";
 
 async function getStore(slug: string) {

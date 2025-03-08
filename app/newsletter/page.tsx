@@ -1,5 +1,5 @@
 import { Container, Stack, Title } from '@mantine/core';
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { SubscribeForm } from '@/app/components/ui/subscribe.form';
 import { Store } from '@/markket/store';
 import PageContent from '@/app/components/ui/page.content';

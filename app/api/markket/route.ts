@@ -27,20 +27,17 @@ async function handler(req: NextRequest) {
 
   console.info('API Proxy:', { targetUrl: targetUrl.toString() });
 
-
-  const contentType = req.headers.get('Content-Type') || 'application/json';
-
   try {
     const response = await fetch(targetUrl.toString(), {
       method: req.method,
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': 'application/json',
         ...(req.headers.get('authorization') && {
           'Authorization': req.headers.get('authorization') || ''
         })
       },
       ...(req.method !== 'GET' && req.method !== 'HEAD' && {
-        body: contentType.endsWith('json') ? JSON.stringify(await req.json()) : req.body,
+        body: JSON.stringify(await req.json())
       })
     });
 

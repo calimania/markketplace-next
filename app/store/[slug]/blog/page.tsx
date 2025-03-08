@@ -1,5 +1,5 @@
 import { Container, Title, Text, Stack, SimpleGrid } from "@mantine/core";
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
 import { Store } from "@/markket/store.d";

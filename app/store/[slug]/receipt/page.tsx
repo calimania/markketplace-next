@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 import { MainImage } from "../../../components/ui/product.display";
 import { Store } from "@/markket/store";
 import { Page } from "@/markket/page";

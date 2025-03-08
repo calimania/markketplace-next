@@ -1,5 +1,5 @@
 
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import { Container, Title, Text, Stack, } from "@mantine/core";
 import PageContent from '@/app/components/ui/page.content';

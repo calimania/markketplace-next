@@ -1,14 +1,10 @@
+import { markketConfig } from "./config";
 
 type fetchOptions = {
   method?: string;
   headers?: any;
   body?: any;
 };
-
-/**
- * Base url for de.markket instance
- */
-export const MARKKET_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://de.markket.place/';
 
 /**
  * Utitilities to easily communitcate with our routes in /api/markket
@@ -19,12 +15,16 @@ export class markketClient {
 
   constructor() {
     if (typeof window == 'undefined') {
-      this.baseUrl = MARKKET_URL as string;
+      this.baseUrl = markketConfig.markket_url as string;
       this.token = '';
     } else {
       this.baseUrl = window.location.origin;
       this.token = '';
     }
+  };
+
+  public who = () => {
+    console.log('markketClient', this);
   };
 
   public readToken = () => {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { strapiClient } from '@/markket/api'
+import { strapiClient } from '@/markket/api.strapi'
 import pkg from '@/package.json';
 
 export async function GET() {

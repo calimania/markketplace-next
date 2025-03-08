@@ -1,7 +1,7 @@
 "use client";
 
 import { type FC, useState } from "react";
-import { strapiClient } from "@/markket/api";
+import { strapiClient } from "@/markket/api.strapi";
 
 interface Props {
   eventId: string;

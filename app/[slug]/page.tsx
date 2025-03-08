@@ -1,5 +1,5 @@
 import { Container, Title, Text, Group, Stack } from "@mantine/core";
-import { strapiClient } from '@/markket/api';
+import { strapiClient } from '@/markket/api.strapi';
 import { Store } from "@/markket/store.d";
 import { Article } from "@/markket/article.d";
 
