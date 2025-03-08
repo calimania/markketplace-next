@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const maybe = () => {
-    if (!localStorage) {
+    if (typeof localStorage == 'undefined') {
       return false;
     }
 
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const confirmed = () => {
-    if (!localStorage) {
+    if (typeof localStorage == 'undefined') {
       return false;
     }
 

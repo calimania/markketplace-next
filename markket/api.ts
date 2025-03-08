@@ -58,19 +58,22 @@ export class StrapiClient {
   };
 
   public me = async () => {
-    if (!localStorage) { return null; }
+    if (typeof localStorage == 'undefined') { return null; }
 
-    const token = this._token();
+    const _string = localStorage.getItem('markket.auth');
+    const _json = _string ? JSON.parse(_string) : {};
+    const { jwt, id } = _json;
 
-    if (!token) {
+    if (!jwt) {
       return null;
     }
-    const url = new URL(`api/users/me`, this.baseUrl);
+
+    const url = new URL(`api/users/${id}`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${jwt}`,
       },
     });
 

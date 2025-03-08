@@ -24,6 +24,8 @@ import {
 import { markketConfig } from '@/markket/config';
 
 import StoreForm from '@/app/components/ui/store.form';
+import ProfileForm from '@/app/components/ui/profile.form';
+
 import Link from 'next/link';
 
 const settingsTabs = [
@@ -129,9 +131,7 @@ export default function SettingsPage() {
             <Tabs.Panel value="profile">
               <Stack>
                 <Title order={4}>Profile Information</Title>
-                <Text size="sm" c="dimmed" maw={600}>
-                  Manage your personal information and how it appears to others.
-                </Text>
+                <ProfileForm />
               </Stack>
             </Tabs.Panel>
 

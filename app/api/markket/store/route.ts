@@ -48,7 +48,7 @@ async function verifyToken(token: string) {
   }
 }
 
-async function validateUserAndToken() {
+export async function validateUserAndToken() {
   if (!STRAPI_URL || !ADMIN_TOKEN) {
     throw new Error('API configuration missing');
   }

@@ -35,10 +35,10 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.p
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout, confirmed } = useAuth();
-  const isLoggedIn = maybe();
-  const isConfirmed = confirmed();
+  const { maybe, logout, confirmed, refreshUser } = useAuth();
   const [store, setStore] = useState({} as Store);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -48,6 +48,16 @@ export default function AuthPage() {
 
     fetchStore();
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) refreshUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    setIsLoggedIn(maybe());
+    setIsConfirmed(confirmed());
+  }, [maybe, confirmed]);
 
   const loggedInOptions = [
     {
@@ -114,8 +124,6 @@ export default function AuthPage() {
     },
   ];
 
-  const options = isLoggedIn ? loggedInOptions : loggedOutOptions;
-
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
@@ -134,7 +142,7 @@ export default function AuthPage() {
       )}
 
       <Stack mt={30}>
-        {options.map((option, index) => (
+        {(isLoggedIn ? loggedInOptions : loggedOutOptions).map((option, index) => (
           <Paper
             key={index}
             withBorder
