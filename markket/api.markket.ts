@@ -39,6 +39,26 @@ export class markketClient {
     return jwt;
   };
 
+  public uploadImage = async (file: File, field: string, refId: string | number) => {
+    this.readToken();
+
+    const formData = new FormData();
+    formData.append('files', file);
+    formData.append('ref', 'api::store.store');
+    formData.append('refId', refId as string);
+    formData.append('field', field);
+
+    const _url = new URL('/api/markket?path=/api/upload', this.baseUrl);
+
+    return await fetch(_url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+      body: formData,
+    });
+  };
+
   public fetch = async (url: string, options: fetchOptions) => {
     if (!options?.headers?.Authorization) {
       this.readToken();

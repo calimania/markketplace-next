@@ -47,7 +47,6 @@ export default async function StorePage({
 
   return (
     <div>
-      {/* Hero Section with Cover and Logo */}
       <Box pos="relative" h={300} mb={50}>
         <Box
           style={{
@@ -59,7 +58,7 @@ export default async function StorePage({
           }}
         >
           <Overlay
-            gradient="linear-gradient(180deg, rgba(0,0,0, 0.2) 0%, rgba(36, 85, 214, 0.4) 100%)"
+            gradient="linear-gradient(180deg, rgba(36, 85, 214, 0.2) 0%, rgba(36, 85, 214, 0.4) 100%)"
             opacity={0.6}
             zIndex={1}
           />

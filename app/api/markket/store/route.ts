@@ -68,7 +68,7 @@ export async function validateUserAndToken() {
   return userData;
 };
 
-async function fetchUserStores(userId: number) {
+export async function fetchUserStores(userId: number) {
   const query = qs.stringify({
     filters: {
       users: {
@@ -77,7 +77,7 @@ async function fetchUserStores(userId: number) {
         }
       }
     },
-    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS'],
+    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover'],
   }, {
     encodeValuesOnly: true
   });

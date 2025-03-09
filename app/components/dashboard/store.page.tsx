@@ -19,9 +19,10 @@ import {
   type ComboboxItem,
 } from '@mantine/core';
 import { Store } from '@/markket/store';
-import { IconBuildingStore, IconLink, IconEdit } from '@tabler/icons-react';
+import { IconBuildingStore, IconLink, IconEdit, IconHomeShare, IconCalendarClock } from '@tabler/icons-react';
 import Link from 'next/link';
 import Markdown from "@/app/components/ui/page.markdown";
+import StoreMedia from '@/app/components/ui/store.media';
 
 type StoreOption = {
   value: string;
@@ -140,20 +141,29 @@ export default function StoreDashboardPage  ()   {
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Card.Section p="md">
                   <Group>
-                    <IconBuildingStore size={24} />
+                    {store?.Favicon?.url ?
+                      <img src={store.Favicon.url} alt={`${store.title} site icon`} width={24} height={24} /> :
+                      (<IconBuildingStore size={24} />)
+                    }
                     <Text fw={500}>Store Details</Text>
                   </Group>
                 </Card.Section>
                 <Stack gap="xs" mt="md">
-                  <Text size="sm">
-                    <b>Slug: </b>
-                    <Link href={`/store/${store?.slug}`} title={store?.title} className='cursor-pointer'>
-                      {store.slug}
-                    </Link>
-                  </Text>
-                  <Text size="sm">
-                    <b>Created:</b> {new Date(store.createdAt).toLocaleDateString()}
-                  </Text>
+                  <Group>
+                    <IconHomeShare size={18} />
+                    <Text size="sm">
+                      <Link href={`/store/${store?.slug}`} target="de.preview" title={store?.title} className='cursor-pointer'>
+                        <strong>Slug: </strong>
+                        <span className="text-markket-blue">{store.slug}</span>
+                      </Link>
+                    </Text>
+                  </Group>
+                  <Group>
+                    <IconCalendarClock size={18} />
+                    <Text size="sm">
+                      <b>Created:</b> {new Date(store.createdAt).toLocaleDateString()}
+                    </Text>
+                  </Group>
                   {store.URLS?.length > 0 && (
                     <Text size="sm">
                       <b>Custom Domain:</b> {store?.URLS?.[0].URL}
@@ -162,7 +172,6 @@ export default function StoreDashboardPage  ()   {
                 </Stack>
               </Card>
             </Grid.Col>
-
             {store.SEO && (
               <Grid.Col span={{ base: 12, md: 8 }}>
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -172,9 +181,9 @@ export default function StoreDashboardPage  ()   {
                       <Text fw={500}>SEO Preview</Text>
                     </Group>
                   </Card.Section>
-                  {store.SEO.socialImage && (
+                  {(store.Cover?.url || store.SEO.socialImage) && (
                     <Image
-                      src={store.SEO.socialImage.url}
+                      src={store.SEO?.socialImage?.url || store.Cover?.url}
                       height={200}
                       alt="Store social preview"
                       mt="md"
@@ -189,6 +198,24 @@ export default function StoreDashboardPage  ()   {
                 </Card>
               </Grid.Col>
             )}
+            <Grid.Col span={{ base: 12 }}>
+              <StoreMedia store={store} onUpdate={(media, field, id) => {
+                if (store?.id !== id) return;
+
+                if (field?.startsWith('SEO')) {
+                  setStore((prev) => ({
+                    ...prev as Store,
+                    SEO: {
+                      ...prev?.SEO as Store['SEO'],
+                      [field.split('.')[1]]: media
+                    }
+                  }));
+                  return;
+                }
+
+                setStore((prev) => ({ ...prev as Store, [field]: media }));
+              }} />
+            </Grid.Col>
           </Grid>
         </Stack>
       )}
