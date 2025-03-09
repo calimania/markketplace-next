@@ -5,6 +5,7 @@ import {
   IconBuildingStore,
   IconSettings,
   IconUserCircle,
+  IconBat,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -20,8 +21,8 @@ interface DashboardCard {
 
 const dashboardCards: DashboardCard[] = [
   {
-    title: 'Stores',
-    description: 'Manage your stores and products',
+    title: 'Sites & Storefronts',
+    description: 'Manage your content & resources',
     icon: IconBuildingStore,
     color: 'blue',
     href: '/dashboard/store',
@@ -29,7 +30,7 @@ const dashboardCards: DashboardCard[] = [
   },
   {
     title: 'Settings',
-    description: 'New stores, and preferences',
+    description: 'Edit your profile & configuration',
     icon: IconSettings,
     color: 'pink',
     iconColor: '#ff3366',
@@ -37,11 +38,19 @@ const dashboardCards: DashboardCard[] = [
   },
   {
     title: 'Account',
-    description: 'Profile and authentication',
+    description: 'Auth & homepage',
     icon: IconUserCircle,
     color: 'grape',
     iconColor: '#fbda0f',
     href: '/auth'
+  },
+  {
+    title: 'Docs',
+    description: 'Our technical blog & articles',
+    icon: IconBat,
+    color: 'grape',
+    iconColor: '#ff00ff',
+    href: '/docs'
   },
 ];
 

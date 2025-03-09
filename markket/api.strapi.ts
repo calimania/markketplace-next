@@ -248,7 +248,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon,URLS',
+      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover',
     });
   }
 
@@ -357,12 +357,17 @@ export class StrapiClient {
     });
   }
 
-
+  /**
+   * Uploads an avatar image to the strapi / upload endpoint with the user's token
+   * @param file
+   * @param param1
+   * @returns
+   */
   public uploadAvatar = async (file: File, { id, model, field }: uploadAvatarOptions) => {
     const token = this._token();
     const formData = new FormData();
     formData.append('files', file);
-    formData.append('ref', `plugin::users-permissions.${model || 'user'}`);
+    formData.append('ref', model || 'plugin::users-permissions.user');
     formData.append('refId', id.toString());
     formData.append('field', field || 'avatar');
 

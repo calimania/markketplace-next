@@ -16,7 +16,7 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { IconMusicHeart, IconX } from '@tabler/icons-react';
 
 import { useAuth } from '@/app/providers/auth';
 
@@ -43,13 +43,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (values: LoginForm) => {
     setLoading(true);
+
     try {
       const response = await fetch('/api/markket?path=/api/auth/local', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          identifier: values.identifier,
+          password: values.password,
+        }),
       });
 
       const data = await response.json();
@@ -75,10 +79,10 @@ export default function LoginPage() {
 
       notifications.show({
         title: 'Welcome back!',
-        message: 'Successfully logged in',
+        message: 'Authorized credentials. Loading dashboard...',
         color: 'green',
-        icon: <IconCheck size="1.1rem" />,
-        autoClose: 2000,
+        icon: <IconMusicHeart size="1.1rem" />,
+        autoClose: 1200,
       });
 
       router.push('/dashboard');
@@ -115,12 +119,14 @@ export default function LoginPage() {
               label="Email or Username"
               placeholder="de@markket.place"
               required
+              disabled={loading}
               {...form.getInputProps('identifier')}
             />
 
             <PasswordInput
               label="Password"
               placeholder="Your password"
+              disabled={loading}
               required
               {...form.getInputProps('password')}
             />
@@ -137,7 +143,7 @@ export default function LoginPage() {
               </Anchor>
             </Group>
 
-            <Button loading={loading} type="submit" fullWidth>
+            <Button loading={loading} type="submit" fullWidth disabled={loading}>
               Sign in
             </Button>
           </Stack>
@@ -145,4 +151,4 @@ export default function LoginPage() {
       </Paper>
     </Container>
   );
-}
+};

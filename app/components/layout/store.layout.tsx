@@ -105,7 +105,7 @@ export function ClientLayout({
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 60, }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
@@ -114,7 +114,6 @@ export function ClientLayout({
           mobile: !opened,
         }
       }}
-      padding="md"
     >
       <AppShell.Header>
         <Container size="lg">
@@ -149,7 +148,7 @@ export function ClientLayout({
         </Stack>
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main p="xs" className="store-page">
         {children}
       </AppShell.Main>
     </AppShell>
