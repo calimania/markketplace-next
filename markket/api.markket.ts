@@ -64,7 +64,7 @@ export class markketClient {
       this.readToken();
     }
 
-    console.log({ url });
+    console.log(`${options.method || 'GET'}:${url}`);
     const _url = new URL(url, this.baseUrl);
 
     const response = await fetch(_url, {
