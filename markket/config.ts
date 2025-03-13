@@ -14,4 +14,6 @@ export const markketConfig = {
   markket_url: process.env.NEXT_PUBLIC_MARKKET_URL || "https://de.markket.place",
   /** MARKKET_API_KEY : used to wrap API requests */
   admin_token: process.env.MARKKET_API_KEY as string,
+  /** NEXT_PUBLIC_MARKKET_STORE_SLUG */
+  slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
 };
