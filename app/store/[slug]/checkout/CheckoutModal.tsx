@@ -4,6 +4,7 @@ import {
   type PaymentLinkOptions,
 } from "../../../scripts/payment";
 import { Price } from "@/markket/product";
+import { IconShoppingBagHeart } from "@tabler/icons-react";
 
 interface Props {
   prices: Price[];
@@ -96,11 +97,12 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
           setIsModalOpen(true);
         }}
       >
-        Continue to Payment
+        <IconShoppingBagHeart className="w-6 h-6 mr-2" />
+        Buy Now
       </button>
       {isModalOpen && (
         <div
-          className="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-70 flex justify-center items-center z-50"
+          className="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-70 flex justify-center items-center z-[500]"
           onClick={(e) =>
             (e.target as Element).classList.contains("modal-overlay") &&
             setIsModalOpen(false)
