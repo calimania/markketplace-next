@@ -13,6 +13,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import PageContent from "../components/ui/page.content";
+import { redirect } from 'next/navigation';
 
 interface AnyPageProps {
   params: Promise<{ slug: string }>;
@@ -22,15 +23,22 @@ export async function generateMetadata({ params }: AnyPageProps): Promise<Metada
   const { slug } = await params;
 
   let response;
-  if (slug == 'docs') {
-    response = await strapiClient.getPage('blog');
+  switch (slug) {
+    case 'docs':
+      response = await strapiClient.getPage('blog');
+      break;
+    case 'stores':
+      response = await strapiClient.getPage('stores');
+      break;
+    default:
+      const storeResponse = await strapiClient.getStore(slug);
+      if (!storeResponse?.data?.length) {
+        return notFound();
+      }
+      response = storeResponse;
   }
 
-  if (slug == 'stores') {
-    response = await strapiClient.getPage('stores');
-  }
-
-  const page = response?.data?.[0] as Page;
+  const page = response?.data?.[0] as Page | Store;
 
   return generateSEOMetadata({
     slug,
@@ -76,7 +84,14 @@ export default async function AnyPage({ params }: AnyPageProps) {
   const a = await strapiClient.getStore();
 
   if (!['home', 'docs', 'stores'].includes(slug)) {
-    return notFound();
+    const storeResponse = await strapiClient.getStore(slug);
+
+    if (!storeResponse?.data?.length) {
+      return notFound();
+    }
+
+    /** Planning to use this for shorter urls - and future redirection to custom template | domain when setting present */
+    return redirect(`/store/${slug}`);
   }
 
   const collection = await getCollection(slug);
