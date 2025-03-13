@@ -1,4 +1,5 @@
-import { Store } from "./store";
+import { Store, Media } from "./store";
+
 
 interface Price {
   id: number;
@@ -53,6 +54,7 @@ interface Slide {
 
 interface SEO {
   id: number;
+  socialImage: Media;
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
