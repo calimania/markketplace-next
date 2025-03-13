@@ -14,7 +14,6 @@ export default function ProductCard({ product, slug }: { product: Product; slug:
   return (
     <Link href={`/store/${slug}/products/${product.slug}`}>
       <div className="group relative bg-white rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
-        {/* Adjusted aspect ratio to 16/9 for better presentation */}
         <div className="aspect-[16/9] overflow-hidden rounded-t-lg bg-gray-50">
           {imageUrl ? (
             <div className="relative h-full w-full">
@@ -79,4 +78,4 @@ export default function ProductCard({ product, slug }: { product: Product; slug:
       </div>
     </Link>
   );
-}
+};
