@@ -1,6 +1,5 @@
 import { Price } from "@/markket/product";
-
-const MARKKET_API = process.env.NEXT_PUBLIC_MARKKET_API || 'https://api.markket.place';
+import { markketConfig } from "@/markket/config";
 
 export type PaymentLinkOptions = {
   totalPrice: number;
@@ -27,7 +26,7 @@ export const createPaymentLink = async (
     stripe_test: options.stripe_test,
   };
 
-  const request = await fetch(`${MARKKET_API}/api/markket`, {
+  const request = await fetch(new URL('/api/markket', markketConfig.api), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,12 +36,11 @@ export const createPaymentLink = async (
 
   const response = await request.json();
 
-  console.log("Payment link", { request, response });
-
   const url = response?.data?.link?.response?.url;
 
   if (request.ok && url) {
     window.location.href = url;
   }
+
   return request;
 };

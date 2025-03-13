@@ -1,18 +1,62 @@
 import { Product } from "@/markket/product.d";
 import { strapiClient } from "@/markket/api.strapi";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
 import Markdown from "@/app/components/ui/page.markdown";
+import { Metadata } from "next";
+import { generateSEOMetadata } from "@/markket/metadata";
+import { markketConfig } from "@/markket/config";
+import PageContent from "@/app/components/ui/page.content";
+import ProductCard from "@/app/components/ui/product.card";
+import {
+  Container,
+  Title,
+  Text,
+  Group,
+  Paper,
+  SimpleGrid,
+  Box,
+  Divider,
+} from "@mantine/core";
+import { IconShoppingBag } from '@tabler/icons-react';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+
+  let page = StoreProductPage;
+  if (!page) {
+    const { data } = await strapiClient.getPage('products', markketConfig.slug);
+    page = data?.[0];
+  }
+
+  return generateSEOMetadata({
+    slug: `store/${slug}/products`,
+    entity: {
+      url: `/store/${slug}/products`,
+      SEO: page?.SEO,
+      id: page?.id?.toString(),
+    },
+    defaultTitle: `Products`,
+  });
+};
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
+
+  const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+
+  let page = StoreProductPage;
+  if (!page) {
+    const { data } = await strapiClient.getPage('products', markketConfig.slug);
+    page = data?.[0];
+  }
 
   if (!store) {
     notFound();
@@ -25,91 +69,91 @@ export default async function ProductPage({ params }: ProductPageProps) {
   );
   const products = productsResponse?.data || [];
 
+  const title = StoreProductPage?.Title || `${store?.title} Products`;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-          {store?.title} Products
-        </h1>
-        <StoreHeaderButtons store={store} />
-        <Markdown content={store?.Description} />
-      </div>
+    <Container size="xl" py="xl">
+      <Paper
+        radius="md"
+        p={40}
+        mb={40}
+        style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.95)), url(${page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <Group justify="center" mb="xl">
+          <IconShoppingBag size={48} color="var(--mantine-color-blue-6)" />
+        </Group>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((product) => (
-          <ProductCard
-            key={(product as Product).id}
-            product={product as Product}
-            slug={slug}
-          />
-        ))}
-      </div>
-    </div>
+        <Title order={1} ta="center" mb="sm">
+          {title}
+        </Title>
+
+        {page?.Content ? (
+          <Box maw={600} mx="auto">
+            <PageContent params={{ page }} />
+          </Box>
+        ) : (
+          <Text c="dimmed" size="lg" ta="center" maw={600} mx="auto">
+            Discover our curated collection of products. Each item is carefully selected to ensure quality and satisfaction.
+          </Text>
+        )}
+
+        <Group justify="center" mt="xl">
+          <StoreHeaderButtons store={store} />
+        </Group>
+      </Paper>
+
+      <Title order={2} size="h3" mb={40}>
+        Product Catalog
+      </Title>
+
+      <Box mb={40}>
+        {products.length > 0 ? (
+          <SimpleGrid
+            cols={{ base: 1, sm: 2, lg: 3 }}
+            spacing="xl"
+            verticalSpacing="xl"
+            className="product-grid"
+          >
+            {products.map((product) => (
+              <Box
+                key={(product as Product).id}
+                style={{ transform: 'translateY(0)', transition: 'transform 0.2s' }}
+                className="hover:-translate-y-1"
+              >
+                <ProductCard
+                  product={product as Product}
+                  slug={slug}
+                />
+              </Box>
+            ))}
+          </SimpleGrid>
+        ) : (
+          <Paper p="xl" withBorder ta="center">
+            <Text size="lg" c="dimmed">
+              No products available yet. Check back soon!
+            </Text>
+          </Paper>
+        )}
+      </Box>
+
+      {/* Store Description */}
+      {store?.Description && (
+        <>
+          <Divider my={40} />
+          <Paper p="xl" radius="md" withBorder>
+            <Title order={2} size="h3" mb="md" ta="center">
+              About {store.title}
+            </Title>
+            <Box maw={800} mx="auto">
+              <Markdown content={store.Description} />
+            </Box>
+          </Paper>
+        </>
+      )}
+    </Container>
   );
-}
-
-function ProductCard({ product, slug }: { product: Product; slug: string }) {
-  const imageUrl = product.Slides?.[0]?.formats?.medium?.url;
-  const description =
-    product.SEO?.metaDescription || product.Description?.split("\n")[0];
-  return (
-    <Link href={`/store/${slug}/products/${product.slug}`} passHref>
-      <div className="group relative bg-white rounded-2xl shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
-        <div className="aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100">
-          {imageUrl ? (
-            <div className="relative h-full w-full">
-              <img
-                src={imageUrl}
-                alt={product.Name}
-                className="object-cover transform transition-transform group-hover:scale-105"
-              />
-              {product.active === false && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <span className="px-4 py-2 bg-gray-900/80 text-white text-sm font-medium rounded-full">
-                    Coming Soon
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-full w-full flex items-center justify-center">
-              <span className="text-gray-400">No image available</span>
-            </div>
-          )}
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-              {product.Name}
-            </h3>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
-              ${product.usd_price || "Contact"}
-            </span>
-          </div>
-
-          {description && (
-            <p className="mt-2 text-gray-500 text-sm line-clamp-2">
-              {description}
-            </p>
-          )}
-
-          {product.quantity !== null && (
-            <div className="mt-4 flex items-center text-sm text-gray-500">
-              <div
-                className={`w-2 h-2 rounded-full mr-2 ${
-                  product.quantity > 0 ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              {product.quantity > 0 ? (
-                <span>{product.quantity} in stock</span>
-              ) : (
-                <span>Out of stock</span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
+};

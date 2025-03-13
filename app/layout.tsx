@@ -16,8 +16,8 @@ async function generateMetadata(): Promise<Metadata> {
   const favicon = store?.Favicon?.url;
 
   return {
-    title: seo?.metaTitle || "Markket Next",
-    description: seo?.metaDescription || "Dashboard for Markket storefronts",
+    title: seo?.metaTitle || "Markkët Next",
+    description: seo?.metaDescription || "Dashboard for Markkët storefronts",
     keywords: seo?.metaKeywords,
     authors: seo?.metaAuthor ? [{ name: seo.metaAuthor }] : undefined,
     openGraph: {
@@ -65,7 +65,7 @@ export default function RootLayout({
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider>
-              <Notifications />
+              <Notifications position="top-right" zIndex={1000} />
               <GlobalBanner />
               {children}
             </MantineProvider>
