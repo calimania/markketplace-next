@@ -65,7 +65,7 @@ export default function RootLayout({
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider>
-              <Notifications />
+              <Notifications position="top-right" zIndex={1000} />
               <GlobalBanner />
               {children}
             </MantineProvider>

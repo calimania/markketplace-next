@@ -82,7 +82,7 @@ export default function LoginPage() {
         message: 'Authorized credentials. Loading dashboard...',
         color: 'green',
         icon: <IconMusicHeart size="1.1rem" />,
-        autoClose: 1200,
+        autoClose: 800,
       });
 
       router.push('/dashboard');

@@ -1,7 +1,6 @@
 'use client';
 
 import { Container } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 
 export default function AuthLayout({
   children,
@@ -13,7 +12,6 @@ export default function AuthLayout({
       minHeight: '100vh',
       background: 'linear-gradient(to bottom right, #f1f3f5, #e9ecef)'
     }}>
-      <Notifications position="top-right" zIndex={1000} />
       {children}
     </Container>
   );
