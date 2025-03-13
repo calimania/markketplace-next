@@ -1,10 +1,21 @@
 import { type FC, useEffect, useState } from "react";
 import {
-  createPaymentLink,
-  type PaymentLinkOptions,
-} from "../../../scripts/payment";
+  Modal,
+  Button,
+  Select,
+  NumberInput,
+  Stack,
+  Text,
+  Title,
+  Group,
+  Divider,
+  Paper,
+  Container,
+} from '@mantine/core';
+import { IconShoppingBagHeart, IconX } from "@tabler/icons-react";
+import { createPaymentLink, type PaymentLinkOptions } from "../../../scripts/payment";
 import { Price } from "@/markket/product";
-import { IconShoppingBagHeart } from "@tabler/icons-react";
+import { notifications } from '@mantine/notifications';
 
 interface Props {
   prices: Price[];
@@ -19,6 +30,8 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
   const [total, setTotal] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState({} as Price);
 
+  const isValidOrder = selectedPriceId && total > 0;
+
   const [options, setOptions] = useState({
     totalPrice: 0,
     product: product.id,
@@ -27,14 +40,12 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
     includes_shipping: !product.Name?.match(/digital/i),
   } as PaymentLinkOptions);
 
-  // Calculate total whenever inputs change
   useEffect(() => {
     const priceId = selectedPriceId;
     const price = prices.find((p: Price) => p.STRIPE_ID == priceId);
     const basePrice = Number(price?.Price) || 0;
     const subtotal = basePrice * quantity;
     const newTotal = subtotal + tip;
-    console.log(prices);
 
     const option_prices = [
       {
@@ -60,172 +71,186 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
           prices: option_prices,
         } as PaymentLinkOptions)
     );
-    console.log(newTotal);
     setTotal(newTotal);
     setSelectedPrice(price || ({} as Price));
   }, [selectedPriceId, quantity, tip, prices, product.SKU]);
 
-  const redirectToPaymentLink = async (event: any) => {
+  const redirectToPaymentLink = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("submit event", { options });
-    // @TODO: prevent redirect when price or product is missing
-    const a = await createPaymentLink(options);
-    console.log({ a });
+
+    if (!isValidOrder) {
+      notifications.show({
+        title: 'Please select an option',
+        message: 'You need to select a product option to continue',
+        color: 'red',
+      });
+      return;
+    }
+
+    try {
+      await createPaymentLink(options);
+    } catch (error) {
+      console.error('Payment link error:', error);
+      notifications.show({
+        title: 'Payment Error',
+        message: 'Could not create payment link. Please try again.',
+        color: 'red',
+      });
+    }
   };
 
-  const handlePriceChange = (event: any) => {
-    const price = event.target.value as string;
-    setSelectedPriceId(price);
-  };
-
-  const handleQuantityChange = (event: any) => {
-    const newQuantity = event.target.value as number;
-    setQuantity(newQuantity);
-  };
-
-  const handleTipChange = (event: any) => {
-    const customPrice = event.target.value;
-    setTip(parseInt(customPrice, 10));
+  const handlePriceSelect = (value: string | null) => {
+    // If value is null and we already had a selection, keep the previous selection
+    if (!value && selectedPriceId) {
+      return;
+    }
+    setSelectedPriceId(value || '');
   };
 
   return (
     <>
-      {/* Modal Trigger Button */}
-      <button
-        className="w-full mb-5 flex items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-        onClick={() => {
-          setIsModalOpen(true);
+      <Button
+        fullWidth
+        size="lg"
+        leftSection={<IconShoppingBagHeart />}
+        onClick={() => setIsModalOpen(true)}
+        variant="filled"
+        color="blue"
+        mb="md"
+      >
+        Purchase Options
+      </Button>
+
+      <Modal
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={
+          <>
+            Purchase Options
+            <Text size="sm" c="dimmed" mt={4}>
+              Review the options and click below to continue
+            </Text>
+          </>
+        }
+        closeButtonProps={{
+          icon: <IconX size={20} />,
+        }}
+        padding="lg"
+        size="md"
+        centered
+        overlayProps={{
+          backgroundOpacity: 0.75,
+          blur: 3,
         }}
       >
-        <IconShoppingBagHeart className="w-6 h-6 mr-2" />
-        Buy Now
-      </button>
-      {isModalOpen && (
-        <div
-          className="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-70 flex justify-center items-center z-[500]"
-          onClick={(e) =>
-            (e.target as Element).classList.contains("modal-overlay") &&
-            setIsModalOpen(false)
-          }
-        >
-          <div className="modal-content bg-skin-card p-6 rounded-lg max-w-lg w-full bg-white">
-            <button
-              className="absolute top-4 right-4 text-gray-500"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-x"
+        <Container size="sm">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            redirectToPaymentLink(e);
+          }}>
+            <Stack gap="md">
+              <Select
+                label="Select Product Option"
+                description="Choose the option that best fits your needs"
+                placeholder="Available options..."
+                value={selectedPriceId || null}
+                onChange={handlePriceSelect}
+                data={prices.map((price) => ({
+                  value: price.STRIPE_ID,
+                  label: `${price.Name.replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
+                }))}
+                required
+                clearable={false}
+                searchable={false}
+              />
+              <NumberInput
+                label="Quantity"
+                value={quantity}
+                onChange={(value) => setQuantity(Number(value))}
+                min={1}
+                max={99}
+                required
+              />
+
+              <NumberInput
+                label="Ñapa || Tillägg"
+                description="Support the creator with an additional amount, for particular agreements"
+                value={tip}
+                onChange={(value) => setTip(Number(value))}
+                min={0}
+                placeholder="0"
+                prefix="$"
+              />
+
+              {selectedPrice?.Description && (
+                <Text size="sm" c="dimmed">
+                  {selectedPrice.Description}
+                </Text>
+              )}
+
+              {/* Order Summary */}
+              <Paper
+                withBorder
+                p="md"
+                radius="md"
+                style={{
+                  transition: 'transform 0.2s ease',
+                  transform: total > 0 ? 'translateY(0)' : 'translateY(10px)',
+                  opacity: total > 0 ? 1 : 0.7,
+                }}
               >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
+                <Stack gap="xs">
+                  <Title order={4}>Order Summary</Title>
+                  <Divider />
 
-            <form
-              data-product-price={product.id}
-              data-product-json={JSON.stringify(product)}
-              className="product-form-container"
-            >
-              <div className="hidden md:flex items-center justify-between">
-                <h3 className="text-2xl font-medium text-gray-900 dark:text-white">
-                  Available Options
-                  <br />
-                  <small className="text-sm text-gray-500">
-                    Pick an option to see more details
-                  </small>
-                  <br />
-                </h3>
-              </div>
+                  <Group justify="space-between">
+                    <Text>Base Price:</Text>
+                    <Text fw={500}>
+                      ${selectedPrice?.Price || 0}
+                    </Text>
+                  </Group>
 
-              <div className="m-4">
-                <label htmlFor="price">
-                  <strong>Product Options</strong>
-                </label>
-                <select
-                  id="price"
-                  name="price"
-                  data-input="product.prices"
-                  className="block w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
-                  onChange={handlePriceChange}
-                >
-                  <option value=""></option>
-                  {prices.map((price: any) => (
-                    <option value={price.STRIPE_ID} key={price.STRIPE_ID}>
-                      {price.Name.replace(/_/gi, " ")} - ${price.Price}{" "}
-                      {price.Currency}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {quantity > 1 && (
+                    <Group justify="space-between">
+                      <Text>Quantity:</Text>
+                      <Text fw={500}>× {quantity}</Text>
+                    </Group>
+                  )}
 
-              <div className="m-4">
-                <label htmlFor="quantity">
-                  <strong>Quantity multiplier</strong>
-                </label>
-                <input
-                  type="number"
-                  id="quantity"
-                  value={quantity}
-                  data-input="quantity"
-                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
-                  onChange={handleQuantityChange}
-                />
-              </div>
+                  {tip > 0 && (
+                    <Group justify="space-between">
+                      <Text>Tip:</Text>
+                      <Text fw={500}>+ ${tip}</Text>
+                    </Group>
+                  )}
 
-              <div className="m-4">
-                <label htmlFor="custom-price">
-                  <strong>Tip || Custom Price</strong>
-                </label>
-                <input
-                  type="number"
-                  id="custom-price"
-                  placeholder="0"
-                  name="custom-price"
-                  className="w-full rounded-md border-2 border-solid border-gray-300 py-2 pl-3 pr-10 text-base focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 dark:border-gray-300 dark:bg-gray-400"
-                  onChange={handleTipChange}
-                />
-              </div>
+                  <Divider />
 
-              <div className="m-4">
-                <label htmlFor="total">
-                  <strong>Total</strong>
-                </label>
-                <p className="text-4xl">${total || 0}</p>
-              </div>
+                  <Group justify="space-between">
+                    <Text fw={700}>Total:</Text>
+                    <Text size="xl" fw={700} c="blue">
+                      ${total}
+                    </Text>
+                  </Group>
+                </Stack>
+              </Paper>
 
-              <div className="m-4">
-                <button
-                  disabled={total <= 0}
-                  data-action-button="submit"
-                  type="submit"
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-sky-500 px-8 py-3 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={redirectToPaymentLink}
-                >
-                  Continue to Payment
-                </button>
-              </div>
-              <div className="m-4">
-                <p className="text-md">
-                  {total > 0
-                    ? selectedPrice?.Description ||
-                      "Continue using custom price"
-                    : "Please select a price and quantity to continue"}
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <Button
+                type="submit"
+                disabled={!isValidOrder}
+                fullWidth
+                size="lg"
+                color="blue"
+              >
+                {isValidOrder
+                  ? `Checkout ($${total})`
+                  : 'Select an option'
+                }
+              </Button>
+            </Stack>
+          </form>
+        </Container>
+      </Modal>
     </>
   );
 };

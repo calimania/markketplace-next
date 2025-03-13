@@ -6,7 +6,8 @@ import CheckoutModal from "../../store/[slug]/checkout/CheckoutModal";
 import Markdown from '@/app/components/ui/page.markdown';
 import { motion } from 'framer-motion';
 import { Page } from "@/markket/page";
-import PageContent from "@/app/components/ui/page.content";
+import PageContent from '@/app/components/ui/page.content';
+import { Title } from "@mantine/core";
 
 /**
  * ProductDisplay Component
@@ -80,11 +81,13 @@ export default function ProductDisplay({ product, page }: { product: Product, pa
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
                 {product.Name}
               </h1>
-              <ProductPrice prices={prices} />
             </div>
 
             <div className="mt-6 prose prose-sm max-w-none">
               <ProductPrice prices={prices} />
+              <Title order={2} size="h3" mb={40}>
+                Product Description
+              </Title>
               <Markdown content={product?.Description as string} />
             </div>
 
@@ -108,12 +111,7 @@ export default function ProductDisplay({ product, page }: { product: Product, pa
           className="mt-16 bg-white rounded-2xl shadow-sm border border-gray-100"
         >
           <div className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Product Details
-            </h2>
-            <div className="prose prose-sm max-w-none">
-              <PageContent params={{ page }} />
-            </div>
+            <PageContent params={{ page }} />
           </div>
         </motion.div>
       )}
