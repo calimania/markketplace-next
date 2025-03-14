@@ -1,7 +1,7 @@
 import { SEO } from './seo';
 import { Media, Store } from './store';
 
-export interface CollectionItem {
+export interface ListItem {
   id: number;
   documentId: string;
   title: string;
@@ -19,7 +19,7 @@ export interface CollectionItem {
   SEO?: SEO;
 };
 
-export interface Collection {
+export interface List {
   id: number;
   documentId: string;
   title: string;
@@ -36,8 +36,8 @@ export interface Collection {
   SEO?: SEO;
 };
 
-export interface CollectionResponse {
-  data: Collection[];
+export interface ListResponse {
+  data: List[];
   meta: {
     pagination: {
       page: number;

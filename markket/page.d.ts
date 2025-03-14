@@ -1,5 +1,5 @@
 import Store from '@/markket/store.d';
-import { Collection } from './collection';
+import { List } from './list';
 
 interface BlockText {
   text: string;
@@ -107,7 +107,7 @@ export interface Page {
   documentId: string;
   store?: Store;
   SEO?: SEO;
-  collections?: Collection[];
+  lists?: List[];
 };
 
 export interface PageResponse {

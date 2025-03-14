@@ -1,4 +1,4 @@
-import { Collection } from '@/markket/collection.d';
+import { Collection } from '@/markket/list';
 import {
   SimpleGrid,
   Card,

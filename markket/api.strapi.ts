@@ -296,7 +296,7 @@ export class StrapiClient {
         },
       },
       paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,store,collections,collections.cover,collections.SEO,collections.items,collections.items.URLS,collections.items.SEO'
+      populate: 'SEO.socialImage,store,lists,lists.cover,lists.SEO,lists.items,lists.items.URLS,lists.items.SEO'
     });
   };
 
@@ -357,13 +357,13 @@ export class StrapiClient {
     });
   }
 
-  async getCollection(collection_slug: string, store_slug?: string) {
+  async getList(list_slug: string, store_slug?: string) {
 
     return await this.fetch({
-      contentType: 'collections',
+      contentType: 'lists',
       filters: {
         slug: {
-          $eq: collection_slug
+          $eq: list_slug,
         },
         store: {
           slug: {
