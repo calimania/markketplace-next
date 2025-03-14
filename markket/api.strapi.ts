@@ -296,7 +296,7 @@ export class StrapiClient {
         },
       },
       paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,store'
+      populate: 'SEO.socialImage,store,collections,collections.items,collections.items.URLS,collections.items.SEO'
     });
   };
 

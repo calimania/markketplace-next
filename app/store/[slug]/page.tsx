@@ -6,6 +6,8 @@ import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
 
+import CollectionList from '@/app/components/ui/collection.list';
+
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
@@ -107,6 +109,7 @@ export default async function StorePage({
           </div>
           <PageContent params={{ page: homePage }} />
           <StoreTabs urls={store?.URLS} />
+          <CollectionList collections={homePage?.collections} />
         </Stack>
       </Container>
     </div>
