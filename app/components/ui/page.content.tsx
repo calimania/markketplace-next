@@ -221,10 +221,10 @@ export default function PageContent({ params, }: PageContentProps) {
   };
 
   return (
-    <>
+    <div className='blocks-content'>
       {content.map((block: ContentBlock, index: number) => (
         <div key={index}>{renderBlock(block)}</div>
       ))}
-    </>
+    </div>
   );
 }

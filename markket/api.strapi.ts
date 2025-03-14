@@ -135,6 +135,7 @@ export class StrapiClient {
   };
 
 
+  // @TODO - if we have a store?.id, is faster to search that way instead of slug
   private buildUrl(options: EnhancedFetchOptions): string {
     const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
@@ -372,7 +373,7 @@ export class StrapiClient {
           },
         }
       },
-      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.media',
+      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.media,tracks.urls',
       sort: 'createdAt:desc',
     });
   };
