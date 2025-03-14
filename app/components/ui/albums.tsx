@@ -1,4 +1,4 @@
-import { Collection } from '@/markket/list';
+import { Album } from '@/markket/album';
 import {
   SimpleGrid,
   Card,
@@ -8,26 +8,26 @@ import {
   Badge,
   Title,
   Container,
-  Paper,
   Overlay,
   AspectRatio,
 } from '@mantine/core';
 import Link from 'next/link';
 import { IconUsers } from '@tabler/icons-react';
 
-interface CollectionCardProps {
-  collection: Collection;
+interface AlbumCardProps {
+  album: Album;
   store_slug: string;
 }
 
-interface CollectionListProps {
-  collections: Collection[];
+interface AlbumsProps {
+  albums: Album[];
   store_slug: string;
 }
 
-function CollectionCard({ collection, store_slug }: CollectionCardProps) {
+function AlbumCard({ album, store_slug }: AlbumCardProps) {
+
   return (
-    <Link href={`/store/${store_slug}/${collection.slug}`} style={{ textDecoration: 'none' }}>
+    <Link href={`/store/${store_slug}/${album.slug}`} style={{ textDecoration: 'none' }}>
       <Card
         shadow="sm"
         padding="lg"
@@ -38,8 +38,8 @@ function CollectionCard({ collection, store_slug }: CollectionCardProps) {
         <>
           <AspectRatio ratio={16 / 9} pos="relative">
             <Image
-              src={collection.cover?.url || collection.SEO?.socialImage?.url}
-              alt={collection.title}
+              src={album.cover?.url || album.SEO?.socialImage?.url}
+              alt={album.title}
               height={200}
             />
             <Overlay
@@ -51,31 +51,33 @@ function CollectionCard({ collection, store_slug }: CollectionCardProps) {
 
         <Group justify="space-between" mt="md" mb="xs">
           <Title order={3} lineClamp={2}>
-            {collection.title}
+            {album.title}
           </Title>
           <Badge
             leftSection={<IconUsers size={14} />}
             variant="light"
           >
-            {collection.items.length} items
+            {album.tracks.length} tracks
           </Badge>
         </Group>
 
-        <Text size="sm" c="dimmed" lineClamp={2} mb="md">
-          {collection.description}
-        </Text>
+        {album?.SEO?.metaDescription && (
+          <Text size="sm" c="dimmed" mt="sm">
+            {album.SEO.metaDescription}
+          </Text>
+        )}
 
-        {collection.store && (
+        {album?.store && (
           <Group gap="xs">
             <Image
-              src={collection.store.Favicon?.url || collection.store.Logo?.url}
+              src={album.store.Favicon?.url || album.store.Logo?.url}
               width={20}
               height={20}
               radius="xl"
-              alt={collection.store.title}
+              alt={album.store.title}
             />
             <Text size="sm" c="dimmed">
-              {collection.store.title}
+              {album.store.title}
             </Text>
           </Group>
         )}
@@ -84,8 +86,8 @@ function CollectionCard({ collection, store_slug }: CollectionCardProps) {
   );
 }
 
-export default function CollectionList({ collections, store_slug }: CollectionListProps) {
-  if (!collections?.length) {
+export default function Albums({ albums, store_slug }: AlbumsProps) {
+  if (!albums?.length) {
     return (
       <></>
     );
@@ -98,11 +100,11 @@ export default function CollectionList({ collections, store_slug }: CollectionLi
         spacing="xl"
         verticalSpacing="xl"
       >
-        {collections.map((collection) => (
-          <CollectionCard
-            key={collection.id}
+        {albums.map((album) => (
+          <AlbumCard
+            key={album.documentId}
             store_slug={store_slug}
-            collection={collection}
+            album={album}
           />
         ))}
       </SimpleGrid>

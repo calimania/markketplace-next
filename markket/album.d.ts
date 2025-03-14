@@ -1,7 +1,8 @@
 import { SEO } from './seo';
 import { Media, Store } from './store';
+import { ContentBlock } from './page';
 
-export interface ListItem {
+export interface AlbumTrack {
   id: number;
   documentId: string;
   title: string;
@@ -19,25 +20,25 @@ export interface ListItem {
   SEO?: SEO;
 };
 
-export interface List {
+export interface Album {
   id: number;
   documentId: string;
   title: string;
   slug: string;
-  description: string;
+  description: ContentBlock[];
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
   locale: string;
   cover: Media;
-  items: CollectionItem[];
+  tracks: AlbumTrack[];
   store?: Store;
   displayType: 'grid' | 'list' | 'carousel';
   SEO?: SEO;
 };
 
-export interface ListResponse {
-  data: List[];
+export interface AlbumResponse {
+  data: Album[];
   meta: {
     pagination: {
       page: number;

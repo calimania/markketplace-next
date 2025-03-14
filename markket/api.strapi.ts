@@ -296,7 +296,7 @@ export class StrapiClient {
         },
       },
       paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,store,lists,lists.cover,lists.SEO,lists.items,lists.items.URLS,lists.items.SEO'
+      populate: 'SEO.socialImage,store,albums,albums.cover,albums.SEO,albums.tracks'
     });
   };
 
@@ -357,13 +357,14 @@ export class StrapiClient {
     });
   }
 
-  async getList(list_slug: string, store_slug?: string) {
+  /** Requests related Album */
+  async getAlbum(album_slug: string, store_slug?: string) {
 
     return await this.fetch({
-      contentType: 'lists',
+      contentType: 'albums',
       filters: {
         slug: {
-          $eq: list_slug,
+          $eq: album_slug,
         },
         store: {
           slug: {
@@ -371,10 +372,10 @@ export class StrapiClient {
           },
         }
       },
-      populate: 'SEO.socialImage,items,items.URLS,items.SEO',
+      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.media',
       sort: 'createdAt:desc',
     });
-  }
+  };
 
   /**
    * Uploads an avatar image to the strapi / upload endpoint with the user's token

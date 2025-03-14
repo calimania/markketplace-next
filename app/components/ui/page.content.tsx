@@ -1,5 +1,6 @@
-import { Paper, Title, Code } from '@mantine/core';
+import { Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
+import { Album } from '@/markket/album';
 import { Article } from '@/markket/article';
 import { CodeHighlight } from '@mantine/code-highlight';
 
@@ -7,6 +8,7 @@ interface PageContentProps {
   params: {
     page?: Page;
     post?: Article;
+    album?: Album;
   };
 };
 
@@ -16,8 +18,8 @@ interface PageContentProps {
  * @param props - PageContentProps
  * @returns { JSX.Element }
  */
-export default function PageContent({ params }: PageContentProps) {
-  const content = params?.page?.Content || params?.post?.Content;
+export default function PageContent({ params, }: PageContentProps) {
+  const content = params?.page?.Content || params?.post?.Content || params?.album?.description;
   const renderedImages = new Set<string>();
 
   if (!content?.length) {
@@ -219,12 +221,10 @@ export default function PageContent({ params }: PageContentProps) {
   };
 
   return (
-    <Paper p="md" mt={33} className='blocks-content'>
-      <div className="space-y-6">
-        {content.map((block: ContentBlock, index: number) => (
-          <div key={index}>{renderBlock(block)}</div>
-        ))}
-      </div>
-    </Paper>
+    <>
+      {content.map((block: ContentBlock, index: number) => (
+        <div key={index}>{renderBlock(block)}</div>
+      ))}
+    </>
   );
 }
