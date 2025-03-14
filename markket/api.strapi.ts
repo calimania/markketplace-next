@@ -373,7 +373,7 @@ export class StrapiClient {
           },
         }
       },
-      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.media,tracks.urls',
+      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.SEO.socialImage,tracks.media,tracks.urls,cover',
       sort: 'createdAt:desc',
     });
   };

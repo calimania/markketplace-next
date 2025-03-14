@@ -12,6 +12,8 @@ export interface AlbumTrack {
   updatedAt: string;
   publishedAt: string;
   locale: string;
+  description: string;
+  content: ContentBlock[];
   URLS?: {
     id: number;
     Label: string;
@@ -25,7 +27,8 @@ export interface Album {
   documentId: string;
   title: string;
   slug: string;
-  description: ContentBlock[];
+  description: string;
+  content: ContentBlock[];
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
