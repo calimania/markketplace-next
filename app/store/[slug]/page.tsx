@@ -12,6 +12,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
 import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
+import { Collection } from '@/markket/collection';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -109,7 +110,7 @@ export default async function StorePage({
           </div>
           <PageContent params={{ page: homePage }} />
           <StoreTabs urls={store?.URLS} />
-          <CollectionList collections={homePage?.collections} />
+          <CollectionList collections={homePage?.collections as Collection[]} />
         </Stack>
       </Container>
     </div>

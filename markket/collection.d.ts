@@ -1,4 +1,5 @@
-import { Media } from './store';
+import { SEO } from './seo';
+import { Media, Store } from './store';
 
 export interface CollectionItem {
   id: number;
@@ -15,16 +16,7 @@ export interface CollectionItem {
     Label: string;
     URL: string;
   }[];
-  SEO?: {
-    id: number;
-    metaTitle: string;
-    metaDescription: string;
-    metaKeywords: string;
-    metaUrl: string | null;
-    metaAuthor: string | null;
-    excludeFromSearch: boolean;
-    metaDate: string | null;
-  };
+  SEO?: SEO;
 };
 
 export interface Collection {
@@ -39,6 +31,9 @@ export interface Collection {
   locale: string;
   cover: Media;
   items: CollectionItem[];
+  store?: Store;
+  displayType: 'grid' | 'list' | 'carousel';
+  SEO?: SEO;
 };
 
 export interface CollectionResponse {
@@ -47,8 +42,8 @@ export interface CollectionResponse {
     pagination: {
       page: number;
       pageSize: number;
-      pageCount: number;
       total: number;
+      pageCount: number;
     };
   };
 };
