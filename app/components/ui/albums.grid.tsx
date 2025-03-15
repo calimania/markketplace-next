@@ -48,39 +48,21 @@ function AlbumCard({ album, store_slug }: AlbumCardProps) {
             />
           </AspectRatio>
         </>
-
-        <Group justify="space-between" mt="md" mb="xs">
           <Title order={3} lineClamp={2}>
             {album.title}
           </Title>
           <Badge
             leftSection={<IconUsers size={14} />}
             variant="light"
+            mt="sm"
           >
             {album.tracks.length} tracks
           </Badge>
-        </Group>
-
-        {album?.SEO?.metaDescription && (
-          <Text size="sm" c="dimmed" mt="sm">
-            {album.SEO.metaDescription}
-          </Text>
-        )}
-
-        {album?.store && (
-          <Group gap="xs">
-            <Image
-              src={album.store.Favicon?.url || album.store.Logo?.url}
-              width={20}
-              height={20}
-              radius="xl"
-              alt={album.store.title}
-            />
-            <Text size="sm" c="dimmed">
-              {album.store.title}
+          {album?.SEO?.metaDescription && (
+            <Text size="sm" c="dimmed" mt="sm">
+              {album.SEO.metaDescription}
             </Text>
-          </Group>
-        )}
+          )}
       </Card>
     </Link>
   );

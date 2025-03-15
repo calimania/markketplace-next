@@ -6,7 +6,7 @@ import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
 
-import Albums from '@/app/components/ui/albums';
+import Albums from '@/app/components/ui/albums.grid';
 
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
