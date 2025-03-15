@@ -38,5 +38,8 @@ export default async function TrackPage({ params }: PageProps) {
     notFound();
   }
 
-  return <TracksPage album={album} store={store} />;
+  return <TracksPage album={{
+    ...album,
+    tracks: album.tracks?.filter((t) => t.slug !== track_slug),
+  }} store={store} track={track} />;
 };

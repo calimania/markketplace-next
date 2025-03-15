@@ -10,17 +10,17 @@ import {
   SimpleGrid,
   Paper,
   Card,
-  Badge,
   Stack,
   Box,
   Image,
   AspectRatio,
   Overlay,
+  Grid,
 } from "@mantine/core";
 import PageContent from "@/app/components/ui/page.content";
-import {  IconLink,  } from '@tabler/icons-react';
-
+import { IconLink, } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
+import AlbumNav from './album.nav';
 
 // @ts-expect-error Card is a special polymorphic component
 const MotionCard = motion(Card);
@@ -28,14 +28,14 @@ const MotionCard = motion(Card);
 type AlbumPageProps = {
   store: Store;
   album: Album;
+  track: AlbumTrack;
 };
 
-const TrackPage = ({store, album}: AlbumPageProps) => {
-    console.log({store});
+const TrackPage = ({ store, album, track }: AlbumPageProps) => {
 
-    return (
-      <Box>
-              <motion.div
+  return (
+    <Box>
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
@@ -61,9 +61,6 @@ const TrackPage = ({store, album}: AlbumPageProps) => {
           <Container size="lg" style={{ height: '100%', position: 'relative', zIndex: 2 }}>
             <Group justify="space-between" align="flex-end" h="100%" pb="lg">
               <div>
-                <Badge size="lg" radius="sm" variant="filled" color="blue" mb="md">
-                  {album.tracks?.length} Tracks
-                </Badge>
                 <Title c="white">{album.title}</Title>
               </div>
               {store && (
@@ -85,15 +82,35 @@ const TrackPage = ({store, album}: AlbumPageProps) => {
         </Box>
 
         <Container size="lg">
-          <Text size="lg" mt="xs">
-            {album.description}
-          </Text>
-          {album.content && (
-            <Paper withBorder p="xl" radius="md" mb="xl">
-              <PageContent params={{ album }} />
-            </Paper>
-          )}
+          <Title order={2} mt="lg" mb="lg">
+            {track.title}
+          </Title>
+          <PageContent params={{ track }} />
 
+        </Container>
+
+        {track.media?.length && <Container size="lg">
+          <Paper withBorder p="lg" radius="md" mb="xl">
+            <Grid>
+              {track.media?.map((media) => {
+                return (
+                  <Grid.Col span={{ xs: 12, sm: 12, md: 6 }} key={media.id}>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 3 }}>
+                      <AspectRatio ratio={16 / 9} mb="lg">
+                        <Image
+                          src={media.url}
+                          alt={media.alternativeText || media.alternativeText || track.title}
+                        />
+                      </AspectRatio>
+                    </motion.div>
+                  </Grid.Col>
+                );
+              })}
+            </Grid>
+          </Paper>
+        </Container>}
+
+        <Container size="lg">
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
             {album.tracks?.map((track: AlbumTrack) => (
               <MotionCard
@@ -106,7 +123,7 @@ const TrackPage = ({store, album}: AlbumPageProps) => {
                   visible: { opacity: 1, y: 0 }
                 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
+              >
                 <div className="mb-md">
                   <AspectRatio ratio={16 / 9}>
                     <Image
@@ -138,9 +155,10 @@ const TrackPage = ({store, album}: AlbumPageProps) => {
             ))}
           </SimpleGrid>
         </Container>
-        </motion.div>
-      </Box>
-    );
-  };
+        <AlbumNav store={store} album={album} />
+      </motion.div>
+    </Box>
+  );
+};
 
-  export default TrackPage;
+export default TrackPage;

@@ -1,6 +1,6 @@
 import { Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
-import { Album } from '@/markket/album';
+import { Album, AlbumTrack } from '@/markket/album';
 import { Article } from '@/markket/article';
 import { CodeHighlight } from '@mantine/code-highlight';
 
@@ -9,6 +9,7 @@ interface PageContentProps {
     page?: Page;
     post?: Article;
     album?: Album;
+    track?: AlbumTrack;
   };
 };
 
@@ -19,7 +20,7 @@ interface PageContentProps {
  * @returns { JSX.Element }
  */
 export default function PageContent({ params, }: PageContentProps) {
-  const content = params?.page?.Content || params?.post?.Content || params?.album?.content;
+  const content = params?.page?.Content || params?.post?.Content || params?.album?.content || params?.track?.content;
   const renderedImages = new Set<string>();
 
   if (!content?.length) {

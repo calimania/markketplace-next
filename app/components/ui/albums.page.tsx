@@ -18,7 +18,8 @@ import {
   Overlay,
 } from "@mantine/core";
 import PageContent from "@/app/components/ui/page.content";
-import {  IconLink,  } from '@tabler/icons-react';
+import { IconLink, } from '@tabler/icons-react';
+import AlbumNav from '@/app/components/ui/album.nav';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -140,6 +141,7 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
             ))}
           </SimpleGrid>
         </Container>
+        <AlbumNav store={store} />
       </motion.div>
     </Box>
   );

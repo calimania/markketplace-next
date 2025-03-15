@@ -14,6 +14,7 @@ export interface AlbumTrack {
   locale: string;
   description: string;
   content: ContentBlock[];
+  media: Media[];
   URLS?: {
     id: number;
     Label: string;
