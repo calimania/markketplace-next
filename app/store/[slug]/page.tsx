@@ -6,10 +6,13 @@ import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
 
+import Albums from '@/app/components/ui/albums.grid';
+
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
 import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
+import { Album } from '@/markket/album';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -107,6 +110,7 @@ export default async function StorePage({
           </div>
           <PageContent params={{ page: homePage }} />
           <StoreTabs urls={store?.URLS} />
+          <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
         </Stack>
       </Container>
     </div>

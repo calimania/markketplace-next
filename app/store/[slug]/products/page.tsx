@@ -6,7 +6,6 @@ import Markdown from "@/app/components/ui/page.markdown";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { markketConfig } from "@/markket/config";
-import PageContent from "@/app/components/ui/page.content";
 import ProductCard from "@/app/components/ui/product.card";
 import {
   Container,
@@ -19,6 +18,7 @@ import {
   Divider,
 } from "@mantine/core";
 import { IconShoppingBag } from '@tabler/icons-react';
+import PageContent from "@/app/components/ui/page.content";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -106,9 +106,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </Group>
       </Paper>
 
-      <Title order={2} size="h3" mb={40}>
+      {!!products.length && (<Title order={2} size="h3" mb={40}>
         Product Catalog
-      </Title>
+      </Title>)}
 
       <Box mb={40}>
         {products.length > 0 ? (

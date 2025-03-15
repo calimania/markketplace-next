@@ -135,6 +135,7 @@ export class StrapiClient {
   };
 
 
+  // @TODO - if we have a store?.id, is faster to search that way instead of slug
   private buildUrl(options: EnhancedFetchOptions): string {
     const { contentType, filters, populate, paginate, sort } = options;
     const params = new URLSearchParams();
@@ -296,7 +297,7 @@ export class StrapiClient {
         },
       },
       paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,store'
+      populate: 'SEO.socialImage,store,albums,albums.cover,albums.SEO,albums.tracks'
     });
   };
 
@@ -356,6 +357,26 @@ export class StrapiClient {
       sort: 'createdAt:desc',
     });
   }
+
+  /** Requests related Album */
+  async getAlbum(album_slug: string, store_slug?: string) {
+
+    return await this.fetch({
+      contentType: 'albums',
+      filters: {
+        slug: {
+          $eq: album_slug,
+        },
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
+      },
+      populate: 'SEO.socialImage,tracks,tracks.SEO,tracks.SEO.socialImage,tracks.media,tracks.urls,cover',
+      sort: 'createdAt:desc',
+    });
+  };
 
   /**
    * Uploads an avatar image to the strapi / upload endpoint with the user's token

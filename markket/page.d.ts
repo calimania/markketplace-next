@@ -1,4 +1,5 @@
 import Store from '@/markket/store.d';
+import { Album } from './album';
 
 interface BlockText {
   text: string;
@@ -106,6 +107,7 @@ export interface Page {
   documentId: string;
   store?: Store;
   SEO?: SEO;
+  albums?: Album[];
 };
 
 export interface PageResponse {
