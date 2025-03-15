@@ -21,6 +21,7 @@ import PageContent from "@/app/components/ui/page.content";
 import { IconLink, } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 import AlbumNav from './album.nav';
+import Link from 'next/link';
 
 // @ts-expect-error Card is a special polymorphic component
 const MotionCard = motion(Card);
@@ -86,9 +87,24 @@ const TrackPage = ({ store, album, track }: AlbumPageProps) => {
             {track.title}
           </Title>
           <PageContent params={{ track }} />
-
+          {track.urls && track.urls.length > 0 && (
+            <Paper withBorder p="lg" radius="md" mb="xl">
+              <Stack gap="md">
+                <Title order={3}>Links</Title>
+                {track.urls.map((url) => (
+                  <Group key={url.id} gap="xs">
+                    <IconLink size={16} />
+                    <Text size="lg" fw={500}>
+                      <Link href={url.URL} target="_blank">
+                        {url.Label || url.URL}
+                      </Link>
+                    </Text>
+                  </Group>
+                ))}
+              </Stack>
+            </Paper>
+          )}
         </Container>
-
         {track.media?.length && <Container size="lg">
           <Paper withBorder p="lg" radius="md" mb="xl">
             <Grid>
