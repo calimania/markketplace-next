@@ -18,7 +18,6 @@ import {
   Overlay,
 } from "@mantine/core";
 import PageContent from "@/app/components/ui/page.content";
-import { IconLink, } from '@tabler/icons-react';
 import AlbumNav from '@/app/components/ui/album.nav';
 
 import { motion } from 'framer-motion';
@@ -123,19 +122,9 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
                       {track.title}
                     </Link>
                   </Text>
-
                   <Text size="sm" c="dimmed" lineClamp={2}>
                     {track.description}
                   </Text>
-
-                  {track.URLS && track.URLS.length > 0 && (
-                    <Group gap="xs" mt="xs">
-                      <IconLink size={16} />
-                      <Text size="sm" c="dimmed">
-                        {track.URLS.length} links
-                      </Text>
-                    </Group>
-                  )}
                 </Stack>
               </MotionCard>
             ))}

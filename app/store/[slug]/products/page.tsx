@@ -49,8 +49,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
-  const { data } = await strapiClient.getPage("products", slug);
-  const productPage = data?.[0];
 
   const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
 

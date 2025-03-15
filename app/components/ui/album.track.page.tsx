@@ -87,23 +87,6 @@ const TrackPage = ({ store, album, track }: AlbumPageProps) => {
             {track.title}
           </Title>
           <PageContent params={{ track }} />
-          {track.urls && track.urls.length > 0 && (
-            <Paper withBorder p="lg" radius="md" mb="xl">
-              <Stack gap="md">
-                <Title order={3}>Links</Title>
-                {track.urls.map((url) => (
-                  <Group key={url.id} gap="xs">
-                    <IconLink size={16} />
-                    <Text size="lg" fw={500}>
-                      <Link href={url.URL} target="_blank">
-                        {url.Label || url.URL}
-                      </Link>
-                    </Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Paper>
-          )}
         </Container>
         {track.media?.length && <Container size="lg">
           <Paper withBorder p="lg" radius="md" mb="xl">
@@ -157,19 +140,29 @@ const TrackPage = ({ store, album, track }: AlbumPageProps) => {
                   <Text size="sm" c="dimmed" lineClamp={2}>
                     {track.description}
                   </Text>
-
-                  {track.URLS && track.URLS.length > 0 && (
-                    <Group gap="xs" mt="xs">
-                      <IconLink size={16} />
-                      <Text size="sm" c="dimmed">
-                        {track.URLS.length} links
-                      </Text>
-                    </Group>
-                  )}
                 </Stack>
               </MotionCard>
             ))}
           </SimpleGrid>
+        </Container>
+        <Container size="lg">
+          {track.urls && track.urls.length > 0 && (
+            <Paper withBorder p="lg" radius="md" mb="xl">
+              <Stack gap="md">
+                <Title order={3}>Links</Title>
+                {track.urls.map((url) => (
+                  <Group key={url.id} gap="xs">
+                    <IconLink size={16} />
+                    <Text size="lg" fw={500}>
+                      <Link href={url.URL} target="_blank">
+                        {url.Label || url.URL}
+                      </Link>
+                    </Text>
+                  </Group>
+                ))}
+              </Stack>
+            </Paper>
+          )}
         </Container>
         <AlbumNav store={store} album={album} />
       </motion.div>
