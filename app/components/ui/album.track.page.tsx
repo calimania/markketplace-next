@@ -21,7 +21,6 @@ import PageContent from "@/app/components/ui/page.content";
 import {  IconLink,  } from '@tabler/icons-react';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 // @ts-expect-error Card is a special polymorphic component
 const MotionCard = motion(Card);
@@ -31,11 +30,12 @@ type AlbumPageProps = {
   album: Album;
 };
 
-const AlbumPage = ({ store, album }: AlbumPageProps) => {
+const TrackPage = ({store, album}: AlbumPageProps) => {
+    console.log({store});
 
-  return (
-    <Box>
-      <motion.div
+    return (
+      <Box>
+              <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
@@ -106,7 +106,7 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
                   visible: { opacity: 1, y: 0 }
                 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              >
+                >
                 <div className="mb-md">
                   <AspectRatio ratio={16 / 9}>
                     <Image
@@ -118,9 +118,7 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
                 </div>
                 <Stack mt="md" gap="xs">
                   <Text fw={500} size="lg" lineClamp={2}>
-                    <Link href={`/store/${store.slug}/${album.slug}/${track.slug}`} >
-                      {track.title}
-                    </Link>
+                    {track.title}
                   </Text>
 
                   <Text size="sm" c="dimmed" lineClamp={2}>
@@ -140,9 +138,9 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
             ))}
           </SimpleGrid>
         </Container>
-      </motion.div>
-    </Box>
-  );
-};
+        </motion.div>
+      </Box>
+    );
+  };
 
-export default AlbumPage;
+  export default TrackPage;
