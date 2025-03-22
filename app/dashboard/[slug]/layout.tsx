@@ -31,6 +31,7 @@ import {
   IconMoodEdit,
   IconHomeHeart,
   IconHomeStar,
+  IconCashBanknoteHeart,
 } from '@tabler/icons-react';
 
 type DashboardLayoutProps = {
@@ -39,6 +40,7 @@ type DashboardLayoutProps = {
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
+  { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
