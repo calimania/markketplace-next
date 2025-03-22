@@ -1,22 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Store } from '@/markket/store.d';
+import { markketClient } from '@/markket/api';
 import ProtectedRoute from '@/app/components/protectedRoute';
 import { useAuth } from '@/app/providers/auth';
 import {
   AppShell,
   Text,
+  Container,
+  Paper,
+  Select,
+  Avatar,
   UnstyledButton,
   Group,
-  rem,
   Burger,
   HoverCard,
   Stack,
-  Divider
+  Divider,
+  Button,
+  Loader,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { strapiClient } from '@/markket/api.strapi';
 import {
   IconSettings,
   IconShoppingCart,
@@ -33,10 +40,6 @@ import {
   IconHomeStar,
   IconCashBanknoteHeart,
 } from '@tabler/icons-react';
-
-type DashboardLayoutProps = {
-  children: React.ReactNode;
-};
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
@@ -60,16 +63,14 @@ function MainLink({ icon: Icon, label, notifications, href }: {
   href?: string;
 }) {
   return (
-    <UnstyledButton>
-      <Group align="right" style={{ width: '100%' }} py={8}>
-        <Icon style={{ width: rem(20), height: rem(20) }} />
-        <Text size="sm">
-          <a href={href?.startsWith('http') ? href : `${href || '#'}`} className="hover:text-blue-500 hover:bg-gray-300 block py-1 cursor-pointer">
-            {label}
-          </a>
-        </Text>
+    <UnstyledButton component={Link} href={href || '#'}>
+      <Group align="center" justify="space-between" py={8} px={4} className="hover:bg-gray-200 rounded">
+        <Group gap="sm">
+          <Icon size={20} />
+          <Text size="sm">{label}</Text>
+        </Group>
         {notifications && (
-          <Text size="xs" color="blue" fw={700}>
+          <Text size="xs" c="blue" fw={700}>
             {notifications}
           </Text>
         )}
@@ -78,19 +79,100 @@ function MainLink({ icon: Icon, label, notifications, href }: {
   );
 }
 
-export default function DashboardPage({ children }: DashboardLayoutProps) {
+
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
-  const [store, setStore] = useState({} as Store);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    async function fetchStore() {
-      const store = await strapiClient.getStore();
-      setStore(store?.data?.[0]);
+    const params = new URLSearchParams(window.location.search);
+    const currentStoreId = params.get('store');
+
+    async function fetchStores() {
+      const markket = new markketClient();
+      setLoading(true);
+
+      try {
+        const response = await markket.fetch('/api/markket/store', {});
+
+        // Handle 401 unauthorized
+        if (response.status === 401) {
+          router.push('/auth');
+          return;
+        }
+
+        const stores = response?.data || [];
+        setStores(stores);
+
+        // Select initial store
+        if (stores.length > 0) {
+          const initialStore = currentStoreId
+            ? stores.find(s => s.documentId === currentStoreId)
+            : stores[0]; // Default to first store
+
+          if (initialStore) {
+            setSelectedStore(initialStore);
+            // Update URL if needed
+            if (!currentStoreId || currentStoreId !== initialStore.documentId) {
+              updateStoreInUrl(initialStore.documentId);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch stores:', error);
+        if (error.response?.status === 401) {
+          router.push('/auth');
+        }
+      } finally {
+        setLoading(false);
+      }
     }
 
-    fetchStore();
-  }, []);
+    fetchStores();
+  }, [router]);
+
+  const updateStoreInUrl = (storeId: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('store', storeId);
+    // Use replace to avoid adding to history stack
+    router.replace(url.pathname + url.search);
+  };
+
+  const handleStoreChange = (storeId: string | null) => {
+    if (!storeId) return;
+
+    const store = stores.find(s => s.documentId === storeId);
+    if (store) {
+      setSelectedStore(store);
+      updateStoreInUrl(store.documentId);
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Container>
+        <Paper p="xl" withBorder mt="xl">
+          <Group justify="center">
+            <Loader size="sm" />
+            <Text>Loading stores...</Text>
+          </Group>
+        </Paper>
+      </Container>
+    );
+  }
+
+  // Redirect to auth if no user
+  if (!user) {
+    router.push('/auth');
+    return null;
+  }
+
 
 
   return (
@@ -99,82 +181,106 @@ export default function DashboardPage({ children }: DashboardLayoutProps) {
       navbar={{
         width: 300,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        collapsed: { mobile: !opened }
       }}
       padding="md"
     >
-      <AppShell.Header p="md" style={{ borderBottom: '1px solid #eee' }}>
+      <AppShell.Header p="md">
         <Group justify="space-between" h="100%">
           <Group>
-            <Burger
-              opened={opened}
-              onClick={toggle}
-              hiddenFrom="sm"
-              size="sm"
-            />
-            <img
-              src={store?.Logo?.url}
-              alt={store?.SEO?.metaTitle}
-              style={{
-                height: '30px',
-                width: 'auto',
-                marginLeft: rem(12)
-              }}
-            />
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            {selectedStore && (
+              <img
+                src={selectedStore.Logo?.url}
+                alt={selectedStore.title}
+                style={{ height: 30, width: 'auto' }}
+              />
+            )}
           </Group>
-          <Group>
-            <HoverCard width={280} shadow="md" position="bottom-end">
-              <HoverCard.Target>
-                <UnstyledButton>
-                  <Group>
-                    <IconUserCircle size={24} style={{ color: '#228be6' }} />
-                    <Text fw={500}>{user?.username}</Text>
-                  </Group>
-                </UnstyledButton>
-              </HoverCard.Target>
 
-              <HoverCard.Dropdown>
-                <Stack>
-                  <Group>
-                    <IconUserCircle size={32} style={{ color: '#228be6' }} />
-                    <div>
-                      <Text fw={500}>{user?.username}</Text>
-                      <Text size="xs" c="dimmed">{user?.email}</Text>
-                    </div>
-                  </Group>
-                  <Divider />
-                  <UnstyledButton
-                    component="a"
-                    href="/auth"
-                    className="hover:bg-gray-100 p-2 rounded"
-                  >
-                    <Group>
-                      <Text size="sm">Auth Page</Text>
-                    </Group>
-                  </UnstyledButton>
-                </Stack>
-              </HoverCard.Dropdown>
-            </HoverCard>
-          </Group>
+          <Select
+            value={selectedStore?.documentId}
+            onChange={handleStoreChange}
+            data={stores.map(store => ({
+              value: store.documentId,
+              label: store.title,
+              image: store.Favicon?.url || store.Logo?.url
+            }))}
+            placeholder="Select Store"
+            clearable={false}
+            renderOption={({ option }) => (
+              <Group gap="sm">
+                <Avatar src={option.image} size={20} radius="xl" />
+                <Text>{option.label}</Text>
+              </Group>
+            )}
+          />
+
+          <HoverCard width={280} shadow="md">
+            <HoverCard.Target>
+              <UnstyledButton>
+                <Group>
+                  <IconUserCircle size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                  <Text fw={500}>{user?.username}</Text>
+                </Group>
+              </UnstyledButton>
+            </HoverCard.Target>
+
+            <HoverCard.Dropdown>
+              <Stack>
+                <Group>
+                  <IconUserCircle size={32} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                  <div>
+                    <Text fw={500}>{user?.username}</Text>
+                    <Text size="xs" c="dimmed">{user?.email}</Text>
+                  </div>
+                </Group>
+                <Divider />
+                <UnstyledButton component={Link} href="/auth" className="hover:bg-gray-100 p-2 rounded">
+                  <Text size="sm">Auth Page</Text>
+                </UnstyledButton>
+              </Stack>
+            </HoverCard.Dropdown>
+          </HoverCard>
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar
-        p="md"
-        style={{
-          borderRight: '1px solid #eee',
-          background: '#f8f9fa'
-        }}
-      >
-        <Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="md">
-          Dashboard
-        </Text>
-        {mainLinks.map((link) => (
-          <MainLink {...link} key={link.label} />
-        ))}
+
+      <AppShell.Navbar p="md">
+        <Stack gap="xs">
+          <Text size="xs" tt="uppercase" fw={700} c="dimmed">
+            Dashboard
+          </Text>
+          {mainLinks.map((link) => (
+            <MainLink {...link} key={link.label} />
+          ))}
+        </Stack>
       </AppShell.Navbar>
+
       <AppShell.Main>
         <ProtectedRoute>
-          {children}
+          {stores.length === 0 ? (
+            <Container>
+              <Paper p="xl" withBorder mt="xl">
+                <Stack align="center" gap="md">
+                  <Text ta="center">No stores found. Create your first store to continue.</Text>
+                  <Button
+                    onClick={() => router.push('/dashboard/store/new')}
+                    leftSection={<IconBuildingStore size={16} />}
+                  >
+                    Create Store
+                  </Button>
+                </Stack>
+              </Paper>
+            </Container>
+          ) : selectedStore ? (
+            children
+          ) : (
+            <Container>
+              <Paper p="xl" withBorder mt="xl">
+                <Text ta="center">Please select a store to continue</Text>
+              </Paper>
+            </Container>
+          )}
         </ProtectedRoute>
       </AppShell.Main>
     </AppShell>

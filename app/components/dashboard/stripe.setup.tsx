@@ -1,0 +1,172 @@
+"use client";
+
+import { useState } from 'react';
+import {
+  Container,
+  Paper,
+  Title,
+  Text,
+  Button,
+  Group,
+  Stack,
+  Alert,
+  Loader,
+} from '@mantine/core';
+import {
+  IconBuildingStore,
+  IconCreditCard,
+  IconAlertCircle,
+  IconExternalLink
+} from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+
+export default function StripePage() {
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateAccount = async () => {
+    setLoading(true);
+    try {
+      // Create Stripe account
+      const accountResponse = await fetch('/api/stripe/connect?action=account', {
+        method: 'POST',
+      });
+      const { account } = await accountResponse.json();
+
+      if (!account) {
+        throw new Error('Failed to create Stripe account');
+      }
+
+      // Get account link
+      const linkResponse = await fetch('/api/stripe/connect?action=account_link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ account }),
+      });
+
+      const accountLink = await linkResponse.json();
+
+      if (accountLink.url) {
+        window.location.href = accountLink.url;
+      } else {
+        throw new Error('No account link URL received');
+      }
+
+    } catch (error) {
+      console.error('Stripe setup error:', error);
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to setup Stripe account. Please try again.',
+        color: 'red',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container size="md" py="xl">
+      <Paper withBorder radius="md" p="xl">
+        <Stack gap="lg">
+          <Group>
+            <IconBuildingStore size={32} color="var(--mantine-color-blue-6)" />
+            <Title order={2}>Stripe Payments</Title>
+          </Group>
+
+          <Text c="dimmed">
+            Connect your store with Stripe to start accepting payments and manage your transactions.
+            You&apos;ll be able to track sales, handle refunds, and receive payouts directly to your bank account.
+          </Text>
+          <Text c="dimmed">
+            You can continue using every other feature, to create albums, blog posts, and products;
+            however, for compliance & technical reasons, automatic payouts will be disabled until you set up your Stripe account
+          </Text>
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Important Information"
+            color="blue"
+          >
+            To accept payments, you'll need to:
+            <ul className="list-disc pl-6 mt-2">
+              <li>Provide basic business information</li>
+              <li>Connect a bank account for payouts</li>
+              <li>Verify your identity</li>
+            </ul>
+          </Alert>
+
+          <Group justify="space-between" mt="md">
+            <Button
+              leftSection={<IconCreditCard size={20} />}
+              onClick={handleCreateAccount}
+              loading={loading}
+              size="md"
+              variant="filled"
+            >
+              {loading ? 'Setting up...' : 'Setup Stripe Account'}
+            </Button>
+
+            <Button
+              variant="light"
+              component="a"
+              href="https://docs.stripe.com/security"
+              target="_blank"
+              rightSection={<IconExternalLink size={16} />}
+            >
+              Stripe Security
+            </Button>
+          </Group>
+        </Stack>
+      </Paper>
+
+      {/* Additional Info Section */}
+      <Paper withBorder radius="md" p="xl" mt="xl">
+        <Stack gap="md">
+          <Title order={3}>What happens next?</Title>
+          <Text c="dimmed">
+            After clicking "Setup Stripe Account", you'll be redirected to Stripe to:
+          </Text>
+          <ol className="list-decimal pl-6">
+            <li className="mb-2">Complete your account setup</li>
+            <li className="mb-2">Verify your identity and business details</li>
+            <li className="mb-2">Connect your bank account for receiving payments</li>
+            <li>Start accepting payments from customers</li>
+          </ol>
+        </Stack>
+        <Stack gap="md" mt="xl">
+          <Title order={3}>Why Stripe? Payouts?</Title>
+          <Text c="dimmed">
+            Storing private and sensitive information like credit cards is very complex, malign actors
+            are always looking for ways to steal this information, and there are many regulatory nuances.
+            At Markket we want to keep your data safe, and your transactions aways from prying eyes
+          </Text>
+          <ol className="list-decimal pl-6">
+            <li className="mb-2">Enterprise level encryption</li>
+            <li className="mb-2">Regulatory liasons</li>
+            <li className="mb-2">Identity verification & compliance</li>
+            <li className="mb-2">Easy refunds, & customer management</li>
+          </ol>
+        </Stack>
+        <Stack gap="md" mt="xl">
+          <Title order={3}>Why are you asking this from me?</Title>
+          <Text c="dimmed">
+            We&apos;re not asking for anything you havent given Venmo already - we just receive a
+            prime number we use to identify your account
+          </Text>
+        </Stack>
+        <Stack gap="md" mt="xl">
+          <Title order={3}>I refuse</Title>
+          <Text c="dimmed">
+            Markket is open source, you can self-host and control your Stripe, or a different gateway; or install a community alternative
+          </Text>
+          <ol className="list-decimal pl-6">
+            <li className="mb-2">ask customers to venmo you</li>
+            <li className="mb-2">cash</li>
+            <li className="mb-2">Square</li>
+            <li className="mb-2">Wells fargo</li>
+          </ol>
+        </Stack>
+      </Paper>
+    </Container>
+  );
+};
