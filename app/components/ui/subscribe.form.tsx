@@ -43,7 +43,7 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
         body: JSON.stringify({
           data: {
             Email: values.email,
-            stores: [`${store?.id || ''}`],
+            stores: [`${store?.documentId || ''}`],
           }
         }),
       });
