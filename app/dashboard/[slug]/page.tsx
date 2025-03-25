@@ -9,10 +9,12 @@ type AnyDashboardPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+
 export default async function AnyDashboardPage({
   params,
 }: AnyDashboardPageProps) {
   const { slug } = await params;
+
 
   if (slug === 'store') {
     return <StoreDashboardPage />;

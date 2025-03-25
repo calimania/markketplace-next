@@ -22,7 +22,7 @@ import {
 } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import { strapiClient } from '@/markket/api.strapi';
 import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';

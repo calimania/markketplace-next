@@ -3,7 +3,7 @@
 import { Group, ActionIcon, Container, Paper } from '@mantine/core';
 import { IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import { useEffect, useState } from 'react';
 
 interface GlobalBannerProps {

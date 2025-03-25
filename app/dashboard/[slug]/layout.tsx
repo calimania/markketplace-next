@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Store } from '@/markket/store.d';
 import { markketClient } from '@/markket/api';
 import ProtectedRoute from '@/app/components/protectedRoute';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import {
   AppShell,
   Text,
@@ -40,6 +40,7 @@ import {
   IconHomeStar,
   IconCashBanknoteHeart,
 } from '@tabler/icons-react';
+import { DashboardContext } from '@/app/providers/dashboard.provider';
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
@@ -79,7 +80,9 @@ function MainLink({ icon: Icon, label, notifications, href }: {
   );
 }
 
-
+type DashboardLayoutProps = {
+  children: React.ReactNode;
+};
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
@@ -88,6 +91,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
+
+
+  const updateStoreInUrl = useCallback((storeId: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('store', storeId);
+    return url;
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -112,36 +122,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         // Select initial store
         if (stores.length > 0) {
           const initialStore = currentStoreId
-            ? stores.find(s => s.documentId === currentStoreId)
-            : stores[0]; // Default to first store
+            ? stores.find((s: Store) => s.documentId === currentStoreId)
+            : stores[0];
 
           if (initialStore) {
             setSelectedStore(initialStore);
-            // Update URL if needed
+
             if (!currentStoreId || currentStoreId !== initialStore.documentId) {
-              updateStoreInUrl(initialStore.documentId);
+              const newURL = updateStoreInUrl(initialStore.documentId);
+              router.replace(newURL.pathname + newURL.search);
             }
           }
         }
       } catch (error) {
         console.error('Failed to fetch stores:', error);
-        if (error.response?.status === 401) {
-          router.push('/auth');
-        }
+
+        // if (error.response?.status === 401) {
+        //   router.push('/auth');
+        // }
+
       } finally {
         setLoading(false);
       }
     }
 
     fetchStores();
-  }, [router]);
+  }, [router, updateStoreInUrl]);
 
-  const updateStoreInUrl = (storeId: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('store', storeId);
-    // Use replace to avoid adding to history stack
-    router.replace(url.pathname + url.search);
-  };
 
   const handleStoreChange = (storeId: string | null) => {
     if (!storeId) return;
@@ -149,11 +156,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const store = stores.find(s => s.documentId === storeId);
     if (store) {
       setSelectedStore(store);
-      updateStoreInUrl(store.documentId);
+      const newURL = updateStoreInUrl(store.documentId);
+      router.replace(newURL.pathname + newURL.search);
     }
   };
 
-  // Show loading state
   if (loading) {
     return (
       <Container>
@@ -167,13 +174,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  // Redirect to auth if no user
   if (!user) {
     router.push('/auth');
     return null;
   }
-
-
 
   return (
     <AppShell
@@ -204,13 +208,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             data={stores.map(store => ({
               value: store.documentId,
               label: store.title,
-              image: store.Favicon?.url || store.Logo?.url
             }))}
             placeholder="Select Store"
             clearable={false}
             renderOption={({ option }) => (
               <Group gap="sm">
-                <Avatar src={option.image} size={20} radius="xl" />
+                <Avatar src={stores.find(s => s.documentId == option.value)?.Favicon?.url} size={20} radius="xl" />
                 <Text>{option.label}</Text>
               </Group>
             )}
@@ -273,7 +276,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </Paper>
             </Container>
           ) : selectedStore ? (
-            children
+              <>
+                <DashboardContext.Provider value={{ store: selectedStore }}>
+                  {children}
+                </DashboardContext.Provider>
+              </>
           ) : (
             <Container>
               <Paper p="xl" withBorder mt="xl">

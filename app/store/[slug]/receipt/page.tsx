@@ -159,7 +159,7 @@ export default function ProductDisplay({ params }: ReceiptPageProps) {
                   body: JSON.stringify({
                     data: {
                       Email: email,
-                      stores: [store.id],
+                      stores: [store.documentId],
                     },
                   }),
                 });
