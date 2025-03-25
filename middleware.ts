@@ -19,6 +19,13 @@ const PROTECTED_ROUTES: string[] = [
  */
 export async function middleware(request: NextRequest) {
 
+  if (request.headers.get('x-middleware-subrequest')) {
+    return NextResponse.json(
+      { error: 'Subrequest not allowed' },
+      { status: 400 }
+    );
+  }
+
   const isProtectedRoute = PROTECTED_ROUTES.some(route =>
     request.nextUrl.pathname.startsWith(route)
   );
