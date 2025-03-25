@@ -8,13 +8,15 @@ type PageListProps = {
   storeSlug?: string;
 };
 
+const excluded_list = ['docs', 'blog', 'newsletter', 'events', 'about', 'home',];
+
 export const PageList = ({ pages, storeSlug}: PageListProps) => {
   return (
     <div className="space-y-4">
       {pages.map((page) => (
         <Link
           key={page.id}
-          href={`/store/${storeSlug}/about/${page.slug}`}
+          href={`/store/${storeSlug}/${!excluded_list.includes(page.slug) ? 'about/' : ''}${page.slug}`}
           className="no-underline block"
         >
           <Card

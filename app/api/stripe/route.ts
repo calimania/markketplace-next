@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import Stripe from 'stripe';
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+import stripeClient, { Stripe } from '@/markket/stripe.server';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -22,6 +20,10 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
  * @returns
  */
 export async function POST(req: NextRequest) {
+  console.info('stripe:webhook:');
+
+  const stripe = stripeClient.getInstance();
+
   try {
     const body = await req.text();
     console.log('Received body:', body);
@@ -29,7 +31,8 @@ export async function POST(req: NextRequest) {
     const signature = headersList.get('stripe-signature');
 
     if (!signature || !WEBHOOK_SECRET) {
-      console.warn('⚠️ Missing Stripe signature or webhook secret');
+      console.warn('Missing Stripe signature or webhook secret');
+
       return NextResponse.json(
         { error: 'Missing required headers' },
         { status: 400 }
@@ -37,9 +40,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify webhook signature
-    // let event: Stripe.Event;
+    let event: Stripe.Event;
     try {
-      // event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
     } catch (err) {
       console.error('🚨 Webhook signature verification failed:', err);
       return NextResponse.json(
@@ -48,9 +51,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const event = { type: 'pending', data: { object: {} } };
 
     // Handle different event types
+    console.log(`stripe:webhook:${event.type}`);
+
     switch (event.type) {
       case 'payment_intent.succeeded':
         const paymentIntent = event.data?.object as Stripe.PaymentIntent;
@@ -101,3 +105,4 @@ export async function GET() {
     { status: 405 }
   );
 }
+

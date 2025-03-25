@@ -29,6 +29,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const x = confirmed();
+
     if (!x) {
       return router.replace('/auth');
     }
@@ -68,58 +69,12 @@ export default function DashboardLayout({
     }
   };
 
-  // const handleStoreChange = (storeId: string | null) => {
-  //   if (!storeId) return;
-
-  //   setSelectedStore(storeId);
-  //   const store = stores.find(s => s.id.toString() === storeId);
-  //   if (store) {
-  //     // Update URL with store slug
-  //     const newPath = pathname.replace(/\/dashboard\/(.+)/, `/dashboard/${store.slug}/$1`);
-  //     router.push(newPath);
-  //   }
-  // };
-
   useEffect(() => {
     getStores();
   }, []);
 
   return (
     <>
-      {/* {stores.length > 0 && (
-        <Paper shadow="sm" p="md" withBorder mb="xl">
-          <Group justify="end" >
-            <Text size="sm" fw={500} c="dimmed">
-              {store?.title} |
-              Select Store
-            </Text>
-            <Select
-              value={selectedStore}
-              onChange={(value) => {
-                setSelectedStore(value);
-              }}
-              data={storeOptions}
-              placeholder="Choose store"
-              clearable={false}
-              maxDropdownHeight={400}
-              comboboxProps={{ withinPortal: true }}
-              renderOption={(item) => {
-                const storeItem = item as unknown as StoreOption;
-                return (
-                  <Group gap="sm">
-                    <Avatar
-                      src={storeItem.image}
-                      size={20}
-                      radius="xl"
-                    />
-                    <span>{storeItem.label}</span>
-                  </Group>
-                );
-              }}
-            />
-          </Group>
-        </Paper>
-      )} */}
       {children}
     </>
   );
