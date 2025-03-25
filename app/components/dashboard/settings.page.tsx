@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import { useEffect, useState } from 'react';
 import {
   Container,

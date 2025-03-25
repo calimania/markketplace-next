@@ -7,7 +7,7 @@ import { FeatureCard } from "@/app/components/ui/feature.card";
 import { Store } from "@/markket/store";
 import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
-import { useAuth } from "@/app/providers/auth";
+import { useAuth } from "@/app/providers/auth.provider";
 
 const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
 

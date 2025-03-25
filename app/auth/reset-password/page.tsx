@@ -16,7 +16,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 
 interface ResetPasswordForm {
   password: string;

@@ -16,7 +16,7 @@ import {
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import { IconUpload, IconTrash, IconUser } from '@tabler/icons-react';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import { strapiClient, markketClient } from '@/markket/api';
 
 interface ProfileFormValues {

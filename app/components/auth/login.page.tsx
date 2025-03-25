@@ -18,7 +18,7 @@ import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { IconMusicHeart, IconX } from '@tabler/icons-react';
 
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 
 interface LoginForm {
   identifier: string; // Strapi uses 'identifier' for email/username

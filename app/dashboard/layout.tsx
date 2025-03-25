@@ -4,7 +4,7 @@ import { markketClient } from '@/markket/api';
 import { useEffect, useState } from 'react';
 // import { Paper, Select, Group, Avatar, Text } from '@mantine/core';
 import { Store } from '@/markket/store';
-import { useAuth } from '@/app/providers/auth';
+import { useAuth } from '@/app/providers/auth.provider';
 import { useRouter } from 'next/navigation';
 
 type StoreOption = {

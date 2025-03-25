@@ -21,7 +21,7 @@ interface EnhancedFetchOptions extends Omit<FetchOptions, 'filters'> {
 };
 
 type uploadAvatarOptions = {
-  id: number;
+  id: number | string;
   model?: string;
   field?: string;
 };
