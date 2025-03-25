@@ -258,7 +258,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
         </Stack>
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main py="md">
         <ProtectedRoute>
           {stores.length === 0 ? (
             <Container>

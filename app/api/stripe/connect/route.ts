@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import stripeClient from '@/markket/stripe.server';
+import { markketConfig } from '@/markket/config';
 
 /**
  * @swagger POST /api/stripe/connect
@@ -19,6 +20,9 @@ export async function POST(req: NextRequest) {
   /* middleware prevents this from being null */
   const userEmail = req.headers.get('x-user-email') as string;
 
+  const body = await req.json();
+  const store = body.store;
+
   const stripe = stripeClient.getInstance();
 
   if (!stripe) {
@@ -28,7 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!action) {
+  if (!action || !store) {
     return NextResponse.json(
       { error: 'Missing action parameter' },
       { status: 400 }
@@ -45,12 +49,32 @@ export async function POST(req: NextRequest) {
           email: userEmail
         });
 
-        console.log('stripe:connect:account:', { account: account?.id });
+        console.log('stripe:connect:account:', { account: account?.id, store });
+
+        if (account?.id) {
+          const updateStore = await fetch(new URL(`/api/stores/${store}`, markketConfig.api), {
+            method: 'PUT',
+            body: JSON.stringify({
+              data: { STRIPE_CUSTOMER_ID: account?.id, }
+            }),
+            headers: {
+              Authorization: `Bearer ${markketConfig.admin_token}`,
+              "Content-Type": "application/json",
+            }
+          });
+
+          const response = await updateStore.json();
+
+          console.info('stripe:connect:store:update:', {
+            ok: updateStore.ok,
+            success: response?.data?.STRIPE_CUSTOMER_ID === account?.id,
+          });
+        }
+
         return NextResponse.json({ account: account.id });
       }
 
       case 'account_link': {
-        const body = await req.json();
         const { account, store } = body;
         console.log('stripe:connect:account_link:', { account });
 
@@ -69,8 +93,6 @@ export async function POST(req: NextRequest) {
           refresh_url: `${origin}/dashboard/stripe/?store=${store}`,
           type: "account_onboarding",
         });
-
-        console.log({ accountLink });
 
         return NextResponse.json({
           url: accountLink.url,

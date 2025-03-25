@@ -8,8 +8,6 @@ import { markketConfig } from './markket/config';
  */
 const PROTECTED_ROUTES: string[] = [
   '/api/stripe/connect',
-  // '/api/markket/store',
-  // '/dashboard',
 ];
 
 /**
@@ -57,13 +55,16 @@ export async function middleware(request: NextRequest) {
 
     const userData = await verifyResponse.json();
 
-    // For store-specific routes, verify store ownership
-    if (request.nextUrl.pathname.includes('/api/stripe/connect')) {
-      const storeId = request.nextUrl.searchParams.get('store');
+    const body = await request.json();
+    const storeId = body.store;
+
+    // for stores, check that the user exists in the store
+    if (storeId || request.nextUrl.pathname.includes('/api/stripe/connect')) {
 
       if (storeId) {
-        const storeResponse = await fetch(
-          `${markketConfig.api}/api/store/${storeId}`,
+        const url = new URL(`/api/stores/${storeId}?populate=users`, markketConfig.api);
+
+        const storeResponse = await fetch(url,
           {
             headers: {
               'Authorization': `Bearer ${markketConfig.admin_token}`,
@@ -72,8 +73,16 @@ export async function middleware(request: NextRequest) {
         );
 
         const storeData = await storeResponse.json();
-        console.info('Found store data:', storeData);
-        if (!storeData?.data?.users?.includes(userData.documentId)) {
+
+        console.info('middleware:store:verification:', {
+          storeResponse: storeResponse.status,
+          store: storeData?.documentId,
+          user: userData?.documentId
+        });
+
+        const flattened_user_ids = storeData?.data?.users?.map((user: any) => user.documentId);
+
+        if (!flattened_user_ids?.includes(userData.documentId)) {
           return NextResponse.json(
             { error: 'Not authorized for this store' },
             { status: 403 }
@@ -102,13 +111,9 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-/** Paths that use this middleware */
+/** paths that use this middleware */
 export const config = {
   matcher: [
     '/api/stripe/connect/:path*',
-    // '/api/markket/:path*',
-    // '/dashboard/:path*',
   ],
 };
-
-

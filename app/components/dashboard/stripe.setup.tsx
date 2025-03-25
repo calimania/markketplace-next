@@ -20,6 +20,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import { markketClient } from '@/markket/api.markket';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
+import StoreHeader from './store.header';
 
 export default function StripePage() {
   const [loading, setLoading] = useState(false);
@@ -64,7 +65,10 @@ export default function StripePage() {
     const markket = new markketClient();
 
     try {
-      const accountResponse = await markket.stripeConnect('account', {});
+      const accountResponse = await markket.stripeConnect('account', {
+        store: store?.documentId,
+      });
+
       const { account } = await accountResponse.json();
 
       if (!account) {
@@ -73,6 +77,7 @@ export default function StripePage() {
 
       const linkResponse = await markket.stripeConnect('account_link', {
         account,
+        store: store?.documentId,
       });
 
       if (linkResponse.url) {
@@ -94,7 +99,8 @@ export default function StripePage() {
   };
 
   return (
-    <Container size="md" py="xl">
+    <Container size="md" pb="xl">
+      <StoreHeader store={store} />
       <Paper withBorder radius="md" p="xl">
         <Stack gap="lg">
           <Group>
