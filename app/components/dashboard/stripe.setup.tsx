@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Container,
   Paper,
@@ -18,35 +18,65 @@ import {
   IconExternalLink
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { markketClient } from '@/markket/api.markket';
+import { DashboardContext } from '@/app/providers/dashboard.provider';
 
 export default function StripePage() {
   const [loading, setLoading] = useState(false);
 
+  const { store } = useContext(DashboardContext) as { store: any };
+
+  const openDashboard = async () => {
+    setLoading(true);
+    const markket = new markketClient();
+    try {
+      const linkResponse = await markket.stripeConnect('account_link', {
+        account: store?.STRIPE_CUSTOMER_ID,
+        store: store?.documentId,
+      });
+
+      console.log({ linkResponse, ur: linkResponse?.data?.url });
+
+      if (linkResponse?.url) {
+        const url = new URL(linkResponse.url);
+        const a = document.createElement('a');
+        a.href = url.toString();
+        a.target = '_blank';
+        a.click();
+        a.remove();
+      } else {
+        throw new Error('No account link URL received');
+      }
+    } catch (error) {
+      console.error('Stripe setup error:', error);
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to setup Stripe account. Please try again.',
+        color: 'red',
+      });
+    }
+    setLoading(false);
+  };
+
   const handleCreateAccount = async () => {
     setLoading(true);
-    try {
 
-      const accountResponse = await fetch('/api/stripe/connect?action=account', {
-        method: 'POST',
-      });
+    const markket = new markketClient();
+
+    try {
+      const accountResponse = await markket.stripeConnect('account', {});
       const { account } = await accountResponse.json();
 
       if (!account) {
         throw new Error('Failed to create Stripe account');
       }
 
-      const linkResponse = await fetch('/api/stripe/connect?action=account_link', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ account }),
+      const linkResponse = await markket.stripeConnect('account_link', {
+        account,
       });
 
-      const accountLink = await linkResponse.json();
-
-      if (accountLink.url) {
-        window.location.href = accountLink.url;
+      if (linkResponse.url) {
+        window.location.href = linkResponse.url;
       } else {
         throw new Error('No account link URL received');
       }
@@ -94,26 +124,41 @@ export default function StripePage() {
           </Alert>
 
           <Group justify="space-between" mt="md">
-            <Button
-              leftSection={<IconCreditCard size={20} />}
-              onClick={handleCreateAccount}
-              disabled
-              loading={loading}
-              size="md"
-              variant="filled"
-            >
-              {loading ? 'Setting up...' : 'Setup Stripe Account'}
-            </Button>
+            {!store?.STRIPE_CUSTOMER_ID && (
+              <Button
+                leftSection={<IconCreditCard size={20} />}
+                onClick={handleCreateAccount}
+                disabled={loading}
+                loading={loading}
+                size="md"
+                variant="filled"
+              >
+                {loading ? 'Setting up...' : 'Create Stripe Account'}
+              </Button>
+            )}
+
+            {store?.STRIPE_CUSTOMER_ID && (
+              <Button
+                leftSection={<IconCreditCard size={20} />}
+                onClick={openDashboard}
+                disabled={loading}
+                loading={loading}
+                size="md"
+                variant="filled"
+              >
+                {loading ? 'Setting up...' : 'Open Stripe Dashboard'}
+              </Button>
+            )}
 
             <Button
               variant="light"
               component="a"
-              disabled
+              size='md'
               href="https://docs.stripe.com/security"
               target="_blank"
               rightSection={<IconExternalLink size={16} />}
             >
-              Stripe Security
+              Security at Stripe
             </Button>
           </Group>
         </Stack>

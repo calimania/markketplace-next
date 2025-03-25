@@ -59,7 +59,7 @@ export class markketClient {
     });
   };
 
-  public fetch = async (url: string, options: fetchOptions) => {
+  public fetch = async (url: string | URL, options: fetchOptions) => {
     if (!options?.headers?.Authorization) {
       this.readToken();
     }
@@ -100,6 +100,21 @@ export class markketClient {
         ...(options.headers || {}),
       },
       body: options.body,
+    });
+  };
+
+  public stripeConnect = async (action: string, options: any) => {
+    this.readToken();
+
+    const _url = new URL(`/api/stripe/connect?action=${action}`, this.baseUrl);
+
+    return await this.fetch(_url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: options,
     });
   };
 };

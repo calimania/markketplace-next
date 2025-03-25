@@ -44,7 +44,6 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
-  { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
@@ -53,6 +52,7 @@ const mainLinks = [
   { icon: IconMessageChatbot, label: 'Inbox', notifications: 1, href: '/dashboard/inbox' },
   { icon: IconSubscript, label: 'Subscribers', href: '/dashboard/subscribers' },
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
+  { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
@@ -84,14 +84,13 @@ type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
-
 
   const updateStoreInUrl = useCallback((storeId: string) => {
     const url = new URL(window.location.href);

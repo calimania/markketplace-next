@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import stripeClient from '@/markket/stripe';
+import stripeClient from '@/markket/stripe.server';
 
 /**
  * @swagger POST /api/stripe/connect
- *  description: Create a Stripe account or account link
+ *  description: Create a Stripe account or account link,
  *   responses:
  *    400:
  *     description: Bad request
@@ -16,7 +16,11 @@ export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action');
 
+  /* middleware prevents this from being null */
+  const userEmail = req.headers.get('x-user-email') as string;
+
   const stripe = stripeClient.getInstance();
+
   if (!stripe) {
     return NextResponse.json(
       { error: 'Stripe instance not initialized' },
@@ -31,29 +35,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  console.info(`stripe:connect:${action}`);
+
   try {
     switch (action) {
       case 'account': {
         const account = await stripe.accounts.create({
-          controller: {
-            stripe_dashboard: {
-              type: "express",
-            },
-            fees: {
-              payer: "application"
-            },
-            losses: {
-              payments: "application"
-            },
-          },
+          type: 'standard',
+          email: userEmail
         });
 
+        console.log('stripe:connect:account:', { account: account?.id });
         return NextResponse.json({ account: account.id });
       }
 
       case 'account_link': {
         const body = await req.json();
-        const { account } = body;
+        const { account, store } = body;
+        console.log('stripe:connect:account_link:', { account });
 
         if (!account) {
           return NextResponse.json(
@@ -66,12 +65,16 @@ export async function POST(req: NextRequest) {
 
         const accountLink = await stripe.accountLinks.create({
           account: account,
-          return_url: `${origin}/return/${account}`,
-          refresh_url: `${origin}/refresh/${account}`,
+          return_url: `${origin}/dashboard/stripe/?store=${store}`,
+          refresh_url: `${origin}/dashboard/stripe/?store=${store}`,
           type: "account_onboarding",
         });
 
-        return NextResponse.json(accountLink);
+        console.log({ accountLink });
+
+        return NextResponse.json({
+          url: accountLink.url,
+        });
       }
 
       default:
