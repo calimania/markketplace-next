@@ -10,7 +10,6 @@ import {
   Group,
   Stack,
   Alert,
-  Loader,
 } from '@mantine/core';
 import {
   IconBuildingStore,
@@ -26,7 +25,7 @@ export default function StripePage() {
   const handleCreateAccount = async () => {
     setLoading(true);
     try {
-      // Create Stripe account
+
       const accountResponse = await fetch('/api/stripe/connect?action=account', {
         method: 'POST',
       });
@@ -36,7 +35,6 @@ export default function StripePage() {
         throw new Error('Failed to create Stripe account');
       }
 
-      // Get account link
       const linkResponse = await fetch('/api/stripe/connect?action=account_link', {
         method: 'POST',
         headers: {
@@ -87,7 +85,7 @@ export default function StripePage() {
             title="Important Information"
             color="blue"
           >
-            To accept payments, you'll need to:
+            To accept payments, you&apos;ll need to:
             <ul className="list-disc pl-6 mt-2">
               <li>Provide basic business information</li>
               <li>Connect a bank account for payouts</li>
@@ -99,6 +97,7 @@ export default function StripePage() {
             <Button
               leftSection={<IconCreditCard size={20} />}
               onClick={handleCreateAccount}
+              disabled
               loading={loading}
               size="md"
               variant="filled"
@@ -109,6 +108,7 @@ export default function StripePage() {
             <Button
               variant="light"
               component="a"
+              disabled
               href="https://docs.stripe.com/security"
               target="_blank"
               rightSection={<IconExternalLink size={16} />}
@@ -124,7 +124,7 @@ export default function StripePage() {
         <Stack gap="md">
           <Title order={3}>What happens next?</Title>
           <Text c="dimmed">
-            After clicking "Setup Stripe Account", you'll be redirected to Stripe to:
+            After clicking &quot;Setup Stripe Account&quot;, you&apos;ll be redirected to Stripe to:
           </Text>
           <ol className="list-decimal pl-6">
             <li className="mb-2">Complete your account setup</li>
@@ -157,7 +157,8 @@ export default function StripePage() {
         <Stack gap="md" mt="xl">
           <Title order={3}>I refuse</Title>
           <Text c="dimmed">
-            Markket is open source, you can self-host and control your Stripe, or a different gateway; or install a community alternative
+            Markket is open source, you can self-host and control your Stripe, or a different gateway;
+            or install a community alternative: (more to come)
           </Text>
           <ol className="list-decimal pl-6">
             <li className="mb-2">ask customers to venmo you</li>

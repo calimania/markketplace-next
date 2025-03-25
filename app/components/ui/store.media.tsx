@@ -30,11 +30,7 @@ export default  function StoreMedia({ store, onUpdate }: StoreMediaProps) {
     try {
       setLoading(field === 'Logo' ? 'logo' : field === 'Favicon' ? 'favicon' : 'social');
 
-      // const markket = new markketClient();
-      // const response = await markket.uploadImage(file, field, store.id);
-
       const response = await strapiClient.uploadAvatar(file, { id: store.id, field, model: 'api::store.store' });
-      console.log('response', response);
 
       if (!response.ok) {
         throw new Error('Upload failed');

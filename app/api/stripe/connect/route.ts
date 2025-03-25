@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+import stripeClient from '@/markket/stripe';
 
 /**
  * @swagger POST /api/stripe/connect
@@ -17,6 +15,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action');
+
+  const stripe = stripeClient.getInstance();
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe instance not initialized' },
+      { status: 500 }
+    );
+  }
 
   if (!action) {
     return NextResponse.json(

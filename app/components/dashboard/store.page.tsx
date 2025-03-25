@@ -23,7 +23,6 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 
 export default function StoreDashboardPage() {
   const { store } = useContext(DashboardContext) as { store: Store };
-  console.log('StoreDashboardPage', store);
 
   return (
     <Container size="lg" py="xl">
@@ -76,13 +75,23 @@ export default function StoreDashboardPage() {
                     <Group>
                       <IconCalendarClock size={18} />
                       <Text size="sm">
-                        <b>Created:</b> {new Date(store.createdAt).toLocaleDateString()}
+                        <strong>Created:</strong> {new Date(store.createdAt).toLocaleDateString()}
                       </Text>
                     </Group>
-                    {store.URLS?.length > 0 && (
-                      <Text size="sm">
-                        <b>Custom Domain:</b> {store?.URLS?.[0].URL}
-                      </Text>
+                    {!!store.URLS?.length && (
+                      <>
+                        <Text size="sm">
+                          <strong>URLs:</strong>
+                        </Text>
+                        {store.URLS.map((url, i) => (
+                          <Group key={i}>
+                            <IconLink size={18} />
+                            <Link href={url.URL} target="_blank" className='text-markket-blue'>
+                              {url.Label || url.URL}
+                            </Link>
+                          </Group>
+                        ))}
+                      </>
                     )}
                   </Stack>
                 </Card>
@@ -93,7 +102,7 @@ export default function StoreDashboardPage() {
                     <Card.Section p="md">
                       <Group>
                         <IconLink size={24} />
-                        <Text fw={500}>SEO Preview</Text>
+                        <Text fw={500}>Social share Preview</Text>
                       </Group>
                     </Card.Section>
                     {(store.Cover?.url || store.SEO.socialImage) && (
@@ -127,8 +136,8 @@ export default function StoreDashboardPage() {
                   //   }));
                   //   return;
                   // }
-                  // @TODO: refresh stores
-                  // setStore((prev) => ({ ...prev as Store, [field]: media }));
+                  // // @TODO: refresh stores via context
+                  // setStore((prev: Store) => ({...prev , [field]: media }));
 
                 }} />
               </Grid.Col>
