@@ -18,6 +18,7 @@ import {
   Group,
   Burger,
   HoverCard,
+  Badge,
   Stack,
   Divider,
   Button,
@@ -36,7 +37,6 @@ import {
   IconSubscript,
   IconMessageChatbot,
   IconMoodEdit,
-  IconHomeHeart,
   IconHomeStar,
   IconCashBanknoteHeart,
 } from '@tabler/icons-react';
@@ -54,26 +54,59 @@ const mainLinks = [
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
-  { icon: IconHomeHeart, label: 'Homepage', href: '/' },
 ];
 
-function MainLink({ icon: Icon, label, notifications, href }: {
+function MainLink({
+  icon: Icon,
+  label,
+  notifications,
+  href,
+  active
+}: {
   icon: typeof IconSettings;
   label: string;
   notifications?: number;
   href?: string;
+    active?: boolean;
 }) {
   return (
-    <UnstyledButton component={Link} href={href || '#'}>
-      <Group align="center" justify="space-between" py={8} px={4} className="hover:bg-gray-200 rounded">
+    <UnstyledButton
+      component={Link}
+      href={href || '#'}
+      className={`
+        transition-colors duration-200 rounded-md w-full
+        ${active
+          ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+          : 'hover:bg-gray-100'
+        }
+      `}
+    >
+      <Group
+        align="center"
+        justify="space-between"
+        py={8}
+        px={12}
+      >
         <Group gap="sm">
-          <Icon size={20} />
-          <Text size="sm">{label}</Text>
+          <Icon
+            size={20}
+            className={active ? 'text-blue-600' : 'text-gray-600'}
+          />
+          <Text
+            size="sm"
+            fw={active ? 500 : 400}
+          >
+            {label}
+          </Text>
         </Group>
         {notifications && (
-          <Text size="xs" c="blue" fw={700}>
+          <Badge
+            size="sm"
+            variant={active ? "filled" : "light"}
+            color="blue"
+          >
             {notifications}
-          </Text>
+          </Badge>
         )}
       </Group>
     </UnstyledButton>
@@ -187,6 +220,11 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
         collapsed: { mobile: !opened }
       }}
       padding="md"
+      styles={{
+        main: {
+          paddingTop: 'calc(var(--mantine-spacing-md) + 60px)',
+        },
+      }}
     >
       <AppShell.Header p="md">
         <Group justify="space-between" h="100%">
@@ -194,7 +232,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             {selectedStore && (
               <img
-                src={selectedStore.Logo?.url}
+                src={selectedStore.Favicon?.url || selectedStore.Logo?.url || '/images/logo.png'}
                 alt={selectedStore.title}
                 style={{ height: 30, width: 'auto' }}
               />
@@ -247,26 +285,57 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
         </Group>
       </AppShell.Header>
 
+
       <AppShell.Navbar p="md">
-        <Stack gap="xs">
-          <Text size="xs" tt="uppercase" fw={700} c="dimmed">
+        <Stack h="100%" gap={0}>
+          <div>
+            <Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="md">
             Dashboard
           </Text>
-          {mainLinks.map((link) => (
-            <MainLink {...link} key={link.label} />
-          ))}
+            <Divider mb="md" />
+          </div>
+
+          {/* Scrollable navigation area */}
+          <div className="flex-1 overflow-y-auto" style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'var(--mantine-color-gray-3) transparent',
+          }}>
+            <Stack gap="xs">
+              {mainLinks.map((link) => (
+                <MainLink
+                  {...link}
+                  key={link.label}
+                  active={window.location.pathname.includes(link.href)}
+                />
+              ))}
+            </Stack>
+          </div>
+
+          {/* Optional: Bottom section for additional controls */}
+          <div className="mt-auto pt-md">
+            <Divider mb="md" />
+            <Button
+              fullWidth
+              leftSection={<IconBuildingStore size={16} />}
+              variant="light"
+              component={Link}
+              href="/"
+            >
+              Home
+            </Button>
+          </div>
         </Stack>
       </AppShell.Navbar>
 
       <AppShell.Main py="md">
         <ProtectedRoute>
-          {stores.length === 0 ? (
+          {(stores.length === 0 && !window.location.pathname.includes('settings')) ? (
             <Container>
               <Paper p="xl" withBorder mt="xl">
                 <Stack align="center" gap="md">
                   <Text ta="center">No stores found. Create your first store to continue.</Text>
                   <Button
-                    onClick={() => router.push('/dashboard/store/new')}
+                    onClick={() => router.push('/dashboard/settings#store')}
                     leftSection={<IconBuildingStore size={16} />}
                   >
                     Create Store
@@ -274,9 +343,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 </Stack>
               </Paper>
             </Container>
-          ) : selectedStore ? (
+          ) : (selectedStore || window.location.pathname.includes('settings')) ? (
               <>
-                <DashboardContext.Provider value={{ store: selectedStore }}>
+                <DashboardContext.Provider value={{ store: selectedStore as Store }}>
                   {children}
                 </DashboardContext.Provider>
               </>

@@ -63,8 +63,6 @@ export default function AuthPage() {
     fetchData();
   }, []);
 
-  console.log({store, page})
-
   useEffect(() => {
     if (isLoggedIn) refreshUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,7 +141,6 @@ export default function AuthPage() {
 
   const title = page?.Title || page?.SEO?.metaTitle || `Welcome to ${store?.title || 'Markket.ts'}!`;
 
-  console.log({page, })
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>

@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
       case 'account_link': {
         const { account, store } = body;
-        console.log('stripe:connect:account_link:', { account });
+        console.log('stripe:connect:account_link:', { account: account?.account, store });
 
         if (!account) {
           return NextResponse.json(
