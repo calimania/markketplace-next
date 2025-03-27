@@ -91,8 +91,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initAuth = async () => {
       const storedAuth = localStorage.getItem('markket.auth');
       if (storedAuth) {
+        try {
+          const parsedAuth = JSON.parse(storedAuth);
+          setUser(parsedAuth);
+        } catch (error) {
+          console.error('Failed to parse stored auth data:', error);
+          localStorage.removeItem('markket.auth');
+        }
+
         await verifyAndRefreshUser();
       }
+
       setIsLoading(false);
     };
 

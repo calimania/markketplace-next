@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import stripeClient, { Stripe } from '@/markket/stripe.server';
+import { markketConfig } from '@/markket/config';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -20,7 +21,7 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
  * @returns
  */
 export async function POST(req: NextRequest) {
-  console.info('stripe:webhook:');
+  console.info('post:stripe:webhook');
 
   const stripe = stripeClient.getInstance();
 
@@ -40,11 +41,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify webhook signature
-    let event: Stripe.Event;
+    let event: Stripe.Event = {} as Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
     } catch (err) {
-      console.error('🚨 Webhook signature verification failed:', err);
+      console.error('ebhook signature verification failed:', err);
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -54,6 +55,23 @@ export async function POST(req: NextRequest) {
 
     // Handle different event types
     console.log(`stripe:webhook:${event.type}`);
+
+    const markket = {
+      action: `stripe.webhook:${event.type}`,
+      event,
+      user_key_or_id: event?.account || '',
+    };
+
+    const _log = await fetch(new URL('/api/markket', markketConfig.api), {
+      method: 'POST',
+      body: JSON.stringify({ data: markket }),
+      headers: {
+        Authorization: `Bearer ${markketConfig.admin_token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log(`stripe:webhook:log:${_log.status}`, { markket });
 
     switch (event.type) {
       case 'payment_intent.succeeded':

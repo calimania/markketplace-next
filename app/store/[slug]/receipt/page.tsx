@@ -7,13 +7,11 @@ import { Store } from "@/markket/store";
 import { Page } from "@/markket/page";
 import SubscriptionModal from "./SubscriptionModal";
 import PageContent from "@/app/components/ui/page.content";
+import { markketConfig } from "@/markket/config";
 
 interface ReceiptPageProps {
   params: Promise<{ slug: string }>;
 }
-
-const MARKKET_API =
-  process.env.NEXT_PUBLIC_MARKKET_API || "https://api.markket.place";
 
 export default function ProductDisplay({ params }: ReceiptPageProps) {
   const { slug } = use(params);
@@ -52,7 +50,7 @@ export default function ProductDisplay({ params }: ReceiptPageProps) {
       console.log("activating receipt page", { session_id });
 
       try {
-        const request = await fetch(`${MARKKET_API}/api/markket`, {
+        const request = await fetch(new URL(`/api/markket`, markketConfig.api), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -153,7 +151,7 @@ export default function ProductDisplay({ params }: ReceiptPageProps) {
               ).value;
 
               try {
-                const response = await fetch(`${MARKKET_API}/api/subscribers`, {
+                const response = await fetch(new URL(`/api/subscribers`, markketConfig.api), {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
