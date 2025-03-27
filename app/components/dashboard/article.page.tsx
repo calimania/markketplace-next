@@ -5,12 +5,11 @@ import { Article, Store } from '@/markket/';
 import { Container } from '@mantine/core';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useContext, useState, useEffect } from 'react';
-import { strapiClient } from '@/markket/api.strapi';
+import { strapiClient as strapi } from '@/markket/api.strapi';
 
 const ArticlePage = () => {
   const { store } = useContext(DashboardContext) as { store: Store };
   const [articles, setArticles] = useState<Article[]>([]);
-  const strapi =  strapiClient;
 
   useEffect(() => {
      const fetchArticles = async () => {

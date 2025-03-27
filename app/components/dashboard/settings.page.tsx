@@ -24,7 +24,9 @@ import { showNotification } from '@mantine/notifications';
 
 import ProfileForm from '@/app/components/ui/profile.form';
 import StoreList from '@/app/components/ui/store.list';
+import SecuritySettings from './settings.security';
 import { useRouter } from 'next/navigation';
+
 
 const settingsTabs = [
   {
@@ -163,9 +165,7 @@ export default function SettingsPage() {
             <Tabs.Panel value="security">
               <Stack>
                 <Title order={4}>Security Settings</Title>
-                <Text size="sm" c="dimmed" maw={600}>
-                  Manage your account security and authentication options.
-                </Text>
+                <SecuritySettings />
               </Stack>
             </Tabs.Panel>
           </Paper>
