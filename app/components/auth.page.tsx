@@ -18,7 +18,8 @@ import {
   IconBrandGithub,
   IconHomeHeart,
   IconLogout,
-  IconDashboard
+  IconDashboard,
+  IconMailHeart
 } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,8 @@ import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';
 import { markketConfig } from '@/markket/config';
 import { Page } from '@/markket/page';
+
+import AuthUnconfirmed from './auth/auth.unconfirmed';
 
 type Option = {
   title: string;
@@ -44,7 +47,7 @@ type Option = {
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout, confirmed, refreshUser } = useAuth();
+  const { maybe, logout, confirmed, refreshUser, } = useAuth();
   const [store, setStore] = useState({} as Store);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -139,6 +142,23 @@ export default function AuthPage() {
     },
   ];
 
+  const unconfirmedOptions: Option[] = [
+    {
+      title: 'Login',
+      description: 'You need to enter your password after confirming your email',
+      icon: IconMailHeart,
+      action: () => router.push('/auth/login'),
+      variant: 'filled',
+    },
+    {
+      title: 'Homepage',
+      description: 'Not all those who wander are lost',
+      icon: IconHomeHeart,
+      action: () => router.push('/'),
+      variant: 'subtle',
+    },
+  ];
+
   const title = page?.Title || page?.SEO?.metaTitle || `Welcome to ${store?.title || 'Markket.ts'}!`;
 
   return (
@@ -152,14 +172,11 @@ export default function AuthPage() {
       </Text>
 
       {isLoggedIn && !isConfirmed && (
-        <Text c="red" ta="center" mt="sm">
-          Please confirm your email address to view the dashboard,
-          logout and retry if this message persists.
-        </Text>
+        <AuthUnconfirmed />
       )}
 
       <Stack mt={30}>
-        {(isLoggedIn ? loggedInOptions : loggedOutOptions).map((option, index) => (
+        {(isLoggedIn ? (isConfirmed ? loggedInOptions : unconfirmedOptions) : loggedOutOptions).map((option, index) => (
           <Paper
             key={index}
             withBorder
