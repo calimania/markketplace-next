@@ -25,47 +25,15 @@ import {
 } from '@tabler/icons-react';
 
 export default function StripeHeader() {
-  const [loading, setLoading] = useState(true);
-  const [account, setAccount] = useState<StripeAccount | null>(null);
-  const { store } = useContext(DashboardContext) as { store: Store };
 
-  useEffect(() => {
-    const getAccountData = async () => {
-      try {
-        const response = await fetch(new URL('/api/markket', markketConfig.api), {
-          body: JSON.stringify({
-            action: 'stripe.account',
-            store_id: store?.documentId,
-          }),
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const { data } = await response.json();
-        setAccount(data);
-      } catch (error) {
-        console.error('Failed to fetch Stripe account:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (store?.documentId) {
-      getAccountData();
-    }
-  }, [store?.documentId]);
-
-  if (!store?.STRIPE_CUSTOMER_ID) {
-    return null;
-  }
-
-  if (loading) {
-    return <Skeleton height={200} radius="md" animate />;
-  }
+  const { stripe: account, isLoading } = useContext(DashboardContext) as { store: Store, stripe: StripeAccount | undefined, isLoading: boolean };
 
   if (!account) {
     return null;
+  }
+
+  if (isLoading) {
+    return <Skeleton height={200} radius="md" animate />;
   }
 
   const activeCapabilities = Object.entries(account.info.capabilities)

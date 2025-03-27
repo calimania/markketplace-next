@@ -1,6 +1,7 @@
 import { createContext  } from 'react';
 import { Store, StripeAccount } from '@/markket';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { markketConfig } from '@/markket/config';
 
 /**
  * DashboardContext
@@ -15,8 +16,35 @@ import { useState } from 'react';
 export const DashboardContext = createContext(null as (null | { store: Store, stripe?: StripeAccount, isLoading?: boolean }));
 
 export function DashboardProvider({ children, store }: { children: React.ReactNode, store?: Store }) {
-  const [stripe, setStripe] = useState<StripeAccount | undefined>(undefined);
+  const [stripe, setAccount] = useState<StripeAccount | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const getAccountData = async (store_id: string) => {
+      try {
+        const response = await fetch(new URL('/api/markket', markketConfig.api), {
+          body: JSON.stringify({
+            action: 'stripe.account',
+            store_id: store_id,
+          }),
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const { data } = await response.json();
+        setAccount(data);
+      } catch (error) {
+        console.error('Failed to fetch Stripe account:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (store?.documentId) {
+      getAccountData(store.documentId);
+    }
+  }, [store?.documentId]);
 
   return (
     <DashboardContext.Provider value={{ store: store as Store, stripe, isLoading }}>
