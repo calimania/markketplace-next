@@ -167,11 +167,11 @@ export class StrapiClient {
         headers: {
           'Content-Type': 'application/json',
         },
-        next: { revalidate: 0 },
+        // next: { revalidate: 0 },
       });
 
       if (!response.ok) {
-        // throw new Error(`Failed to fetch ${options.contentType}`);
+        throw new Error(`Failed to fetch ${options.contentType}`);
       }
 
       return response.json();

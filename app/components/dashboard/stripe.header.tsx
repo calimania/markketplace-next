@@ -106,8 +106,8 @@ export default function StripeHeader() {
 
   return (
     <Paper withBorder radius="md" p="md" mb="xl">
-      <Text fz="lg" fw={500} >
-            Stripe{account?.info?.test_mode ? ' test' : '' }: {account.info.settings?.dashboard?.display_name}
+      <Text fz="lg" fw={500} color={(account?.info as any)?.test_mode ? 'magenta' : 'cyan'} >
+        Stripe{(account?.info as any)?.test_mode ? ' test' : ''}: {account.info.settings?.dashboard?.display_name}
       </Text>
       <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>

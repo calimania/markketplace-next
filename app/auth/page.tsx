@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 import AuthPageComponent from '@/app/components/auth.page';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: [page] } = await strapiClient.getPage('auth', markketConfig.slug);
+  const { data: [page] } = await strapiClient.getPage('auth', markketConfig.slug) || { data: [] };
 
   return generateSEOMetadata({
     slug: 'auth',
