@@ -1,3 +1,5 @@
+'use client';
+
 import { type Store } from '@/markket/store.d';
 import {
   Paper,

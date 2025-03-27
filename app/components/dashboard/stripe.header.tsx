@@ -1,8 +1,7 @@
 "use client";
 
-import { useContext, useState, useEffect } from 'react';
+import { useContext } from 'react';
 import { DashboardContext } from "@/app/providers/dashboard.provider";
-import { markketConfig } from "@/markket/config";
 import { Store, StripeAccount } from "@/markket";
 import {
   Paper,

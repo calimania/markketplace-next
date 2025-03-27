@@ -3,6 +3,8 @@ import { Store, StripeAccount } from '@/markket';
 import { useState, useEffect } from 'react';
 import { markketConfig } from '@/markket/config';
 
+export type DashboardContextType = { store: Store, stripe: StripeAccount, isLoading: boolean };
+
 /**
  * DashboardContext
  * This context is used to provide account information to the dashboard components
@@ -13,10 +15,10 @@ import { markketConfig } from '@/markket/config';
  *
  * @returns {React.Context<null | { store: Store }>} - The DashboardContext
  */
-export const DashboardContext = createContext(null as (null | { store: Store, stripe?: StripeAccount, isLoading?: boolean }));
+export const DashboardContext = createContext({ isLoading: false, store: {}, stripe: {} } as DashboardContextType);
 
 export function DashboardProvider({ children, store }: { children: React.ReactNode, store?: Store }) {
-  const [stripe, setAccount] = useState<StripeAccount | undefined>(undefined);
+  const [stripe, setAccount] = useState<StripeAccount>({} as StripeAccount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastId, setLastId] = useState<string | null>(null);
 

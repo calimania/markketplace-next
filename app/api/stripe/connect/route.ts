@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'account_link': {
-        const { account, store } = body;
+        const { account, store, test_mode } = body;
         console.log('stripe:connect:account_link:', { account: account?.account, store });
 
         if (!account) {
@@ -85,9 +85,10 @@ export async function POST(req: NextRequest) {
           );
         }
 
+
         const origin = req.headers.get('origin') || 'http://localhost:4020';
 
-        const accountLink = await stripe.accountLinks.create({
+        const accountLink = await (!!test_mode ? stripeClient.getTestInstance() : stripe).accountLinks.create({
           account: account,
           return_url: `${origin}/dashboard/stripe/?store=${store}`,
           refresh_url: `${origin}/dashboard/stripe/?store=${store}`,

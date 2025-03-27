@@ -2,6 +2,7 @@
 
 export interface StripeAccount {
   info: {
+    test_mode: boolean;
     business_profile: {
       name: string;
       url: string;
