@@ -5,6 +5,7 @@
 
 export { Article } from './article';
 export { Store } from './store';
+export { StripeAccount } from './stripe';
 
 /**
  * @typedef {Object} StrapiResponse

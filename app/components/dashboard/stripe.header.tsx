@@ -3,7 +3,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { markketConfig } from "@/markket/config";
-import { Store } from "@/markket";
+import { Store, StripeAccount } from "@/markket";
 import {
   Paper,
   Group,
@@ -23,38 +23,6 @@ import {
   IconMail,
   IconPhone,
 } from '@tabler/icons-react';
-
-interface StripeAccount {
-  info: {
-    business_profile: {
-      name: string;
-      url: string;
-      support_phone: string;
-    };
-    charges_enabled: boolean;
-    payouts_enabled: boolean;
-    default_currency: string;
-    email: string;
-    settings: {
-      dashboard: {
-        display_name: string;
-      };
-      branding: {
-        primary_color: string;
-        secondary_color: string;
-        logo: string;
-      };
-    };
-    external_accounts: {
-      data: Array<{
-        bank_name: string;
-        last4: string;
-        routing_number: string;
-      }>;
-    };
-    capabilities: Record<string, string>;
-  };
-}
 
 export default function StripeHeader() {
   const [loading, setLoading] = useState(true);
