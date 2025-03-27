@@ -1,5 +1,12 @@
 import StripeSetup from './stripe.setup';
 
-export default StripeSetup;
+export default function StripePage() {
+  return (
+    <>
+      <StripeSetup />
+    </>
+  )
+}
+
 
 

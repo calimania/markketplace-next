@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 };
 
 export default async function NewsletterPage() {
-  const { data: [page] } = await strapiClient.getPage('newsletter');
+  const { data: [page] } = await strapiClient.getPage('newsletter') || { data: [] };
 
   return (
     <Container size="md" className="">

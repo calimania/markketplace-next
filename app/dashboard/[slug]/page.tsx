@@ -4,6 +4,7 @@ import { Container, Title } from '@mantine/core';
 import StoreDashboardPage from '@/app/components/dashboard/store.page';
 import SettingsDashboardPage from '@/app/components/dashboard/settings.page';
 import StripeDashboardPage from '@/app/components/dashboard/stripe.page';
+import ArticlesDashboardPage from '@/app/components/dashboard/article.page';
 
 type AnyDashboardPageProps = {
   params: Promise<{ slug: string }>;
@@ -26,6 +27,10 @@ export default async function AnyDashboardPage({
 
   if (slug === 'stripe') {
     return <StripeDashboardPage />;
+  }
+
+  if (slug === 'articles') {
+    return <ArticlesDashboardPage />;
   }
 
   return (

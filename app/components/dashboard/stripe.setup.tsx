@@ -21,6 +21,7 @@ import { notifications } from '@mantine/notifications';
 import { markketClient } from '@/markket/api.markket';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import StoreHeader from './store.header';
+import StripeHeader from './stripe.header';
 
 export default function StripePage() {
   const [loading, setLoading] = useState(false);
@@ -101,6 +102,7 @@ export default function StripePage() {
   return (
     <Container size="md" pb="xl">
       <StoreHeader store={store} />
+      <StripeHeader />
       <Paper withBorder radius="md" p="xl">
         <Stack gap="lg">
           <Group>

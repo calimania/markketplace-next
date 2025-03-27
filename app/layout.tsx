@@ -9,9 +9,11 @@ import { GlobalBanner } from '@/app/components/global.banner';
 import '@mantine/code-highlight/styles.css';
 import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
+import { Store } from "@/markket";
 
 async function generateMetadata(): Promise<Metadata> {
-  const { data: [store] } = await strapiClient.getStore();
+  const storeData = await strapiClient.getStore();
+  const store = storeData?.data?.[0] as Store;
   const seo = store?.SEO;
   const favicon = store?.Favicon?.url;
 

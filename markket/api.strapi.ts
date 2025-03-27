@@ -161,19 +161,25 @@ export class StrapiClient {
     const url = this.buildUrl(options);
 
     console.info({ url });
+    try {
 
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      next: { revalidate: 0 },
-    });
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // next: { revalidate: 0 },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${options.contentType}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${options.contentType}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
 
-    return response.json();
+    return {} as StrapiResponse<T>;
   };
 
 

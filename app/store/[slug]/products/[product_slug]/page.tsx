@@ -33,9 +33,11 @@ export default async function ProductSlugPage({ params }: ProductSlugPageProps) 
   const { data: [mainPage] } = await strapiClient.getPage('product',);
   const { data: [page] } = await strapiClient.getPage('product', slug);
 
+  const { data: [store] } = await strapiClient.getStore(slug);
+
   if (!(product as Product)?.id) {
     return <div>Product not found</div>;
   }
 
-  return <ProductDisplay product={product as Product} page={(page || mainPage) as Page} />;
+  return <ProductDisplay product={product as Product} page={(page || mainPage) as Page} store={store} />;
 };

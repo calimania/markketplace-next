@@ -1,3 +1,5 @@
+'use client';
+
 import { type FC, useEffect, useState } from "react";
 import {
   Modal,
@@ -16,13 +18,15 @@ import { IconShoppingBagHeart, IconX } from "@tabler/icons-react";
 import { createPaymentLink, type PaymentLinkOptions } from "../../../scripts/payment";
 import { Price } from "@/markket/product";
 import { notifications } from '@mantine/notifications';
+import { Store } from "@/markket";
 
 interface Props {
   prices: Price[];
   product: any;
+  store?: Store;
 }
 
-const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
+const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPriceId, setSelectedPriceId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -32,12 +36,15 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
 
   const isValidOrder = selectedPriceId && total > 0;
 
+  const url = new URL(`/store/receipt/${store?.slug}`, (typeof window !== 'undefined' ? window?.location?.origin : 'https://de.markket.place')).origin;
+
   const [options, setOptions] = useState({
     totalPrice: 0,
     product: product.id,
     prices: [],
-    stripe_test: product.Name?.match(/test/i),
+    stripe_test: !!product.Name?.match(/TEST/i),
     includes_shipping: !product.Name?.match(/digital/i),
+    redirect_to_url: url,
   } as PaymentLinkOptions);
 
   useEffect(() => {
@@ -59,7 +66,7 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
       option_prices.push({
         unit_amount: String(tip),
         Currency: "usd",
-        Product: product.SKU,
+        product: product.SKU,
       } as unknown as Price);
     }
 
@@ -88,7 +95,10 @@ const CheckoutModal: FC<Props> = ({ prices, product }: Props) => {
     }
 
     try {
-      await createPaymentLink(options);
+      await createPaymentLink({
+        ...options,
+        store_id: store?.documentId,
+      });
     } catch (error) {
       console.error('Payment link error:', error);
       notifications.show({
