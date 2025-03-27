@@ -6,10 +6,12 @@ import { Container } from '@mantine/core';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useContext, useState, useEffect } from 'react';
 import { strapiClient as strapi } from '@/markket/api.strapi';
+import { useRouter } from 'next/navigation';
 
 const ArticlePage = () => {
   const { store } = useContext(DashboardContext) as { store: Store };
   const [articles, setArticles] = useState<Article[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
      const fetchArticles = async () => {
@@ -37,7 +39,7 @@ const ArticlePage = () => {
     <Container size="lg" py="xl">
       <ArticleList articles={articles as Article[]} actions={{
         onView: (article) => {
-          window.open(`/store/${store.slug}/blog/${article.slug}`, '_blank');
+          router.push(`/dashboard/articles/view/${article.id}`);
         }
       }}></ArticleList>
     </Container>
