@@ -39,7 +39,7 @@ import {
   IconHomeStar,
   IconCashBanknoteHeart,
 } from '@tabler/icons-react';
-import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { DashboardProvider } from '@/app/providers/dashboard.provider';
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
@@ -124,7 +124,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, stores, isLoading } = useAuth();
+  const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const updateStoreInUrl = useCallback((storeId: string) => {
@@ -134,11 +134,12 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   useEffect(() => {
-
     if (stores) {
-      setLoading(isLoading);
+      setLoading(authLoading);
     }
+  }, [stores, authLoading]);
 
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const currentStoreId = params.get('store');
 
@@ -152,7 +153,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
       setSelectedStore(stores.find(s => s.documentId === currentStoreId) || null);
     }
 
-  }, [router, updateStoreInUrl, stores, selectedStore]);
+  }, [router, updateStoreInUrl, stores, selectedStore,]);
 
 
   const handleStoreChange = (storeId: string | null) => {
@@ -317,11 +318,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               </Paper>
             </Container>
           ) : (selectedStore || window.location.pathname.includes('settings')) ? (
-              <>
-                <DashboardContext.Provider value={{ store: selectedStore as Store }}>
-                  {children}
-                </DashboardContext.Provider>
-              </>
+              <DashboardProvider store={selectedStore as Store}>
+                {children}
+              </DashboardProvider>
           ) : (
             <Container>
               <Paper p="xl" withBorder mt="xl">
