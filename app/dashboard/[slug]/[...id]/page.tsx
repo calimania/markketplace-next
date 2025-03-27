@@ -7,8 +7,8 @@ import { notFound } from "next/navigation";
  * @param param0
  * @returns
  */
-const ItemPage = async ({  params }: { params: { id: string[], slug: string } }) => {
-  const { id , slug } = params;
+const ItemPage = async ({ params }: { params: Promise<{ id: string[], slug: string }> }) => {
+  const { id, slug } = await params;
 
   if (!id[1]) {
     return notFound();

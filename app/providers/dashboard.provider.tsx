@@ -25,6 +25,12 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
   const [selectedStore, setSelectedStore] = useState<Store>(store as Store);
 
   useEffect(() => {
+    if (store) {
+      setSelectedStore(store);
+    }
+  }, [store]);
+
+  useEffect(() => {
     const getAccountData = async (store_id: string) => {
       if (lastId === store_id) {
         return;
