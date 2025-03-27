@@ -30,7 +30,7 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
       setIsLoading(true);
 
       try {
-        const response = await fetch(new URL('/api/markket', markketConfig.api), {
+        const response = await fetch(new URL('/api/markket?stripe', markketConfig.api), {
           body: JSON.stringify({
             action: 'stripe.account',
             store_id: store_id,
@@ -49,10 +49,10 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
       }
     };
 
-    if (store?.documentId) {
+    if (store?.STRIPE_CUSTOMER_ID && store?.documentId) {
       getAccountData(store.documentId);
     }
-  }, [store?.documentId, lastId]);
+  }, [store, lastId]);
 
   return (
     <DashboardContext.Provider value={{ store: store as Store, stripe, isLoading }}>

@@ -28,7 +28,7 @@ export default function StripeHeader() {
 
   const { stripe: account, isLoading } = useContext(DashboardContext) as { store: Store, stripe: StripeAccount | undefined, isLoading: boolean };
 
-  if (!account) {
+  if (!account?.info) {
     return null;
   }
 
