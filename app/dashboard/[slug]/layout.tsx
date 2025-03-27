@@ -68,10 +68,14 @@ function MainLink({
   href?: string;
     active?: boolean;
 }) {
+  let store_id: string = '';
+  const params = new URLSearchParams(window.location.search);
+  store_id = params.get('store') || '';
+
   return (
     <UnstyledButton
       component={Link}
-      href={href || '#'}
+      href={(!store_id ? href : `${href}?store=${store_id}`) as string}
       className={`
         transition-colors duration-200 rounded-md w-full
         ${active
