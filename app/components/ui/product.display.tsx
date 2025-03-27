@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Price, Product, Slide } from "@/markket/product";
+import { Store } from "@/markket";
 import CheckoutModal from "../../store/[slug]/checkout/CheckoutModal";
 import Markdown from '@/app/components/ui/page.markdown';
 import { motion } from 'framer-motion';
@@ -18,7 +19,7 @@ import { Title } from "@mantine/core";
  * - Animated transitions
  * - Markdown support for descriptions
  */
-export default function ProductDisplay({ product, page }: { product: Product, page?: Page }) {
+export default function ProductDisplay({ product, page, store }: { product: Product, page?: Page, store?: Store }) {
   const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides?.[0]);
   const prices: Price[] = product.PRICES?.map((price) => ({
     ...price,
@@ -97,7 +98,7 @@ export default function ProductDisplay({ product, page }: { product: Product, pa
               transition={{ delay: 0.4 }}
               className="mt-8"
             >
-              <CheckoutModal prices={prices} product={product} />
+              <CheckoutModal prices={prices} product={product} store={store} />
             </motion.div>
           </motion.div>
         </div>

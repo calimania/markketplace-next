@@ -7,6 +7,8 @@ export type PaymentLinkOptions = {
   prices: Price[];
   includes_shipping: boolean;
   stripe_test: boolean;
+  store_id?: string;
+  redirect_to_url?: string;
 };
 
 export const createPaymentLink = async (
@@ -24,6 +26,8 @@ export const createPaymentLink = async (
     action: "stripe.link",
     includes_shipping: options.includes_shipping,
     stripe_test: options.stripe_test,
+    store_id: options.store_id,
+    redirect_to_url: options?.redirect_to_url || '',
   };
 
   const request = await fetch(new URL('/api/markket', markketConfig.api), {
