@@ -120,7 +120,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, stores, } = useAuth();
+  const { user, stores, isLoading } = useAuth();
   const router = useRouter();
 
   const updateStoreInUrl = useCallback((storeId: string) => {
@@ -132,8 +132,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
 
     if (stores) {
-      setLoading(false);
+      setLoading(isLoading);
     }
+
     const params = new URLSearchParams(window.location.search);
     const currentStoreId = params.get('store');
 
@@ -149,7 +150,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   }, [router, updateStoreInUrl, stores, selectedStore]);
 
-  console.log({ stores, user })
 
   const handleStoreChange = (storeId: string | null) => {
     if (!storeId) return;

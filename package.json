@@ -29,6 +29,7 @@
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.4.10",
     "next": "^15.2.4",
     "next-swagger-doc": "^0.4.1",
