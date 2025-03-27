@@ -15,6 +15,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconBuildingStore } from '@tabler/icons-react';
 import { markketClient } from '@/markket/api';
+import { Store } from '@/markket/store.d';
 
 interface StoreFormValues {
   title: string;
@@ -82,7 +83,11 @@ export default function StoreForm(props: StoreFormProps) {
         color: 'green',
       });
 
-      if (onSubmit) onSubmit(values);
+      if (onSubmit) onSubmit({
+        ...values,
+        id: response.data.documentId,
+      } as Store);
+
       form.reset();
     } catch (error) {
       console.warn({ error });

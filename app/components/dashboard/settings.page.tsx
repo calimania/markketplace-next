@@ -20,9 +20,11 @@ import {
   IconBell,
   IconKey
 } from '@tabler/icons-react';
+import { showNotification } from '@mantine/notifications';
 
 import ProfileForm from '@/app/components/ui/profile.form';
 import StoreList from '@/app/components/ui/store.list';
+import { useRouter } from 'next/navigation';
 
 const settingsTabs = [
   {
@@ -58,6 +60,7 @@ const settingsTabs = [
 export default function SettingsPage() {
   const { user, stores, fetchStores } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const router = useRouter();
 
   // Handle hash-based navigation
   useEffect(() => {
@@ -133,8 +136,17 @@ export default function SettingsPage() {
             <Tabs.Panel value="store">
               <Stack>
                 <Title order={4}>Store Settings</Title>
-                <StoreList stores={stores} onCreate={() => {
+                <StoreList stores={stores} onCreate={(store) => {
+                  showNotification({
+                    title: 'Store Created',
+                    message: `Store ${store?.title} created successfully, redirecting...`,
+                    color: 'green',
+                  });
+
                   fetchStores();
+                  if (store?.id) {
+                    router.push(`/dashboard/store/?store=${store.id}`);
+                  }
                 }} />
               </Stack>
             </Tabs.Panel>

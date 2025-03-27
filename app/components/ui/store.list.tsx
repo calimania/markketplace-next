@@ -8,7 +8,7 @@ import { Store } from '@/markket/store';
 
 type StoreSettingsListPageProps = {
   stores: Store[];
-  onCreate?: () => void;
+  onCreate?: (store: Store | undefined) => void;
   onEdit?: (store: Store) => void;
 };
 
@@ -39,9 +39,9 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
       {showStoreForm && (
         stores?.length >= markketConfig?.max_stores_per_user ?
           (<></>) :
-          (<StoreForm onSubmit={()=> {
+          (<StoreForm onSubmit={(values) => {
             setShowStoreForm(false);
-            return onCreate && onCreate();
+            return onCreate && onCreate(values as Store);
           }} />)
       )}
 

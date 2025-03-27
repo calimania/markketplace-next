@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Store } from '@/markket/store.d';
-import { markketClient } from '@/markket/api';
+import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/app/components/protectedRoute';
 import { useAuth } from '@/app/providers/auth.provider';
 import {
@@ -119,10 +118,9 @@ type DashboardLayoutProps = {
 
 export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
-  const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, stores, } = useAuth();
   const router = useRouter();
 
   const updateStoreInUrl = useCallback((storeId: string) => {
@@ -132,55 +130,26 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   useEffect(() => {
+
+    if (stores) {
+      setLoading(false);
+    }
     const params = new URLSearchParams(window.location.search);
     const currentStoreId = params.get('store');
 
-    async function fetchStores() {
-      const markket = new markketClient();
-      setLoading(true);
-
-      try {
-        const response = await markket.fetch('/api/markket/store', {});
-
-        // Handle 401 unauthorized
-        if (response.status === 401) {
-          router.push('/auth');
-          return;
-        }
-
-        const stores = response?.data || [];
-        setStores(stores);
-
-        // Select initial store
-        if (stores.length > 0) {
-          const initialStore = currentStoreId
-            ? stores.find((s: Store) => s.documentId === currentStoreId)
-            : stores[0];
-
-          if (initialStore) {
-            setSelectedStore(initialStore);
-
-            if (!currentStoreId || currentStoreId !== initialStore.documentId) {
-              const newURL = updateStoreInUrl(initialStore.documentId);
-              router.replace(newURL.pathname + newURL.search);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch stores:', error);
-
-        // if (error.response?.status === 401) {
-        //   router.push('/auth');
-        // }
-
-      } finally {
-        setLoading(false);
-      }
+    if (!currentStoreId && stores.length) {
+      const newURL = updateStoreInUrl(stores[0].documentId);
+      setSelectedStore(stores[0]);
+      router.replace(newURL.pathname + newURL.search);
     }
 
-    fetchStores();
-  }, [router, updateStoreInUrl]);
+    if (currentStoreId && !selectedStore) {
+      setSelectedStore(stores.find(s => s.documentId === currentStoreId) || null);
+    }
 
+  }, [router, updateStoreInUrl, stores, selectedStore]);
+
+  console.log({ stores, user })
 
   const handleStoreChange = (storeId: string | null) => {
     if (!storeId) return;
