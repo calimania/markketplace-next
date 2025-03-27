@@ -46,10 +46,10 @@ const mainLinks = [
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 2, href: '/dashboard/orders' },
+  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 0, href: '/dashboard/orders' },
   { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
-  { icon: IconMessageChatbot, label: 'Inbox', notifications: 1, href: '/dashboard/inbox' },
-  { icon: IconSubscript, label: 'Subscribers', href: '/dashboard/subscribers' },
+  { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
+  { icon: IconSubscript, label: 'Subscribers', nofications: 0, href: '/dashboard/subscribers' },
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
@@ -60,18 +60,17 @@ function MainLink({
   label,
   notifications,
   href,
-  active
+  active,
+  store_id,
 }: {
   icon: typeof IconSettings;
   label: string;
   notifications?: number;
+    store_id?: string;
   href?: string;
     active?: boolean;
-}) {
-  let store_id: string = '';
-  const params = new URLSearchParams(window.location.search);
-  store_id = params.get('store') || '';
-
+  }
+) {
   return (
     <UnstyledButton
       component={Link}
@@ -279,6 +278,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <MainLink
                   {...link}
                   key={link.label}
+                  store_id={selectedStore?.documentId}
                   active={window.location.pathname.includes(link.href)}
                 />
               ))}
