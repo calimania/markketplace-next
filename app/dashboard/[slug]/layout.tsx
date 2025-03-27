@@ -39,17 +39,17 @@ import {
   IconHomeStar,
   IconCashBanknoteHeart,
 } from '@tabler/icons-react';
-import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { DashboardProvider } from '@/app/providers/dashboard.provider';
 
 const mainLinks = [
   { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 2, href: '/dashboard/orders' },
+  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 0, href: '/dashboard/orders' },
   { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
-  { icon: IconMessageChatbot, label: 'Inbox', notifications: 1, href: '/dashboard/inbox' },
-  { icon: IconSubscript, label: 'Subscribers', href: '/dashboard/subscribers' },
+  { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
+  { icon: IconSubscript, label: 'Subscribers', nofications: 0, href: '/dashboard/subscribers' },
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
@@ -60,18 +60,17 @@ function MainLink({
   label,
   notifications,
   href,
-  active
+  active,
+  store_id,
 }: {
   icon: typeof IconSettings;
   label: string;
   notifications?: number;
+    store_id?: string;
   href?: string;
     active?: boolean;
-}) {
-  let store_id: string = '';
-  const params = new URLSearchParams(window.location.search);
-  store_id = params.get('store') || '';
-
+  }
+) {
   return (
     <UnstyledButton
       component={Link}
@@ -124,7 +123,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, stores, isLoading } = useAuth();
+  const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const updateStoreInUrl = useCallback((storeId: string) => {
@@ -134,11 +133,12 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   useEffect(() => {
-
     if (stores) {
-      setLoading(isLoading);
+      setLoading(authLoading);
     }
+  }, [stores, authLoading]);
 
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const currentStoreId = params.get('store');
 
@@ -152,7 +152,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
       setSelectedStore(stores.find(s => s.documentId === currentStoreId) || null);
     }
 
-  }, [router, updateStoreInUrl, stores, selectedStore]);
+  }, [router, updateStoreInUrl, stores, selectedStore,]);
 
 
   const handleStoreChange = (storeId: string | null) => {
@@ -278,6 +278,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <MainLink
                   {...link}
                   key={link.label}
+                  store_id={selectedStore?.documentId}
                   active={window.location.pathname.includes(link.href)}
                 />
               ))}
@@ -317,11 +318,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               </Paper>
             </Container>
           ) : (selectedStore || window.location.pathname.includes('settings')) ? (
-              <>
-                <DashboardContext.Provider value={{ store: selectedStore as Store }}>
-                  {children}
-                </DashboardContext.Provider>
-              </>
+              <DashboardProvider store={selectedStore as Store}>
+                {children}
+              </DashboardProvider>
           ) : (
             <Container>
               <Paper p="xl" withBorder mt="xl">

@@ -2,13 +2,16 @@ import { Stripe } from  'stripe';
 
 interface StripeInstance {
   instance?: Stripe | null;
+  testInstance?: Stripe | null;
 }
 
 export { Stripe };
 
 const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY || '';
+// Disabled in production
+const STRIPE_TEST_PRIVATE_KEY = process.env.STRIPE_TEST_PRIVATE_KEY || '';
 
-const stripe: StripeInstance & { start: () => void; getInstance: () => Stripe } = {
+const stripe: StripeInstance & { start: () => void; getInstance: () => Stripe, getTestInstance: () => Stripe, } = {
   start: () => {
     if (!STRIPE_PRIVATE_KEY) {
       console.error('Stripe secret key is not set in environment variables');
@@ -17,6 +20,13 @@ const stripe: StripeInstance & { start: () => void; getInstance: () => Stripe } 
 
     stripe.instance = new Stripe(STRIPE_PRIVATE_KEY);
     return stripe.instance;
+  },
+  getTestInstance: () => {
+    if (!stripe.testInstance) {
+      stripe.testInstance = new Stripe(STRIPE_TEST_PRIVATE_KEY);
+    }
+
+    return stripe.testInstance as Stripe;
   },
   getInstance: () => {
     if (!stripe.instance) {

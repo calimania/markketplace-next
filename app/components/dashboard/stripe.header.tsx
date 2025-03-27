@@ -1,9 +1,8 @@
 "use client";
 
-import { useContext, useState, useEffect } from 'react';
+import { useContext } from 'react';
 import { DashboardContext } from "@/app/providers/dashboard.provider";
-import { markketConfig } from "@/markket/config";
-import { Store } from "@/markket";
+import { Store, StripeAccount } from "@/markket";
 import {
   Paper,
   Group,
@@ -24,80 +23,16 @@ import {
   IconPhone,
 } from '@tabler/icons-react';
 
-interface StripeAccount {
-  info: {
-    business_profile: {
-      name: string;
-      url: string;
-      support_phone: string;
-    };
-    charges_enabled: boolean;
-    payouts_enabled: boolean;
-    default_currency: string;
-    email: string;
-    settings: {
-      dashboard: {
-        display_name: string;
-      };
-      branding: {
-        primary_color: string;
-        secondary_color: string;
-        logo: string;
-      };
-    };
-    external_accounts: {
-      data: Array<{
-        bank_name: string;
-        last4: string;
-        routing_number: string;
-      }>;
-    };
-    capabilities: Record<string, string>;
-  };
-}
-
 export default function StripeHeader() {
-  const [loading, setLoading] = useState(true);
-  const [account, setAccount] = useState<StripeAccount | null>(null);
-  const { store } = useContext(DashboardContext) as { store: Store };
 
-  useEffect(() => {
-    const getAccountData = async () => {
-      try {
-        const response = await fetch(new URL('/api/markket', markketConfig.api), {
-          body: JSON.stringify({
-            action: 'stripe.account',
-            store_id: store?.documentId,
-          }),
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const { data } = await response.json();
-        setAccount(data);
-      } catch (error) {
-        console.error('Failed to fetch Stripe account:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { stripe: account, isLoading } = useContext(DashboardContext) as { store: Store, stripe: StripeAccount | undefined, isLoading: boolean };
 
-    if (store?.documentId) {
-      getAccountData();
-    }
-  }, [store?.documentId]);
-
-  if (!store?.STRIPE_CUSTOMER_ID) {
+  if (!account?.info) {
     return null;
   }
 
-  if (loading) {
+  if (isLoading) {
     return <Skeleton height={200} radius="md" animate />;
-  }
-
-  if (!account) {
-    return null;
   }
 
   const activeCapabilities = Object.entries(account.info.capabilities)

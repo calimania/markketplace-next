@@ -1,8 +1,7 @@
 "use client";
 
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import {
-  Container,
   Paper,
   Title,
   Text,
@@ -19,22 +18,20 @@ import {
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { markketClient } from '@/markket/api.markket';
-import { DashboardContext } from '@/app/providers/dashboard.provider';
-import StoreHeader from './store.header';
-import StripeHeader from './stripe.header';
+import { Store, StripeAccount } from '@/markket'
 
-export default function StripePage() {
+export default function StripePage({ store, stripe }: { store: Store, stripe: StripeAccount }) {
   const [loading, setLoading] = useState(false);
-
-  const { store } = useContext(DashboardContext) as { store: any };
 
   const openDashboard = async () => {
     setLoading(true);
     const markket = new markketClient();
+
     try {
       const linkResponse = await markket.stripeConnect('account_link', {
         account: store?.STRIPE_CUSTOMER_ID,
         store: store?.documentId,
+        test_mode: !!stripe?.info?.test_mode,
       });
 
       console.log({ linkResponse, ur: linkResponse?.data?.url });
@@ -100,9 +97,7 @@ export default function StripePage() {
   };
 
   return (
-    <Container size="md" pb="xl">
-      <StoreHeader store={store} />
-      <StripeHeader />
+    <>
       <Paper withBorder radius="md" p="xl">
         <Stack gap="lg">
           <Group>
@@ -221,6 +216,6 @@ export default function StripePage() {
           </ol>
         </Stack>
       </Paper>
-    </Container>
+    </>
   );
 };
