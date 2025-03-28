@@ -5,32 +5,28 @@ import StoreDashboardPage from '@/app/components/dashboard/store.page';
 import SettingsDashboardPage from '@/app/components/dashboard/settings.page';
 import StripeDashboardPage from '@/app/components/dashboard/stripe.page';
 import ArticlesDashboardPage from '@/app/components/dashboard/article.page';
+import PagesDashboardPage from '@/app/components/dashboard/page.page';
 
 type AnyDashboardPageProps = {
   params: Promise<{ slug: string }>;
 };
-
 
 export default async function AnyDashboardPage({
   params,
 }: AnyDashboardPageProps) {
   const { slug } = await params;
 
-
-  if (slug === 'store') {
-    return <StoreDashboardPage />;
-  }
-
-  if (slug === 'settings') {
-    return <SettingsDashboardPage />;
-  }
-
-  if (slug === 'stripe') {
-    return <StripeDashboardPage />;
-  }
-
-  if (slug === 'articles') {
-    return <ArticlesDashboardPage />;
+  switch (slug) {
+    case 'pages':
+      return <PagesDashboardPage />;
+    case 'articles':
+      return <ArticlesDashboardPage />;
+    case 'store':
+      return <StoreDashboardPage />;
+    case 'settings':
+      return <SettingsDashboardPage />;
+    case 'stripe':
+      return <StripeDashboardPage />;
   }
 
   return (

@@ -166,7 +166,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <Container>
         <Paper p="xl" withBorder mt="xl">
@@ -303,7 +303,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
       <AppShell.Main py="md">
         <ProtectedRoute>
-          {(stores.length === 0 && !window.location.pathname.includes('settings')) ? (
+          {(!stores.length && !window.location.pathname.includes('settings')) ? (
             <Container>
               <Paper p="xl" withBorder mt="xl">
                 <Stack align="center" gap="md">

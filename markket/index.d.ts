@@ -7,6 +7,7 @@ export { Article, } from './article';
 export { Store } from './store';
 export { StripeAccount } from './stripe';
 export { SEO } from './seo';
+export { Page } from './page';
 
 /**
  * @typedef {Object} StrapiResponse
