@@ -94,15 +94,15 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {articles.map((article) => (
-              <Table.Tr key={article.documentId}>
+            {articles.map((item) => (
+              <Table.Tr key={item.documentId}>
                   <Table.Td>
                   <Group gap={4} justify="flex-end" wrap="nowrap">
                     <Tooltip label="Edit">
                       <ActionIcon
                         variant="subtle"
                         color="gray"
-                        onClick={() => handleAction('edit', article)}
+                        onClick={() => handleAction('edit', item)}
                       >
                         <IconEdit size={16} />
                       </ActionIcon>
@@ -116,20 +116,20 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                       <Menu.Dropdown>
                         <Menu.Item
                           leftSection={<IconEye size={14} />}
-                          onClick={() => handleAction('view', article)}
+                          onClick={() => handleAction('view', item)}
                         >
                           View
                         </Menu.Item>
                         <Menu.Item
                           leftSection={<IconCopy size={14} />}
-                          onClick={() => handleAction('clone', article)}
+                          onClick={() => handleAction('clone', item)}
                         >
                           Clone
                         </Menu.Item>
-                        {article.publishedAt ? (
+                        {item.publishedAt ? (
                           <Menu.Item
                             leftSection={<IconRocketOff size={14} />}
-                            onClick={() => handleAction('unpublish', article)}
+                            onClick={() => handleAction('unpublish', item)}
                             color="yellow"
                           >
                             Unpublish
@@ -137,7 +137,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                         ) : (
                           <Menu.Item
                             leftSection={<IconRocket size={14} />}
-                            onClick={() => handleAction('publish', article)}
+                              onClick={() => handleAction('publish', item)}
                             color="green"
                           >
                             Publish
@@ -147,7 +147,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                         <Menu.Item
                           leftSection={<IconTrash size={14} />}
                           color="red"
-                          onClick={() => handleAction('delete', article)}
+                          onClick={() => handleAction('delete', item)}
                         >
                           Delete
                         </Menu.Item>
@@ -160,40 +160,40 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                     <Avatar
                       size={40}
                       radius="md"
-                      src={article.SEO?.socialImage?.formats?.thumbnail?.url || article.SEO?.socialImage?.formats.thumbnail?.url}
-                      alt={article.Title}
+                      src={item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url}
+                      alt={item.Title}
                     >
                       <IconPhoto size={20} />
                     </Avatar>
                     <div>
                       <Text size="sm" fw={500} lineClamp={1}>
-                        <a href="#" onClick={() => handleAction('view', article)} className="text-blue-600 hover:text-blue-900">
-                          {article.Title}
+                        <a href="#" onClick={() => handleAction('view', item)} className="text-blue-600 hover:text-blue-900">
+                          {item.Title}
                         </a>
                       </Text>
                       <Text size="xs" c="dimmed">
-                        {article.slug}
+                        {item.slug}
                       </Text>
                     </div>
                   </Group>
                 </Table.Td>
                 <Table.Td>
                   <Badge
-                    color={article.publishedAt ? 'green' : 'yellow'}
+                    color={item.publishedAt ? 'green' : 'yellow'}
                     variant="light"
                   >
-                    {article.publishedAt ? 'Published' : 'Draft'}
+                    {item.publishedAt ? 'Published' : 'Draft'}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm">
-                    {formatDistanceToNow(new Date(article.updatedAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
                   </Text>
                 </Table.Td>
                 {'Tags' in items?.[0] && (
                   <Table.Td>
                     <Group gap={4}>
-                      {(article as HasTags)?.Tags?.slice(0, 2).map((tag, id) => (
+                      {(item as HasTags)?.Tags?.slice(0, 2).map((tag, id) => (
                         <Badge
                           key={id}
                           size="sm"
@@ -203,9 +203,9 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                           {tag.Label}
                         </Badge>
                       ))}
-                      {((article as HasTags).Tags?.length || 0) > 2 && (
+                      {((item as HasTags).Tags?.length || 0) > 2 && (
                         <Badge size="sm" variant="outline" color="gray">
-                          +{(article as HasTags).Tags!.length - 2}
+                          +{(item as HasTags).Tags!.length - 2}
                         </Badge>
                       )}
                     </Group>
