@@ -1,4 +1,4 @@
-import { Article } from "@/markket/article";
+
 import {
   Table,
   Text,
@@ -22,17 +22,21 @@ import {
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
 
+import { ITEM } from "./index";
+
 type ArticleListProps = {
-  articles: Article[];
+  items: ITEM[];
   actions: {
-    onEdit?: (article: Article) => void;
-    onDelete?: (article: Article) => void;
-    onPublish?: (article: Article) => void;
-    onUnpublish?: (article: Article) => void;
-    onView?: (article: Article) => void;
-    onPreview?: (article: Article) => void;
-    onClone?: (article: Article) => void;
-  }
+    onEdit?: (article: ITEM) => void;
+    onDelete?: (article: ITEM) => void;
+    onPublish?: (article: ITEM) => void;
+    onUnpublish?: (article: ITEM) => void;
+    onView?: (article: ITEM) => void;
+    onPreview?: (article: ITEM) => void;
+    onClone?: (article: ITEM) => void;
+  },
+  plural: string;
+  singular: string;
 }
 
 const map = {
@@ -47,10 +51,10 @@ const map = {
 
 type actions = 'onEdit' | 'onDelete' | 'onPublish' | 'onUnpublish' | 'onView' | 'onPreview' | 'onClone';
 
-export default function ArticleList({ articles, actions }: ArticleListProps) {
-  const handleAction = (action: keyof typeof map, article: Article) => {
+export default function ListComponent({ items, actions, plural }: ArticleListProps) {
+  const handleAction = (action: keyof typeof map, article: ITEM) => {
 
-    const fn = actions[map[action] as actions]  as (article: Article) => void;
+    const fn = actions[map[action] as actions]  as (article: ITEM) => void;
 
     if (fn) {
       fn(article);
@@ -58,12 +62,12 @@ export default function ArticleList({ articles, actions }: ArticleListProps) {
       console.warn(`Action ${action} is not defined`);
     }
   };
-
-  if (!articles.length) {
+  const articles = items;
+  if (!items.length) {
     return (
       <Paper p="xl" withBorder>
         <Text ta="center" c="dimmed">
-          No articles found. Create your first article to get started.
+          No {plural} found.
         </Text>
       </Paper>
     );
@@ -205,4 +209,4 @@ export default function ArticleList({ articles, actions }: ArticleListProps) {
       </Table.ScrollContainer>
     </Paper>
   );
-}
+};
