@@ -22,13 +22,32 @@ import { Store, StripeAccount } from '@/markket'
 
 export default function StripePage({ store, stripe }: { store: Store, stripe: StripeAccount }) {
   const [loading, setLoading] = useState(false);
+  const markket = new markketClient();
 
-  const openDashboard = () => {
+  const openDashboard = async () => {
     setLoading(true);
 
     try {
-      const url = new URL(`https://connect.stripe.com/setup/${store?.STRIPE_CUSTOMER_ID}`);
-      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+      const linkResponse = await markket.stripeConnect('account_link', {
+        account: store?.STRIPE_CUSTOMER_ID,
+        store: store?.documentId,
+        test_mode: !!stripe?.info?.test_mode,
+      });
+
+      if (linkResponse?.url) {
+        setTimeout(() => {
+          const url = new URL(linkResponse.url);
+          const a = document.createElement('a');
+          a.href = url.toString();
+          a.target = '_blank';
+
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }, 0);
+      } else {
+        throw new Error('No account link URL received');
+      }
     } catch (error) {
       console.error('Stripe setup error:', error);
       notifications.show({
