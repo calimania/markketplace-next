@@ -79,19 +79,32 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
             <Stack gap={0}>
               <Text size="sm" fw={500}>Title</Text>
               <Text size="xs" c="dimmed">
-                {SEO.title?.length || 0}/60 chars
+                {(SEO.metaTitle)?.length || 0}/60 chars
               </Text>
             </Stack>
           </Group>
 
           <Group gap="xs">
             <ThemeIcon size={24} variant="light">
-              <IconPhoto size={14} />
+              {!SEO.socialImage?.url && (<IconPhoto size={14} />)}
+              {SEO.socialImage?.url && (
+                <a href={SEO.socialImage.url} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                  <img
+                    src={SEO.socialImage.url}
+                    alt="Social Image"
+                    style={{ width: rem(28), height: rem(28), objectFit: 'cover' }}
+                  />
+                </a>
+              )}
             </ThemeIcon>
             <Stack gap={0}>
-              <Text size="sm" fw={500}>Social Image</Text>
+              <Text size="sm" fw={500}>
+                <a href={SEO?.socialImage?.url || '#'} target="_blank" rel="noopener noreferrer" className="">
+                  Social Image
+                </a>
+              </Text>
               <Text size="xs" c="dimmed">
-                {SEO.image ? 'Set' : 'Not set'}
+                {SEO.socialImage ? 'Set' : 'Not set'}
               </Text>
             </Stack>
           </Group>
@@ -103,14 +116,14 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
             <Stack gap={0}>
               <Text size="sm" fw={500}>Author</Text>
               <Text size="xs" c="dimmed">
-                {SEO.author || 'Not set'}
+                {SEO.metaAuthor || 'Not set'}
               </Text>
             </Stack>
           </Group>
 
-          {SEO.canonical && (
+          {SEO.metaUrl && (
             <Group gap="xs" ml="auto">
-              <CopyButton value={SEO.canonical}>
+              <CopyButton value={SEO.metaUrl}>
                 {({ copied, copy }) => (
                   <Tooltip label={copied ? 'Copied!' : 'Copy canonical URL'}>
                     <ActionIcon

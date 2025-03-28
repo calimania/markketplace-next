@@ -1,81 +1,131 @@
-import { Container, Paper, Stack, Title, Text, Group, Badge, ActionIcon, Tooltip, Divider } from '@mantine/core';
+import {
+  Container,
+  Paper,
+  Stack,
+  Title,
+  Text,
+  Group,
+  Badge,
+  Divider,
+  ThemeIcon,
+  Button,
+} from '@mantine/core';
 import { Article } from '@/markket';
-import { IconCalendar, IconClock, IconLink } from '@tabler/icons-react';
+import {
+  IconCalendar,
+  IconClock,
+  IconLink,
+  IconEdit,
+} from '@tabler/icons-react';
 import { format } from 'date-fns';
-import {ContentBlock} from './content.blocks.view';
+import { ContentBlock } from './content.blocks.view';
 import SEOPreview from './seo.preview';
+import Link from 'next/link';
 
 const ViewArticle = ({ article }: { article: Article }) => {
-  console.log('Article:', article);
   return (
     <Container size="md" py="xl">
       <SEOPreview SEO={article?.SEO} />
+
+      <Paper withBorder radius="md" p="md" mb="xl">
+        <Group justify="space-between">
+          <Group>
+            <Button
+              component={Link}
+              href={`/dashboard/articles/edit/${article.documentId}`}
+              variant="light"
+              leftSection={<IconEdit size={16} />}
+            >
+              Edit Article
+            </Button>
+          </Group>
+        </Group>
+      </Paper>
       <Paper shadow="sm" p="xl" radius="md" withBorder>
         <Stack>
-          {/* Article Header */}
-          <Stack gap="xs">
-            <Title order={1}>
+          <Stack gap="lg">
+            <Title
+              order={1}
+              style={{
+                fontSize: '2.5rem',
+                lineHeight: 1.2,
+                fontWeight: 800,
+              }}
+            >
               {article.Title}
             </Title>
-
-            <Group gap="md">
+            <Group gap="lg">
               <Group gap="xs">
-                <IconCalendar size={16} />
-                <Text size="sm" c="dimmed">
-                  Published {article?.publishedAt && format(new Date(article.publishedAt), 'MMM d, yyyy')}
+                <ThemeIcon size="md" variant="light" color="blue">
+                  <IconCalendar size={16} />
+                </ThemeIcon>
+                <Text size="sm">
+                  Published{' '}
+                  <Text span fw={500}>
+                    {article?.publishedAt &&
+                      format(new Date(article.publishedAt), 'MMMM d, yyyy')}
+                  </Text>
                 </Text>
               </Group>
               <Group gap="xs">
-                <IconClock size={16} />
-                <Text size="sm" c="dimmed">
-                  Updated {article?.updatedAt && format(new Date(article.updatedAt), 'MMM d, yyyy')}
+                <ThemeIcon size="md" variant="light" color="grape">
+                  <IconClock size={16} />
+                </ThemeIcon>
+                <Text size="sm">
+                  Updated{' '}
+                  <Text span fw={500}>
+                    {article?.updatedAt &&
+                      format(new Date(article.updatedAt), 'MMMM d, yyyy')}
+                  </Text>
                 </Text>
               </Group>
             </Group>
-
-            {article.Tags && (
-              <Group gap="xs" mt="xs">
-                {article.Tags.map(tag => (
-                  <Badge key={tag.id} variant="light">
-                    {tag.Label}
-                  </Badge>
-                ))}
-              </Group>
+            {article.Tags && article.Tags.length > 0 && (
+              <>
+                <Divider />
+                <Group gap="xs">
+                  {article.Tags.map(tag => (
+                    <Badge
+                      key={tag.id}
+                      variant="dot"
+                      size="lg"
+                      radius="sm"
+                    >
+                      {tag.Label}
+                    </Badge>
+                  ))}
+                </Group>
+              </>
             )}
           </Stack>
-
           <Paper
             withBorder
             p="xl"
             radius="md"
             mt="xl"
             className="prose max-w-none"
+            style={{
+              backgroundColor: 'var(--mantine-color-gray-0)',
+            }}
           >
-            <strong>Content</strong>
-            <Divider my="md" />
-            {article.Content?.map((block, index) => (
-              <ContentBlock key={index} block={block} />
-            ))}
+            <div className="content-wrapper">
+              {article.Content?.map((block, index) => (
+                <ContentBlock key={index} block={block} />
+              ))}
+            </div>
           </Paper>
-
-          {/* Article Footer */}
-          <Group justify="space-between" mt="xl">
-            <Text size="sm" c="dimmed">
-              Article ID: {article.documentId}
-            </Text>
-            <Tooltip label="Copy link">
-              <ActionIcon
-                variant="light"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `${window.location.origin}/articles/${article.slug}`
-                  );
-                }}
-              >
-                <IconLink size={16} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
+          <Paper withBorder p="md" radius="md" mt="xl">
+            <Group justify="space-between">
+              <Group gap="xs">
+                <ThemeIcon size="md" variant="light">
+                  <IconLink size={16} />
+                </ThemeIcon>
+                <Text size="sm" fw={500}>
+                  Article ID: {article.documentId}
+                </Text>
+              </Group>
+            </Group>
+          </Paper>
         </Stack>
       </Paper>
     </Container>

@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Article } from '@/markket';
 import ViewArticle from '@/app/components/dashboard/article.view';
+import Link from 'next/link';
+import { IconChevronCompactLeft } from '@tabler/icons-react';
+import { Group } from '@mantine/core';
 
 const EditArticle = ({ article }: { article: Article }) => {
   return (
     <div>
-      <h1>View Article</h1>
+      <h1>Edit Article</h1>
       {article?.Title}
-      <p>This is the view article component.</p>
     </div>
   );
 };
-
 
 const ActionComponents = {
   view: ViewArticle,
@@ -48,8 +49,12 @@ export default function ArticleActions({ action, id }: { action: string, id: str
 
   return (
     <div>
-      <h1>{action} Article</h1>
-      <p>Article ID: {id}</p>
+      <Link href="/dashboard/articles" className='text-blue-700'>
+        <Group className='mb-4' align="center">
+          <IconChevronCompactLeft size={16} />
+          <span> Back to Articles</span>
+        </Group>
+      </Link>
       <ActionComponent article={data} />
     </div>
   );

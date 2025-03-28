@@ -3,7 +3,6 @@
 import { useContext } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import ArticleActions from "./article.actions";
-
 /**
  * The dashboard item to view, edit and interact with a specific item
  *

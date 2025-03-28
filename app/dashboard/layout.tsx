@@ -7,6 +7,8 @@ import { Store } from '@/markket/store';
 import { useAuth } from '@/app/providers/auth.provider';
 import { useRouter } from 'next/navigation';
 
+import '@/app/styles/dashboard.scss';
+
 type StoreOption = {
   value: string;
   label: string;

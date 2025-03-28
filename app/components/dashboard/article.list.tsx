@@ -156,7 +156,9 @@ export default function ArticleList({ articles, actions }: ArticleListProps) {
                     </Avatar>
                     <div>
                       <Text size="sm" fw={500} lineClamp={1}>
-                        {article.Title}
+                        <a href="#" onClick={() => handleAction('view', article)} className="text-blue-600 hover:text-blue-900">
+                          {article.Title}
+                        </a>
                       </Text>
                       <Text size="xs" c="dimmed">
                         {article.slug}

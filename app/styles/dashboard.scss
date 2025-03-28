@@ -1,0 +1,42 @@
+.prose {
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5 {
+  margin-top: 2em;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
+  color: var(--mantine-color-dark-7);
+}
+
+.prose code {
+  background: var(--mantine-color-gray-1);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.content-wrapper {
+  max-width: 65ch;
+  margin: 0 auto;
+}
+
+.prose a {
+  color: var(--mantine-color-blue-6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.prose a:hover {
+  color: var(--mantine-color-blue-8);
+  text-decoration: underline;
+}
