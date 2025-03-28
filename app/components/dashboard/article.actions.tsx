@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Article } from '@/markket';
-import { markketConfig } from '@/markket/config';
-
-const ViewArticle = ({ article }: { article: Article }) => {
-  return (
-    <div>
-      <h1>View Article</h1>
-      {article?.Title}
-      <p>This is the view article component.</p>
-    </div>
-  );
-};
-
+import ViewArticle from '@/app/components/dashboard/article.view';
 
 const EditArticle = ({ article }: { article: Article }) => {
   return (
@@ -45,8 +34,7 @@ export default function ArticleActions({ action, id }: { action: string, id: str
 
       const json = await response.json();
 
-
-      console.log('fetching data', id, json);
+      setData(json?.data as Article);
     };
 
     if (id) {
