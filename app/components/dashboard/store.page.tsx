@@ -20,9 +20,8 @@ import StoreMedia from '@/app/components/ui/store.media';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 
-
 export default function StoreDashboardPage() {
-  const { store } = useContext(DashboardContext) as { store: Store };
+  const { store, setSelectedStore } = useContext(DashboardContext);
 
   return (
     <Container size="lg" py="xl">
@@ -126,19 +125,18 @@ export default function StoreDashboardPage() {
                 <StoreMedia store={store} onUpdate={(media, field, id) => {
                   if (store?.id !== id) return;
 
-                  // if (field?.startsWith('SEO')) {
-                  //   setStore((prev) => ({
-                  //     ...prev as Store,
-                  //     SEO: {
-                  //       ...prev?.SEO as Store['SEO'],
-                  //       [field.split('.')[1]]: media
-                  //     }
-                  //   }));
-                  //   return;
-                  // }
-                  // // @TODO: refresh stores via context
-                  // setStore((prev: Store) => ({...prev , [field]: media }));
-
+                  if (field?.startsWith('SEO')) {
+                    const newStore = {
+                      ...store,
+                      SEO: {
+                        ...store?.SEO as Store['SEO'],
+                        [field.split('.')[1]]: media
+                      }
+                    };
+                    setSelectedStore(newStore);
+                    return;
+                  }
+                  setSelectedStore({ ...store, [field]: media });
                 }} />
               </Grid.Col>
             </Grid>

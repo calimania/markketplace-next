@@ -41,8 +41,11 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
         const a = document.createElement('a');
         a.href = url.toString();
         a.target = '_blank';
+
+        document.body.appendChild(a);
         a.click();
-        a.remove();
+        document.body.removeChild(a);
+
       } else {
         throw new Error('No account link URL received');
       }
