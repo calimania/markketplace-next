@@ -1,4 +1,5 @@
-import { Store, Media } from "./store";
+import { Store } from "./store";
+import { SEO } from "./seo";
 
 
 interface Price {
@@ -50,18 +51,6 @@ interface Slide {
   updatedAt: string;
   documentId: string;
   publishedAt: string;
-}
-
-interface SEO {
-  id: number;
-  socialImage: Media;
-  metaTitle: string;
-  metaDescription: string;
-  metaKeywords: string;
-  metaUrl: string | null;
-  metaAuthor: string | null;
-  excludeFromSearch: boolean;
-  metaDate: string | null;
 }
 
 export interface Product {
