@@ -24,6 +24,13 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { ITEM } from "./index";
 
+type HasTags = {
+  Tags: {
+    Label: string;
+    Color: string;
+  }[];
+}
+
 type ArticleListProps = {
   items: ITEM[];
   actions: {
@@ -83,7 +90,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
               <Table.Th>Article</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Last Updated</Table.Th>
-              <Table.Th>Tags</Table.Th>
+              {'Tags' in items?.[0] && <Table.Th>Tags</Table.Th>}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -153,7 +160,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                     <Avatar
                       size={40}
                       radius="md"
-                      src={article.cover?.formats?.thumbnail?.url || article.cover?.url}
+                      src={article.SEO?.socialImage?.formats?.thumbnail?.url || article.SEO?.socialImage?.formats.thumbnail?.url}
                       alt={article.Title}
                     >
                       <IconPhoto size={20} />
@@ -183,25 +190,27 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                     {formatDistanceToNow(new Date(article.updatedAt), { addSuffix: true })}
                   </Text>
                 </Table.Td>
-                <Table.Td>
-                  <Group gap={4}>
-                    {article.Tags?.slice(0, 2).map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        size="sm"
-                        variant="outline"
-                        color={tag.Color}
-                      >
-                        {tag.Label}
-                      </Badge>
-                    ))}
-                    {(article.Tags?.length || 0) > 2 && (
-                      <Badge size="sm" variant="outline" color="gray">
-                        +{article.Tags!.length - 2}
-                      </Badge>
-                    )}
-                  </Group>
-                </Table.Td>
+                {'Tags' in items?.[0] && (
+                  <Table.Td>
+                    <Group gap={4}>
+                      {(article as HasTags)?.Tags?.slice(0, 2).map((tag, id) => (
+                        <Badge
+                          key={id}
+                          size="sm"
+                          variant="outline"
+                          color={tag.Color}
+                        >
+                          {tag.Label}
+                        </Badge>
+                      ))}
+                      {((article as HasTags).Tags?.length || 0) > 2 && (
+                        <Badge size="sm" variant="outline" color="gray">
+                          +{(article as HasTags).Tags!.length - 2}
+                        </Badge>
+                      )}
+                    </Group>
+                  </Table.Td>
+                )}
               </Table.Tr>
             ))}
           </Table.Tbody>

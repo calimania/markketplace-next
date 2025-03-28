@@ -15,7 +15,7 @@ async function generateMetadata(): Promise<Metadata> {
   const storeData = await strapiClient.getStore();
   const store = storeData?.data?.[0] as Store;
   const seo = store?.SEO;
-  const favicon = store?.Favicon?.url;
+  const favicon = store?.Favicon?.formats?.thumbnail?.url;
 
   return {
     title: seo?.metaTitle || "Markkët Next",

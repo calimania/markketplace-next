@@ -22,7 +22,7 @@ const PagePage = () => {
               $eq: store?.id,
             }
           },
-          populate: 'SEO',
+          populate: 'SEO,SEO.socialImage',
         });
         setPages((ar?.data || []) as Article[]);
       } catch (error) {

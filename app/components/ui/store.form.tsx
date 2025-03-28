@@ -15,16 +15,13 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconBuildingStore } from '@tabler/icons-react';
 import { markketClient } from '@/markket/api';
-import { Store } from '@/markket/store.d';
+import { Store, SEO } from '@/markket';
 
 interface StoreFormValues {
   title: string;
   Description: string;
   slug: string;
-  SEO?: {
-    metaTitle: string;
-    metaDescription: string;
-  };
+  SEO?: SEO;
 };
 
 type StoreFormProps = {
@@ -55,8 +52,8 @@ export default function StoreForm(props: StoreFormProps) {
         return null;
       },
       SEO: {
-        metaTitle: (value: string) => (value.length < 3 ? 'Meta title must be at least 3 characters' : null),
-        metaDescription: (value: string) => (value.length < 10 ? 'Meta description must be at least 10 characters' : null),
+        metaTitle: (value: string | undefined) => ((value?.length || 0) < 3 ? 'Meta title must be at least 3 characters' : null),
+        metaDescription: (value: string | undefined) => ((value?.length || 0) < 10 ? 'Meta description must be at least 10 characters' : null),
       },
       Description: (value) => (value.length < 10 ? 'Description must be at least 10 characters' : null),
     },
@@ -86,6 +83,10 @@ export default function StoreForm(props: StoreFormProps) {
       if (onSubmit) onSubmit({
         ...values,
         id: response.data.documentId,
+        SEO: {
+          metaTitle: values.SEO?.metaTitle || '',
+          metaDescription: values.SEO?.metaDescription || '',
+        },
       } as Store);
 
       form.reset();

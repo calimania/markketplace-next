@@ -1,15 +1,4 @@
-interface ImageFormat {
-  ext: string;
-  url: string;
-  hash: string;
-  mime: string;
-  name: string;
-  path: string | null;
-  size: number;
-  width: number;
-  height: number;
-  sizeInBytes: number;
-}
+import { SEO, ImageData } from './seo';
 
 interface MediaFormats {
   large: ImageFormat;
@@ -52,29 +41,12 @@ export interface Store {
   publishedAt: string;
   STRIPE_CUSTOMER_ID: string;
   Cover: Media;
-  Logo: {
-    url: string;
-    formats: {
-      small: {
-        url: string;
-      }
-    }
-  };
-  Favicon: {
-    url: string;
-  },
+  Logo: ImageData;
+  Favicon: ImageData;
   URLS: {
     id: number;
     Label: string;
     URL: string;
   }[],
-  SEO: {
-    metaDescription: string;
-    metaKeywords: string;
-    metaTitle: string;
-    metaAuthor: string;
-    socialImage?: {
-      url: string;
-    };
-  };
+  SEO: SEO;
 };
