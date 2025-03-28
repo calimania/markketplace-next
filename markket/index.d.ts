@@ -3,9 +3,10 @@
  * @description Types for Markket API requests & responses
  */
 
-export { Article } from './article';
+export { Article, } from './article';
 export { Store } from './store';
 export { StripeAccount } from './stripe';
+export { SEO } from './seo';
 
 /**
  * @typedef {Object} StrapiResponse

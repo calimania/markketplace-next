@@ -3,11 +3,13 @@ import { Article } from '@/markket';
 import { IconCalendar, IconClock, IconLink } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import {ContentBlock} from './content.blocks.view';
+import SEOPreview from './seo.preview';
 
 const ViewArticle = ({ article }: { article: Article }) => {
   console.log('Article:', article);
   return (
     <Container size="md" py="xl">
+      <SEOPreview SEO={article?.SEO} />
       <Paper shadow="sm" p="xl" radius="md" withBorder>
         <Stack>
           {/* Article Header */}

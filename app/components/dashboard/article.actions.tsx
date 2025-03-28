@@ -25,7 +25,7 @@ export default function ArticleActions({ action, id }: { action: string, id: str
 
   useEffect(() => {
     const fetchData = async (_id: string) => {
-      const response = await fetch(`/api/markket?path=/api/articles/${_id}`, {
+      const response = await fetch(`/api/markket?path=/api/articles/${_id}?populate[]=SEO&populate[]=SEO.socialImage`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
