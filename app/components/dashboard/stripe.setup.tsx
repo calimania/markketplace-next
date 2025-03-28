@@ -23,32 +23,12 @@ import { Store, StripeAccount } from '@/markket'
 export default function StripePage({ store, stripe }: { store: Store, stripe: StripeAccount }) {
   const [loading, setLoading] = useState(false);
 
-  const openDashboard = async () => {
+  const openDashboard = () => {
     setLoading(true);
-    const markket = new markketClient();
 
     try {
-      const linkResponse = await markket.stripeConnect('account_link', {
-        account: store?.STRIPE_CUSTOMER_ID,
-        store: store?.documentId,
-        test_mode: !!stripe?.info?.test_mode,
-      });
-
-      console.log({ linkResponse, ur: linkResponse?.data?.url });
-
-      if (linkResponse?.url) {
-        const url = new URL(linkResponse.url);
-        const a = document.createElement('a');
-        a.href = url.toString();
-        a.target = '_blank';
-
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-      } else {
-        throw new Error('No account link URL received');
-      }
+      const url = new URL(`https://connect.stripe.com/setup/${store?.STRIPE_CUSTOMER_ID}`);
+      window.open(url.toString(), '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Stripe setup error:', error);
       notifications.show({
@@ -173,7 +153,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
             </Button>
           </Group>
 
-          <Alert
+          {!stripe.info?.payouts_enabled && (<Alert
             icon={<IconAlertCircle size={16} />}
             title="Important Information"
             color="blue"
@@ -184,7 +164,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
               <li>Connect a bank account for payouts</li>
               <li>Verify your identity</li>
             </ul>
-          </Alert>
+          </Alert>)}
         </Stack>
       </Paper>
 
