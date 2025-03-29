@@ -23,7 +23,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { Page, Article, Product } from '@/markket';
 
-import { ITEM } from "./index";
+import { ContentItem } from "@/app/hooks/common.d";
 
 type HasTags = {
   Tags: {
@@ -33,15 +33,15 @@ type HasTags = {
 }
 
 type ArticleListProps = {
-  items: ITEM[];
+  items: ContentItem[];
   actions: {
-    onEdit?: (article: ITEM) => void;
-    onDelete?: (article: ITEM) => void;
-    onPublish?: (article: ITEM) => void;
-    onUnpublish?: (article: ITEM) => void;
-    onView?: (article: ITEM) => void;
-    onPreview?: (article: ITEM) => void;
-    onClone?: (article: ITEM) => void;
+    onEdit?: (article: ContentItem) => void;
+    onDelete?: (article: ContentItem) => void;
+    onPublish?: (article: ContentItem) => void;
+    onUnpublish?: (article: ContentItem) => void;
+    onView?: (article: ContentItem) => void;
+    onPreview?: (article: ContentItem) => void;
+    onClone?: (article: ContentItem) => void;
   },
   plural: string;
   singular: string;
@@ -60,9 +60,9 @@ const map = {
 type actions = 'onEdit' | 'onDelete' | 'onPublish' | 'onUnpublish' | 'onView' | 'onPreview' | 'onClone';
 
 export default function ListComponent({ items, actions, plural }: ArticleListProps) {
-  const handleAction = (action: keyof typeof map, article: ITEM) => {
+  const handleAction = (action: keyof typeof map, article: ContentItem) => {
 
-    const fn = actions[map[action] as actions]  as (article: ITEM) => void;
+    const fn = actions[map[action] as actions] as (article: ContentItem) => void;
 
     if (fn) {
       fn(article);
@@ -162,7 +162,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                       size={40}
                       radius="md"
                       src={item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url}
-                      alt={item.Title}
+                      alt={(item as Article).Title || (item as Page).Title || (item as Product).Name}
                     >
                       <IconPhoto size={20} />
                     </Avatar>

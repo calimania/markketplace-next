@@ -40,6 +40,7 @@ export default function StoreForm(props: StoreFormProps) {
       SEO: {
         metaDescription: '',
         metaTitle: '',
+        excludeFromSearch: true,
       }
     },
     validate: {

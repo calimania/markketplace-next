@@ -162,7 +162,7 @@ export class StrapiClient {
   }
 
   async fetch<T>(options: FetchOptions): Promise<StrapiResponse<T>> {
-    const url = this.buildUrl(options);
+    const url = this.buildUrl(options as EnhancedFetchOptions);
 
     console.info({ url });
     try {

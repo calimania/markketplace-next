@@ -1,4 +1,5 @@
 import ItemPageComponent from "@/app/components/dashboard/item.page";
+import { ContentType } from "@/app/hooks/common";
 import { notFound } from "next/navigation";
 
 /**
@@ -15,7 +16,10 @@ const ItemPage = async ({ params }: { params: Promise<{ id: string[], slug: stri
   }
 
   return (
-    <ItemPageComponent id={id[1] as string} action={id[0]} slug={slug} />
+    <ItemPageComponent
+      id={id[1] as string}
+      action={id[0] as 'view' | 'edit'}
+      slug={slug as ContentType} />
   );
 }
 

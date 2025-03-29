@@ -29,7 +29,7 @@ export interface StrapiResponse<T> {
  */
 export interface FetchOptions {
   contentType: string;
-  filters?: Record<string, string | number | ojbect>;
+  filters?: Record<string, string | number | object>;
   populate?: string;
   sort?: string;
   status?: 'published' | 'draft' | 'all';
