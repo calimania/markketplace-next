@@ -8,7 +8,7 @@ import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
 const PagePage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('articles', store);
+  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
 
   return (
     <DashboardCMS
