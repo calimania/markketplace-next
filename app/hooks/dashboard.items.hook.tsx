@@ -53,6 +53,7 @@ export function useCMSItems<T>(
     const fetchItems = async () => {
       setLoading(true);
       setError(null);
+      setItems([]);
 
       try {
         const mergedOptions = {
