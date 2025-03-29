@@ -19,7 +19,7 @@ export function useCMSItem<T>(
     setError(null);
 
     const fetchData = async (_id: string) => {
-      const response = await fetch(`/api/markket?path=/api/${contentType}/${_id}?${options?.append ||''}`, {
+      const response = await fetch(`/api/markket?path=/api/${contentType}/${_id}&${options?.append || ''}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
