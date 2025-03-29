@@ -1,15 +1,15 @@
 import { Container, Group, Paper, Stack, Title, Text, Button, Skeleton } from '@mantine/core';
 import { IconArticle, IconPlus, IconSearch, IconMicroscope } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { Article , Page , Store } from "@/markket";
 import ItemList from '@/app/components/dashboard/cms/list.component';
+import { Store } from '@/markket';
 
-export type ITEM = Article | Page ;
+import { ContentItem } from '@/app/hooks/common.d';
 
 type CMSComponent = {
   singular: string;
   plural: string;
-  items: ITEM[];
+  items: ContentItem[];
   loading: boolean;
   store: Store;
   description?: string;

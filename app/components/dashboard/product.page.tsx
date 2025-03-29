@@ -1,25 +1,25 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { Product } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const ArticlePage = () => {
+const ProductPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: articles, loading, } = useCMSItems<Article>('articles', store);
+  const { items: products, loading, } = useCMSItems<Product>('products', store);
 
   return (
     <DashboardCMS
-      singular="article"
-      plural="articles"
-      items={articles}
+      singular="product"
+      plural="products"
+      items={products}
       loading={loading}
       store={store}
-      description="Articles are the main content of your blog, used to share news, updates, and stories with your audience."
+      description={'Information about Digital & Physical products, and subscriptions'}
     ></DashboardCMS>
   );
 };
 
-export default ArticlePage;
+export default ProductPage;

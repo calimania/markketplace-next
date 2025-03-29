@@ -2,42 +2,13 @@
 
 import DashboardCMS from '@/app/components/dashboard/cms';
 import { Article } from '@/markket/';
-import { useState, useEffect, useContext } from 'react';
-import { strapiClient as strapi } from '@/markket/api.strapi';
+import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
 const PagePage = () => {
-  const [pages, setPages] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(false);
   const { store } = useContext(DashboardContext);
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      setLoading(true);
-      try {
-        const ar = await strapi.fetch({
-          contentType: 'pages',
-          filters: {
-            store: {
-              $eq: store?.id,
-            }
-          },
-          populate: 'SEO,SEO.socialImage',
-        });
-        setPages((ar?.data || []) as Article[]);
-      } catch (error) {
-        console.error('Failed to fetch articles:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (store?.id) {
-      fetchPages();
-    } else {
-      setPages([]);
-    }
-  }, [store?.id]);
+  const { items: pages, loading, } = useCMSItems<Article>('articles', store);
 
   return (
     <DashboardCMS
