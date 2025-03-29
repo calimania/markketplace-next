@@ -8,6 +8,7 @@ export { StripeAccount } from './stripe';
 export { SEO } from './seo';
 export { Page } from './page';
 export { Product } from './product';
+export { Event } from './event';
 
 /**
  * @typedef {Object} StrapiResponse

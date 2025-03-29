@@ -65,7 +65,7 @@ export function useCMSItems<T>(
           contentType,
           filters: {
             //  some models connect with multiple stores - and some are 1:1
-            [['products'].includes(contentType)  ? 'stores' : 'store']: {
+            [['products', 'events'].includes(contentType) ? 'stores' : 'store']: {
               $eq: store?.id,
             },
           },
