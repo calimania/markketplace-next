@@ -1,10 +1,10 @@
 import { Container, Group, Paper, Stack, Title, Text, Button, Skeleton } from '@mantine/core';
 import { IconArticle, IconPlus, IconSearch, IconMicroscope } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { Article , Page , Store } from "@/markket";
+import { Article, Page, Store, Product } from "@/markket";
 import ItemList from '@/app/components/dashboard/cms/list.component';
 
-export type ITEM = Article | Page ;
+export type ITEM = Article | Page | Product;
 
 type CMSComponent = {
   singular: string;

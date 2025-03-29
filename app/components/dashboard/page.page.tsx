@@ -22,6 +22,7 @@ const PagePage = () => {
               $eq: store?.id,
             }
           },
+          sort: 'updatedAt:desc',
           populate: 'SEO,SEO.socialImage',
         });
         setPages((ar?.data || []) as Article[]);

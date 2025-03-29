@@ -32,6 +32,8 @@ export interface FetchOptions {
   filters?: Record<string, string | number | ojbect>;
   populate?: string;
   sort?: string;
+  status?: 'published' | 'draft' | 'all';
+  includeAuth?: boolean;
   paginate?: {
     limit?: number;
     page?: number;

@@ -47,4 +47,5 @@ export type SEO = {
   metaUrl?: string;
   metaDate?: string;
   socialImage?: ImageData;
+  excludeFromSearch: boolean;
 };

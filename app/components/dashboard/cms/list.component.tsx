@@ -21,6 +21,7 @@ import {
   IconPhoto,
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
+import { Page, Article, Product } from '@/markket';
 
 import { ITEM } from "./index";
 
@@ -168,7 +169,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                     <div>
                       <Text size="sm" fw={500} lineClamp={1}>
                         <a href="#" onClick={() => handleAction('view', item)} className="text-blue-600 hover:text-blue-900">
-                          {item.Title}
+                          {(item as Article).Title || (item as Page).Title || (item as Product).Name}
                         </a>
                       </Text>
                       <Text size="xs" c="dimmed">
@@ -179,10 +180,10 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                 </Table.Td>
                 <Table.Td>
                   <Badge
-                    color={item.publishedAt ? 'green' : 'yellow'}
+                    color={(item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'yellow' : 'green'}
                     variant="light"
                   >
-                    {item.publishedAt ? 'Published' : 'Draft'}
+                    {(item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'Draft' : 'Published'}
                   </Badge>
                 </Table.Td>
                 <Table.Td>

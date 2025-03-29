@@ -1,31 +1,33 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { Product } from '@/markket/';
 import { useState, useEffect, useContext } from 'react';
 import { strapiClient as strapi } from '@/markket/api.strapi';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 
-const ArticlePage = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
+const ProductPage = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const { store } = useContext(DashboardContext);
 
   useEffect(() => {
-    const fetchArticles = async () => {
+    const fetchPages = async () => {
       setLoading(true);
       try {
         const ar = await strapi.fetch({
-          contentType: 'articles',
+          contentType: 'products',
+          includeAuth: true,
           filters: {
-            store: {
+            stores: {
               $eq: store?.id,
-            }
+            },
           },
+          status: 'published',
           sort: 'updatedAt:desc',
-          populate: 'Tags,SEO,SEO.socialImage',
+          populate: 'SEO,SEO.socialImage',
         });
-        setArticles((ar?.data || []) as Article[]);
+        setProducts((ar?.data || []) as Product[]);
       } catch (error) {
         console.error('Failed to fetch articles:', error);
       } finally {
@@ -34,22 +36,22 @@ const ArticlePage = () => {
     };
 
     if (store?.id) {
-      fetchArticles();
+      fetchPages();
     } else {
-      setArticles([]);
+      setProducts([]);
     }
   }, [store?.id]);
 
   return (
     <DashboardCMS
-      singular="article"
-      plural="articles"
-      items={articles}
+      singular="product"
+      plural="products"
+      items={products}
       loading={loading}
       store={store}
-      description="Articles are the main content of your blog, used to share news, updates, and stories with your audience."
+      description={'Information about Digital & Physical products, and subscriptions'}
     ></DashboardCMS>
   );
 };
 
-export default ArticlePage;
+export default ProductPage;

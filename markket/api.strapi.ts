@@ -137,10 +137,14 @@ export class StrapiClient {
 
   // @TODO - if we have a store?.id, is faster to search that way instead of slug
   private buildUrl(options: EnhancedFetchOptions): string {
-    const { contentType, filters, populate, paginate, sort } = options;
+    const { contentType, filters, populate, paginate, sort, status } = options;
     const params = new URLSearchParams();
 
     const filterString = this.buildFilterString(filters);
+
+    if (status) {
+      params.append('status', status);
+    }
 
     if (populate) {
       const fields = Array.isArray(populate) ? populate : populate.split(',');
@@ -166,6 +170,7 @@ export class StrapiClient {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
         },
         // next: { revalidate: 0 },
       });
