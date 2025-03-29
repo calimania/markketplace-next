@@ -2,14 +2,8 @@ import { useState, useEffect } from 'react';
 import { strapiClient as strapi } from '@/markket/api.strapi';
 import { Store } from '@/markket/store';
 
-type ContentType = 'articles' | 'pages' | 'products' | 'albums' | 'tracks' | 'events'  | 'subscribers' | 'inbox';
+import { ContentType, FetchOptions } from './common.d';
 
-interface FetchOptions {
-  populate?: string[];
-  sort?: string;
-  includeAuth?: boolean;
-  status?: string;
-}
 
 const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
   articles: {

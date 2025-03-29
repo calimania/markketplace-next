@@ -18,21 +18,21 @@ import {
   IconEdit,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
-import { ContentBlock } from './content.blocks.view';
-import SEOPreview from './seo.preview';
+import { ContentBlock } from '../content.blocks.view';
+import SEOPreview from '../seo.preview';
 import Link from 'next/link';
 
-const ViewArticle = ({ article }: { article: Article }) => {
+const ViewArticle = ({ item }: { item: Article }) => {
   return (
     <Container size="md" py="xl">
-      <SEOPreview SEO={article?.SEO} />
+      <SEOPreview SEO={item?.SEO} />
 
       <Paper withBorder radius="md" p="md" mb="xl">
         <Group justify="space-between">
           <Group>
             <Button
               component={Link}
-              href={`/dashboard/articles/edit/${article.documentId}`}
+              href={`/dashboard/articles/edit/${item.documentId}`}
               variant="light"
               leftSection={<IconEdit size={16} />}
             >
@@ -52,7 +52,7 @@ const ViewArticle = ({ article }: { article: Article }) => {
                 fontWeight: 800,
               }}
             >
-              {article.Title}
+              {item.Title}
             </Title>
             <Group gap="lg">
               <Group gap="xs">
@@ -62,8 +62,8 @@ const ViewArticle = ({ article }: { article: Article }) => {
                 <Text size="sm">
                   Published{' '}
                   <Text span fw={500}>
-                    {article?.publishedAt &&
-                      format(new Date(article.publishedAt), 'MMMM d, yyyy')}
+                    {item?.publishedAt &&
+                      format(new Date(item.publishedAt), 'MMMM d, yyyy')}
                   </Text>
                 </Text>
               </Group>
@@ -74,17 +74,17 @@ const ViewArticle = ({ article }: { article: Article }) => {
                 <Text size="sm">
                   Updated{' '}
                   <Text span fw={500}>
-                    {article?.updatedAt &&
-                      format(new Date(article.updatedAt), 'MMMM d, yyyy')}
+                    {item?.updatedAt &&
+                      format(new Date(item.updatedAt), 'MMMM d, yyyy')}
                   </Text>
                 </Text>
               </Group>
             </Group>
-            {article.Tags && article.Tags.length > 0 && (
+            {item.Tags && item.Tags.length > 0 && (
               <>
                 <Divider />
                 <Group gap="xs">
-                  {article.Tags.map(tag => (
+                  {item.Tags.map(tag => (
                     <Badge
                       key={tag.id}
                       variant="dot"
@@ -109,7 +109,7 @@ const ViewArticle = ({ article }: { article: Article }) => {
             }}
           >
             <div className="content-wrapper">
-              {article.Content?.map((block, index) => (
+              {item.Content?.map((block, index) => (
                 <ContentBlock key={index} block={block} />
               ))}
             </div>
@@ -121,7 +121,7 @@ const ViewArticle = ({ article }: { article: Article }) => {
                   <IconLink size={16} />
                 </ThemeIcon>
                 <Text size="sm" fw={500}>
-                  Article ID: {article.documentId}
+                  Article ID: {item.documentId}
                 </Text>
               </Group>
             </Group>
