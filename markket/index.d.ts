@@ -10,6 +10,8 @@ export { Page } from './page';
 export { Product } from './product';
 export { Event } from './event';
 export { Album, AlbumTrack } from './album';
+export { InboxMessage } from './inbox';
+export { Form } from './form';
 
 /**
  * @typedef {Object} StrapiResponse

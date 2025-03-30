@@ -34,8 +34,12 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     populate: [],
     sort: 'updatedAt:desc'
   },
-  inbox: {
+  inboxes: {
     populate: [],
+    sort: 'updatedAt:desc'
+  },
+  forms: {
+    populate: ['SEO', 'SEO.socialImage'],
     sort: 'updatedAt:desc'
   }
 };
@@ -63,6 +67,7 @@ export function useCMSItems<T>(
 
         const response = await strapi.fetch({
           contentType,
+          includeAuth: true,
           filters: {
             //  some models connect with multiple stores - and some are 1:1
             [['products', 'events'].includes(contentType) ? 'stores' : 'store']: {
@@ -71,7 +76,6 @@ export function useCMSItems<T>(
           },
           populate: mergedOptions?.populate?.join(','),
           sort: mergedOptions.sort,
-          includeAuth: mergedOptions.includeAuth,
         });
 
         setItems((response?.data || []) as T[]);
