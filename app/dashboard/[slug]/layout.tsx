@@ -39,6 +39,7 @@ import {
   IconHomeStar,
   IconCashBanknoteHeart,
   IconClipboardPlus,
+  IconLibraryPhoto,
 } from '@tabler/icons-react';
 import { DashboardProvider } from '@/app/providers/dashboard.provider';
 
@@ -49,6 +50,7 @@ const mainLinks = [
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
   { icon: IconShoppingBagEdit, label: 'Orders', notifications: 0, href: '/dashboard/orders' },
   { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
+  { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums' },
   { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
   { icon: IconClipboardPlus, label: 'Forms & Responses', href: '/dashboard/forms' },
   { icon: IconSubscript, label: 'Subscribers', nofications: 0, href: '/dashboard/subscribers' },

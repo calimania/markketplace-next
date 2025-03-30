@@ -1,6 +1,6 @@
-import { Article, Page, Product, Event } from '@/markket';
+import { Article, Page, Product, Event, Album, AlbumTrack } from '@/markket';
 
-export type ContentItem = Article | Page | Product | Event;
+export type ContentItem = Article | Page | Product | Event | Album | AlbumTrack;
 
 export type ContentType = 'articles' | 'pages' | 'products' | 'albums' | 'tracks' | 'events'  | 'subscribers' | 'inbox';
 

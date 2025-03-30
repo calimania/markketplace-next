@@ -19,7 +19,7 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     sort: 'updatedAt:desc',
   },
   albums: {
-    populate: ['SEO', 'SEO.socialImage', 'tracks'],
+    populate: ['SEO', 'SEO.socialImage', 'tracks',],
     sort: 'updatedAt:desc'
   },
   tracks: {

@@ -9,6 +9,7 @@ export { SEO } from './seo';
 export { Page } from './page';
 export { Product } from './product';
 export { Event } from './event';
+export { Album, AlbumTrack } from './album';
 
 /**
  * @typedef {Object} StrapiResponse

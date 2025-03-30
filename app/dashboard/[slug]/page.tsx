@@ -8,6 +8,7 @@ import ArticlesDashboardPage from '@/app/components/dashboard/article.page';
 import PagesDashboardPage from '@/app/components/dashboard/page.page';
 import ProductDashboardPage from '@/app/components/dashboard/product.page';
 import EventsDashboardPage from '@/app/components/dashboard/event.page';
+import AlbumsDashboardPage from '@/app/components/dashboard/album.page';
 
 type AnyDashboardPageProps = {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,8 @@ export default async function AnyDashboardPage({
       return <ProductDashboardPage />;
     case 'events':
       return <EventsDashboardPage />;
+    case 'albums':
+      return <AlbumsDashboardPage />;
   }
 
   return (
