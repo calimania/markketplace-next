@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { IconRocket, IconBrandGithub, IconBuildingStore, IconCode, IconShoppingBag, IconFileTypeDoc, IconRadio, IconLogin2, IconHeartCode, IconBrandMysql } from "@tabler/icons-react";
 import { Container, Title, Text, Button, Group, Stack, SimpleGrid, Paper } from "@mantine/core";
 import { FeatureCard } from "@/app/components/ui/feature.card";
-import { Store } from "@/markket/store";
-import { Page } from "@/markket/page";
+import { Store, Page, Album } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
-
-const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
+import Albums from '@/app/components/ui/albums.grid';
+import { markketConfig } from "@/markket/config";
 
 const features = [
   {
@@ -89,7 +88,7 @@ const HomePage = ({store, page}: HomePageProps) => {
         {/* Hero Section */}
         <div className="text-center">
           <img
-            src={store?.Logo?.url || defaultLogo}
+            src={store?.Logo?.url || markketConfig.blank_logo_url}
             alt={store?.SEO?.metaTitle || 'Markket Logo'}
             width={200}
             height={200}
@@ -181,7 +180,7 @@ const HomePage = ({store, page}: HomePageProps) => {
           </Stack>
         </Paper>
 
-        {/* TODO: add product carousel  */}
+        <Albums albums={page?.albums as Album[]} store_slug={store?.slug as ''} />
 
         {page?.Content && (
           <PageContent params={{ page }} />
