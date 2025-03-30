@@ -17,8 +17,6 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
 
   return (
     <>
-      <Text size="sm" c="dimmed" maw={600}>
-      </Text>
       <Group justify="space-between" align="center">
         {stores?.length < markketConfig?.max_stores_per_user ? (
           <>
@@ -36,6 +34,10 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
           </>
         )}
       </Group>
+      <h3>Collaborators</h3>
+      <Text size="sm" c="dimmed" maw={600}>
+        <strong>WIP</strong> To invite collaborators, send us an email support@caliman.org
+      </Text>
       {showStoreForm && (
         stores?.length >= markketConfig?.max_stores_per_user ?
           (<></>) :

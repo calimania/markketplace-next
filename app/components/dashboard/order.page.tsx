@@ -17,7 +17,7 @@ const OrderPage = () => {
       items={items}
       loading={loading}
       store={store}
-      description={'Orders are records of purchases made by customers, including details like items bought, quantities, prices, and customer information. They are essential for tracking sales and managing inventory.'}
+      description={'Sales notifications and fulfillment'}
     ></DashboardCMS>
   );
 };
