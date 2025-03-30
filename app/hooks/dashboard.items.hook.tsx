@@ -34,6 +34,10 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     populate: [],
     sort: 'updatedAt:desc'
   },
+  orders: {
+    populate: [],
+    sort: 'updatedAt:desc'
+  },
   inboxes: {
     populate: [],
     sort: 'updatedAt:desc'

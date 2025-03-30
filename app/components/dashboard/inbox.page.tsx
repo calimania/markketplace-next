@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const EventsPage = () => {
+const InboxPage = () => {
   const { store } = useContext(DashboardContext);
   const { items, loading } = useCMSItems<InboxMessage>('inboxes', store);
 
@@ -22,4 +22,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;
+export default InboxPage;

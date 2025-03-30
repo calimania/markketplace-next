@@ -9,6 +9,7 @@ import AlbumsDashboardPage from '@/app/components/dashboard/album.page';
 import InboxDashboardPage from '@/app/components/dashboard/inbox.page';
 import FormsDashboardPage from '@/app/components/dashboard/form.page';
 import NewsletterDashboardPage from '@/app/components/dashboard/newsletter.page';
+import OrderDashboardPage from '@/app/components/dashboard/order.page';
 
 import { Container, Title } from '@mantine/core';
 
@@ -44,6 +45,8 @@ export default async function AnyDashboardPage({
       return <FormsDashboardPage />;
     case 'newsletters':
       return <NewsletterDashboardPage />;
+    case 'orders':
+      return <OrderDashboardPage />;
   }
 
   return (
