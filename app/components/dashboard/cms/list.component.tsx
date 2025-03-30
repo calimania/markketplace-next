@@ -59,7 +59,7 @@ const map = {
 
 type actions = 'onEdit' | 'onDelete' | 'onPublish' | 'onUnpublish' | 'onView' | 'onPreview' | 'onClone';
 
-export default function ListComponent({ items, actions, plural }: ArticleListProps) {
+export default function ListComponent({ items, actions, plural, singular }: ArticleListProps) {
   const handleAction = (action: keyof typeof map, article: ContentItem) => {
 
     const fn = actions[map[action] as actions] as (article: ContentItem) => void;
@@ -88,7 +88,7 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
           <Table.Thead>
             <Table.Tr>
               <Table.Th style={{ width: 100 }}>Actions</Table.Th>
-              <Table.Th>Article</Table.Th>
+              <Table.Th>{singular.charAt(0).toUpperCase()}{singular.slice(1)}</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Last Updated</Table.Th>
               {'Tags' in items?.[0] && <Table.Th>Tags</Table.Th>}
