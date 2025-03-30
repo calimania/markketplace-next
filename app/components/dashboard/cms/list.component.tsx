@@ -21,7 +21,7 @@ import {
   IconPhoto,
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Page, Article, Product } from '@/markket';
+import { Article, Product, Album } from '@/markket';
 
 import { ContentItem } from "@/app/hooks/common.d";
 
@@ -162,14 +162,14 @@ export default function ListComponent({ items, actions, plural }: ArticleListPro
                       size={40}
                       radius="md"
                       src={item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url}
-                      alt={(item as Article).Title || (item as Page).Title || (item as Product).Name}
+                      alt={(item as Article).Title || (item as Album).title || (item as Product).Name}
                     >
                       <IconPhoto size={20} />
                     </Avatar>
                     <div>
                       <Text size="sm" fw={500} lineClamp={1}>
                         <a href="#" onClick={() => handleAction('view', item)} className="text-blue-600 hover:text-blue-900">
-                          {(item as Article).Title || (item as Page).Title || (item as Product).Name}
+                          {(item as Article).Title || (item as Album).title || (item as Product).Name}
                         </a>
                       </Text>
                       <Text size="xs" c="dimmed">

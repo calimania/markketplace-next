@@ -1,25 +1,25 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { InboxMessage } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const PagePage = () => {
+const InboxPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
+  const { items, loading } = useCMSItems<InboxMessage>('inboxes', store);
 
   return (
     <DashboardCMS
-      singular="page"
-      plural="pages"
-      items={pages}
+      singular="inbox"
+      plural="inbox"
+      items={items}
       loading={loading}
       store={store}
-      description={'Pages are static content that can be used for various purposes, such as landing pages, about us, contact information, etc.'}
+      description="Direct DM messages"
     ></DashboardCMS>
   );
 };
 
-export default PagePage;
+export default InboxPage;

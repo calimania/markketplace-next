@@ -1,25 +1,25 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { Event } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const PagePage = () => {
+const EventsPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
+  const { items: events, loading, } = useCMSItems<Event>('events', store);
 
   return (
     <DashboardCMS
-      singular="page"
-      plural="pages"
-      items={pages}
+      singular="event"
+      plural="events"
+      items={events}
       loading={loading}
       store={store}
-      description={'Pages are static content that can be used for various purposes, such as landing pages, about us, contact information, etc.'}
+      description="Special occasions & activities that you can create to engage with your audience"
     ></DashboardCMS>
   );
 };
 
-export default PagePage;
+export default EventsPage;

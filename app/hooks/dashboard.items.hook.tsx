@@ -19,7 +19,7 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     sort: 'updatedAt:desc',
   },
   albums: {
-    populate: ['SEO', 'SEO.socialImage', 'tracks'],
+    populate: ['SEO', 'SEO.socialImage', 'tracks',],
     sort: 'updatedAt:desc'
   },
   tracks: {
@@ -34,10 +34,18 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     populate: [],
     sort: 'updatedAt:desc'
   },
-  inbox: {
+  orders: {
     populate: [],
     sort: 'updatedAt:desc'
-  }
+  },
+  inboxes: {
+    populate: [],
+    sort: 'updatedAt:desc'
+  },
+  forms: {
+    populate: ['SEO', 'SEO.socialImage'],
+    sort: 'updatedAt:desc'
+  },
 };
 
 export function useCMSItems<T>(
@@ -53,6 +61,7 @@ export function useCMSItems<T>(
     const fetchItems = async () => {
       setLoading(true);
       setError(null);
+      setItems([]);
 
       try {
         const mergedOptions = {
@@ -62,15 +71,15 @@ export function useCMSItems<T>(
 
         const response = await strapi.fetch({
           contentType,
+          includeAuth: true,
           filters: {
             //  some models connect with multiple stores - and some are 1:1
-            [['products'].includes(contentType)  ? 'stores' : 'store']: {
+            [['products', 'events'].includes(contentType) ? 'stores' : 'store']: {
               $eq: store?.id,
             },
           },
           populate: mergedOptions?.populate?.join(','),
           sort: mergedOptions.sort,
-          includeAuth: mergedOptions.includeAuth,
         });
 
         setItems((response?.data || []) as T[]);

@@ -1,25 +1,25 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { Form } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const PagePage = () => {
+const FormsPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
+  const { items, loading } = useCMSItems<Form>('forms', store);
 
   return (
     <DashboardCMS
-      singular="page"
-      plural="pages"
-      items={pages}
+      singular="form"
+      plural="forms"
+      items={items}
       loading={loading}
       store={store}
-      description={'Pages are static content that can be used for various purposes, such as landing pages, about us, contact information, etc.'}
+      description="Questionnaires & Forms to collect information from your audience"
     ></DashboardCMS>
   );
 };
 
-export default PagePage;
+export default FormsPage;

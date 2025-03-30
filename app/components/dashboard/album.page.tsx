@@ -1,25 +1,25 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { Article } from '@/markket/';
+import { Album,  } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const PagePage = () => {
+const AlbumsPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
+  const { items: albums, loading, } = useCMSItems<Album>('albums', store);
 
   return (
     <DashboardCMS
-      singular="page"
-      plural="pages"
-      items={pages}
+      singular="album"
+      plural="albums"
+      items={albums}
       loading={loading}
       store={store}
-      description={'Pages are static content that can be used for various purposes, such as landing pages, about us, contact information, etc.'}
+      description="Collections with individual pages, and items with their own pages. For featured and seasonal promos"
     ></DashboardCMS>
   );
 };
 
-export default PagePage;
+export default AlbumsPage;

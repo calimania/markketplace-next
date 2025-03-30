@@ -8,6 +8,12 @@ export { StripeAccount } from './stripe';
 export { SEO } from './seo';
 export { Page } from './page';
 export { Product } from './product';
+export { Event } from './event';
+export { Album, AlbumTrack } from './album';
+export { InboxMessage } from './inbox';
+export { Form } from './form';
+export { Subscriber } from './newsletter';
+export { Order } from './order';
 
 /**
  * @typedef {Object} StrapiResponse

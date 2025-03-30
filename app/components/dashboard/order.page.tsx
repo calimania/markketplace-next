@@ -6,20 +6,20 @@ import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 
-const PagePage = () => {
+const OrderPage = () => {
   const { store } = useContext(DashboardContext);
-  const { items: pages, loading, } = useCMSItems<Article>('pages', store);
+  const { items, loading, } = useCMSItems<Article>('orders', store);
 
   return (
     <DashboardCMS
-      singular="page"
-      plural="pages"
-      items={pages}
+      singular="order"
+      plural="orders"
+      items={items}
       loading={loading}
       store={store}
-      description={'Pages are static content that can be used for various purposes, such as landing pages, about us, contact information, etc.'}
+      description={'Orders are records of purchases made by customers, including details like items bought, quantities, prices, and customer information. They are essential for tracking sales and managing inventory.'}
     ></DashboardCMS>
   );
 };
 
-export default PagePage;
+export default OrderPage;

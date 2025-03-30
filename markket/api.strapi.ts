@@ -165,6 +165,7 @@ export class StrapiClient {
     const url = this.buildUrl(options as EnhancedFetchOptions);
 
     console.info({ url });
+
     try {
 
       const response = await fetch(url, {
