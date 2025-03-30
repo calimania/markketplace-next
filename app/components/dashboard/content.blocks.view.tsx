@@ -33,7 +33,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
     case 'paragraph':
       if (!block.children.some(child => child.text || child.url)) return null;
       return (
-        <Text size="md" mb="sm">
+        <div>
           {block.children.map((child, i) =>
             child.url ? (
               <Group key={i} gap="xs" display="inline-flex" align="center">
@@ -49,10 +49,12 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
                 </Anchor>
               </Group>
             ) : (
-              child.text
+                <Text key={i} component="p" >
+                  {child.text}
+                </Text>
             )
           )}
-        </Text>
+        </div>
       );
 
     case 'code':

@@ -10,36 +10,29 @@ import {
   ThemeIcon,
   Button,
 } from '@mantine/core';
-import { Article } from '@/markket';
+import { Article, Store } from '@/markket';
 import {
   IconCalendar,
+  IconEyeBolt,
   IconClock,
-  IconLink,
-  IconEdit,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
 import SEOPreview from '../seo.preview';
-import Link from 'next/link';
 
-const ViewArticle = ({ item }: { item: Article }) => {
+const ViewArticle = ({ item, store }: { item: Article, store: Store }) => {
+
   return (
     <Container size="md" py="xl">
       <SEOPreview SEO={item?.SEO} />
-
-      <Paper withBorder radius="md" p="md" mb="xl">
-        <Group justify="space-between">
-          <Group>
-            <Button
-              component={Link}
-              href={`/dashboard/articles/edit/${item.documentId}`}
-              variant="light"
-              leftSection={<IconEdit size={16} />}
-            >
-              Edit Article
-            </Button>
-          </Group>
-        </Group>
+      <Paper p="xl" radius="md" >
+        <Button
+          variant="light"
+          leftSection={<IconEyeBolt size={16} />}
+          onClick={() => window.open(`/store/${store.slug}/blog/${item.slug}`, '_preview')}
+        >
+          Preview
+        </Button>
       </Paper>
       <Paper shadow="sm" p="xl" radius="md" withBorder>
         <Stack>
@@ -80,7 +73,7 @@ const ViewArticle = ({ item }: { item: Article }) => {
                 </Text>
               </Group>
             </Group>
-            {item.Tags && item.Tags.length > 0 && (
+            {item.Tags && (
               <>
                 <Divider />
                 <Group gap="xs">
@@ -90,6 +83,7 @@ const ViewArticle = ({ item }: { item: Article }) => {
                       variant="dot"
                       size="lg"
                       radius="sm"
+                      color={tag.Color}
                     >
                       {tag.Label}
                     </Badge>
@@ -113,18 +107,6 @@ const ViewArticle = ({ item }: { item: Article }) => {
                 <ContentBlock key={index} block={block} />
               ))}
             </div>
-          </Paper>
-          <Paper withBorder p="md" radius="md" mt="xl">
-            <Group justify="space-between">
-              <Group gap="xs">
-                <ThemeIcon size="md" variant="light">
-                  <IconLink size={16} />
-                </ThemeIcon>
-                <Text size="sm" fw={500}>
-                  Article ID: {item.documentId}
-                </Text>
-              </Group>
-            </Group>
           </Paper>
         </Stack>
       </Paper>

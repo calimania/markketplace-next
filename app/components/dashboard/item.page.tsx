@@ -3,10 +3,10 @@
 import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
-import { Article, Page, Product } from '@/markket';
+import { Article, Page, Product, Store } from '@/markket';
 import ViewArticle from '@/app/components/dashboard/actions/article.view';
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
 type ContentItem = Article | Page | Product;
@@ -21,7 +21,7 @@ interface ActionComponent {
 
 const actionsMap: Record<string, ActionComponent> = {
   articles: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags`,
     view: ViewArticle,
     edit: (item: Article) => <> edit {item.documentId}  </>,
     singular: 'article',
@@ -57,7 +57,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
     append: options.url,
   });
 
-  const Component = options[action] as ElementType<{ item: ContentItem }>;
+  const Component = options[action] as ElementType<{ item: ContentItem, store: Store }>;
 
   if (loading) {
     return (
@@ -97,15 +97,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
 
   return (
     <Container size="lg" py="xl">
-      <Paper withBorder p="md" mb="xl">
-        <Stack>
-          <Text size="lg" fw={500}>
-            {store.title}
-          </Text>
-          <Text c="dimmed">{item?.documentId}</Text>
-        </Stack>
-      </Paper>
-      <Stack gap="xl">
+      <Stack gap="sm">
         <Group justify="space-between">
           <Button
             variant="light"
@@ -114,9 +106,26 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
           >
             Back to {options.plural}
           </Button>
+          <Button
+            variant="light"
+            leftSection={<IconEdit size={16} />}
+            onClick={() => router.push(`/dashboard/${slug}/edit/${item.documentId}`)}
+          >
+            Edit {options.singular}
+          </Button>
         </Group>
-        <Component item={item} />
+        <Component item={item} store={store} />
       </Stack>
+      <Paper withBorder p="md" mb="xl">
+        <Stack>
+          <Text size="lg" fw={500}>
+            {store.title}
+          </Text>
+          <Text c="dimmed">
+            <strong>{options.singular} </strong>
+            {item?.documentId}</Text>
+        </Stack>
+      </Paper>
     </Container>
   );
 }
