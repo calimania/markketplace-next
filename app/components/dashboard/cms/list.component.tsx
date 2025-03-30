@@ -21,7 +21,7 @@ import {
   IconPhoto,
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Page, Article, Product, Album } from '@/markket';
+import { Article, Product, Album } from '@/markket';
 
 import { ContentItem } from "@/app/hooks/common.d";
 

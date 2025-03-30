@@ -12,6 +12,7 @@ export { Event } from './event';
 export { Album, AlbumTrack } from './album';
 export { InboxMessage } from './inbox';
 export { Form } from './form';
+export { Subscriber } from './newsletter';
 
 /**
  * @typedef {Object} StrapiResponse

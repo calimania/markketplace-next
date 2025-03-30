@@ -41,7 +41,7 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
   forms: {
     populate: ['SEO', 'SEO.socialImage'],
     sort: 'updatedAt:desc'
-  }
+  },
 };
 
 export function useCMSItems<T>(
