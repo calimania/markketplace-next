@@ -1,96 +1,202 @@
-import { Paper,  } from '@mantine/core';
+import { useState } from 'react';
+import {
+  Group,
+  Text,
+  Badge,
+  SimpleGrid,
+  Card,
+  Image,
+  Modal,
+  ActionIcon,
+  Tooltip,
+  rem,
+} from '@mantine/core';
 import { ContentType } from '@/app/hooks/common';
 import { Media } from '@/markket';
+import { IconMaximize, IconDownload, IconPhoto } from '@tabler/icons-react';
+import { Carousel } from '@mantine/carousel';
 
 type Name = 'Cover' | 'cover' | 'Logo' | 'Favicon' | 'Slides' | 'socialImage' | 'thumbnail' | 'image' | 'images' | 'photo' | 'photos' | 'picture' | 'pictures';
 
-export default function DashboardItemImages  ({item, name , multiple }: { item: ContentType & Record<Name, Media | Media[]>, name: Name, multiple?: boolean})  {
+interface ImageCardProps {
+  image: Media;
+  onView: (image: Media) => void;
+}
 
+const ImageCard = ({ image, onView }: ImageCardProps) => (
+  <Card shadow="sm" padding="sm" radius="md" withBorder className='max-w-[300px]'>
+    <Card.Section>
+      <Image
+        src={image?.formats?.thumbnail?.url || image.url}
+        height={180}
+        alt={image.alternativeText || ''}
+        style={{ objectFit: 'cover' }}
+      />
+      <div
+        className="absolute top-2 right-2 flex gap-2"
+        style={{ zIndex: 2 }}
+      >
+        <Tooltip label="View full size">
+          <ActionIcon
+            variant="light"
+            onClick={() => onView(image)}
+            className="bg-white/80 hover:bg-white"
+          >
+            <IconMaximize size={16} />
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label="Download">
+          <ActionIcon
+            variant="light"
+            component="a"
+            href={image.url}
+            download
+            target="_blank"
+            className="bg-white/80 hover:bg-white"
+          >
+            <IconDownload size={16} />
+          </ActionIcon>
+        </Tooltip>
+      </div>
+    </Card.Section>
 
+    <Text size="sm" c="dimmed" mt="sm">
+      {image.alternativeText || 'No description'}
+    </Text>
+
+    <Group mt="xs">
+      <Badge size="sm">
+        {image.formats?.thumbnail ? 'Has thumbnail' : 'Original only'}
+      </Badge>
+      <Badge size="sm" color="blue">
+        {(image.size / 1024).toFixed(0)}KB
+      </Badge>
+    </Group>
+  </Card>
+);
+
+export default function DashboardItemImages({
+  item,
+  name,
+  multiple
+}: {
+  item: ContentType & Record<Name, Media | Media[]>,
+  name: Name,
+  multiple?: boolean
+}) {
+  const [viewingImage, setViewingImage] = useState<Media | null>(null);
   let image = item[name] as Media;
-  let images;
+  let images: Media[] = [];
 
-  if (Array.isArray(image)) {
-    image = image[0];
+  if (Array.isArray(item[name])) {
+    images = item[name] as Media[];
+    image = images[0];
   }
 
   if (!image?.url) {
     return null;
   }
 
-  if (multiple) {
-    images = item[name] as Media[];
-
+  if (multiple && images.length > 0) {
     return (
       <>
-        <h3>{name || 'Image'}</h3>
+        <Group justify="space-between" mb="md">
+          <Group gap="xs">
+            <IconPhoto size={20} />
+            <Text fw={500} size="lg">
+              {name || 'Images'}
+            </Text>
+          </Group>
+          <Badge size="lg">
+            {images.length} images
+          </Badge>
+        </Group>
 
+        <SimpleGrid
+          cols={{ base: 1, sm: 2, md: 3 }}
+          spacing="md"
+        >
+          {images.map((img) => (
+            <ImageCard
+              key={img.id}
+              image={img}
+              onView={setViewingImage}
+            />
+          ))}
+        </SimpleGrid>
 
-          <Paper
-            key={image?.id}
-            withBorder
-            p="sm"
-            radius="md"
-            mt="sm"
-            className="prose max-w-none content-wrapper "
-            style={{
-              backgroundColor: 'var(--mantine-color-gray-0)',
-            }}
-          >
-            {images?.map((image) => (
-              <>
-                <a href={image?.url} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src={image?.formats?.thumbnail?.url || image.url }
-                    alt={image.alternativeText || ''}
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      borderRadius: '8px',
-                      right: '0',
-                    }}
+        <Modal
+          opened={!!viewingImage}
+          onClose={() => setViewingImage(null)}
+          size="xl"
+          padding="md"
+          centered
+        >
+          {viewingImage && (
+            <Carousel
+              withIndicators
+              height={rem(600)}
+              initialSlide={images.findIndex(img => img.id === viewingImage.id)}
+              styles={{
+                indicator: {
+                  width: rem(12),
+                  height: rem(4),
+                  transition: 'width 250ms ease',
+                  '&[data-active]': {
+                    width: rem(40),
+                  },
+                },
+              }}
+            >
+              {images.map((img) => (
+                <Carousel.Slide key={img.id}>
+                  <Image
+                    src={img.url}
+                    alt={img.alternativeText || ''}
+                    height={rem(600)}
+                    fit="contain"
                   />
-                </a>
-              </>
-            ))}
-          </Paper>
-
+                </Carousel.Slide>
+              ))}
+            </Carousel>
+          )}
+        </Modal>
       </>
-    )
+    );
   }
-
-  console.log({ image, name})
 
   return (
     <>
-      <h3>{name || 'Image'}</h3>
+      <Group justify="space-between" mb="md">
+        <Group gap="xs">
+          <IconPhoto size={20} />
+          <Text fw={500} size="lg">
+            {name || 'Image'}
+          </Text>
+        </Group>
+      </Group>
 
-      {(image?.url) && (
-        <Paper
-          key={image?.id}
-          withBorder
-          p="sm"
-          radius="md"
-          mt="sm"
-          className="prose max-w-none content-wrapper "
-          style={{
-            backgroundColor: 'var(--mantine-color-gray-0)',
-          }}
-        >
-          <a href={image?.url} target="_blank" rel="noopener noreferrer">
-            <img
-              src={image?.formats?.thumbnail?.url || image.url }
-              alt={image?.alternativeText || ''}
-              style={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: '8px',
-                right: '0',
-              }}
-            />
-          </a>
-        </Paper>
-      )}
+      <ImageCard
+        image={image}
+        onView={setViewingImage}
+      />
+
+      <Modal
+        opened={!!viewingImage}
+        onClose={() => setViewingImage(null)}
+        size="xl"
+        padding="md"
+        centered
+      >
+        {viewingImage && (
+          <Image
+            src={viewingImage.url}
+            alt={viewingImage.alternativeText || ''}
+            fit="contain"
+            height={rem(600)}
+          />
+        )}
+      </Modal>
     </>
-  )
-};
+  );
+}
