@@ -21,14 +21,14 @@ import { ContentBlock } from '../content.blocks.view';
 import SEOPreview from '../seo.preview';
 import { ContentItem } from '@/app/hooks/common';
 
-const ViewItem = ({ item, store, singular  }: { item: ContentItem, store: Store, singular: string,  }) => {
+const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
 
   return (
     <Container size="md" py="xl" >
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}
-           previewUrl={`/store/${store.slug}/blog/${item.slug}`} />
+          previewUrl={previewUrl || `/store/${store.slug}/blog/${item.slug}`} />
       )}
       <Paper shadow="sm" p="xl" radius="md" withBorder mt={'sm'}>
         <Stack>
