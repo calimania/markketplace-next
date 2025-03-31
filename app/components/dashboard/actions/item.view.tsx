@@ -20,8 +20,11 @@ import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
 import SEOPreview from '../seo.preview';
 import { ContentItem } from '@/app/hooks/common';
+import { Remarkable } from 'remarkable';
+import ImagesView from '../item.images';
 
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
+  const md = new Remarkable();
 
   return (
     <Container size="md" py="xl" >
@@ -105,47 +108,42 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </>
             )}
           </Stack>
-          {item.Content && (
+
+          {(item.Description || item.Content) && (
             <Paper
               withBorder
               p="xl"
               radius="md"
               mt="xl"
-              className="prose max-w-none content-wrapper"
+              className="prose dark:prose-dark max-w-full"
               style={{
                 backgroundColor: 'var(--mantine-color-gray-0)',
               }}
             >
-              {item?.Content?.map((block: ContentBlock, index: number) => (
-                <ContentBlock key={index} block={block} />
-              ))}
+              {item.Description && (
+                <div
+                  className="  content-wrapper content-as-markdown"
+                  dangerouslySetInnerHTML={{
+                    __html: md.render(item.Description),
+                  }} />
+              )}
+              {item.Content && (
+                <div className="content-wrapper content-as-block">
+                  {item?.Content?.map((block: ContentBlock, index: number) => (
+                    <ContentBlock key={index} block={block} />
+                  ))}
+                </div>
+              )}
             </Paper>
           )}
-          {item.cover && (
-            <Paper
-              withBorder
-              p="sm"
-              radius="md"
-              mt="sm"
-              className="prose max-w-none content-wrapper"
-              style={{
-                backgroundColor: 'var(--mantine-color-gray-0)',
-              }}
-            >
-              <a href={item.cover?.url} target="_blank" rel="noopener noreferrer">
-                <img
-                  src={item.cover?.formats?.thumbnail?.url}
-                  alt={item.title}
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    borderRadius: '8px',
-                    right: '0',
-                  }}
-                />
-              </a>
-            </Paper>
-          )}
+          {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
+            <ImagesView
+              key={name}
+              item={item as ContentItem & Record<string, any>}
+              name={name as any}
+              multiple={item[name] && Array.isArray(item[name])}
+            />
+          ))}
         </Stack>
       </Paper>
     </Container>

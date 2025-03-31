@@ -5,10 +5,11 @@ import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
 
-const OrderPage = () => {
+const StoreListPage = () => {
   const { store , isLoading,} = useContext(DashboardContext);
   const { stores } = useAuth()
 
+  console.log({ isLoading, stores })
   return (
     <DashboardCMS
       singular="store"
@@ -21,4 +22,4 @@ const OrderPage = () => {
   );
 };
 
-export default OrderPage;
+export default StoreListPage;

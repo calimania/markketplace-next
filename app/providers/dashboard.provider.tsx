@@ -19,7 +19,7 @@ export const DashboardContext = createContext({ isLoading: false, store: {}, str
 
 export function DashboardProvider({ children, store }: { children: React.ReactNode, store?: Store }) {
   const [stripe, setAccount] = useState<StripeAccount>({} as StripeAccount);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastId, setLastId] = useState<string | null>(null);
 
   const [selectedStore, setSelectedStore] = useState<Store>(store as Store);
@@ -33,6 +33,7 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
   useEffect(() => {
     const getAccountData = async (store_id: string) => {
       if (lastId === store_id) {
+        setIsLoading(false);
         return;
       }
 
@@ -54,9 +55,10 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
         setAccount(data);
       } catch (error) {
         console.error('Failed to fetch Stripe account:', error);
-      } finally {
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
+
     };
 
     if (store?.STRIPE_CUSTOMER_ID && store?.documentId) {
