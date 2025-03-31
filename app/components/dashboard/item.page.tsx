@@ -4,7 +4,7 @@ import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
 import { Article, Page, Product, Store } from '@/markket';
-import ViewArticle from '@/app/components/dashboard/actions/article.view';
+import ViewItem from '@/app/components/dashboard/actions/item.view';
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ interface ActionComponent {
 const actionsMap: Record<string, ActionComponent> = {
   articles: {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags`,
-    view: ViewArticle,
+    view: ViewItem,
     edit: (item: Article) => <> edit {item.documentId}  </>,
     singular: 'article',
     plural: 'articles',
@@ -41,6 +41,7 @@ interface DashboardItemPageProps {
   action: 'view' | 'edit';
   slug: ContentType;
 }
+
 /**
  * The dashboard item to view, edit and interact with a specific item
  *
@@ -57,7 +58,9 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
     append: options.url,
   });
 
-  const Component = options[action] as ElementType<{ item: ContentItem, store: Store }>;
+  const Component = options[action] as ElementType<{
+    item: ContentItem, store: Store, singular: string,
+  }>;
 
   if (loading) {
     return (
@@ -114,7 +117,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
             Edit {options.singular}
           </Button>
         </Group>
-        <Component item={item} store={store} />
+        <Component item={item} store={store} singular={options.singular} />
       </Stack>
       <Paper withBorder p="md" mb="xl">
         <Stack>

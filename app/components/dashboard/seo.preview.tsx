@@ -18,19 +18,23 @@ import {
   IconBrandGoogle,
   IconUserCircle,
   IconPhoto,
+  IconExclamationCircle,
+  IconCalendarOff,
+  IconSquareRoundedCheck,
 } from '@tabler/icons-react';
+import { format } from 'date-fns';
 
 type PreviewSEOProps = {
   SEO: SEO;
+  previewUrl?: string;
 };
 
-const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
+const PreviewSEO = ({ SEO, previewUrl }: PreviewSEOProps) => {
   if (!SEO) return null;
 
   return (
     <Paper withBorder p="md" radius="md">
       <Stack gap="md">
-        {/* Google Preview */}
         <Stack gap="xs">
           <Group gap="xs">
             <ThemeIcon size="sm" variant="light" color="blue">
@@ -43,7 +47,6 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
             p="md"
             bg="gray.0"
             radius="sm"
-            style={{ maxWidth: rem(600) }}
           >
             <Stack gap="xs">
               <Text
@@ -55,12 +58,14 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {SEO.metaTitle || ''}
+                <a href={previewUrl} target='_preview'>
+                  {SEO.metaTitle || 'not set'}
+                </a>
               </Text>
               <Group gap={4}>
                 <IconWorld size={14} style={{ color: 'var(--mantine-color-green-7)' }} />
                 <Text size="xs" c="dimmed" truncate>
-                  yoursite.com
+                  {SEO.metaUrl || 'de.markket.place'}
                 </Text>
               </Group>
               <Text size="sm" lineClamp={2} c="dark.6">
@@ -70,20 +75,7 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
           </Paper>
         </Stack>
 
-        {/* Quick Info */}
         <Group gap="lg" wrap="nowrap">
-          <Group gap="xs">
-            <ThemeIcon size={24} variant="light">
-              <IconSearch size={14} />
-            </ThemeIcon>
-            <Stack gap={0}>
-              <Text size="sm" fw={500}>Title</Text>
-              <Text size="xs" c="dimmed">
-                {(SEO.metaTitle)?.length || 0}/60 chars
-              </Text>
-            </Stack>
-          </Group>
-
           <Group gap="xs">
             <ThemeIcon size={24} variant="light">
               {!SEO.socialImage?.url && (<IconPhoto size={14} />)}
@@ -108,7 +100,41 @@ const PreviewSEO = ({ SEO }: PreviewSEOProps) => {
               </Text>
             </Stack>
           </Group>
-
+          <Group gap="xs">
+            <ThemeIcon size={24} variant="light">
+              {!SEO.excludeFromSearch && <IconSquareRoundedCheck size={14} />}
+              {SEO.excludeFromSearch && <IconExclamationCircle size={14} />}
+            </ThemeIcon>
+            <Stack gap={0}>
+              <Text size="sm" fw={500}>Active</Text>
+              <Text size="xs" c="dimmed">
+                {(SEO.excludeFromSearch) ? 'No' : 'Yes'}
+              </Text>
+            </Stack>
+          </Group>
+          <Group gap="xs">
+            <ThemeIcon size={24} variant="light">
+              <IconSearch size={14} />
+            </ThemeIcon>
+            <Stack gap={0}>
+              <Text size="sm" fw={500}>Title</Text>
+              <Text size="xs" c="dimmed">
+                {(SEO.metaTitle)?.length || 0}/60 chars
+              </Text>
+            </Stack>
+          </Group>
+          <Group gap="xs">
+            <ThemeIcon size={24} variant="light">
+              {!SEO.metaDate && <IconCalendarOff size={14} />}
+              {SEO.metaDate && <IconExclamationCircle size={14} />}
+            </ThemeIcon>
+            <Stack gap={0}>
+              <Text size="sm" fw={500}>Meta Date</Text>
+              <Text size="xs" c="dimmed">
+                {(SEO.metaDate && format(new Date(SEO.metaDate), 'MMMM d, yyyy')) || 'Not set'}
+              </Text>
+            </Stack>
+          </Group>
           <Group gap="xs">
             <ThemeIcon size={24} variant="light">
               <IconUserCircle size={14} />
