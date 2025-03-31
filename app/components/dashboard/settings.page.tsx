@@ -36,12 +36,6 @@ const settingsTabs = [
     description: 'Manage your personal information'
   },
   {
-    value: 'store',
-    label: 'Store Settings',
-    icon: IconBuildingStore,
-    description: 'Configure your store preferences'
-  },
-  {
     value: 'notifications',
     label: 'Notifications',
     icon: IconBell,

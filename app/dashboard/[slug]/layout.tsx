@@ -40,6 +40,7 @@ import {
   IconCashBanknoteHeart,
   IconClipboardPlus,
   IconLibraryPhoto,
+  IconWindmill,
 } from '@tabler/icons-react';
 import { DashboardProvider } from '@/app/providers/dashboard.provider';
 
@@ -57,6 +58,7 @@ const mainLinks = [
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
+  { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
 ];
 
 function MainLink({
