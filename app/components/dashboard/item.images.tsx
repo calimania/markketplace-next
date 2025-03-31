@@ -16,15 +16,16 @@ import { Media } from '@/markket';
 import { IconMaximize, IconDownload, IconPhoto } from '@tabler/icons-react';
 import { Carousel } from '@mantine/carousel';
 
-type Name = 'Cover' | 'cover' | 'Logo' | 'Favicon' | 'Slides' | 'socialImage' | 'thumbnail' | 'image' | 'images' | 'photo' | 'photos' | 'picture' | 'pictures';
+type Name = 'Cover' | 'cover' | 'Logo' | 'Favicon' | 'Slides' | 'socialImage' | 'Thumbnail' | 'image' | 'images' | 'photo' | 'photos' | 'picture' | 'pictures' | 'media';
 
 interface ImageCardProps {
   image: Media;
   onView: (image: Media) => void;
+  name?: string;
 }
 
-const ImageCard = ({ image, onView }: ImageCardProps) => (
-  <Card shadow="sm" padding="sm" radius="md" withBorder className='max-w-[300px]'>
+const ImageCard = ({ image, onView, name }: ImageCardProps) => (
+  <Card shadow="sm" padding="sm" radius="md" withBorder className={`max-w-[300px] relative`}>
     <Card.Section>
       <Image
         src={image?.formats?.thumbnail?.url || image.url}
@@ -36,6 +37,7 @@ const ImageCard = ({ image, onView }: ImageCardProps) => (
         className="absolute top-2 right-2 flex gap-2"
         style={{ zIndex: 2 }}
       >
+        <span className="text-white">{name}</span>
         <Tooltip label="View full size">
           <ActionIcon
             variant="light"
@@ -61,7 +63,7 @@ const ImageCard = ({ image, onView }: ImageCardProps) => (
     </Card.Section>
 
     <Text size="sm" c="dimmed" mt="sm">
-      {image.alternativeText || 'No description'}
+      {image.alternativeText || image.caption || 'No description'}
     </Text>
 
     <Group mt="xs">
@@ -102,8 +104,8 @@ export default function DashboardItemImages({
       <>
         <Group justify="space-between" mb="md">
           <Group gap="xs">
-            <IconPhoto size={20} />
-            <Text fw={500} size="lg">
+            <IconPhoto size={20} color="magenta" />
+            <Text fw={500} size="lg" >
               {name || 'Images'}
             </Text>
           </Group>
@@ -167,9 +169,9 @@ export default function DashboardItemImages({
 
   return (
     <>
-      <Group justify="space-between" mb="md">
+      <Group justify="space-between" mb="md" mt="md">
         <Group gap="xs">
-          <IconPhoto size={20} />
+          <IconPhoto size={20} color="magenta" />
           <Text fw={500} size="lg">
             {name || 'Image'}
           </Text>
@@ -178,6 +180,7 @@ export default function DashboardItemImages({
 
       <ImageCard
         image={image}
+        name={name}
         onView={setViewingImage}
       />
 

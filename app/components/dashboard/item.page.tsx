@@ -35,7 +35,7 @@ const actionsMap: Record<string, ActionComponent> = {
     plural: 'pages',
   },
   products: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Slides&populate[]=Thumbnail&populate[]=Tag&poulate[]=PRICES`,
     view: ViewItem,
     edit: (item: Product) => <> edit {item.documentId}  </>,
     singular: 'product',

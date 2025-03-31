@@ -8,13 +8,18 @@ import {
   Badge,
   Divider,
   ThemeIcon,
+  Collapse,
+  Button,
+  // Accordion,
 } from '@mantine/core';
-import {  Article, Product, Album, Store } from '@/markket';
+import { useDisclosure } from '@mantine/hooks';
+import { Article, Product, Album, Store, URL } from '@/markket';
 import {
   IconCalendar,
   IconClock,
   IconBubbleTea,
   IconSailboat,
+  IconLinkPlus,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
@@ -25,6 +30,7 @@ import ImagesView from '../item.images';
 
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
   const md = new Remarkable();
+  const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
 
   return (
     <Container size="md" py="xl" >
@@ -136,14 +142,48 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               )}
             </Paper>
           )}
-          {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
-            <ImagesView
-              key={name}
-              item={item as ContentItem & Record<string, any>}
-              name={name as any}
-              multiple={item[name] && Array.isArray(item[name])}
-            />
-          ))}
+          {(item as Store).URLS && (
+            <Paper p="xl" radius="md" withBorder mt="xl">
+              <Group justify="left" mb={5}>
+                <IconLinkPlus size={16} />
+                <Button onClick={() => toggleUrls()}> {showUrls ? 'Hide URLs' : 'Show URLs'} [{(item as Store).URLS.length}]</Button>
+              </Group>
+              <Collapse in={showUrls}>
+                {(item as Store).URLS.map((url: URL, index: number) => {
+                  return (
+                    <Text key={index} size="sm" mb="xs">
+                      <a
+                        href={url.URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        {url.Label}
+                      </a>
+                    </Text>
+                  );
+                })}
+              </Collapse>
+            </Paper>
+          )}
+          {/* <Accordion >
+          PRICES.map((item) => (
+              <Accordion.Item key={item.value} value={item.value}>
+                <Accordion.Control icon={item.emoji}>{item.value}</Accordion.Control>
+                <Accordion.Panel>{item.description}</Accordion.Panel>
+              </Accordion.Item>
+            ));
+          </Accordion> */}
+          <Paper p="xl" radius="md" withBorder mt="xl">
+            {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
+              <ImagesView
+                key={name}
+                item={item as ContentItem & Record<string, any>}
+                name={name as any}
+                multiple={item[name] && Array.isArray(item[name])}
+              />
+            ))}
+          </Paper>
         </Stack>
       </Paper>
     </Container>
