@@ -21,7 +21,7 @@ interface ActionComponent {
 
 const actionsMap: Record<string, ActionComponent> = {
   articles: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags&populate[]=cover`,
     view: ViewItem,
     edit: (item: Article) => <> edit {item.documentId}  </>,
     singular: 'article',
@@ -29,11 +29,25 @@ const actionsMap: Record<string, ActionComponent> = {
   },
   pages: {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums`,
-    view: (item: Page) => <> view {item.documentId}  </>,
+    view: ViewItem,
     edit: (item: Page) => <> edit {item.documentId}  </>,
     singular: 'page',
     plural: 'pages',
   },
+  products: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&`,
+    view: ViewItem,
+    edit: (item: Product) => <> edit {item.documentId}  </>,
+    singular: 'product',
+    plural: 'products',
+  },
+  stores: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&`,
+    view: ViewItem,
+    edit: (item: Store) => <> edit {item.documentId}  </>,
+    singular: 'store',
+    plural: 'stores',
+  }
 }
 
 interface DashboardItemPageProps {

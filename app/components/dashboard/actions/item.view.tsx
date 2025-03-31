@@ -14,6 +14,7 @@ import {
   IconCalendar,
   IconClock,
   IconBubbleTea,
+  IconSailboat,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
@@ -68,7 +69,7 @@ const ViewItem = ({ item, store, singular  }: { item: ContentItem, store: Store,
                 </Text>
               </Group>
               <Group gap="xs">
-                <ThemeIcon size="md" variant="light" color="grape">
+                <ThemeIcon size="md" variant="light" color="pink">
                   <IconBubbleTea size={16} />
                 </ThemeIcon>
                 <Text size="sm">
@@ -76,6 +77,15 @@ const ViewItem = ({ item, store, singular  }: { item: ContentItem, store: Store,
                 </Text>
               </Group>
             </Group>
+            {item.slug && (<Group gap="xs">
+              <ThemeIcon size="md" variant="light" color="magenta">
+                <IconSailboat size={16} />
+              </ThemeIcon>
+              <Text size="sm">
+                {item.slug}
+              </Text>
+            </Group>)}
+
             {item.Tags && (
               <>
                 <Divider />
@@ -109,6 +119,31 @@ const ViewItem = ({ item, store, singular  }: { item: ContentItem, store: Store,
               {item?.Content?.map((block: ContentBlock, index: number) => (
                 <ContentBlock key={index} block={block} />
               ))}
+            </Paper>
+          )}
+          {item.cover && (
+            <Paper
+              withBorder
+              p="sm"
+              radius="md"
+              mt="sm"
+              className="prose max-w-none content-wrapper"
+              style={{
+                backgroundColor: 'var(--mantine-color-gray-0)',
+              }}
+            >
+              <a href={item.cover?.url} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={item.cover?.formats?.thumbnail?.url}
+                  alt={item.title}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    borderRadius: '8px',
+                    right: '0',
+                  }}
+                />
+              </a>
             </Paper>
           )}
         </Stack>
