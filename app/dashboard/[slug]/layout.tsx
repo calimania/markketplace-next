@@ -136,6 +136,14 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const updateStoreInUrl = useCallback((storeId: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('store', storeId);
+
+    if (url.pathname.includes('view') || url.pathname.includes('edit')) {
+      const parts = url.pathname.split('/');
+      const newPath = [''].concat('dashboard', parts[2] || 'store').join('/');
+
+      return new URL(`${newPath}?store=${storeId}`, window.location.origin);
+    }
+
     return url;
   }, []);
 

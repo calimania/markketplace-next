@@ -10,7 +10,7 @@ import {
   ThemeIcon,
   Collapse,
   Button,
-  // Accordion,
+  Accordion,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Article, Product, Album, Store, URL } from '@/markket';
@@ -20,6 +20,8 @@ import {
   IconBubbleTea,
   IconSailboat,
   IconLinkPlus,
+  IconCurrencyDollar,
+  IconPigMoney,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
@@ -166,14 +168,20 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </Collapse>
             </Paper>
           )}
-          {/* <Accordion >
-          PRICES.map((item) => (
-              <Accordion.Item key={item.value} value={item.value}>
-                <Accordion.Control icon={item.emoji}>{item.value}</Accordion.Control>
-                <Accordion.Panel>{item.description}</Accordion.Panel>
+
+          {(item as Product)?.PRICES && <Group gap="xs"><IconPigMoney size={16} />Prices</Group>}
+          <Accordion defaultValue={['']} multiple>
+            {(item as Product)?.PRICES?.map((item, index) => (
+              <Accordion.Item key={item.Name} value={index.toString()}>
+                <Accordion.Control icon={<IconCurrencyDollar color={item.STRIPE_ID ? 'green' : 'red'} />}>
+                  {item.Price} {item.Currency} - {item.Name}
+                </Accordion.Control>
+                <Accordion.Panel>
+                  {item.Description}
+                </Accordion.Panel>
               </Accordion.Item>
-            ));
-          </Accordion> */}
+            ))}
+          </Accordion>
           <Paper p="xl" radius="md" withBorder mt="xl">
             {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
               <ImagesView
