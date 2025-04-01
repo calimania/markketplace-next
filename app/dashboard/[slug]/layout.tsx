@@ -40,6 +40,7 @@ import {
   IconCashBanknoteHeart,
   IconClipboardPlus,
   IconLibraryPhoto,
+  IconWindmill,
 } from '@tabler/icons-react';
 import { DashboardProvider } from '@/app/providers/dashboard.provider';
 
@@ -57,6 +58,7 @@ const mainLinks = [
   { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
+  { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
 ];
 
 function MainLink({
@@ -130,9 +132,22 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
+  let hideSelector = false;
+  if (typeof window === 'object') {
+    hideSelector = window.location.pathname.includes('settings') || window.location.pathname.includes('stores');
+  }
+
   const updateStoreInUrl = useCallback((storeId: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('store', storeId);
+
+    if (url.pathname.includes('view') || url.pathname.includes('edit')) {
+      const parts = url.pathname.split('/');
+      const newPath = [''].concat('dashboard', parts[2] || 'store').join('/');
+
+      return new URL(`${newPath}?store=${storeId}`, window.location.origin);
+    }
+
     return url;
   }, []);
 
@@ -216,7 +231,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             )}
           </Group>
 
-          <Select
+          {!hideSelector && (<Select
             value={selectedStore?.documentId}
             onChange={handleStoreChange}
             data={stores.map(store => ({
@@ -231,7 +246,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <Text>{option.label}</Text>
               </Group>
             )}
-          />
+          />)}
 
           <HoverCard width={280} shadow="md">
             <HoverCard.Target>
@@ -271,8 +286,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </Text>
             <Divider mb="md" />
           </div>
-
-          {/* Scrollable navigation area */}
           <div className="flex-1 overflow-y-auto" style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'var(--mantine-color-gray-3) transparent',
@@ -288,9 +301,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </Stack>
           </div>
-
-          {/* Optional: Bottom section for additional controls */}
-          <div className="mt-auto pt-md">
+          <div className="mt-auto pt-md buttom-navbar">
             <Divider mb="md" />
             <Button
               fullWidth
@@ -307,31 +318,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
       <AppShell.Main py="md">
         <ProtectedRoute>
-          {(!stores.length && !window.location.pathname.includes('settings')) ? (
-            <Container>
-              <Paper p="xl" withBorder mt="xl">
-                <Stack align="center" gap="md">
-                  <Text ta="center">No stores found. Create your first store to continue.</Text>
-                  <Button
-                    onClick={() => router.push('/dashboard/settings#store')}
-                    leftSection={<IconBuildingStore size={16} />}
-                  >
-                    Create Store
-                  </Button>
-                </Stack>
-              </Paper>
-            </Container>
-          ) : (selectedStore || window.location.pathname.includes('settings')) ? (
-              <DashboardProvider store={selectedStore as Store}>
-                {children}
-              </DashboardProvider>
-          ) : (
-            <Container>
-              <Paper p="xl" withBorder mt="xl">
-                <Text ta="center">Please select a store to continue</Text>
-              </Paper>
-            </Container>
-          )}
+          <DashboardProvider store={selectedStore as Store}>
+            {children}
+          </DashboardProvider>
         </ProtectedRoute>
       </AppShell.Main>
     </AppShell>

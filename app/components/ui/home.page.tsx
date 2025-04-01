@@ -216,9 +216,9 @@ const HomePage = ({store, page}: HomePageProps) => {
           )}
 
           {page?.Content && (
-            <div className="py-10">
+            <Container>
               <PageContent params={{ page }} />
-            </div>
+            </Container>
           )}
         </Stack>
       </Container>

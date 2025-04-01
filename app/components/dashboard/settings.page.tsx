@@ -16,7 +16,6 @@ import {
 } from '@mantine/core';
 import {
   IconUserCircle,
-  IconBuildingStore,
   IconBell,
   IconKey
 } from '@tabler/icons-react';
@@ -34,12 +33,6 @@ const settingsTabs = [
     label: 'Profile',
     icon: IconUserCircle,
     description: 'Manage your personal information'
-  },
-  {
-    value: 'store',
-    label: 'Store Settings',
-    icon: IconBuildingStore,
-    description: 'Configure your store preferences'
   },
   {
     value: 'notifications',

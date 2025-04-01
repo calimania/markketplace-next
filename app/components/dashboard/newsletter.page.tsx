@@ -103,7 +103,7 @@ const NewsletterPage = () => {
                 <IconMailForward size={20} />
               </ThemeIcon>
               <div>
-                <Text size="xl" fw={500}>98.5%</Text>
+                <Text size="xl" fw={500} c="dimmed">N/A</Text>
                 <Text size="sm" c="dimmed">Delivery Rate</Text>
               </div>
             </Group>
@@ -118,7 +118,9 @@ const NewsletterPage = () => {
                 Subscribers
               </Tabs.Tab>
               <Tabs.Tab value="settings" leftSection={<IconSettings size={14} />}>
-                Settings
+                <Text c="dimmed">
+                  Settings
+                </Text>
               </Tabs.Tab>
             </Tabs.List>
 
@@ -129,7 +131,7 @@ const NewsletterPage = () => {
                 items={[]}
                 loading={loading}
                 store={store}
-                description={'Manage your newsletter subscribers and communications'}
+                description={'Manage your customers, newsletter subscribers and communications'}
               ></DashboardCMS>
             </Tabs.Panel>
 

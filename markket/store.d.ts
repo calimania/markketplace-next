@@ -29,6 +29,12 @@ export interface Media {
   publishedAt: string;
 }
 
+export type URL = {
+  id: number;
+  Label: string;
+  URL: string;
+};
+
 export interface Store {
   id: number;
   title: string;
@@ -43,10 +49,6 @@ export interface Store {
   Cover: Media;
   Logo: ImageData;
   Favicon: ImageData;
-  URLS: {
-    id: number;
-    Label: string;
-    URL: string;
-  }[],
+  URLS: URL[],
   SEO: SEO;
 };

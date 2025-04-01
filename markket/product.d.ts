@@ -1,5 +1,6 @@
 import { Store } from "./store";
 import { SEO } from "./seo";
+import { Tag } from "./tag";
 
 
 interface Price {
@@ -74,6 +75,7 @@ export interface Product {
   PRICES?: Price[];
   Thumbnail?: ImageFormat;
   stores?: Store[];
+  Tag: Tag[];
 }
 
 export interface ProductResponse {

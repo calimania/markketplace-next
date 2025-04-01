@@ -17,7 +17,7 @@ const AlbumsPage = () => {
       items={albums}
       loading={loading}
       store={store}
-      description="Collections with individual pages, and items with their own pages. For featured and seasonal promos"
+      description="Collections for featured releases and seasonal content"
     ></DashboardCMS>
   );
 };

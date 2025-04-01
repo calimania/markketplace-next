@@ -3,10 +3,10 @@
 import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
-import { Article, Page, Product } from '@/markket';
-import ViewArticle from '@/app/components/dashboard/actions/article.view';
+import { Article, Page, Product, Store } from '@/markket';
+import ViewItem from '@/app/components/dashboard/actions/item.view';
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
 type ContentItem = Article | Page | Product;
@@ -21,19 +21,47 @@ interface ActionComponent {
 
 const actionsMap: Record<string, ActionComponent> = {
   articles: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage`,
-    view: ViewArticle,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags&populate[]=cover`,
+    view: ViewItem,
     edit: (item: Article) => <> edit {item.documentId}  </>,
     singular: 'article',
     plural: 'articles',
   },
   pages: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums`,
-    view: (item: Page) => <> view {item.documentId}  </>,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums&populate[]=albums.tracks`,
+    view: ViewItem,
     edit: (item: Page) => <> edit {item.documentId}  </>,
     singular: 'page',
     plural: 'pages',
   },
+  products: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Slides&populate[]=Thumbnail&populate[]=Tag&populate[]=PRICES`,
+    view: ViewItem,
+    edit: (item: Product) => <> edit {item.documentId}  </>,
+    singular: 'product',
+    plural: 'products',
+  },
+  stores: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides`,
+    view: ViewItem,
+    edit: (item: Store) => <> edit {item.documentId}  </>,
+    singular: 'store',
+    plural: 'stores',
+  },
+  events: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Thumbnail&populate[]=Slides&populate[]=Tag&populate[]=PRICES`,
+    view: ViewItem,
+    edit: (item: Store) => <> edit {item.documentId}  </>,
+    singular: 'event',
+    plural: 'events',
+  },
+  albums: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
+    view: ViewItem,
+    edit: (item: Store) => <> edit {item.documentId}  </>,
+    singular: 'album',
+    plural: 'albums',
+  }
 }
 
 interface DashboardItemPageProps {
@@ -41,6 +69,7 @@ interface DashboardItemPageProps {
   action: 'view' | 'edit';
   slug: ContentType;
 }
+
 /**
  * The dashboard item to view, edit and interact with a specific item
  *
@@ -54,10 +83,12 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
   const options = actionsMap[slug as keyof typeof actionsMap];
 
   const { item, loading, error } = useCMSItem<ContentItem>(slug as ContentType, id, {
-    append: options.url,
+    append: options?.url || '',
   });
 
-  const Component = options[action] as ElementType<{ item: ContentItem }>;
+  const Component = options[action] as ElementType<{
+    item: ContentItem, store: Store, singular: string,
+  }>;
 
   if (loading) {
     return (
@@ -97,15 +128,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
 
   return (
     <Container size="lg" py="xl">
-      <Paper withBorder p="md" mb="xl">
-        <Stack>
-          <Text size="lg" fw={500}>
-            {store.title}
-          </Text>
-          <Text c="dimmed">{item?.documentId}</Text>
-        </Stack>
-      </Paper>
-      <Stack gap="xl">
+      <Stack gap="sm">
         <Group justify="space-between">
           <Button
             variant="light"
@@ -114,9 +137,26 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
           >
             Back to {options.plural}
           </Button>
+          <Button
+            variant="light"
+            leftSection={<IconEdit size={16} />}
+            onClick={() => router.push(`/dashboard/${slug}/edit/${item.documentId}`)}
+          >
+            Edit {options.singular}
+          </Button>
         </Group>
-        <Component item={item} />
+        <Component item={item} store={store} singular={options.singular} />
       </Stack>
+      <Paper withBorder p="md" mb="xl">
+        <Stack>
+          <Text size="lg" fw={500}>
+            {store.title}
+          </Text>
+          <Text c="dimmed">
+            <strong>{options.singular} </strong>
+            {item?.documentId}</Text>
+        </Stack>
+      </Paper>
     </Container>
   );
 }

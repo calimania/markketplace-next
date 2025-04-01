@@ -77,7 +77,7 @@ export async function fetchUserStores(userId: number) {
         }
       }
     },
-    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover'],
+    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover', 'Slides'],
   }, {
     encodeValuesOnly: true
   });
