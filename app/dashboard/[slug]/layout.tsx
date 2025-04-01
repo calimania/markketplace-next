@@ -286,8 +286,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </Text>
             <Divider mb="md" />
           </div>
-
-          {/* Scrollable navigation area */}
           <div className="flex-1 overflow-y-auto" style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'var(--mantine-color-gray-3) transparent',
@@ -303,9 +301,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </Stack>
           </div>
-
-          {/* Optional: Bottom section for additional controls */}
-          <div className="mt-auto pt-md">
+          <div className="mt-auto pt-md buttom-navbar">
             <Divider mb="md" />
             <Button
               fullWidth
@@ -322,31 +318,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
       <AppShell.Main py="md">
         <ProtectedRoute>
-          {(!stores.length && !window.location.pathname.includes('settings')) ? (
-            <Container>
-              <Paper p="xl" withBorder mt="xl">
-                <Stack align="center" gap="md">
-                  <Text ta="center">No stores found. Create your first store to continue.</Text>
-                  <Button
-                    onClick={() => router.push('/dashboard/settings#store')}
-                    leftSection={<IconBuildingStore size={16} />}
-                  >
-                    Create Store
-                  </Button>
-                </Stack>
-              </Paper>
-            </Container>
-          ) : (selectedStore || window.location.pathname.includes('settings')) ? (
-              <DashboardProvider store={selectedStore as Store}>
-                {children}
-              </DashboardProvider>
-          ) : (
-            <Container>
-              <Paper p="xl" withBorder mt="xl">
-                <Text ta="center">Please select a store to continue</Text>
-              </Paper>
-            </Container>
-          )}
+          <DashboardProvider store={selectedStore as Store}>
+            {children}
+          </DashboardProvider>
         </ProtectedRoute>
       </AppShell.Main>
     </AppShell>
