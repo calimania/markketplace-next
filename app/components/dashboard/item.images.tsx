@@ -12,7 +12,7 @@ import {
   rem,
 } from '@mantine/core';
 import { ContentType, } from '@/app/hooks/common';
-import { Media } from '@/markket';
+import { Media, Product } from '@/markket';
 import { IconMaximize, IconDownload, IconPhoto } from '@tabler/icons-react';
 import { Carousel } from '@mantine/carousel';
 
@@ -93,7 +93,7 @@ export default function DashboardItemImages({
   let displayName: string = name || 'Image';
 
   if (name == 'SEO.socialImage') {
-    image = (item as Product)?.SEO?.socialImage as Media;
+    image = (item as any as Product)?.SEO?.socialImage as Media;
     displayName = 'Social Image';
   }
 

@@ -13,7 +13,7 @@ import {
   Accordion,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Article, Product, Album, Store, URL } from '@/markket';
+import { Article, Product, Album, Store, URL, Page } from '@/markket';
 import {
   IconCalendar,
   IconClock,
@@ -23,6 +23,7 @@ import {
   IconCurrencyDollar,
   IconPigMoney,
   IconPhotoHexagon,
+  IconAlbum,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
@@ -31,10 +32,13 @@ import { ContentItem } from '@/app/hooks/common';
 import { Remarkable } from 'remarkable';
 import ImagesView from '../item.images';
 import AlbumTrackList from '../album.tracks.component';
+import AlbumsView from '../album.page.component';
+import { useRouter } from 'next/navigation';
 
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
   const md = new Remarkable();
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
+  const router = useRouter();
 
   return (
     <Container size="md" py="xl" >
@@ -177,6 +181,23 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                   );
                 })}
               </Collapse>
+            </Paper>
+          )}
+
+          {(item as Page)?.albums && (
+            <Paper withBorder p="xl" radius="md" mt="xl">
+              <Group mb="md">
+                <ThemeIcon size="md" variant="light" color="grape">
+                  <IconAlbum size={16} />
+                </ThemeIcon>
+                <Text fw={500}>Related Albums</Text>
+              </Group>
+              <AlbumsView
+                albums={(item as Page).albums || []}
+                onView={(album) => {
+                  router.push(`/dashboard/albums/view/${album.documentId}?store=${store.documentId}`);
+                }}
+              />
             </Paper>
           )}
 

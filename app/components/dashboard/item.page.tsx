@@ -28,7 +28,7 @@ const actionsMap: Record<string, ActionComponent> = {
     plural: 'articles',
   },
   pages: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums&populate[]=albums.tracks`,
     view: ViewItem,
     edit: (item: Page) => <> edit {item.documentId}  </>,
     singular: 'page',
