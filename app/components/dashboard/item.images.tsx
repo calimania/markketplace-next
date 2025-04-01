@@ -11,12 +11,13 @@ import {
   Tooltip,
   rem,
 } from '@mantine/core';
-import { ContentType } from '@/app/hooks/common';
+import { ContentType, Product } from '@/app/hooks/common';
 import { Media } from '@/markket';
 import { IconMaximize, IconDownload, IconPhoto } from '@tabler/icons-react';
 import { Carousel } from '@mantine/carousel';
 
-type Name = 'Cover' | 'cover' | 'Logo' | 'Favicon' | 'Slides' | 'socialImage' | 'Thumbnail' | 'image' | 'images' | 'photo' | 'photos' | 'picture' | 'pictures' | 'media';
+type Name = 'Cover' | 'cover' | 'Logo' | 'Favicon' | 'Slides' | 'socialImage' | 'Thumbnail' | 'image' | 'images' | 'photo' | 'photos' | 'picture' | 'pictures' | 'media' | 'SEO.socialImage';
+
 
 interface ImageCardProps {
   image: Media;
@@ -89,6 +90,12 @@ export default function DashboardItemImages({
   const [viewingImage, setViewingImage] = useState<Media | null>(null);
   let image = item[name] as Media;
   let images: Media[] = [];
+  let displayName: string = name || 'Image';
+
+  if (name == 'SEO.socialImage') {
+    image = (item as Product)?.SEO?.socialImage as Media;
+    displayName = 'Social Image';
+  }
 
   if (Array.isArray(item[name])) {
     images = item[name] as Media[];
@@ -173,7 +180,7 @@ export default function DashboardItemImages({
         <Group gap="xs">
           <IconPhoto size={20} color="magenta" />
           <Text fw={500} size="lg">
-            {name || 'Image'}
+            {displayName}
           </Text>
         </Group>
       </Group>

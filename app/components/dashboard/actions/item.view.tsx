@@ -190,7 +190,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
             <Group gap="xs" mb="lg">
               <IconPhotoHexagon size={16} color="magenta" /> Images
             </Group>
-            {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
+            {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures', 'SEO.socialImage'].map((name) => (
               <ImagesView
                 key={name}
                 item={item as ContentItem & Record<string, any>}
