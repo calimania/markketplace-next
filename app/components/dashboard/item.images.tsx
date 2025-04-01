@@ -11,7 +11,7 @@ import {
   Tooltip,
   rem,
 } from '@mantine/core';
-import { ContentType, Product } from '@/app/hooks/common';
+import { ContentType, } from '@/app/hooks/common';
 import { Media } from '@/markket';
 import { IconMaximize, IconDownload, IconPhoto } from '@tabler/icons-react';
 import { Carousel } from '@mantine/carousel';

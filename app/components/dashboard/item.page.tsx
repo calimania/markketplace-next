@@ -47,6 +47,13 @@ const actionsMap: Record<string, ActionComponent> = {
     edit: (item: Store) => <> edit {item.documentId}  </>,
     singular: 'store',
     plural: 'stores',
+  },
+  events: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Thumbnail&populate[]=Slides&populate[]=Tag&populate[]=PRICES`,
+    view: ViewItem,
+    edit: (item: Store) => <> edit {item.documentId}  </>,
+    singular: 'event',
+    plural: 'events',
   }
 }
 
@@ -69,7 +76,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
   const options = actionsMap[slug as keyof typeof actionsMap];
 
   const { item, loading, error } = useCMSItem<ContentItem>(slug as ContentType, id, {
-    append: options.url,
+    append: options?.url || '',
   });
 
   const Component = options[action] as ElementType<{
