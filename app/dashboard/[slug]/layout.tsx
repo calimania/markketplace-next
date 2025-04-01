@@ -131,7 +131,11 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [loading, setLoading] = useState(true);
   const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const hideSelector = window.location.pathname.includes('settings') || window.location.pathname.includes('stores');
+
+  let hideSelector = false;
+  if (typeof window === 'object') {
+    hideSelector = window.location.pathname.includes('settings') || window.location.pathname.includes('stores');
+  }
 
   const updateStoreInUrl = useCallback((storeId: string) => {
     const url = new URL(window.location.href);

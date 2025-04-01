@@ -30,6 +30,7 @@ import SEOPreview from '../seo.preview';
 import { ContentItem } from '@/app/hooks/common';
 import { Remarkable } from 'remarkable';
 import ImagesView from '../item.images';
+import AlbumTrackList from '../album.tracks.component';
 
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
   const md = new Remarkable();
@@ -116,9 +117,18 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                 </Group>
               </>
             )}
+
+            {(item as Album)?.description && (
+              <>
+                <Divider />
+                <Text size="sm" c="dimmed">
+                  {(item as Album).description}
+                </Text>
+              </>
+            )}
           </Stack>
 
-          {(item.Description || item.Content) && (
+          {(item.Description || item.Content || item.content) && (
             <Paper
               withBorder
               p="xl"
@@ -136,9 +146,9 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                     __html: md.render(item.Description),
                   }} />
               )}
-              {item.Content && (
+              {(item.Content || item.content) && (
                 <div className="content-wrapper content-as-block">
-                  {item?.Content?.map((block: ContentBlock, index: number) => (
+                  {(item?.Content || item.content)?.map((block: ContentBlock, index: number) => (
                     <ContentBlock key={index} block={block} />
                   ))}
                 </div>
@@ -167,6 +177,15 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                   );
                 })}
               </Collapse>
+            </Paper>
+          )}
+
+          {(item as Album)?.tracks && (
+            <Paper p="xl" radius="md" withBorder mt="xl">
+              <Group gap="xs" mb="lg">
+                <IconPhotoHexagon size={16} color="blue" /> Tracks
+              </Group>
+              <AlbumTrackList tracks={(item as Album).tracks} />
             </Paper>
           )}
 

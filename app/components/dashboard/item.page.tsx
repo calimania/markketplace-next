@@ -56,7 +56,7 @@ const actionsMap: Record<string, ActionComponent> = {
     plural: 'events',
   },
   albums: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
     view: ViewItem,
     edit: (item: Store) => <> edit {item.documentId}  </>,
     singular: 'album',

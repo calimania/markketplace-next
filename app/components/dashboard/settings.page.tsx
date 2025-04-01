@@ -16,7 +16,6 @@ import {
 } from '@mantine/core';
 import {
   IconUserCircle,
-  IconBuildingStore,
   IconBell,
   IconKey
 } from '@tabler/icons-react';

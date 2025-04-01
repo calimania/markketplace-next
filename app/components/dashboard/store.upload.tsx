@@ -27,7 +27,7 @@ function StoreUploadPage() {
                     <Text fz="lg" fw={500} mb={3}>
                       {store.title}
                     </Text>
-                    <Markdown content={store.Description || ''} />
+                    {/* <Markdown content={store.Description || ''} /> */}
                     <Group gap="xs">
                       <Badge color="blue">Active</Badge>
                       {store.URLS?.length > 0 && (
@@ -53,10 +53,10 @@ function StoreUploadPage() {
                       <Group>
                         <IconHomeShare size={18} />
                         <Text size="sm">
-                          <Link href={`/store/${store?.slug}`} target="de.preview" title={store?.title} className='cursor-pointer'>
+                          {/* <Link href={`/store/${store?.slug}`} target="de.preview" title={store?.title} className='cursor-pointer'>
                             <strong>Slug: </strong>
                             <span className="text-markket-blue">{store.slug}</span>
-                          </Link>
+                          </Link> */}
                         </Text>
                       </Group>
                       <Group>
@@ -73,9 +73,9 @@ function StoreUploadPage() {
                           {store.URLS.map((url, i) => (
                             <Group key={i}>
                               <IconLink size={18} />
-                              <Link href={url.URL} target="_blank" className='text-markket-blue'>
+                              {/* <Link href={url.URL} target="_blank" className='text-markket-blue'>
                                 {url.Label || url.URL}
-                              </Link>
+                              </Link> */}
                             </Group>
                           ))}
                         </>
@@ -92,14 +92,14 @@ function StoreUploadPage() {
                           <Text fw={500}>Social share Preview</Text>
                         </Group>
                       </Card.Section>
-                      {(store.Cover?.url || store.SEO.socialImage) && (
+                      {/* {(store.Cover?.url || store.SEO.socialImage) && (
                         <Image
                           src={store.SEO?.socialImage?.url || store.Cover?.url}
                           height={200}
                           alt="Store social preview"
                           mt="md"
                         />
-                      )}
+                      )} */}
                       <Text fz="lg" fw={500} mt="md">
                         {store.SEO.metaTitle || store.title}
                       </Text>
