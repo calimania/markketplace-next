@@ -22,6 +22,7 @@ import {
   IconLinkPlus,
   IconCurrencyDollar,
   IconPigMoney,
+  IconPhotoHexagon,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ContentBlock } from '../content.blocks.view';
@@ -97,11 +98,11 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </Text>
             </Group>)}
 
-            {item.Tags && (
+            {(item.Tags || item.Tag) && (
               <>
                 <Divider />
                 <Group gap="xs">
-                  {(item as Article)?.Tags?.map(tag => (
+                  {((item as Article)?.Tags || (item as Product).Tag)?.map((tag) => (
                     <Badge
                       key={tag.id}
                       variant="dot"
@@ -169,8 +170,11 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
             </Paper>
           )}
 
-          {(item as Product)?.PRICES && <Group gap="xs"><IconPigMoney size={16} />Prices</Group>}
-          <Accordion defaultValue={['']} multiple>
+          {(item as Product)?.PRICES && (
+            <Group gap="xs">
+              <IconPigMoney size={16} color={item.SKU ? 'green' : 'red'} />Prices
+            </Group>)}
+          <Accordion defaultValue={['']} multiple mb="lg">
             {(item as Product)?.PRICES?.map((item, index) => (
               <Accordion.Item key={item.Name} value={index.toString()}>
                 <Accordion.Control icon={<IconCurrencyDollar color={item.STRIPE_ID ? 'green' : 'red'} />}>
@@ -182,7 +186,10 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </Accordion.Item>
             ))}
           </Accordion>
-          <Paper p="xl" radius="md" withBorder mt="xl">
+          <div>
+            <Group gap="xs" mb="lg">
+              <IconPhotoHexagon size={16} color="magenta" /> Images
+            </Group>
             {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures'].map((name) => (
               <ImagesView
                 key={name}
@@ -191,7 +198,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                 multiple={item[name] && Array.isArray(item[name])}
               />
             ))}
-          </Paper>
+          </div>
         </Stack>
       </Paper>
     </Container>
