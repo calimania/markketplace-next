@@ -35,17 +35,27 @@ import AlbumTrackList from '../album.tracks.component';
 import AlbumsView from '../album.page.component';
 import { useRouter } from 'next/navigation';
 
+
+const prefixMap: Record<string, string> = {
+  article: 'blog',
+  track: 'track',
+  page: 'about',
+  product: 'product',
+}
+
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
   const md = new Remarkable();
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
   const router = useRouter();
+
+  const prefix = prefixMap[singular] || 'blog';
 
   return (
     <Container size="md" py="xl" >
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}
-          previewUrl={previewUrl || `/store/${store.slug}/blog/${item.slug}`} />
+          previewUrl={previewUrl || `/store/${store.slug}/${prefix}/${item.slug}`} />
       )}
       <Paper shadow="sm" p="xl" radius="md" withBorder mt={'sm'}>
         <Stack>

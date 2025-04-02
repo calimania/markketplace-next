@@ -108,8 +108,9 @@ export default async function StorePage({
               </Text>
             )}
           </div>
-          <PageContent params={{ page: homePage }} />
           <StoreTabs urls={store?.URLS} />
+          <Title>{homePage.Title}</Title>
+          <PageContent params={{ page: homePage }} />
           <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
         </Stack>
       </Container>
