@@ -17,6 +17,18 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'markketplace.nyc3.digitaloceanspaces.com',
+        port: '',
+        pathname: '/uploads/**',
+        search: '',
+      },
+    ],
+  },
+
 };
 
 export default nextConfig;
