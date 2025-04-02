@@ -1,133 +1,276 @@
 'use client';
 
-import {  AlbumTrack, } from '@/markket/album';
+import { AlbumTrack } from '@/markket/album';
 import { Store } from "@/markket/store.d";
 import {
-  Title,
-  Text,
-  Container,
-  Group,
-  Paper,
-  Card,
-  Stack,
-  Box,
-  Image,
-  AspectRatio,
-  Overlay,
-  Grid,
+  Title, Text, Container, Group, Paper, Stack, Box,
+  Image, AspectRatio, Overlay, Grid, ThemeIcon, Badge,
 } from "@mantine/core";
-import PageContent from "@/app/components/ui/page.content";
-import { IconLink, } from '@tabler/icons-react';
-import { motion } from 'framer-motion';
-// import AlbumNav from './album.nav';
+import {
+  IconLink, IconPhoto, IconMusic, IconCalendar,
+  IconBrandSpotify, IconBrandSoundcloud, IconBrandYoutube
+} from '@tabler/icons-react';
+import PageContent from '@/app/components/ui/page.content';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-// @ts-expect-error Card is a special polymorphic component
-const MotionCard = motion(Card);
+const MotionPaper = motion(Paper as any);
+const MotionContainer = motion(Container);
 
-type TrackPageProps = {
-  store: Store;
-  track: AlbumTrack;
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
 };
 
-const TrackPage = ({ store, track }: TrackPageProps) => {
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
+const getLinkIcon = (url: string) => {
+  if (url.includes('spotify')) return IconBrandSpotify;
+  if (url.includes('soundcloud')) return IconBrandSoundcloud;
+  if (url.includes('youtube')) return IconBrandYoutube;
+  return IconLink;
+};
+
+const TrackPage = ({ store, track }: { store: Store; track: AlbumTrack }) => {
   return (
-    <Box>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-      >
-        <Box pos="relative" h={300} mb="xl">
-          <Image
-            src={track.media?.[0]?.url || track.SEO?.socialImage?.url}
-            alt={track.title}
-            height={300}
-            style={{
-              position: 'absolute',
-              width: '100%',
-              overflow: 'hidden',
-              objectFit: 'cover',
-              maxHeight: 300,
-            }}
-          />
-          <Overlay
-            gradient="linear-gradient(180deg, rgba(42, 0, 243, 0.1) 0%, rgba(42, 0, 243, 0.9) 90%)"
-            opacity={0.8}
-            zIndex={1}
-          />
-          <Container size="lg" style={{ height: '100%', position: 'relative', zIndex: 2 }}>
-            <Group justify="space-between" align="flex-end" h="100%" pb="lg">
-              <div>
-                <Title c="white">{track.title}</Title>
-              </div>
-              {store && (
-                <Group gap="xs">
-                  <Image
-                    src={store.Favicon?.url || store.Logo?.url}
-                    width={24}
-                    height={24}
-                    radius="sm"
-                    alt={store.title}
-                  />
-                  <Text c="white" fw={500}>
-                    {store.title}
-                  </Text>
-                </Group>
-              )}
-            </Group>
-          </Container>
-        </Box>
+    <AnimatePresence>
+      <Box>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          {/* Hero Section */}
+          <Box pos="relative" style={{ overflow: 'hidden' }}>
+            <Box
+              pos="absolute"
+              top={0}
+              left={0}
+              right={0}
+              h={400}
+              style={{
+                // backgroundImage: `url(${track.media?.[0]?.url || track.SEO?.socialImage?.url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(10px)',
+                transform: 'scale(1.1)',
+              }}
+            />
+            <Overlay
+              gradient="linear-gradient(180deg, rgba(233, 4, 148, 0.3) 0%, rgba(215, 0, 61, 0.9) 90%)"
+              opacity={0.95}
+              zIndex={1}
+            />
 
-        <Container size="lg">
-          {track.urls && track.urls.length > 0 && (
-            <Paper withBorder p="lg" radius="md" mb="xl">
-              <Stack gap="md">
-                <Title order={3}>Links</Title>
-                {track.urls.map((url) => (
-                  <Group key={url.id} gap="xs">
-                    <IconLink size={16} />
-                    <Text size="lg" fw={500}>
-                      <Link href={url.URL} target="_blank">
-                        {url.Label || url.URL}
-                      </Link>
-                    </Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Paper>
-          )}
-        </Container>
+            <Container size="lg" py={80} pos="relative" style={{ zIndex: 2 }}>
+              <Grid align="center" gutter={40}>
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <AspectRatio ratio={1} className="track-cover rounded-xl" bg={'white'} >
+                      <Image
+                        src={track.media?.[0]?.url || track.SEO?.socialImage?.url}
+                        alt={track.title}
+                        style={{
+                          borderRadius: '12px',
+                          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                        }}
+                      />
+                    </AspectRatio>
+                  </motion.div>
+                </Grid.Col>
 
-        {track.media?.length && <Container size="lg">
-          <Paper withBorder p="lg" radius="md" mb="xl">
-            <Grid>
-              {track.media?.map((media) => {
-                return (
-                  <Grid.Col span={{ xs: 12, sm: 12, md: 6 }} key={media.id}>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 3 }}>
-                      <AspectRatio ratio={16 / 9} mb="lg">
-                        <Image
-                          src={media.url}
-                          alt={media.alternativeText || media.alternativeText || track.title}
-                        />
-                      </AspectRatio>
+                <Grid.Col span={{ base: 12, md: 8 }}>
+                  <Stack justify="space-between" h="100%" gap="lg">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Group gap="xs" mb="md">
+                        <ThemeIcon size="md" variant="light" radius="xl">
+                          <IconMusic size={16} />
+                        </ThemeIcon>
+                        <Badge size="lg" variant="light">Track</Badge>
+                        {track.publishedAt && (
+                          <Group gap="xs">
+                            <IconCalendar size={16} style={{ color: 'white' }} />
+                            <Text size="sm" c="white">
+                              {new Date(track.publishedAt).toLocaleDateString()}
+                            </Text>
+                          </Group>
+                        )}
+                      </Group>
+                      <Title c="white" size="h1" mb="md">{track.title}</Title>
+                      {track.description && (
+                        <Text c="#FFF" size="lg" maw={600}>
+                          {track.description}
+                        </Text>
+                      )}
                     </motion.div>
-                  </Grid.Col>
-                );
-              })}
-            </Grid>
-          </Paper>
-        </Container>}
 
+                    {store && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <Paper
+                          p="md"
+                          radius="md"
+                          style={{
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            backdropFilter: 'blur(10px)',
+                          }}
+                        >
+                          <Link href={`/store/${store.slug}`} style={{ textDecoration: 'none' }}>
+                            <Group gap="md">
+                              <Image
+                                src={store.Favicon?.url || store.Logo?.url}
+                                width={40}
+                                height={40}
+                                radius="sm"
+                                alt={store.title}
+                              />
+                              <div>
+                                <Text size="xs" c="#DDD"><strong>Published by</strong></Text>
+                                <Text c="white" fw={500} size="lg">
+                                  {store.title}
+                                </Text>
+                              </div>
+                            </Group>
+                          </Link>
+                        </Paper>
+                      </motion.div>
+                    )}
+                  </Stack>
+                </Grid.Col>
+              </Grid>
+            </Container>
+          </Box>
+          {/* Links Section */}
+          {track.urls && track.urls.length > 0 && (
+            <MotionContainer
+              size="lg"
+              variants={container}
+              initial="hidden"
+              animate="show"
+            >
+              <MotionPaper
+                withBorder
+                p="xl"
+                radius="md"
+                mb="xl"
+                variants={item}
+              >
+                <Stack gap="lg">
+                  <Title order={3}>Links</Title>
+                  <Grid>
+                    {track.urls.map((url) => {
+                      const LinkIcon = getLinkIcon(url.URL);
+                      return (
+                        <Grid.Col key={url.id} span={{ base: 12, sm: 6, md: 4 }}>
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <Paper
+                              component={Link}
+                              href={url.URL}
+                              target="_blank"
+                              withBorder
+                              p="md"
+                              radius="md"
+                            >
+                              <Group>
+                                <ThemeIcon
+                                  size="xl"
+                                  radius="md"
+                                  variant="light"
+                                  color={url.URL.includes('spotify') ? 'green' : 'blue'}
+                                >
+                                  <LinkIcon size={20} />
+                                </ThemeIcon>
+                                <Text size="lg" fw={500}>
+                                  {url.Label || 'Listen Online'}
+                                </Text>
+                              </Group>
+                            </Paper>
+                          </motion.div>
+                        </Grid.Col>
+                      );
+                    })}
+                  </Grid>
+                </Stack>
+              </MotionPaper>
+            </MotionContainer>
+          )}
 
-        <Container>
-          <PageContent params={{track: track }} />
-        </Container>
-        {/* <AlbumNav store={store} album={album} /> */}
-      </motion.div>
-    </Box>
+          {/* Media Gallery */}
+          {track.media?.length > 0 && (
+            <MotionContainer size="lg">
+              <MotionPaper
+                withBorder
+                p="xl"
+                radius="md"
+                mb="xl"
+                variants={item}
+              >
+                <Stack gap="lg">
+                  <Group justify="space-between">
+                    <Title order={3}>Gallery</Title>
+                    <Badge
+                      size="lg"
+                      leftSection={<IconPhoto size={14} />}
+                    >
+                      {track.media.length} photos
+                    </Badge>
+                  </Group>
+                  <Grid>
+                    {track.media?.map((media, index) => (
+                      <Grid.Col span={{ base: 12, sm: 6 }} key={media.id}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <AspectRatio ratio={16 / 9}>
+                            <Image
+                              src={media.url}
+                              alt={media.alternativeText || track.title}
+                              radius="md"
+                            />
+                          </AspectRatio>
+                        </motion.div>
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </Stack>
+              </MotionPaper>
+            </MotionContainer>
+          )}
+
+          {/* Content Section */}
+          <MotionContainer>
+            <motion.div variants={item}>
+              <PageContent params={{ track }} />
+            </motion.div>
+          </MotionContainer>
+        </motion.div>
+      </Box>
+    </AnimatePresence>
   );
 };
 
