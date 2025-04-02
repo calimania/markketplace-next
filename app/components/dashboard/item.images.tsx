@@ -90,7 +90,7 @@ export default function DashboardItemImages({
   const [viewingImage, setViewingImage] = useState<Media | null>(null);
   let image = item[name] as Media;
   let images: Media[] = [];
-  let displayName: string = name || 'Image';
+  let displayName: string = `${name.charAt(0).toUpperCase()}${name.slice(1)}` || 'Image';
 
   if (name == 'SEO.socialImage') {
     image = (item as any as Product)?.SEO?.socialImage as Media;
@@ -112,8 +112,8 @@ export default function DashboardItemImages({
         <Group justify="space-between" mb="md">
           <Group gap="xs">
             <IconPhoto size={20} color="magenta" />
-            <Text fw={500} size="lg" >
-              {name || 'Images'}
+            <Text fw={500} size="md" >
+              {displayName}
             </Text>
           </Group>
           <Badge size="lg">
@@ -179,7 +179,7 @@ export default function DashboardItemImages({
       <Group justify="space-between" mb="md" mt="md">
         <Group gap="xs">
           <IconPhoto size={20} color="magenta" />
-          <Text fw={500} size="lg">
+          <Text fw={500} size="md">
             {displayName}
           </Text>
         </Group>

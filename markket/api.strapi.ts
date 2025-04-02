@@ -390,6 +390,26 @@ export class StrapiClient {
     });
   };
 
+  async getTrack(track_slug: string, store_slug?: string) {
+
+    return await this.fetch({
+      contentType: 'tracks',
+      filters: {
+        slug: {
+          $eq: track_slug,
+        },
+        store: {
+          slug: {
+            $eq: store_slug || this.storeSlug
+          },
+        }
+      },
+      populate: 'SEO.socialImage,urls,media',
+      sort: 'createdAt:desc',
+    });
+  };
+
+
   /**
    * Uploads an avatar image to the strapi / upload endpoint with the user's token
    * @param file
