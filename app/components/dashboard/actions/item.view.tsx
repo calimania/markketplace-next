@@ -13,7 +13,7 @@ import {
   Accordion,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Article, Product, Album, Store, URL, Page } from '@/markket';
+import { Article, Product, Album, Store, URL, Page, AlbumTrack } from '@/markket';
 import {
   IconCalendar,
   IconClock,
@@ -50,12 +50,14 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
 
   const prefix = prefixMap[singular] || 'blog';
 
+  const urls = (item as Store).URLS || (item as AlbumTrack)?.urls;
+
   return (
     <Container size="md" py="xl" >
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}
-          previewUrl={previewUrl || `/store/${store.slug}/${prefix}/${item.slug}`} />
+          previewUrl={previewUrl || `/store/${store?.slug}/${prefix}/${item.slug}`} />
       )}
       <Paper shadow="sm" p="xl" radius="md" withBorder mt={'sm'}>
         <Stack>
@@ -169,21 +171,22 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               )}
             </Paper>
           )}
-          {(item as Store).URLS && (
+
+          {urls && (
             <Paper p="xl" radius="md" withBorder mt="xl">
               <Group justify="left" mb={5}>
                 <IconLinkPlus size={16} />
-                <Button onClick={() => toggleUrls()}> {showUrls ? 'Hide URLs' : 'Show URLs'} [{(item as Store).URLS.length}]</Button>
+                <Button onClick={() => toggleUrls()}> {showUrls ? 'Hide URLs' : 'Show URLs'} [{urls.length}]</Button>
               </Group>
               <Collapse in={showUrls}>
-                {(item as Store).URLS.map((url: URL, index: number) => {
+                {urls.map((url: URL, index: number) => {
                   return (
-                    <Text key={index} size="sm" mb="xs">
+                    <Text key={index} mb="xs" mt="xl">
                       <a
                         href={url.URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
+                        className="text-blue-500 hover:underline hover:text-blue-800"
                       >
                         {url.Label}
                       </a>
@@ -240,7 +243,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
             <Group gap="xs" mb="lg">
               <IconPhotoHexagon size={16} color="magenta" /> Images
             </Group>
-            {['Cover', 'Logo', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures', 'SEO.socialImage'].map((name) => (
+            {['Cover', 'Logo', 'media', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures', 'SEO.socialImage'].map((name) => (
               <ImagesView
                 key={name}
                 item={item as ContentItem & Record<string, any>}
