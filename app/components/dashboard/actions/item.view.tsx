@@ -41,6 +41,16 @@ const prefixMap: Record<string, string> = {
   track: 'track',
   page: 'about',
   product: 'product',
+  store: 'store',
+}
+
+
+const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem, prefix?: string) => {
+  if (preview_url) return preview_url;
+
+  if (prefix == 'store') return `/store/${item.slug}`;
+
+  return `/store/${store?.slug}/${prefix}/${item.slug}`;
 }
 
 const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
@@ -48,7 +58,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
   const router = useRouter();
 
-  const prefix = prefixMap[singular] || 'blog';
+  const seo_url = seoUrl(previewUrl, store, item, prefixMap[singular]);
 
   const urls = (item as Store).URLS || (item as AlbumTrack)?.urls;
 
@@ -57,7 +67,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}
-          previewUrl={previewUrl || `/store/${store?.slug}/${prefix}/${item.slug}`} />
+          previewUrl={seo_url} />
       )}
       <Paper shadow="sm" p="xl" radius="md" withBorder mt={'sm'}>
         <Stack>

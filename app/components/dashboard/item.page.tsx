@@ -9,7 +9,7 @@ import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
-type ContentItem = Article | Page | Product;
+type ContentItem = Article | Page | Product | Store;
 
 interface ActionComponent {
   view: ElementType;
