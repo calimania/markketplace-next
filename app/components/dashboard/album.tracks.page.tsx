@@ -17,7 +17,7 @@ const TracksPage = () => {
       items={tracks}
       loading={loading}
       store={store}
-      description="Tracks are the individual items in an album. They have their own pages, and can be featured in multiple albums."
+      description="Tracks are the items in an album. With individual pages, and can be featured in multiple albums"
     ></DashboardCMS>
   );
 };
