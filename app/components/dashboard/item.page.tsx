@@ -3,7 +3,7 @@
 import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
-import { Article, Page, Product, Store } from '@/markket';
+import { AlbumTrack, Article, Page, Product, Store } from '@/markket';
 import ViewItem from '@/app/components/dashboard/actions/item.view';
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
@@ -61,6 +61,13 @@ const actionsMap: Record<string, ActionComponent> = {
     edit: (item: Store) => <> edit {item.documentId}  </>,
     singular: 'album',
     plural: 'albums',
+  },
+  tracks: {
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=urls&populate[]=media`,
+    view: ViewItem,
+    edit: (item: AlbumTrack) => <>edit {item.documentId}</>,
+    singular: 'track',
+    plural: 'tracks',
   }
 }
 
@@ -150,7 +157,7 @@ const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
       <Paper withBorder p="md" mb="xl">
         <Stack>
           <Text size="lg" fw={500}>
-            {store.title}
+            {store?.title}
           </Text>
           <Text c="dimmed">
             <strong>{options.singular} </strong>

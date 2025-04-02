@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     sort: 'updatedAt:desc'
   },
   tracks: {
-    populate: ['SEO', 'SEO.socialImage'],
+    populate: ['SEO', 'SEO.socialImage', 'media', 'urls'],
     sort: 'updatedAt:desc'
   },
   events: {
