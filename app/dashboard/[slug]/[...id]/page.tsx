@@ -11,14 +11,14 @@ import { notFound } from "next/navigation";
 const ItemPage = async ({ params }: { params: Promise<{ id: string[], slug: string }> }) => {
   const { id, slug } = await params;
 
-  if (!id[1]) {
+  if (!id[1] && id[0] !== 'new') {
     return notFound();
   }
 
   return (
     <ItemPageComponent
       id={id[1] as string}
-      action={id[0] as 'view' | 'edit'}
+      action={id[0] as 'view' | 'edit' | 'new'}
       slug={slug as ContentType} />
   );
 }

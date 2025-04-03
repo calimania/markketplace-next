@@ -1,5 +1,33 @@
-'use client';
-
+import {
+  Container,
+  Badge,
+  Divider,
+  ThemeIcon,
+  Collapse,
+  Accordion,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Article, Product, Album, URL, Page, AlbumTrack } from '@/markket';
+import {
+  IconCalendar,
+  IconClock,
+  IconBubbleTea,
+  IconSailboat,
+  IconLinkPlus,
+  IconCurrencyDollar,
+  IconPigMoney,
+  IconPhotoHexagon,
+  IconAlbum,
+} from '@tabler/icons-react';
+import { format } from 'date-fns';
+import { ContentBlock } from '../content.blocks.view';
+import SEOPreview from '../seo.preview';
+import { ContentItem } from '@/app/hooks/common';
+import { Remarkable } from 'remarkable';
+import ImagesView from '../item.images';
+import AlbumTrackList from '../album.tracks.component';
+import AlbumsView from '../album.page.component';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   TextInput,
@@ -17,6 +45,15 @@ import { IconBuildingStore } from '@tabler/icons-react';
 import { markketClient } from '@/markket/api';
 import { Store, SEO } from '@/markket';
 
+const prefixMap: Record<string, string> = {
+  article: 'blog',
+  track: 'track',
+  page: 'about',
+  product: 'product',
+  store: 'store',
+}
+
+
 interface StoreFormValues {
   title: string;
   Description: string;
@@ -24,11 +61,41 @@ interface StoreFormValues {
   SEO?: SEO;
 };
 
-type StoreFormProps = {
+type ItemFormProps = {
   onSubmit: (values: StoreFormValues) => void;
+  action: string;
+  item: ContentItem;
+  store: Store;
+  singular: string;
+  previewUrl?: string;
+  onCreate?: any;
+  onUpdate?: any;
 };
 
-export default function StoreForm(props: StoreFormProps) {
+
+const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem, prefix?: string) => {
+  if (preview_url) return preview_url;
+
+  if (prefix == 'store') return `/store/${item.slug}`;
+
+  return `/store/${store?.slug}/${prefix}/${item.slug}`;
+}
+
+const FormItem = ({  }: ItemFormProps) => {
+
+  return (
+    <Container size="md" py="xl" >
+    FORM!
+    </Container>
+  );
+};
+
+export default FormItem;
+
+
+
+
+export  function StoreForm(props: ItemFormProps) {
   const { onSubmit } = props;
   const [loading, setLoading] = useState(false);
 

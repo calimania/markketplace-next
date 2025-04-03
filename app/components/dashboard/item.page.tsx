@@ -5,6 +5,7 @@ import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
 import { AlbumTrack, Article, Page, Product, Store } from '@/markket';
 import ViewItem from '@/app/components/dashboard/actions/item.view';
+import FormItem from '@/app/components/dashboard/actions/item.form';
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ type ContentItem = Article | Page | Product | Store;
 interface ActionComponent {
   view: ElementType;
   edit: ElementType;
+  new?: ElementType;
   url: string;
   singular: string;
   plural: string;
@@ -46,6 +48,7 @@ const actionsMap: Record<string, ActionComponent> = {
     view: ViewItem,
     edit: (item: Store) => <> edit {item.documentId}  </>,
     singular: 'store',
+    new: FormItem,
     plural: 'stores',
   },
   events: {
@@ -73,7 +76,7 @@ const actionsMap: Record<string, ActionComponent> = {
 
 interface DashboardItemPageProps {
   id: string;
-  action: 'view' | 'edit';
+  action: 'view' | 'edit' | 'new';
   slug: ContentType;
 }
 
@@ -83,19 +86,27 @@ interface DashboardItemPageProps {
  * @param { params: { id: string, action: string } }
  * @returns
  */
-const DashboardItemPage = ({ id, action, slug }: DashboardItemPageProps) => {
+const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
   const { store } = useContext(DashboardContext);
   const router = useRouter();
 
   const options = actionsMap[slug as keyof typeof actionsMap];
 
+  const Component = options[action] as ElementType<{
+    item: ContentItem, store: Store, singular: string,
+  }>;
+
+  if (action == 'new') {
+    return <Component
+      action={action}
+      singular={options.singular}
+      plural={options.plural} />
+  }
+
   const { item, loading, error } = useCMSItem<ContentItem>(slug as ContentType, id, {
     append: options?.url || '',
   });
 
-  const Component = options[action] as ElementType<{
-    item: ContentItem, store: Store, singular: string,
-  }>;
 
   if (loading) {
     return (
