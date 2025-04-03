@@ -111,11 +111,11 @@ const HomePage = ({store, page}: HomePageProps) => {
                 size="xl"
                 variant="gradient"
                 gradient={{ from: 'cyan', to: 'indigo' }}
-                rightSection={<IconArrowRight size={20} />}
+                leftSection={<IconShoppingBag size={20} />}
                 component="a"
                 href="/stores"
               >
-                Explore Stores
+                Browse Stores
               </Button>
               {!isLoggedIn && (
                 <Button
@@ -124,6 +124,7 @@ const HomePage = ({store, page}: HomePageProps) => {
                   color="white"
                   className="text-white border-white hover:bg-white transition-all"
                   component="a"
+                  leftSection={<IconArrowRight size={20} />}
                   href="/auth/register"
                 >
                   Get Started
@@ -193,7 +194,7 @@ const HomePage = ({store, page}: HomePageProps) => {
                   variant="white"
                   className="transform hover:scale-105 transition-transform text-white border-fuchsia-300"
                 >
-                  {isLoggedIn ? 'Go to Dashboard' : 'Get Starsted'}
+                  {isLoggedIn ? 'Go to Dashboard' : 'Get Started'}
                 </Button>
               </Group>
             </Stack>

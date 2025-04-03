@@ -20,7 +20,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
         <Title order={(block.level || 1) as TitleOrder} mt="lg" mb="md">
           {block.children.map((child, i) =>
             child.url ? (
-              <Anchor key={i} href={child.url} target="_blank">
+              <Anchor key={i} href={child.url} target={child.url.startsWith('http') ? '_blank' : '_self'}>
                 {child.text}
               </Anchor>
             ) : (
