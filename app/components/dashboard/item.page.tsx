@@ -3,76 +3,15 @@
 import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
-import { AlbumTrack, Article, Page, Product, Store } from '@/markket';
-import ViewItem from '@/app/components/dashboard/actions/item.view';
-import FormItem from '@/app/components/dashboard/actions/item.form';
+import { Article, Page, Product, Store } from '@/markket';
+
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import { actionsMap } from './actions/actions.config';
 
 type ContentItem = Article | Page | Product | Store;
 
-interface ActionComponent {
-  view: ElementType;
-  edit: ElementType;
-  new?: ElementType;
-  url: string;
-  singular: string;
-  plural: string;
-}
-
-const actionsMap: Record<string, ActionComponent> = {
-  articles: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags&populate[]=cover`,
-    view: ViewItem,
-    edit: (item: Article) => <> edit {item.documentId}  </>,
-    singular: 'article',
-    plural: 'articles',
-  },
-  pages: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums&populate[]=albums.tracks`,
-    view: ViewItem,
-    edit: (item: Page) => <> edit {item.documentId}  </>,
-    singular: 'page',
-    plural: 'pages',
-  },
-  products: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Slides&populate[]=Thumbnail&populate[]=Tag&populate[]=PRICES`,
-    view: ViewItem,
-    edit: (item: Product) => <> edit {item.documentId}  </>,
-    singular: 'product',
-    plural: 'products',
-  },
-  stores: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides`,
-    view: ViewItem,
-    edit: (item: Store) => <> edit {item.documentId}  </>,
-    singular: 'store',
-    new: FormItem,
-    plural: 'stores',
-  },
-  events: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Thumbnail&populate[]=Slides&populate[]=Tag&populate[]=PRICES`,
-    view: ViewItem,
-    edit: (item: Store) => <> edit {item.documentId}  </>,
-    singular: 'event',
-    plural: 'events',
-  },
-  albums: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
-    view: ViewItem,
-    edit: (item: Store) => <> edit {item.documentId}  </>,
-    singular: 'album',
-    plural: 'albums',
-  },
-  tracks: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=urls&populate[]=media`,
-    view: ViewItem,
-    edit: (item: AlbumTrack) => <>edit {item.documentId}</>,
-    singular: 'track',
-    plural: 'tracks',
-  }
-}
 
 interface DashboardItemPageProps {
   id: string;
@@ -154,7 +93,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             Edit {options.singular}
           </Button>
         </Group>
-        <Component item={item} store={store} singular={options.singular} />
+        <Component item={item} store={store} singular={options.singular} create={options.create} update={options.update} />
       </Stack>
       <Paper withBorder p="md" mb="xl">
         <Stack>
