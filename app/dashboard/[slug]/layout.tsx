@@ -191,7 +191,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
         <Paper p="xl" withBorder mt="xl">
           <Group justify="center">
             <Loader size="sm" />
-            <Text>Loading stores...</Text>
+            <Text>Loading...</Text>
           </Group>
         </Paper>
       </Container>
