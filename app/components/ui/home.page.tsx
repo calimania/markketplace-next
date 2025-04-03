@@ -38,17 +38,11 @@ const features = [
 const create_links = (prefix?: string) => {
   return [
     {
-      href: "/stores",
-      icon: IconShoppingBag,
-      label: "Browse Stores",
-      variant: "gradient",
-      gradient: { from: 'indigo', to: 'cyan' }
-    },
-    {
-      href: `${prefix}/blog`,
+      href: `/docs`,
       icon: IconFileTypeDoc,
       label: "Documentation",
-      variant: "light"
+      variant: "gradient",
+      gradient: { from: 'indigo', to: 'cyan' }
     },
     {
       href: `${prefix}/about`,
@@ -63,7 +57,7 @@ const create_links = (prefix?: string) => {
       variant: "light"
     },
     {
-      href: `${prefix}/about/newsletter`,
+      href: `/newsletter`,
       icon: IconRadio,
       label: 'Newsletter',
       variant: 'gradient',
@@ -126,9 +120,9 @@ const HomePage = ({store, page}: HomePageProps) => {
               {!isLoggedIn && (
                 <Button
                   size="xl"
-                  variant="outline"
-                  color="gray"
-                  className="text-white border-white hover:bg-white hover:text-black transition-all"
+                  variant="subtle"
+                  color="white"
+                  className="text-white border-white hover:bg-white transition-all"
                   component="a"
                   href="/auth/register"
                 >
@@ -196,11 +190,10 @@ const HomePage = ({store, page}: HomePageProps) => {
                   href={isLoggedIn ? "/dashboard/store" : "/auth/register"}
                   size="xl"
                   leftSection={<IconHeartCode size={24} />}
-                  variant="gradient"
-                  gradient={{ from: 'blue', to: 'cyan' }}
-                  className="transform hover:scale-105 transition-transform"
+                  variant="white"
+                  className="transform hover:scale-105 transition-transform text-white border-fuchsia-300"
                 >
-                  {isLoggedIn ? 'Go to Dashboard' : 'Get Started'}
+                  {isLoggedIn ? 'Go to Dashboard' : 'Get Starsted'}
                 </Button>
               </Group>
             </Stack>
