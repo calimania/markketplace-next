@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/app/providers/auth.provider';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactElement } from 'react';
 import {
   Container,
   Paper,
@@ -17,14 +17,14 @@ import {
 import {
   IconUserCircle,
   IconBell,
-  IconKey
+  IconKey,
+  IconWorldHeart,
 } from '@tabler/icons-react';
-import { showNotification } from '@mantine/notifications';
+// import { showNotification } from '@mantine/notifications';
 
 import ProfileForm from '@/app/components/ui/profile.form';
-import StoreList from '@/app/components/ui/store.list';
+import StoreSettingsList from '@/app/components/dashboard/settings/store.list';
 import SecuritySettings from './settings.security';
-import { useRouter } from 'next/navigation';
 
 
 const settingsTabs = [
@@ -33,6 +33,12 @@ const settingsTabs = [
     label: 'Profile',
     icon: IconUserCircle,
     description: 'Manage your personal information'
+  },
+  {
+    value: 'store',
+    label: 'Stores',
+    icon: IconWorldHeart,
+    description: 'Store settings & access'
   },
   {
     value: 'notifications',
@@ -52,12 +58,10 @@ const settingsTabs = [
  * Dashboard/settings page
  * @returns {JSX.Element}
  */
-export default function SettingsPage() {
-  const { user, stores, fetchStores } = useAuth();
+export default function SettingsPage(): ReactElement {
+  const { user, stores, } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
-  const router = useRouter();
 
-  // Handle hash-based navigation
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (hash && settingsTabs.some(tab => tab.value === hash)) {
@@ -131,18 +135,7 @@ export default function SettingsPage() {
             <Tabs.Panel value="store">
               <Stack>
                 <Title order={4}>Store Settings</Title>
-                <StoreList stores={stores} onCreate={(store) => {
-                  showNotification({
-                    title: 'Store Created',
-                    message: `Store ${store?.title} created successfully, redirecting...`,
-                    color: 'green',
-                  });
-
-                  fetchStores();
-                  if (store?.id) {
-                    router.push(`/dashboard/store/?store=${store.id}`);
-                  }
-                }} />
+                <StoreSettingsList stores={stores} />
               </Stack>
             </Tabs.Panel>
 

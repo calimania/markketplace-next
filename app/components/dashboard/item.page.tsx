@@ -92,23 +92,13 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
 
   const options = actionsMap[slug as keyof typeof actionsMap];
 
-  const Component = options[action] as ElementType<{
-    item: ContentItem, store: Store, singular: string,
-  }>;
-
-  if (action == 'new') {
-    return <Component
-      action={action}
-      singular={options.singular}
-      plural={options.plural} />
-  }
+  const Component = options[action] as ElementType;
 
   const { item, loading, error } = useCMSItem<ContentItem>(slug as ContentType, id, {
     append: options?.url || '',
   });
 
-
-  if (loading) {
+  if (loading && action !== 'new') {
     return (
       <Container size="lg" py="xl">
         <Stack gap="md">
@@ -156,6 +146,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             Back to {options.plural}
           </Button>
           <Button
+            disabled={action == 'new'}
             variant="light"
             leftSection={<IconEdit size={16} />}
             onClick={() => router.push(`/dashboard/${slug}/edit/${item.documentId}`)}
