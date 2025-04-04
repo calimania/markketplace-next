@@ -6,6 +6,7 @@ import {
   IconSettings,
   IconUserCircle,
   IconBat,
+  IconSnowboarding,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -41,7 +42,7 @@ const dashboardCards: DashboardCard[] = [
     description: 'Auth & homepage',
     icon: IconUserCircle,
     color: 'grape',
-    iconColor: '#fbda0f',
+    iconColor: '#4263eb',
     href: '/auth'
   },
   {
@@ -52,6 +53,14 @@ const dashboardCards: DashboardCard[] = [
     iconColor: '#ff00ff',
     href: '/docs'
   },
+  {
+    title: 'Onboarding',
+    description: 'Getting started walkthrough',
+    icon: IconSnowboarding,
+    color: 'pink',
+    iconColor: '#066fd1',
+    href: '/dashboard/onboarding'
+  }
 ];
 
 export default function DashboardHome() {

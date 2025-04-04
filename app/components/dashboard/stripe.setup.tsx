@@ -189,7 +189,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
 
       {/* Additional Info Section */}
       <Paper withBorder radius="md" p="xl" mt="xl">
-        {!store.STRIPE_CUSTOMER_ID && (<Stack gap="md">
+        {!store?.STRIPE_CUSTOMER_ID && (<Stack gap="md">
           <Title order={3}>What happens next?</Title>
           <Text c="dimmed">
             After clicking &quot;Setup Stripe Account&quot;, you&apos;ll be redirected to Stripe to:

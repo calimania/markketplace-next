@@ -68,7 +68,7 @@ export default function StoreHeader({ store }: StoreHeaderProps) {
             <Group gap="xs">
               <IconWorld size={16} className="text-gray-500" />
               <Text size="sm" c="dimmed" className="flex items-center gap-2">
-                {store.slug}
+                {store?.slug}
                 <Tooltip
                   label={copied ? "Copied!" : "Copy store URL"}
                   position="right"
@@ -86,9 +86,9 @@ export default function StoreHeader({ store }: StoreHeaderProps) {
             <Group gap="lg">
               <Text size="sm" c="dimmed" className="flex items-center gap-1">
                 <IconCalendarTime size={16} />
-                Created {new Date(store.createdAt).toLocaleDateString()}
+                Created {new Date(store?.createdAt).toLocaleDateString()}
               </Text>
-              {store.URLS?.length > 0 && (
+              {store?.URLS?.length > 0 && (
                 <Badge
                   color="blue"
                   radius="sm"
@@ -104,7 +104,7 @@ export default function StoreHeader({ store }: StoreHeaderProps) {
         <Group className="sm:hidden">
           <Button
             component={Link}
-            href={`/store/${store.slug}`}
+            href={`/store/${store?.slug}`}
             target="_blank"
             variant="light"
             rightSection={<IconExternalLink size={16} />}

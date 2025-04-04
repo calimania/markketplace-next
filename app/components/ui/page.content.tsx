@@ -84,7 +84,7 @@ export default function PageContent({ params, }: PageContentProps) {
         <a
           key={key}
           href={node.url}
-          target="_blank"
+          target={node.url?.startsWith('http') ? '_blank' : '_self'}
           rel="noopener noreferrer"
           className="text-markket-blue hover:text-markket-pink transition-colors"
         >

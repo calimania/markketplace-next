@@ -13,7 +13,6 @@ export function useCMSItem<T>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-
   useEffect(() => {
     setLoading(true);
     setError(null);

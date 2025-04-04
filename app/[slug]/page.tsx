@@ -121,10 +121,10 @@ export default async function AnyPage({ params }: AnyPageProps) {
             className="mx-auto mb-8"
           />
           <Title className="text-4xl md:text-5xl mb-4">
-            Welcome to {store?.SEO?.metaTitle || 'Markket'}
+            {page?.Title || `Stores at ${store.title}`}
           </Title>
           <Text size="xl" c="dimmed" className="mx-auto mb-8">
-            {store?.SEO?.metaDescription || 'eCommerce'}
+            {page?.SEO?.metaDescription || store?.SEO?.metaDescription || 'eCommerce'}
           </Text>
         </div>
 

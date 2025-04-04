@@ -2,9 +2,8 @@
 import { Text, Button, Group, Stack, Paper, Title, Badge } from '@mantine/core';
 import Link from 'next/link';
 import { markketConfig } from '@/markket/config';
-import { useState } from 'react';
-import StoreForm from '@/app/components/ui/store.form';
 import { Store } from '@/markket/store';
+import { IconTrafficCone } from '@tabler/icons-react';
 
 type StoreSettingsListPageProps = {
   stores: Store[];
@@ -12,8 +11,8 @@ type StoreSettingsListPageProps = {
   onEdit?: (store: Store) => void;
 };
 
-const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) => {
-  const [showStoreForm, setShowStoreForm] = useState(false);
+const StoreSettingsListPage = ({stores}: StoreSettingsListPageProps) => {
+
 
   return (
     <>
@@ -23,9 +22,10 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
             <Text>You can create up to two stores</Text>
             <Button
               variant="light"
-              onClick={() => setShowStoreForm(!showStoreForm)}
+              component='a'
+              href="/dashboard/stores/new"
             >
-              {showStoreForm ? 'Cancel' : 'Create New Store'}
+              Create New Store
             </Button>
           </>
         ) : (
@@ -35,17 +35,12 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
         )}
       </Group>
       <h3>Collaborators</h3>
-      <Text size="sm" c="dimmed" maw={600}>
-        <strong>WIP</strong> To invite collaborators, send us an email support@caliman.org
-      </Text>
-      {showStoreForm && (
-        stores?.length >= markketConfig?.max_stores_per_user ?
-          (<></>) :
-          (<StoreForm onSubmit={(values) => {
-            setShowStoreForm(false);
-            return onCreate && onCreate(values as Store);
-          }} />)
-      )}
+      <Group>
+        <IconTrafficCone size={32} color="#f48f01"/>
+        <Text size="sm" c="dimmed" maw={600}>
+          <strong>WIP</strong> To invite collaborators, send us an email <Text c="indigo">support@caliman.org</Text>
+        </Text>
+      </Group>
 
       {stores.length > 0 && (
         <Stack mt="xl">
@@ -54,7 +49,7 @@ const StoreSettingsListPage = ({stores, onCreate}: StoreSettingsListPageProps) =
             <Paper key={store.id} withBorder p="md">
               <Group justify="space-between">
                 <Text fw={500}>
-                  <Link href={`/store/${store.slug}`}>
+                  <Link href={`/store/${store.slug}`} target="_preview">
                     {store.title}
                   </Link>
                 </Text>

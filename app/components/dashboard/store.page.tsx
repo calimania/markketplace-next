@@ -10,12 +10,12 @@ export default function StoreDashboardPage() {
   const [isLoading, setIsLoading] = useState(0);
 
   useEffect(() => {
-    setIsLoading(store.id);
+    setIsLoading(store?.id);
 
     setTimeout(() => {
       setIsLoading(0);
     }, 160);
-  }, [store.id])
+  }, [store?.id])
 
   if (isLoading) {
     return (
