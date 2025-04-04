@@ -93,9 +93,11 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             Edit {options.singular}
           </Button>
         </Group>
-        <Component item={item}
+        <Component
+          item={item}
           className="ViewItem | FormItem"
           store={store}
+          id={item?.id}
           singular={options.singular}
           plural={options.plural}
           create={options.create}

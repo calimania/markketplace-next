@@ -42,10 +42,31 @@ export class StrapiClient {
     return jwt;
   };
 
+  public update = async (endpoint: string, id: string, options: any) => {
+    const _url = new URL(`api/${endpoint}/${id}`, this.baseUrl);
+
+    console.log('Updating record:', _url.toString());
+    try {
+      const response = await fetch(_url.toString(), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": options?.headers?.Authorization,
+        },
+        body: JSON.stringify({ data: options.data }),
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("Record creation failed:", error);
+      return false;
+    }
+  };
+
   public create = async (endpoint: string, options: any) => {
     const _url = new URL(`api/${endpoint}`, this.baseUrl);
 
-    console.log('Creating record:', _url.toString(), options);
+    console.log('Creating record:', _url.toString());
     try {
       const response = await fetch(_url.toString(), {
         method: "POST",

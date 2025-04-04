@@ -73,6 +73,7 @@ const PreviewSEO = ({ SEO, previewUrl }: PreviewSEOProps) => {
               </Text>
             </Stack>
           </Paper>
+          {SEO.metaKeywords && <Text c="dimmed" size="xs">{SEO.metaKeywords}</Text>}
         </Stack>
 
         <Group gap="lg" wrap="nowrap">

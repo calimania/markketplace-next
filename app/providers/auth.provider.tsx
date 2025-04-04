@@ -59,7 +59,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const client = new markketClient();
-      const response = await client.fetch('/api/markket/store', {});
+      const response = await client.fetch('/api/markket/store', {
+        cache: 'no-store'
+      });
       const { data } = response;
       setStores(data || []);
     } catch (error) {

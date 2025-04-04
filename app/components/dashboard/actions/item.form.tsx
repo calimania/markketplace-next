@@ -36,14 +36,14 @@ type ItemFormProps = {
   };
 };
 
-const FormItem = ({ id, create, update, form, plural, }: ItemFormProps) => {
-  console.log("form item ", { form })
+const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormProps) => {
+
 
   const handleSubmit = async (values: StoreFormValues) => {
-
+    console.log("form item ", { action, update, id })
     try {
-      if (create) return create(values);
-      if (update && id) return update(values);
+      if (action == 'create' && create) return create(values);
+      if (action == 'edit' && update && id) return update(values, id);
     } catch (error) {
       console.warn({ error });
     }
@@ -56,6 +56,7 @@ const FormItem = ({ id, create, update, form, plural, }: ItemFormProps) => {
           contentType={plural as string}
           action='create'
           onSubmit={handleSubmit}
+          item={item}
           formConfig={{
             sections: form?.sections || [],
             initialValues: form?.config?.initialValues || {},

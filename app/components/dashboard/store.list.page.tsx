@@ -1,15 +1,18 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
 
 const StoreListPage = () => {
   const { store , isLoading,} = useContext(DashboardContext);
-  const { stores } = useAuth()
+  const { stores, fetchStores } = useAuth()
 
-  console.log({ isLoading, stores })
+  useEffect(() => {
+    fetchStores()
+  }, [fetchStores]);
+
   return (
     <DashboardCMS
       singular="store"

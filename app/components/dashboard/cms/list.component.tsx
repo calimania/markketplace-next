@@ -183,7 +183,7 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                     color={(item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'yellow' : 'green'}
                     variant="light"
                   >
-                    {(item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'Draft' : 'Published'}
+                    {(!!item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'Draft' : 'Published'}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
