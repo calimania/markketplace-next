@@ -46,6 +46,9 @@ export const actionsMap: Record<string, ActionComponent> = {
     singular: 'store',
     new: FormItem,
     plural: 'stores',
+    update: async (values: any) => {
+      console.log({ values })
+    },
     create: async (values: any) => {
       const client = new markketClient();
       const response = await client.post('/api/markket/store', {
