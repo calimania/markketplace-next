@@ -161,7 +161,10 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                     <Avatar
                       size={40}
                       radius="md"
-                      src={item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url}
+                      src={
+                        item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url
+                        || item.SEO?.socialImage?.url || item?.cover?.thumbnail?.url || item?.Favicon?.url
+                      }
                       alt={(item as Article).Title || (item as Album).title || (item as Product).Name}
                     >
                       <IconPhoto size={20} />

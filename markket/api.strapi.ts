@@ -44,8 +44,8 @@ export class StrapiClient {
 
   public update = async (endpoint: string, id: string, options: any) => {
     const _url = new URL(`api/${endpoint}/${id}`, this.baseUrl);
-
     console.log('Updating record:', _url.toString());
+
     try {
       const response = await fetch(_url.toString(), {
         method: "PUT",

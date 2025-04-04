@@ -15,11 +15,14 @@ interface CreateStorePayload {
     slug: string;
     URLS: any[];
     addresses: [];
+    documentId?: string;
     SEO?: {
+      id?: string;
       metaTitle?: string;
       metaDescription?: string;
       excludeFromSearch?: boolean;
       metaKeywords?: string;
+      socialImage?: any;
     }
   }
 }
@@ -224,7 +227,8 @@ export async function PUT(request: NextRequest) {
     const stores = await fetchUserStores(userData.id);
     const payload: CreateStorePayload = await request.json();
 
-    const store = stores.data.find((store: any) => store.id.toString() === id);
+    const store = stores.data.find((store: any) => store.documentId === id);
+
     if (!store?.id) {
       return errorResponses.unauthorized();
     }
@@ -242,10 +246,12 @@ export async function PUT(request: NextRequest) {
     const data = {
       title: payload.store.title,
       Description: payload.store.Description,
+      slug: payload.store.slug,
       SEO: {
         metaTitle: payload.store.SEO?.metaTitle,
         metaDescription: payload.store.SEO?.metaDescription,
         metaKeywords: payload.store.SEO?.metaKeywords,
+        socialImage: payload.store.SEO?.socialImage?.id,
       }
     }
     console.log({ data })

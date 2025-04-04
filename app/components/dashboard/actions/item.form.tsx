@@ -42,8 +42,8 @@ const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormPr
   const handleSubmit = async (values: StoreFormValues) => {
     console.log("form item ", { action, update, id })
     try {
-      if (action == 'create' && create) return create(values);
-      if (action == 'edit' && update && id) return update(values, id);
+      if (action == 'new' && create) return create(values);
+      if (action == 'edit' && update && id) return update(values, item.documentId);
     } catch (error) {
       console.warn({ error });
     }
@@ -54,7 +54,7 @@ const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormPr
       <Paper withBorder p="md" radius="md">
         <DashboardForm
           contentType={plural as string}
-          action='create'
+          action={action === 'new' ? 'create' : 'update'}
           onSubmit={handleSubmit}
           item={item}
           formConfig={{
