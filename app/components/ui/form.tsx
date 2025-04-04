@@ -1,5 +1,5 @@
 import { ContentItem } from '@/app/hooks/common';
-import { useState, ReactNode, useContext, useEffect, useCallback } from 'react';
+import { useState, ReactNode, useContext, useEffect } from 'react';
 import {
   TextInput,
   Container,
