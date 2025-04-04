@@ -1,5 +1,5 @@
 import { ContentItem } from '@/app/hooks/common';
-import { useState, ReactNode, useContext } from 'react';
+import { useState, ReactNode, useContext, useEffect } from 'react';
 import {
   TextInput,
   Container,
@@ -103,12 +103,16 @@ const FormItem = ({
   const { fetchStores } = useAuth();
 
 
-  console.log({formConfig})
-
   const form = useForm({
     initialValues: formConfig.initialValues,
     validate: formConfig.validation
   });
+
+
+  useEffect(() => {
+    form.setValues(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item])
 
   const handleSubmit = async (values: any) => {
     setLoading(true);

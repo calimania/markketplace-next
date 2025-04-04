@@ -38,8 +38,8 @@ const StoreSettingsListPage = ({stores}: StoreSettingsListPageProps) => {
       <Group>
         <IconTrafficCone size={32} color="#f48f01"/>
         <Text size="sm" c="dimmed" maw={600}>
-          <strong>WIP</strong> To invite collaborators, send us an email <Text c="indigo">support@caliman.org</Text>
         </Text>
+        <strong>WIP</strong> To invite collaborators, send us an email <span className="text-indigo-700">support@caliman.org</span>
       </Group>
 
       {stores.length > 0 && (

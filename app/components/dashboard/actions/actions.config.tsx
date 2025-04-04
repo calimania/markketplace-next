@@ -42,23 +42,27 @@ export const actionsMap: Record<string, ActionComponent> = {
   stores: {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides`,
     view: ViewItem,
-    edit: (item: Store) => <> edit {item.documentId}  </>,
+    edit: FormItem,
     singular: 'store',
     new: FormItem,
     plural: 'stores',
-    create: async (values: any) => {
+    update: async (values: Store, id: string) => {
       const client = new markketClient();
-      const response = await client.post('/api/markket/store', {
+      console.log({ values, id })
+      return await client.put(`/api/markket/store?id=${id}`, {
         body: {
           store: values,
         },
       });
+    },
+    create: async (values: Store) => {
+      const client = new markketClient();
+      return await client.post('/api/markket/store', {
+        body: {
+          store: values,
 
-      if (!response?.data?.id) {
-        throw new Error('Failed to create store');
-      }
-
-      return response;
+        },
+      });
     },
     form: {
       initialValues: {
@@ -68,7 +72,8 @@ export const actionsMap: Record<string, ActionComponent> = {
         SEO: {
           metaDescription: '',
           metaTitle: '',
-          excludeFromSearch: true,
+          excludeFromSearch: false,
+          metaKeywords: '',
         }
       },
       validation: {
@@ -104,7 +109,7 @@ export const actionsMap: Record<string, ActionComponent> = {
             type: 'text',
             placeholder: 'my-awesome-store',
             description: "This will be your store's URL: markket.place/store/[slug]",
-            required: true
+            required: true,
           },
           {
             name: 'Description',
@@ -136,6 +141,14 @@ export const actionsMap: Record<string, ActionComponent> = {
             description: 'Short description that appears in search results (150-160 characters recommended)',
             required: true,
             minRows: 2,
+            groupName: 'SEO'
+          },
+          {
+            name: 'metaKeywords',
+            label: 'Meta Keywords',
+            type: 'text',
+            placeholder: 'Comma separated list of keywords in the article',
+            description: 'Optional to help bots categorize your content',
             groupName: 'SEO'
           }
         ]

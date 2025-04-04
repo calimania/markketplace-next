@@ -5,6 +5,7 @@ import ItemList from '@/app/components/dashboard/cms/list.component';
 import { Store } from '@/markket';
 
 import { ContentItem } from '@/app/hooks/common.d';
+import { markketConfig } from '@/markket/config';
 
 type CMSComponent = {
   singular: string;
@@ -71,7 +72,7 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
               </Button>
               <Button
                 onClick={() => router.push(`/dashboard/${plural}/new?store=${store.documentId}`)}
-                disabled={plural !== 'stores'}
+                disabled={plural !== 'stores' || ((items?.length || 0) >= markketConfig.max_stores_per_user)}
                 leftSection={<IconPlus size={16} />}
               >
                 New {singular}

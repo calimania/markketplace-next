@@ -1,3 +1,4 @@
+import { useAuth } from '@/app/providers/auth.provider';
 import {
   Paper, Text, Title, Container, ThemeIcon,
   Timeline, Button, Group, Stack,
@@ -11,6 +12,7 @@ import { motion } from 'framer-motion';
 const MotionPaper = motion(Paper as any);
 
 const OnboardingComponent = ({ }: { slug?: string }) => {
+  const { stores } = useAuth();
 
   return (
     <Container size="md" py="xl">
@@ -45,7 +47,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Timeline active={0} bulletSize={24} lineWidth={2}>
+          <Timeline active={stores?.length ? 1 : 0} bulletSize={24} lineWidth={2}>
             <Timeline.Item
               bullet={<IconBuildingStore size={12} />}
               title="Create your first Store"
@@ -54,7 +56,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 A store is the base unit in the mall, each store has its own brand, unique homepage,
                 images, blog & catalogues
               </Text>
-              <Button
+              {!stores.length && (<Button
                 variant="light"
                 rightSection={<IconArrowRight size={16} />}
                 mt="md"
@@ -62,7 +64,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 href="/dashboard/stores/new"
               >
                 Create Store
-              </Button>
+              </Button>)}
             </Timeline.Item>
 
             <Timeline.Item
@@ -70,8 +72,18 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
               title="Make it yours"
             >
               <Text c="dimmed" size="sm">
-                Add images, titles and descriptions to personalize your store
+                Manage content, add images, titles and descriptions to personalize your store
               </Text>
+
+              {stores.length && (<Button
+                variant="light"
+                rightSection={<IconArrowRight size={16} />}
+                mt="md"
+                component="a"
+                href="/dashboard/stores/new"
+              >
+                Store Dashboard
+              </Button>)}
             </Timeline.Item>
 
             <Timeline.Item

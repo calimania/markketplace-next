@@ -4,6 +4,7 @@ type fetchOptions = {
   method?: string;
   headers?: any;
   body?: any;
+  cache?: any;
 };
 
 /**
@@ -76,6 +77,7 @@ export class markketClient {
         'Content-Type': 'application/json',
         ...(options.headers || {}),
       },
+      cache: 'no-store',
     });
 
     return await response.json();
