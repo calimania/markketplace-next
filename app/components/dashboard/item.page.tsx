@@ -93,27 +93,29 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             Edit {options.singular}
           </Button>
         </Group>
-        {/** ViewItem | FormItem  */}
-        {console.log({ options })}
         <Component item={item}
+          className="ViewItem | FormItem"
           store={store}
           singular={options.singular}
           plural={options.plural}
           create={options.create}
+          action={action}
           update={options.update}
           form={{ config: options.form, sections: options.form_sections }}
         />
       </Stack>
-      <Paper withBorder p="md" mb="xl">
-        <Stack>
-          <Text size="lg" fw={500}>
-            {store?.title}
-          </Text>
-          <Text c="dimmed">
-            <strong>{options.singular} </strong>
-            {item?.documentId}</Text>
-        </Stack>
-      </Paper>
+      {action !== 'new' && (
+        <Paper withBorder p="md" mb="xl">
+          <Stack>
+            <Text size="lg" fw={500}>
+              {store?.title}
+            </Text>
+            <Text c="dimmed">
+              <strong>{options.singular} </strong>
+              {item?.documentId}</Text>
+          </Stack>
+        </Paper>
+      )}
     </Container>
   );
 }

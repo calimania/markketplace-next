@@ -1,5 +1,5 @@
 import { ContentItem } from '@/app/hooks/common';
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useContext } from 'react';
 import {
   TextInput,
   Container,
@@ -21,6 +21,9 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconBuildingStore, IconSpade, IconDeviceFloppy, IconDisc, IconArticle, IconShoppingCart } from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
+import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { useAuth } from '@/app/providers/auth.provider';
 
 // Define field types
 export type FieldType =
@@ -95,6 +98,10 @@ const FormItem = ({
   description,
 }: ItemFormProps) => {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { store } = useContext(DashboardContext);
+  const { fetchStores } = useAuth();
+
 
   console.log({formConfig})
 
@@ -107,7 +114,7 @@ const FormItem = ({
     setLoading(true);
 
     try {
-      await onSubmit(values);
+      const response = await onSubmit(values) as any;
 
       notifications.show({
         title: 'Success',
@@ -115,8 +122,17 @@ const FormItem = ({
         color: 'green',
       });
 
-      if (action === 'create') {
-        form.reset();
+      const documentId = response?.data?.documentId;
+
+      if (documentId) {
+        let redirect_to = '';
+        if (contentType === 'stores') {
+          redirect_to = `/dashboard/stores?store=${documentId}`;
+          await fetchStores();
+        } else {
+          redirect_to = `/dashboards/${contentType}/?store=${store.documentId}`
+        }
+        router.push(redirect_to);
       }
     } catch (error) {
       console.warn({ error });

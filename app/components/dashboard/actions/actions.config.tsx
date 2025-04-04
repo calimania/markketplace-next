@@ -24,20 +24,6 @@ export const actionsMap: Record<string, ActionComponent> = {
     edit: (item: Article) => <> edit {item.documentId}  </>,
     singular: 'article',
     plural: 'articles',
-    create: async (values: any) => {
-      const client = new markketClient();
-      const response = await client.post('/api/markket/store', {
-        body: {
-          store: values,
-        },
-      });
-
-      if (!response?.data?.id) {
-        throw new Error('Failed to create store');
-      }
-
-      return response;
-    },
   },
   pages: {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums&populate[]=albums.tracks`,
@@ -60,6 +46,20 @@ export const actionsMap: Record<string, ActionComponent> = {
     singular: 'store',
     new: FormItem,
     plural: 'stores',
+    create: async (values: any) => {
+      const client = new markketClient();
+      const response = await client.post('/api/markket/store', {
+        body: {
+          store: values,
+        },
+      });
+
+      if (!response?.data?.id) {
+        throw new Error('Failed to create store');
+      }
+
+      return response;
+    },
     form: {
       initialValues: {
         title: '',

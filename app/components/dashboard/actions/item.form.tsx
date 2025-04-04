@@ -40,9 +40,10 @@ const FormItem = ({ id, create, update, form, plural, }: ItemFormProps) => {
   console.log("form item ", { form })
 
   const handleSubmit = async (values: StoreFormValues) => {
+
     try {
-      if (create) create(values);
-      if (update && id) update(values);
+      if (create) return create(values);
+      if (update && id) return update(values);
     } catch (error) {
       console.warn({ error });
     }
