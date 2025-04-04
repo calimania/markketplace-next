@@ -93,7 +93,16 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             Edit {options.singular}
           </Button>
         </Group>
-        <Component item={item} store={store} singular={options.singular} create={options.create} update={options.update} />
+        {/** ViewItem | FormItem  */}
+        {console.log({ options })}
+        <Component item={item}
+          store={store}
+          singular={options.singular}
+          plural={options.plural}
+          create={options.create}
+          update={options.update}
+          form={{ config: options.form, sections: options.form_sections }}
+        />
       </Stack>
       <Paper withBorder p="md" mb="xl">
         <Stack>
