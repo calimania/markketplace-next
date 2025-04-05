@@ -97,7 +97,6 @@ const FormItem = ({
   onSubmit,
   action,
   item,
-  id,
   formConfig,
   title,
   description,
@@ -136,10 +135,10 @@ const FormItem = ({
       if (documentId) {
         let redirect_to = '';
         if (contentType === 'stores') {
-          redirect_to = `/dashboard/stores?store=${documentId}`;
           await fetchStores();
+          redirect_to = `/dashboard/store?store=${documentId}`;
         } else {
-          redirect_to = `/dashboards/${contentType}/?store=${store.documentId}`
+          redirect_to = `/dashboards/${contentType}/view/${documentId}?store=${store.documentId}`
         }
         router.push(redirect_to);
       }

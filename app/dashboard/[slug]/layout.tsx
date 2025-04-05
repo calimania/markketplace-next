@@ -208,7 +208,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
       header={{ height: 'auto' }}
       navbar={{
         width: 300,
-        breakpoint: 'md',
+        breakpoint: 'sm',
         collapsed: { mobile: !opened }
       }}
       padding="xs"
