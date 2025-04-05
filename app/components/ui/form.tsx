@@ -280,8 +280,8 @@ const FormItem = ({
   };
 
   return (
-    <Container size="md" py="xl">
-      <Paper withBorder p="xl" radius="md"  className={`${id} ${item}`}>
+    <Container size="md" py="xl" mx={0} px='sm'>
+      <Paper p={0} className={`${contentType} ${item.id}`} mx={0} >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <Group>

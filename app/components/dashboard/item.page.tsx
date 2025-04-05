@@ -74,7 +74,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
   }
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" mx={0} px={0}>
       <Stack gap="sm">
         <Group justify="space-between">
           <Button

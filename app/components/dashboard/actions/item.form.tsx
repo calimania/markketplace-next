@@ -50,8 +50,8 @@ const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormPr
   };
 
   return (
-    <Container size="md" py="xl" >
-      <Paper withBorder p="md" radius="md">
+    <Container size="md" py="xl" mx={0} px={0}>
+      <Paper withBorder p="md" radius="md" mx={0} px={0}>
         <DashboardForm
           contentType={plural as string}
           action={action === 'new' ? 'create' : 'update'}
