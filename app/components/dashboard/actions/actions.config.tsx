@@ -48,7 +48,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     plural: 'stores',
     update: async (values: Store, id: string) => {
       const client = new markketClient();
-      console.log({ values, id })
+
       return await client.put(`/api/markket/store?id=${id}`, {
         body: {
           store: values,
@@ -57,6 +57,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     },
     create: async (values: Store) => {
       const client = new markketClient();
+
       return await client.post('/api/markket/store', {
         body: {
           store: values,

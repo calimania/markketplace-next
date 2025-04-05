@@ -97,7 +97,6 @@ const FormItem = ({
   onSubmit,
   action,
   item,
-  id,
   formConfig,
   title,
   description,
@@ -136,10 +135,10 @@ const FormItem = ({
       if (documentId) {
         let redirect_to = '';
         if (contentType === 'stores') {
-          redirect_to = `/dashboard/stores?store=${documentId}`;
           await fetchStores();
+          redirect_to = `/dashboard/store?store=${documentId}`;
         } else {
-          redirect_to = `/dashboards/${contentType}/?store=${store.documentId}`
+          redirect_to = `/dashboards/${contentType}/view/${documentId}?store=${store.documentId}`
         }
         router.push(redirect_to);
       }
@@ -280,8 +279,8 @@ const FormItem = ({
   };
 
   return (
-    <Container size="md" py="xl">
-      <Paper withBorder p="xl" radius="md"  className={`${id} ${item}`}>
+    <Container size="md" py="xl" mx={0} px='sm'>
+      <Paper p={0} className={`${contentType} ${item.id}`} mx={0} >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <Group>

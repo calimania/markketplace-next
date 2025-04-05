@@ -187,8 +187,8 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   if (loading || authLoading) {
     return (
-      <Container>
-        <Paper p="xl" withBorder mt="xl">
+      <Container px={0}>
+        <Paper p="xs" withBorder mt="xl" px={0}>
           <Group justify="center">
             <Loader size="sm" />
             <Text>Loading...</Text>
@@ -205,13 +205,13 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 'auto' }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
         collapsed: { mobile: !opened }
       }}
-      padding="md"
+      padding="xs"
       styles={{
         main: {
           paddingTop: 'calc(var(--mantine-spacing-md) + 60px)',
