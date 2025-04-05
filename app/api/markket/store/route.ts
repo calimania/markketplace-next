@@ -247,6 +247,7 @@ export async function PUT(request: NextRequest) {
       title: payload.store.title,
       Description: payload.store.Description,
       slug: payload.store.slug,
+      URLS: payload.store.URLS,
       SEO: {
         metaTitle: payload.store.SEO?.metaTitle,
         metaDescription: payload.store.SEO?.metaDescription,
