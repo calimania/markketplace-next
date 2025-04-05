@@ -37,6 +37,7 @@ export type FieldType =
   | 'checkbox'
   | 'color'
   | 'file'
+  | 'urls'
   | 'markdown'
   | 'blocks'
   | 'password';

@@ -5,10 +5,8 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import { Markdown } from 'tiptap-markdown';
-import { Text, Paper, Tabs, Group, ActionIcon, Tooltip, } from '@mantine/core';
-import { IconMarkdown, IconPhoto, IconEye, IconCode } from '@tabler/icons-react';
-
-// https://tiptap.dev/docs/editor/extensions/functionality/filehandler
+import { Text, Paper, Tabs, Group, ActionIcon, Tooltip, TextInput, Button, Modal, Stack } from '@mantine/core';
+import { IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus } from '@tabler/icons-react';
 
 interface ContentEditorProps {
   value?: string;
@@ -32,6 +30,9 @@ const ContentEditor = ({
   format = 'markdown',
 }: ContentEditorProps) => {
   const [activeTab, setActiveTab] = useState<string>('editor');
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageAlt, setImageAlt] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -51,6 +52,9 @@ const ContentEditor = ({
       }),
       Image.configure({
         allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-md max-w-full',
+        },
       }),
     ],
     content: value,
@@ -73,13 +77,22 @@ const ContentEditor = ({
     }
   }, [editor, value]);
 
-  const insertImage = () => {
-    if (!editor) return;
+  const handleInsertImage = () => {
+    if (!editor || !imageUrl.trim()) return;
 
-    const url = window.prompt('Enter image URL');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    editor
+      .chain()
+      .focus()
+      .setImage({
+        src: imageUrl,
+        alt: imageAlt,
+      })
+      .run();
+
+    // Reset form and close modal
+    setImageUrl('');
+    setImageAlt('');
+    setImageModalOpen(false);
   };
 
   // Convert markdown to HTML for preview
@@ -132,7 +145,7 @@ const ContentEditor = ({
             <Group>
               <Tooltip label="Insert image">
                 <ActionIcon
-                  onClick={insertImage}
+                  onClick={() => setImageModalOpen(true)}
                   variant="light"
                   color="blue"
                 >
@@ -183,6 +196,16 @@ const ContentEditor = ({
                   <RichTextEditor.Link />
                   <RichTextEditor.Unlink />
                 </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <ActionIcon
+                    variant="subtle"
+                    onClick={() => setImageModalOpen(true)}
+                    title="Insert image"
+                  >
+                    <IconPhotoPlus size={18} />
+                  </ActionIcon>
+                </RichTextEditor.ControlsGroup>
               </RichTextEditor.Toolbar>
 
               <RichTextEditor.Content />
@@ -210,6 +233,62 @@ const ContentEditor = ({
           {error}
         </Text>
       )}
+
+      {/* Image Insert Modal */}
+      <Modal
+        opened={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        title="Insert Image"
+        size="md"
+        centered
+      >
+        <Stack spacing="md">
+          <TextInput
+            label="Image URL"
+            placeholder="https://example.com/image.jpg"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.currentTarget.value)}
+            required
+            data-autofocus
+          />
+          <TextInput
+            label="Alt Text"
+            placeholder="Descriptive text for the image"
+            value={imageAlt}
+            onChange={(e) => setImageAlt(e.currentTarget.value)}
+            description="Add accessible description of the image content"
+          />
+
+          {imageUrl && (
+            <Paper withBorder p="xs" radius="md">
+              <Text size="xs" c="dimmed" mb={8}>Preview:</Text>
+              <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt={imageAlt}
+                  className="max-w-full max-h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYWFhYWFhIj5JbWFnZSBsb2FkaW5nIGVycm9yPC90ZXh0Pjwvc3ZnPg==';
+                  }}
+                />
+              </div>
+            </Paper>
+          )}
+
+          <Group position="right" mt="md">
+            <Button variant="subtle" onClick={() => setImageModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInsertImage}
+              disabled={!imageUrl.trim()}
+              leftSection={<IconPhotoPlus size={16} />}
+            >
+              Insert Image
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </div>
   );
 };
