@@ -5,7 +5,8 @@ import {
 } from '@mantine/core';
 import {
   IconBuildingStore, IconArticle, IconRocket,
-  IconPalette, IconArrowRight, IconShoppingCart
+  IconPalette, IconArrowRight, IconShoppingCart,
+  IconLibraryPhoto
 } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 
@@ -85,7 +86,15 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 Store Dashboard
               </Button>)}
             </Timeline.Item>
-
+            <Timeline.Item
+              bullet={<IconLibraryPhoto size={12} />}
+              title="Add Pictures"
+            >
+              <Text c="dimmed" size="sm">
+                Upload some pictures with your brand colors & vibe, or use our
+                algorithms to create some
+              </Text>
+            </Timeline.Item>
             <Timeline.Item
               bullet={<IconArticle size={12} />}
               title="Create Content"

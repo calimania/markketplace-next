@@ -3,11 +3,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import ViewItem from '@/app/components/dashboard/actions/item.view';
-import { Skeleton } from '@mantine/core';
+import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';
+import { useRouter } from 'next/navigation';
+import { IconBuildingStore } from '@tabler/icons-react';
 
 export default function StoreDashboardPage() {
   const { store, } = useContext(DashboardContext);
   const [isLoading, setIsLoading] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     setIsLoading(store?.id);
@@ -29,6 +32,21 @@ export default function StoreDashboardPage() {
   }
 
   if (store) {
-    return <ViewItem item={store} store={store} singular="store" previewUrl={`/store/${store.slug}`} />;
+    return (<>
+      <Container size="lg" pt="md" pb="xs">
+        <Stack gap="sm">
+          <Group justify="space-between">
+            <Button
+              variant="light"
+              leftSection={<IconBuildingStore size={16} />}
+              onClick={() => router.push(`/dashboard/stores`)}
+            >
+              Your stores
+            </Button>
+          </Group>
+        </Stack>
+      </Container>
+      <ViewItem item={store} store={store} singular="store" previewUrl={`/store/${store.slug}`} />
+    </>);
   }
 };

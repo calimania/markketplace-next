@@ -1,3 +1,4 @@
+// @Maybe use the office Strapi block render // @strapi/blocks-react-renderer
 import { Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
 import { Album, AlbumTrack } from '@/markket/album';

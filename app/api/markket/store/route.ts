@@ -254,7 +254,6 @@ export async function PUT(request: NextRequest) {
         socialImage: payload.store.SEO?.socialImage?.id,
       }
     }
-    console.log({ data })
 
     const response = await strapiClient.update('stores', store.documentId, {
       headers: {
