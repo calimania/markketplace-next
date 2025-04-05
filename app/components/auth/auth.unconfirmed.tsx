@@ -149,8 +149,7 @@ const AuthUnconfirmed = () => {
           variant="light"
           className="max-w-lg"
         >
-          <Text mb={8}>Email confirmed? You can log in directly here:</Text>
-
+          <Text mb={8}>Email confirmed? Login to continue:</Text>
           <Button
             onClick={() => setShowLoginForm(prev => !prev)}
             variant="subtle"
@@ -158,9 +157,8 @@ const AuthUnconfirmed = () => {
             mb={showLoginForm ? 10 : 0}
             leftSection={<IconLockOpen size={16} />}
           >
-            {showLoginForm ? "Cancel" : "Login with password"}
+            {showLoginForm ? "Cancel" : "Enter Password"}
           </Button>
-
           <Collapse in={showLoginForm}>
             <Stack>
               <PasswordInput
@@ -202,7 +200,9 @@ const AuthUnconfirmed = () => {
             New confirmation email sent! Please check your inbox and spam folders.
           </Alert>
         )}
-
+        <Text size="xs" c="dimmed" ta="center" maw={450} mt={10}>
+          Can&apos;t find the email? Please check your spam folder or request a new confirmation email.
+        </Text>
         <Group mt={10}>
           <Button
             variant="light"
@@ -217,19 +217,7 @@ const AuthUnconfirmed = () => {
                 ? "Email sent successfully"
                 : "Resend confirmation email"}
           </Button>
-
-          <Button
-            variant="outline"
-            component="a"
-            href="/auth/login"
-          >
-            Go to login page
-          </Button>
         </Group>
-
-        <Text size="xs" c="dimmed" ta="center" maw={450} mt={10}>
-          Can&apos;t find the email? Please check your spam folder or request a new confirmation email.
-        </Text>
       </Stack>
     </Paper>
   );
