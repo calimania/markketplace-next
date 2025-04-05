@@ -134,7 +134,6 @@ const ContentEditor = ({
   useEffect(() => {
     if (!editor || !value) return;
 
-    // Only update if the value is different to avoid cursor jumps
     const currentContent = editor.storage.markdown.getMarkdown();
 
     if (currentContent !== value) {
