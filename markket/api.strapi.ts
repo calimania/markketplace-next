@@ -26,6 +26,11 @@ type uploadAvatarOptions = {
   field?: string;
 };
 
+type UploadImage = {
+  alternativeText: string;
+  id?: string | number;
+}
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;
@@ -452,6 +457,42 @@ export class StrapiClient {
       },
       body: formData
     });
+  };
+
+
+
+  /**
+   *
+   * @param file
+   * @returns
+   */
+  public uploadImage = async (file: File | null, { alternativeText, id }: UploadImage) => {
+    if (!file) return;
+
+    const token = this._token();
+    const formData = new FormData();
+
+    const newFileData = {
+      alternativeText,
+    }
+
+    formData.append('files', file);
+    formData.append('fileInfo', JSON.stringify(newFileData));
+
+    const _id = id ? `?id=${id}` : '';
+
+    const response = await fetch(new URL(`api/upload/${_id}`, this.baseUrl), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData
+    });
+    try {
+      return await response.json();
+    } catch (error) {
+      return { response, error };
+    }
   };
 };
 

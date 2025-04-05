@@ -88,7 +88,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
             disabled={action == 'new'}
             variant="light"
             leftSection={<IconEdit size={16} />}
-            onClick={() => router.push(`/dashboard/${slug}/edit/${item.documentId}`)}
+            onClick={() => router.push(`/dashboard/${slug}/edit/${item.documentId}?store=${store.documentId}`)}
           >
             Edit {options.singular}
           </Button>

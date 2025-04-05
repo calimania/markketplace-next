@@ -114,7 +114,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           {
             name: 'Description',
             label: 'Description',
-            type: 'textarea',
+            type: 'markdown',
             placeholder: 'Tell us about your store...',
             required: true
           }

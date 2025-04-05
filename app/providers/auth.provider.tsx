@@ -54,6 +54,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [stores, setStores] = useState<Store[]>([]);
 
+
+  const readLocalStorage = () => {
+    const storedAuth = localStorage.getItem('markket.auth');
+    if (storedAuth) {
+      try {
+        const parsedAuth = JSON.parse(storedAuth);
+        setUser(parsedAuth);
+        return parsedAuth;
+      } catch (error) {
+        console.error('Failed to parse stored auth data:', error);
+        localStorage.removeItem('markket.auth');
+      }
+    }
+    return null;
+  }
+
   const fetchStores = useCallback(async () => {
     if (!maybe()) return;
 
@@ -77,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyAndRefreshUser = useCallback(async () => {
     try {
+      readLocalStorage();
       const userData = await strapiClient.me();
+
       if (userData) {
         const storedAuth = localStorage.getItem('markket.auth');
         const { jwt } = JSON.parse(storedAuth || '{}');
@@ -91,18 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedAuth = localStorage.getItem('markket.auth');
-      if (storedAuth) {
-        try {
-          const parsedAuth = JSON.parse(storedAuth);
-          setUser(parsedAuth);
-        } catch (error) {
-          console.error('Failed to parse stored auth data:', error);
-          localStorage.removeItem('markket.auth');
-        }
-
-        await verifyAndRefreshUser();
-      }
+      await verifyAndRefreshUser();
 
       setIsLoading(false);
     };
