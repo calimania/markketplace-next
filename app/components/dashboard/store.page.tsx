@@ -5,7 +5,7 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 import ViewItem from '@/app/components/dashboard/actions/item.view';
 import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';
 import { useRouter } from 'next/navigation';
-import { IconBuildingStore } from '@tabler/icons-react';
+import { IconBuildingStore, IconPencilCog } from '@tabler/icons-react';
 
 export default function StoreDashboardPage() {
   const { store, } = useContext(DashboardContext);
@@ -42,6 +42,14 @@ export default function StoreDashboardPage() {
               onClick={() => router.push(`/dashboard/stores`)}
             >
               Your stores
+            </Button>
+
+            <Button
+              variant="light"
+              rightSection={<IconPencilCog size={16} />}
+              onClick={() => router.push(`/dashboard/stores/edit/${store.documentId}?store=${store.documentId}`)}
+            >
+              Edit
             </Button>
           </Group>
         </Stack>
