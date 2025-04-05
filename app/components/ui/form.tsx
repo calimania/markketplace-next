@@ -25,6 +25,8 @@ import { useRouter } from 'next/navigation';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
 
+import ContentEditor from '@/app/components/ui/form.input.tiptap';
+
 // Define field types
 export type FieldType =
   | 'text'
@@ -35,6 +37,8 @@ export type FieldType =
   | 'checkbox'
   | 'color'
   | 'file'
+  | 'markdown'
+  | 'blocks'
   | 'password';
 
 // Define field configuration
@@ -166,6 +170,18 @@ const FormItem = ({
             description={field.description}
             required={field.required}
             {...inputProps}
+          />
+        );
+      case 'markdown':
+        return (
+          <ContentEditor
+            key={field.name}
+            label={field.label}
+            description={field.description}
+            placeholder={field.placeholder || 'Write your content here...'}
+            value={inputProps.value || ''}
+            onChange={inputProps.onChange}
+            error={inputProps.error}
           />
         );
       case 'textarea':
