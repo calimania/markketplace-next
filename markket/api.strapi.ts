@@ -203,6 +203,7 @@ export class StrapiClient {
       });
 
       if (!response.ok) {
+        console.error(response.statusText);
         throw new Error(`Failed to fetch ${options.contentType}`);
       }
 
