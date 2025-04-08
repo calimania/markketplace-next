@@ -26,6 +26,7 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
 
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
+import URLsInput from './form.input.urls';
 
 // Define field types
 export type FieldType =
@@ -182,6 +183,16 @@ const FormItem = ({
             value={inputProps.value || ''}
             onChange={inputProps.onChange}
             error={inputProps.error}
+          />
+        );
+      case 'urls':
+        return (
+          <URLsInput
+            key={field.name}
+            label={field.label}
+            description={field.description}
+            value={inputProps.value}
+            onChange={inputProps.onChange}
           />
         );
       case 'textarea':

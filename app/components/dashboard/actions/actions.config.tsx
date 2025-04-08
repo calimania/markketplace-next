@@ -40,7 +40,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     plural: 'products',
   },
   stores: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides&populate[]=URLS`,
     view: ViewItem,
     edit: FormItem,
     singular: 'store',
@@ -116,8 +116,14 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Description',
             label: 'Description',
             type: 'markdown',
-            placeholder: 'Tell us about your store...',
+            placeholder: 'Tell us about your store...\nUse the editor to add styles & images',
             required: true
+          },
+          {
+            name: 'URLS',
+            label: 'Links',
+            type: 'urls',
+            description: 'Easy to find, featured links'
           }
         ]
       },

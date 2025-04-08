@@ -190,6 +190,12 @@ export async function POST(request: Request) {
       },
       data: {
         ...payload.store,
+        URLS: payload.store.URLS?.map((url) => {
+          return ({
+            URL: url.URL,
+            Label: url.Label,
+          })
+        }),
         users: [userData.id],
         active: false,
       }
@@ -247,7 +253,12 @@ export async function PUT(request: NextRequest) {
       title: payload.store.title,
       Description: payload.store.Description,
       slug: payload.store.slug,
-      URLS: payload.store.URLS,
+      URLS: payload.store.URLS?.map((url) => {
+        return ({
+          URL: url.URL,
+          Label: url.Label,
+        })
+      }),
       SEO: {
         metaTitle: payload.store.SEO?.metaTitle,
         metaDescription: payload.store.SEO?.metaDescription,
