@@ -79,8 +79,9 @@ const HomePage = ({store, page}: HomePageProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    console.log('x')
     setIsLoggedIn(maybe());
-  }, []);
+  }, [maybe]);
 
   return (
     <div className="min-h-screen">

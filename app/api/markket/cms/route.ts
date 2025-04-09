@@ -1,99 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { headers } from 'next/headers';
-import qs from 'qs';
 import { strapiClient } from '@/markket/api';
 import { markketConfig } from '@/markket/config';
-import { verifyToken, validateUserAndToken } from '@/markket/helpers.api';
-
-const STRAPI_URL = markketConfig.api;
-const ADMIN_TOKEN = markketConfig.markket_api_key;
-
-import { Article, Page, Product, Event, Album, AlbumTrack } from '@/markket';
-
-interface ContentPayload {
-  data: Article | Page | Product | Event | Album | AlbumTrack;
-  id?: string;
-}
-
-// Centralized error responses
-const errorResponses = {
-  missingConfig: () => NextResponse.json({ error: 'API configuration missing' }, { status: 400 }),
-  noToken: () => NextResponse.json({ error: 'No token provided' }, { status: 401 }),
-  invalidToken: () => NextResponse.json({ error: 'Invalid token' }, { status: 401 }),
-  storeLimit: (count: number) => NextResponse.json({ error: 'Maximum store limit reached', stores: count }, { status: 400 }),
-  missingFields: () => NextResponse.json({ error: 'Missing required fields' }, { status: 400 }),
-  invalidSlug: () => NextResponse.json({ error: 'Invalid slug format' }, { status: 400 }),
-  slugTooShort: () => NextResponse.json({ error: 'Slug must be at least 5 characters' }, { status: 400 }),
-  unauthorized: () => NextResponse.json({ error: 'Store not found or unauthorized' }, { status: 403 }),
-  internalError: () => NextResponse.json({ error: 'Internal server error' }, { status: 500 }),
-}
-
-// Validators
-const validators = {
-  config: () => !!STRAPI_URL && !!ADMIN_TOKEN,
-  slug: (slug: string) => slug.length >= 5 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug),
-  // storePayload: (payload: ContentPayload) =>
-  //   !!payload?.store?.title &&
-  //   !!payload?.store?.Description &&
-  //   !!payload?.store?.slug &&
-  //   validators.slug(payload.store.slug)
-}
-
-export async function fetchUserStores(userId: number) {
-  const query = qs.stringify({
-    filters: {
-      users: {
-        id: {
-          $eq: userId
-        }
-      }
-    },
-    sort: 'updatedAt:desc',
-    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover', 'Slides', 'users'],
-  }, {
-    encodeValuesOnly: true
-  });
-
-  const _url = new URL(`api/stores?${query}`, STRAPI_URL);
-
-  try {
-    const response = await fetch(_url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${ADMIN_TOKEN}`,
-      },
-      next: { revalidate: 0 }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch stores');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to fetch stores:', error);
-    throw error;
-  }
-}
+import { fetchUserStores, errorResponses, validators } from '@/markket/helpers.api';
+import { Store } from '@/markket';
+import { headers } from 'next/headers';
 
 export async function GET() {
-  if (!validators.config()) {
-    return errorResponses.missingConfig();
-  }
 
   try {
-    const headersList = await headers();
-    const token = headersList.get('authorization')?.split('Bearer ')[1];
-
-    if (!token) {
-      return errorResponses.noToken();
-    }
-
-    const userData = await verifyToken(token);
-    if (!userData) {
-      return errorResponses.invalidToken();
-    }
-
-    const stores = await fetchUserStores(userData.id);
+    const stores = await fetchUserStores();
     return NextResponse.json(stores);
   } catch (error) {
     console.error('Route error:', error);
@@ -106,43 +21,47 @@ export async function POST(request: Request) {
     return errorResponses.missingConfig();
   }
 
+  const headersList = await headers();
+  const user_id: string | number = headersList.get('markket-user-id') || '';
+
   try {
-    const userData = await validateUserAndToken();
-    const stores = await fetchUserStores(userData.id);
+    const stores = await fetchUserStores();
 
     if (stores?.data?.length >= markketConfig.max_stores_per_user) {
       return errorResponses.storeLimit(stores?.data?.length);
     }
 
-    const payload: ContentPayload = await request.json();
+    const payload: { store: Store } = await request.json();
 
-    if (!validators.storePayload(payload)) {
-      if (!payload?.store?.title || !payload?.store?.Description || !payload?.store?.slug) {
-        return errorResponses.missingFields();
-      }
-
-      if (payload?.store?.slug?.length < 5) {
-        return errorResponses.slugTooShort();
-      }
-
-      return errorResponses.invalidSlug();
+    if (!validators.storeContent(payload?.store)) {
+      return errorResponses.missingFields();
     }
+
+    if (!validators.slug(payload?.store?.slug)) {
+      return errorResponses.invalidSlug()
+    }
+
+    const { title, Description, slug, URLS, SEO } = payload.store;
+    const data = {
+      title,
+      Description,
+      slug,
+      URLS: URLS?.map(({ URL, Label }) => ({ URL, Label })),
+      SEO: {
+        metaTitle: SEO?.metaTitle,
+        metaDescription: SEO?.metaDescription,
+        metaKeywords: SEO?.metaKeywords,
+        socialImage: SEO?.socialImage?.id,
+      },
+      users: [user_id],
+      active: false,
+    };
 
     const response = await strapiClient.create('stores', {
       headers: {
-        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
       },
-      data: {
-        ...payload.store,
-        URLS: payload.store.URLS?.map((url) => {
-          return ({
-            URL: url.URL,
-            Label: url.Label,
-          })
-        }),
-        users: [userData.id],
-        active: false,
-      }
+      data
     });
 
     if (!response?.data?.id) {
@@ -173,9 +92,10 @@ export async function PUT(request: NextRequest) {
 
   try {
     const id = request.nextUrl?.searchParams.get('id')
-    const userData = await validateUserAndToken();
-    const stores = await fetchUserStores(userData.id);
-    const payload: ContentPayload = await request.json();
+
+    const stores = await fetchUserStores();
+
+    const payload: { store: Store } = await request.json();
 
     const store = stores.data.find((store: any) => store.documentId === id);
 
@@ -183,37 +103,31 @@ export async function PUT(request: NextRequest) {
       return errorResponses.unauthorized();
     }
 
-    if (payload?.store?.slug) {
-      if (payload.store.slug.length < 5) {
-        return errorResponses.slugTooShort();
-      }
-
-      if (!validators.slug(payload.store.slug)) {
-        return errorResponses.invalidSlug();
-      }
+    if (!validators.storeContent(payload?.store)) {
+      return errorResponses.missingFields();
     }
 
+    if (!validators.slug(payload?.store?.slug)) {
+      return errorResponses.invalidSlug()
+    }
+
+    const { title, Description, slug, URLS, SEO } = payload.store;
     const data = {
-      title: payload.store.title,
-      Description: payload.store.Description,
-      slug: payload.store.slug,
-      URLS: payload.store.URLS?.map((url) => {
-        return ({
-          URL: url.URL,
-          Label: url.Label,
-        })
-      }),
+      title,
+      Description,
+      slug,
+      URLS: URLS?.map(({ URL, Label }) => ({ URL, Label })),
       SEO: {
-        metaTitle: payload.store.SEO?.metaTitle,
-        metaDescription: payload.store.SEO?.metaDescription,
-        metaKeywords: payload.store.SEO?.metaKeywords,
-        socialImage: payload.store.SEO?.socialImage?.id,
-      }
-    }
+        metaTitle: SEO?.metaTitle,
+        metaDescription: SEO?.metaDescription,
+        metaKeywords: SEO?.metaKeywords,
+        socialImage: SEO?.socialImage?.id,
+      },
+    };
 
     const response = await strapiClient.update('stores', store.documentId, {
       headers: {
-        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
       },
       data,
     });
@@ -234,5 +148,3 @@ export async function PUT(request: NextRequest) {
     return errorResponses.internalError();
   }
 }
-
-

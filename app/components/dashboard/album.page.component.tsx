@@ -10,6 +10,7 @@ import {
   ActionIcon,
   Grid,
   Tooltip,
+  Center,
 } from '@mantine/core';
 import { Album } from '@/markket/album';
 import {
@@ -35,13 +36,14 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
     >
       {albums.map((album) => (
         <Accordion.Item key={album.id} value={album.id.toString()}>
-          <Accordion.Control
-            icon={
-              <ThemeIcon size="lg" variant="light" radius="xl" color="grape">
-                <IconAlbum size={18} />
-              </ThemeIcon>
-            }
-          >
+          <Center>
+            <Accordion.Control
+              icon={
+                <ThemeIcon size="lg" variant="light" radius="xl" color="grape">
+                  <IconAlbum size={18} />
+                </ThemeIcon>
+              }
+            >
             <Group justify="space-between">
               <Group gap="sm">
                 <Text fw={500}>{album.title}</Text>
@@ -49,6 +51,9 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
                   {album.tracks?.length || 0} tracks
                 </Badge>
               </Group>
+            </Group>
+          </Accordion.Control>
+            <ActionIcon size="lg" variant="subtle" color="gray">
               {onView && (
                 <Tooltip label="View album details">
                   <ActionIcon
@@ -62,11 +67,10 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
                   </ActionIcon>
                 </Tooltip>
               )}
-            </Group>
-          </Accordion.Control>
+            </ActionIcon>
+          </Center>
           <Accordion.Panel>
             <Stack gap="md">
-              {/* Album Info */}
               <Grid>
                 {album.cover && (
                   <Grid.Col span={{ base: 12, sm: 4 }}>
@@ -96,7 +100,6 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
                   </Stack>
                 </Grid.Col>
               </Grid>
-
               {/* Album Tracks */}
               {/* {album.tracks && album.tracks.length > 0 && (
                 <Paper withBorder p="md" radius="md">

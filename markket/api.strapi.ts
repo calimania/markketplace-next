@@ -188,18 +188,18 @@ export class StrapiClient {
   }
 
   async fetch<T>(options: FetchOptions): Promise<StrapiResponse<T>> {
+
     const url = this.buildUrl(options as EnhancedFetchOptions);
 
-    console.info({ url });
+    console.log(`url:${url}`);
 
     try {
-
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
         },
-        // next: { revalidate: 0 },
+        next: { revalidate: 0 },
       });
 
       if (!response.ok) {
@@ -214,7 +214,6 @@ export class StrapiClient {
 
     return {} as StrapiResponse<T>;
   };
-
 
   async getProduct(product_slug: string, store_slug: string) {
     return this.fetch({

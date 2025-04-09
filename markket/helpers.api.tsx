@@ -7,10 +7,8 @@ import { NextResponse } from 'next/server';
 export async function verifyToken(token: string) {
   if (!token || !markketConfig.api) return null;
 
-  const _url = new URL('api/users/me', markketConfig.api);
-
   try {
-    const response = await fetch(_url.toString(), {
+    const response = await fetch(new URL('api/users/me', markketConfig.api), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
