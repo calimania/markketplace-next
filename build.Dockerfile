@@ -2,15 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Cache dev files separately initially
 COPY package*.json ./
 
-# Install dependencies with legacy peer deps
+# Ensure turbo is available globally
 RUN npm install --global turbo
 RUN npm ci
-#  --legacy-peer-deps
 
-# Build arguments
+# To read values from build ENV
 ARG NEXT_PUBLIC_MARKKET_STORE_SLUG
 ARG NEXT_PUBLIC_MARKKET_API
 ARG NEXT_PUBLIC_MARKKETPLACE_URL
@@ -20,7 +19,7 @@ ARG NEXT_PUBLIC_STRIPE_KEY
 ARG STRIPE_WEBHOOK_SECRET
 ARG STRIPE_PRIVATE_KEY
 
-# Env variables that will persist in the container
+# Create values inside Docker container for the app
 ENV NEXT_PUBLIC_MARKKET_STORE_SLUG=${NEXT_PUBLIC_MARKKET_STORE_SLUG}
 ENV NEXT_PUBLIC_MARKKET_API=${NEXT_PUBLIC_MARKKET_API}
 ENV NEXT_PUBLIC_MARKKETPLACE_URL=${NEXT_PUBLIC_MARKKETPLACE_URL}
@@ -32,16 +31,11 @@ ENV STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
 ENV STRIPE_PRIVATE_KEY=${STRIPE_PRIVATE_KEY}
 ENV NODE_ENV=production
 
-# Copy rest of the application
 COPY . .
 
-# Build the application
 RUN turbo build
 
-# Expose the port
 EXPOSE 3000
 EXPOSE 8080
 
-# Start the application
 CMD ["npm", "start"]
-
