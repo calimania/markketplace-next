@@ -3,6 +3,7 @@ import {headers } from 'next/headers';
 import qs from 'qs';
 import { Store } from "@/markket";
 import { NextResponse } from 'next/server';
+import { strapiClient } from "./api.strapi";
 
 export async function verifyToken(token: string) {
   if (!token || !markketConfig.api) return null;
@@ -108,4 +109,32 @@ export const validators = {
     !!payload?.store?.Description &&
     !!payload?.store?.slug &&
     validators.slug(payload.store.slug)
+}
+
+export async function countContentTypeItems(plural: string, limit: number, storeId: string | number, token: string) {
+  if (!plural || !limit) return 0;
+
+  try {
+    const response = await strapiClient.fetch({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      contentType: plural,
+      filters: {
+        stores: {
+          id: {
+            $eq: storeId
+          }
+        }
+      },
+      paginate: {
+        limit: 1
+      }
+    });
+    console.log("!!!!", { response });
+    return response.meta?.pagination?.total || 0;
+  } catch (error) {
+    console.error(`Error counting ${plural} items:`, error);
+    return 0;
+  }
 }

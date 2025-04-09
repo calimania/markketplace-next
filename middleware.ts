@@ -124,3 +124,4 @@ export const config = {
     '/api/stripe/connect/:path*',
   ],
 };
+

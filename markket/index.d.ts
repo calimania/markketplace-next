@@ -40,6 +40,7 @@ export interface FetchOptions {
   sort?: string;
   status?: 'published' | 'draft' | 'all';
   includeAuth?: boolean;
+  headers?: Record<string, string | string[]>;
   paginate?: {
     limit?: number;
     page?: number;

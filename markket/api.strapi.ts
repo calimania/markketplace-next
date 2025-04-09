@@ -197,7 +197,7 @@ export class StrapiClient {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
+          'Authorization': options?.headers?.Authorization || options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
         },
         next: { revalidate: 0 },
       });
