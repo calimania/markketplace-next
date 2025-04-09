@@ -1,9 +1,12 @@
 import ViewItem from '@/app/components/dashboard/actions/item.view';
 import FormItem from '@/app/components/dashboard/actions/item.form';
-import { Page, Article, Product, Event, Album, Store, AlbumTrack } from '@/markket';
-import { markketClient } from '@/markket/api';
+import { Store, } from '@/markket';
 import { ElementType } from 'react';
-import { JSONDocToBlocks } from '@/markket/helpers.blocks';
+import { markketClient } from '@/markket/api.markket';
+
+const client = new markketClient();
+
+import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 interface ActionComponent {
   view: ElementType;
@@ -17,43 +20,6 @@ interface ActionComponent {
   update?: any;
   form_sections?: any[];
 }
-
-type Values = Page | Article | Product | Event | Album | AlbumTrack;
-
-const client = new markketClient();
-
-
-const createContentAction = (contentType: string) =>
-  async (values: Values, storeId?: string | number) => {
-
-    let body = values;
-    if (['page'].includes(contentType)) {
-      body = body as Page;
-      body.Content = JSONDocToBlocks(body.Content);
-    }
-
-    return await client.post(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}`, {
-      body: {
-        [contentType]: body,
-      },
-    });
-  };
-
-const updateContentAction = (contentType: string) =>
-  async (values: Values, id: string, storeId?: string | number) => {
-
-    let body = values;
-    if (['page'].includes(contentType)) {
-      body = body as Page;
-      body.Content = JSONDocToBlocks(body.Content);
-    }
-
-    return await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
-      body: {
-        [contentType]: body,
-      },
-    });
-  };
 
 const commonSections = {
   initialValues: {
@@ -130,7 +96,12 @@ const commonSections = {
     description: `This will be your ${contentType}'s URL path`,
     required
   }),
-
+  tagsField: (name: string) => ({
+    name: name || 'Tags',
+    label: 'Tags',
+    type: 'tags',
+    description: 'Keywords to classify your blog',
+  }),
   urlsField: {
     name: 'URLS',
     label: 'Links',
@@ -143,6 +114,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Tags&populate[]=cover`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'article',
     plural: 'articles',
     create: createContentAction('article'),
@@ -152,11 +124,11 @@ export const actionsMap: Record<string, ActionComponent> = {
         Title: '',
         Content: '',
         slug: '',
+        Tags: [],
         SEO: commonSections.initialValues.SEO,
       },
       validation: {
         Title: commonSections.validations.title,
-        Content: commonSections.validations.content,
         slug: commonSections.validations.slug,
         SEO: commonSections.validations.seo,
       },
@@ -169,17 +141,18 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Title',
             label: 'Article Title',
             type: 'text',
-            placeholder: 'My Awesome Article',
+            placeholder: 'To display in blog posts lists & page',
             required: true
           },
           commonSections.slugField('article'),
           {
             name: 'Content',
-            label: 'Article Content',
-            type: 'markdown',
-            placeholder: 'Write your article content here...',
+            label: 'Content',
+            type: 'blocks',
+            placeholder: 'Poetry should be more encouraging of not having virtue',
             required: true
-          }
+          },
+          commonSections.tagsField('Tags'),
         ]
       },
       commonSections.seo

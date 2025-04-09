@@ -14,6 +14,7 @@ export { InboxMessage } from './inbox';
 export { Form } from './form';
 export { Subscriber } from './newsletter';
 export { Order } from './order';
+export { Tag } from './tag';
 
 /**
  * @typedef {Object} StrapiResponse

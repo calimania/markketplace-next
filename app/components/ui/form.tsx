@@ -29,6 +29,7 @@ import { useAuth } from '@/app/providers/auth.provider';
 
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import URLsInput from './form.input.urls';
+import TagsInput from './form.input.tags';
 
 // Define field types
 export type FieldType =
@@ -41,6 +42,7 @@ export type FieldType =
   | 'color'
   | 'file'
   | 'urls'
+  | 'tags'
   | 'markdown'
   | 'blocks'
   | 'password';
@@ -198,6 +200,18 @@ const FormItem = ({
             onChange={inputProps.onChange}
           />
         );
+      case 'tags':
+        return (
+          <TagsInput
+            key={field.name}
+            label={field.label}
+            description={field.description}
+            value={inputProps.value || []}
+            onChange={inputProps.onChange}
+            form={form}
+            field={field.name}
+          />
+        );
       case 'textarea':
         return (
           <Textarea
@@ -300,14 +314,12 @@ const FormItem = ({
             <Group>
               {contentTypeIcons[contentType] || <IconBuildingStore size={24} color="magenta" />}
               <Title order={3}>
-                {title || `${action === 'create' ? 'Create' : 'Update'} ${contentType}`}
+                {title || `${action === 'create' ? 'Create' : 'Update'} ${singular}`}
               </Title>
             </Group>
-
             <Text size="sm" c="dimmed">
               {description || `Fill out the form below to ${action} a ${singular}.`}
             </Text>
-
             {formConfig.sections.map((section, index) => (
               <Stack key={index} mt={index > 0 ? "xl" : 0}>
                 {section.title && (
@@ -321,14 +333,13 @@ const FormItem = ({
                 {section.fields.map(renderField)}
               </Stack>
             ))}
-
             <Group justify="flex-end" mt="xl">
               <Button
                 type="submit"
                 loading={loading}
                 leftSection={action === 'create' ? <IconDisc size={16} /> : <IconDeviceFloppy size={16} />}
               >
-                {action === 'create' ? 'Create' : 'Update'} {contentType}
+                {action === 'create' ? 'Create' : 'Update'} {singular}
               </Button>
             </Group>
           </Stack>
