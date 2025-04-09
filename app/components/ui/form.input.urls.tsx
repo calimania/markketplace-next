@@ -43,7 +43,10 @@ export default function URLsInput({
   const [urls, setUrls] = useState<URL[]>(value || []);
 
   useEffect(() => {
-    setUrls(value || []);
+    if (!!value.length) {
+      setUrls(value || []);
+    }
+
   }, [value]);
 
   const handleAddUrl = () => {

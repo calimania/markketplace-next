@@ -104,9 +104,10 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           action={action}
           update={options.update}
           form={{ config: options.form, sections: options.form_sections }}
+          description={options.form?.description}
         />
       </Stack>
-      {action !== 'new' && (
+      {(action !== 'new' && options.singular !== 'store') && (
         <Paper withBorder p="md" mb="xl">
           <Stack>
             <Text size="lg" fw={500}>

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { markketClient } from '@/markket/api.markket';
 
 import { ContentType , FetchOptions} from './common.d';
 
 export type { ContentType } from './common.d';
+
+const markket = new markketClient();
 
 export function useCMSItem<T>(
   contentType: ContentType,
@@ -18,14 +21,7 @@ export function useCMSItem<T>(
     setError(null);
 
     const fetchData = async (_id: string) => {
-      const response = await fetch(`/api/markket?path=/api/${contentType}/${_id}&${options?.append || ''}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const json = await response.json();
+      const json = await markket.fetch(`/api/markket?path=/api/${contentType}/${_id}&${options?.append || ''}`, {});
       setLoading(false);
       setItem(json?.data as T);
     };

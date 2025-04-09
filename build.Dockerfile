@@ -7,7 +7,8 @@ COPY package*.json ./
 
 # Install dependencies with legacy peer deps
 RUN npm install --global turbo
-RUN npm ci --legacy-peer-deps
+RUN npm ci
+#  --legacy-peer-deps
 
 # Build arguments
 ARG NEXT_PUBLIC_MARKKET_STORE_SLUG

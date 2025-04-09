@@ -1,3 +1,5 @@
+'use client';
+
 import { ContentItem } from '@/app/hooks/common';
 import { useState, ReactNode, useContext, useEffect } from 'react';
 import {
@@ -26,6 +28,7 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
 
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
+import URLsInput from './form.input.urls';
 
 // Define field types
 export type FieldType =
@@ -90,6 +93,7 @@ interface ItemFormProps {
   formConfig: FormConfig;
   title?: string;
   description?: string;
+  singular?: string;
 }
 
 const FormItem = ({
@@ -97,6 +101,7 @@ const FormItem = ({
   onSubmit,
   action,
   item,
+  singular,
   formConfig,
   title,
   description,
@@ -106,12 +111,10 @@ const FormItem = ({
   const { store } = useContext(DashboardContext);
   const { fetchStores } = useAuth();
 
-
   const form = useForm({
     initialValues: formConfig.initialValues,
     validate: formConfig.validation
   });
-
 
   useEffect(() => {
     form.setValues(item);
@@ -138,7 +141,7 @@ const FormItem = ({
           await fetchStores();
           redirect_to = `/dashboard/store?store=${documentId}`;
         } else {
-          redirect_to = `/dashboards/${contentType}/view/${documentId}?store=${store.documentId}`
+          redirect_to = `/dashboard/${contentType}/view/${documentId}?store=${store.documentId}`
         }
         router.push(redirect_to);
       }
@@ -154,7 +157,6 @@ const FormItem = ({
     }
   };
 
-  // Render field based on type
   const renderField = (field: FieldConfig) => {
     const inputProps = field.groupName
       ? form.getInputProps(`${field.groupName}.${field.name}`)
@@ -173,6 +175,7 @@ const FormItem = ({
           />
         );
       case 'markdown':
+      case 'blocks':
         return (
           <ContentEditor
             key={field.name}
@@ -182,6 +185,17 @@ const FormItem = ({
             value={inputProps.value || ''}
             onChange={inputProps.onChange}
             error={inputProps.error}
+            format={field.type}
+          />
+        );
+      case 'urls':
+        return (
+          <URLsInput
+            key={field.name}
+            label={field.label}
+            description={field.description}
+            value={inputProps.value}
+            onChange={inputProps.onChange}
           />
         );
       case 'textarea':
@@ -291,7 +305,7 @@ const FormItem = ({
             </Group>
 
             <Text size="sm" c="dimmed">
-              {description || `Fill out the form below to ${action} a ${contentType}.`}
+              {description || `Fill out the form below to ${action} a ${singular}.`}
             </Text>
 
             {formConfig.sections.map((section, index) => (

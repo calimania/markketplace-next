@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markketConfig } from '@/markket/config';
-import { validateUserAndToken } from '../store/route';
+import { validateUserAndToken } from '@/markket/helpers.api';
 
 const MARKKET_API = markketConfig.api;
 const ADMIN_TOKEN = markketConfig.admin_token;

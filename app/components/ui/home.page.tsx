@@ -20,18 +20,18 @@ import { markketConfig } from "@/markket/config";
 const features = [
   {
     icon: IconRocket,
-    title: "Fast & Modern",
-    description: "Built with Next.js and Astro for optimal performance"
+    title: "Optimized for performance",
+    description: "Full of code & algorithms, includes APIs & Cyber"
   },
   {
     icon: IconBuildingStore,
-    title: "Ready to Sell",
-    description: "Simple dashboard for your store management"
+    title: "Quickstart",
+    description: "Create your landing page, blog & articles in minutes"
   },
   {
     icon: IconCode,
-    title: "Developer Friendly",
-    description: "Plugin ecosystem & custom integrations"
+    title: "Begginer Friendly",
+    description: "Open source templates, enterprise & self-host alternatives"
   },
 ];
 
@@ -40,7 +40,7 @@ const create_links = (prefix?: string) => {
     {
       href: `/docs`,
       icon: IconFileTypeDoc,
-      label: "Documentation",
+      label: "Blog ",
       variant: "gradient",
       gradient: { from: 'indigo', to: 'cyan' }
     },
@@ -51,7 +51,7 @@ const create_links = (prefix?: string) => {
       variant: "light"
     },
     {
-      href: "https://github.com/calimania/markketplace-next",
+      href: "https://github.com/search?q=org%3Acalimania+markket&type=repositories",
       icon: IconBrandGithub,
       label: "GitHub",
       variant: "light"
@@ -79,8 +79,9 @@ const HomePage = ({store, page}: HomePageProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    console.log('x')
     setIsLoggedIn(maybe());
-  }, []);
+  }, [maybe]);
 
   return (
     <div className="min-h-screen">
@@ -117,19 +118,17 @@ const HomePage = ({store, page}: HomePageProps) => {
               >
                 Browse Stores
               </Button>
-              {!isLoggedIn && (
-                <Button
-                  size="xl"
-                  variant="subtle"
-                  color="white"
-                  className="text-white border-white hover:bg-white transition-all"
-                  component="a"
-                  leftSection={<IconArrowRight size={20} />}
-                  href="/auth/register"
-                >
-                  Get Started
-                </Button>
-              )}
+              <Button
+                size="xl"
+                variant="subtle"
+                color="white"
+                className="text-white border-white hover:bg-white transition-all"
+                component="a"
+                leftSection={<IconArrowRight size={20} />}
+                href={!isLoggedIn ? '/auth/register' : '/dashboard/store'}
+              >
+                {!isLoggedIn ? 'Get Started' : 'Dashboard'}
+              </Button>
             </Group>
           </div>
         </Container>
@@ -158,7 +157,7 @@ const HomePage = ({store, page}: HomePageProps) => {
           {/* Features Grid with Animation */}
           <div className="py-10">
             <Title order={2} size="h1" ta="center" mb="xl">
-              Why Choose Markket?
+              our Markkët
             </Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
               {features.map((feature, index) => (

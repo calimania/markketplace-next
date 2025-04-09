@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext  } from 'react';
 import { Store, StripeAccount } from '@/markket';
 import { useState, useEffect } from 'react';

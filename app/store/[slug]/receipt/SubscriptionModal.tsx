@@ -1,4 +1,5 @@
 import React from "react";
+import { IconSquareRoundedX } from '@tabler/icons-react';
 
 interface Props {
   error?: boolean;
@@ -23,11 +24,9 @@ const SubscriptionModal: React.FC<Props> = ({
         <h2 className="text-lg font-semibold text-gray-800 flex items-center">
           {error ? title : `🎉 ${title} ✨`}
         </h2>
-
         <button
           onClick={() => {
             try {
-              console.log("Close button clicked");
               onClose();
             } catch (error) {
               console.error("Error in onClose handler:", error);
@@ -35,22 +34,7 @@ const SubscriptionModal: React.FC<Props> = ({
           }}
           className="text-black hover:text-gray-400 absolute right-0 mb-[1.5em]"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="icon icon-tabler icons-tabler-outline icon-tabler-x"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M18 6l-12 12" />
-            <path d="M6 6l12 12" />
-          </svg>
+          <IconSquareRoundedX size={24} color="magenta" />
         </button>
       </div>
       <p className="text-gray-600">{message1}</p>

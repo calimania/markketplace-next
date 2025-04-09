@@ -67,19 +67,6 @@ When self-hosting the API, you can create an API KEY to perform administrative o
 
 Is necesary to enable /dashboard and other functionalities for users in your instance
 
-### Debugging
-
-Use `--legacy-peer-deps` to install if there are errors, react 19 is not fully supported, and swagger-ui-react causes some peer dependency issues
-
-```
-npm ci --legacy-peer-deps
-
-# or
-
-npm i --legacy-peer-deps
-
-```
-
 ## ENV VARS
 
 Configure your instance with the following variables, refer to `.env.example` for defaults

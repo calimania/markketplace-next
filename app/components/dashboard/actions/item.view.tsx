@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Container,
   Paper,
@@ -35,7 +37,6 @@ import AlbumTrackList from '../album.tracks.component';
 import AlbumsView from '../album.page.component';
 import { useRouter } from 'next/navigation';
 
-
 const prefixMap: Record<string, string> = {
   article: 'blog',
   track: 'track',
@@ -49,6 +50,10 @@ const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem
   if (preview_url) return preview_url;
 
   if (prefix == 'store') return `/store/${item.slug}`;
+
+  if (prefix == 'about' && item.slug == 'home') return `/store/${store.slug}`;
+
+  if (prefix == 'about' && ['products', 'about', 'newsletter', 'blog'].includes(item.slug)) return `/store/${store?.slug}/${item.slug}`
 
   return `/store/${store?.slug}/${prefix}/${item.slug}`;
 }

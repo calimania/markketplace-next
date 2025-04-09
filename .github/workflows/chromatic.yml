@@ -21,4 +21,5 @@ jobs:
         uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_TOKEN }}
-          exitZeroOnChanges: true # Optional: will pass CI even if UI changes detected
+          exitZeroOnChanges: true
+          exitOnceUploaded: true

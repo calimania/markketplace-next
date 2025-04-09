@@ -13,14 +13,17 @@ type fetchOptions = {
 export class markketClient {
   private baseUrl: string;
   private token: string;
+  private _id: string | number;
 
   constructor() {
     if (typeof window == 'undefined') {
       this.baseUrl = markketConfig.markket_url as string;
       this.token = '';
+      this._id = ''
     } else {
       this.baseUrl = window.location.origin;
       this.token = '';
+      this._id = ''
     }
   };
 
@@ -34,9 +37,10 @@ export class markketClient {
 
     const _string = localStorage.getItem('markket.auth');
     const _json = _string ? JSON.parse(_string) : {};
-    const { jwt } = _json;
+    const { jwt, id } = _json;
 
     this.token = jwt;
+    this._id = id;
     return jwt;
   };
 
@@ -74,6 +78,7 @@ export class markketClient {
       body: ['POST', 'PUT'].includes(options?.method as string) ? JSON.stringify(options?.body || {}) : undefined,
       headers: {
         'Authorization': options?.headers?.Authorization || `Bearer ${this.token}`,
+        'markket-user-id': this._id?.toString() || '',
         'Content-Type': 'application/json',
         ...(options.headers || {}),
       },

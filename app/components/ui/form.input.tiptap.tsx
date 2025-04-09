@@ -15,9 +15,11 @@ import {
   IconUpload, IconLink, IconX, IconCheck, IconFileUpload
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
+import { blocksToHtml } from '@/markket/helpers.blocks';
 
+type tiptapDoc = { type: string, content: any[] }
 interface ContentEditorProps {
-  value?: string;
+  value?: string | any[] | tiptapDoc;
   onChange: (value: string) => void;
   label?: string;
   description?: string;
@@ -53,7 +55,7 @@ const ContentEditor = ({
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
 
-      // Simulate progress (in production, you'd use an upload hook with progress)
+      // Simulate progress bar, Responses are too fast currently
       const interval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 95) {
@@ -62,7 +64,7 @@ const ContentEditor = ({
           }
           return prev + 5;
         });
-      }, 100);
+      }, 160);
 
       const response = await strapiClient.uploadImage(file, {
         alternativeText: imageAlt || file.name
@@ -128,18 +130,33 @@ const ContentEditor = ({
         const markdown = editor.storage.markdown.getMarkdown();
         onChange(markdown);
       }
+      if (format == 'blocks') {
+        const html = editor.getJSON();
+        onChange(html as any);
+      }
     },
   });
 
   useEffect(() => {
     if (!editor || !value) return;
 
+    if (format == 'blocks') {
+      if ((value as tiptapDoc)?.type !== 'doc') {
+        const parsed = blocksToHtml(value as any[]);
+        editor.commands.setContent(parsed);
+        return;
+      }
+
+      editor.commands.setContent(value);
+      return;
+    }
+
     const currentContent = editor.storage.markdown.getMarkdown();
 
     if (currentContent !== value) {
-      editor.commands.setContent(value);
+      editor.commands.setContent(currentContent);
     }
-  }, [editor, value]);
+  }, [editor, value, format]);
 
   const handleInsertImage = () => {
     if (!editor || !imageUrl.trim()) return;
