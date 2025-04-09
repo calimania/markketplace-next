@@ -10,14 +10,13 @@ import { Store, SEO } from '@/markket';
 import DashboardForm from '@/app/components/ui/form'
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
-import { Remarkable } from 'remarkable';
 
 interface StoreFormValues {
   title: string;
   Description: string;
   slug: string;
   SEO?: SEO;
-  Content?: string | any[];
+  Content?: string | { type: string, content: any[] };
 };
 
 type ItemFormProps = {
@@ -43,14 +42,9 @@ type ItemFormProps = {
 
 const FormItem = ({ id, item, create, update, form, singular, plural, description, action }: ItemFormProps) => {
   const { store } = useContext(DashboardContext);
-  const md = new Remarkable();
 
   const handleSubmit = async (values: StoreFormValues) => {
-    console.log("form item ", { action, update, id })
-
-    if (singular == 'page') {
-      values.Content = md.render(values?.Content as string);
-    }
+    console.log("form item ", { action, update, id, values })
 
     try {
       if (action == 'new' && create) return create(values, store.documentId);

@@ -21,8 +21,161 @@ type Values = Page | Article | Product | Event | Album | AlbumTrack;
 
 const client = new markketClient();
 
+const JSONDocToBlocks = (doc: any): any[] => {
+  if (!doc || !doc.content) return [];
+
+  return doc.content.map((node: any) => {
+    switch (node.type) {
+      case 'paragraph':
+        return {
+          type: 'paragraph',
+          children: node.content
+            ? node.content.map((child: any) => {
+              if (child.type === 'text') {
+                const marks = child.marks || [];
+                const textNode: any = {
+                  type: 'text',  // Add explicit type: 'text'
+                  text: child.text || ''
+                };
+
+                // Apply formatting marks
+                marks.forEach((mark: any) => {
+                  if (mark.type === 'bold') textNode.bold = true;
+                  if (mark.type === 'italic') textNode.italic = true;
+                  if (mark.type === 'code') textNode.code = true;
+                });
+
+                return textNode;
+              }
+
+              if (child.type === 'link') {
+                return {
+                  type: 'link',
+                  url: child.attrs?.href || '',
+                  children: child.content?.map((c: any) => ({
+                    type: 'text',  // Add explicit type: 'text'
+                    text: c.text || ''
+                  })) || [{ type: 'text', text: '' }]
+                };
+              }
+
+              return { type: 'text', text: '' };  // Add explicit type: 'text'
+            })
+            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+        };
+
+      case 'heading':
+        return {
+          type: 'heading',
+          level: node.attrs?.level || 1,
+          children: node.content
+            ? node.content.map((child: any) => {
+              if (child.type === 'text') {
+                return { type: 'text', text: child.text || '' };  // Add explicit type: 'text'
+              }
+
+              if (child.type === 'link') {
+                return {
+                  type: 'link',
+                  url: child.attrs?.href || '',
+                  children: child.content?.map((c: any) => ({
+                    type: 'text',  // Add explicit type: 'text'
+                    text: c.text || ''
+                  })) || [{ type: 'text', text: '' }]
+                };
+              }
+
+              return { type: 'text', text: '' };  // Add explicit type: 'text'
+            })
+            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+        };
+
+      case 'bulletList':
+        return {
+          type: 'bullet-list',
+          children: node.content
+            ? node.content.map((listItem: any) => ({
+              type: 'list-item',
+              children: listItem.content?.map((p: any) => ({
+                type: 'paragraph',
+                children: p.content?.map((c: any) => ({
+                  type: 'text',  // Add explicit type: 'text'
+                  text: c.text || ''
+                })) || [{ type: 'text', text: '' }]
+              })) || [{ type: 'text', text: '' }]
+            }))
+            : []
+        };
+
+      case 'orderedList':
+        return {
+          type: 'ordered-list',
+          children: node.content
+            ? node.content.map((listItem: any) => ({
+              type: 'list-item',
+              children: listItem.content?.map((p: any) => ({
+                type: 'paragraph',
+                children: p.content?.map((c: any) => ({
+                  type: 'text',  // Add explicit type: 'text'
+                  text: c.text || ''
+                })) || [{ type: 'text', text: '' }]
+              })) || [{ type: 'text', text: '' }]
+            }))
+            : []
+        };
+
+      case 'blockquote':
+        return {
+          type: 'blockquote',
+          children: node.content
+            ? node.content.flatMap((p: any) =>
+              p.content?.map((c: any) => ({
+                type: 'text',  // Add explicit type: 'text'
+                text: c.text || ''
+              })) || [{ type: 'text', text: '' }]
+            )
+            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+        };
+
+      case 'code':
+        return {
+          type: 'code',
+          language: node.attrs?.language || 'plaintext',
+          children: [{ type: 'text', text: node.content?.[0]?.text || '' }]  // Add explicit type: 'text'
+        };
+
+      case 'image':
+        return {
+          type: 'image',
+          url: node.attrs?.src || '',
+          alt: node.attrs?.alt || '',
+          children: [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+        };
+
+      default:
+        // Handle any other node types as paragraphs
+        return {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+        };
+    }
+  });
+  // .filter((block: any) => {
+  //   // Filter out empty paragraphs (no text content)
+  //   if (block.type === 'paragraph') {
+  //     return block.children.some((child: any) => child.text?.trim().length > 0 || child.type === 'link');
+  //   }
+  //   return true;
+  // });
+};
+
 const createContentAction = (contentType: string) =>
   async (values: Values, storeId?: string | number) => {
+
+    if (['page'].includes(contentType)) {
+      values.Content = JSONDocToBlocks(values.Content);
+    }
+
     return await client.post(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}`, {
       body: {
         [contentType]: values,
@@ -32,6 +185,11 @@ const createContentAction = (contentType: string) =>
 
 const updateContentAction = (contentType: string) =>
   async (values: Values, id: string, storeId?: string | number) => {
+
+    if (['page'].includes(contentType)) {
+      values.Content = JSONDocToBlocks(values.Content);
+    }
+
     return await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
         [contentType]: values,
@@ -85,7 +243,7 @@ const commonSections = {
     title: (value: string) => (value.length < 3 ? 'Title must be at least 3 characters' : null),
     name: (value: string) => (value.length < 3 ? 'Name must be at least 3 characters' : null),
     slug: (value: string) => {
-      if (value.length < 3) return 'Slug must be at least 4 characters';
+      if (value.length < 3) return 'Slug must be at least 3 characters';
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
         return 'Slug can only contain lowercase letters, numbers, and hyphens';
       }
@@ -98,7 +256,7 @@ const commonSections = {
       }
       return null;
     },
-    content: (value: string) => (value.length < 10 ? 'Content must be at least 10 characters' : null),
+    content: (value: string) => (value?.length < 10 ? 'Content must be at least 10 characters' : null),
     description: (value: string) => (value.length < 10 ? 'Description must be at least 10 characters' : null),
     seo: {
       metaTitle: (value: string | undefined) => ((value?.length || 0) < 3 ? 'Meta title must be at least 3 characters' : null),
@@ -188,7 +346,6 @@ export const actionsMap: Record<string, ActionComponent> = {
       },
       validation: {
         Title: commonSections.validations.title,
-        Content: commonSections.validations.content,
         slug: commonSections.validations.slug,
         SEO: commonSections.validations.seo,
       },

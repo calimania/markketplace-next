@@ -141,7 +141,7 @@ const FormItem = ({
           await fetchStores();
           redirect_to = `/dashboard/store?store=${documentId}`;
         } else {
-          redirect_to = `/dashboards/${contentType}/view/${documentId}?store=${store.documentId}`
+          redirect_to = `/dashboard/${contentType}/view/${documentId}?store=${store.documentId}`
         }
         router.push(redirect_to);
       }

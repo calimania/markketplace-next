@@ -125,25 +125,24 @@ const ContentEditor = ({
     ],
     content: format == 'markdown' ? value : blocksToHtml(value as any[]),
     onUpdate: ({ editor }) => {
-      // if (format == 'markdown') {
+      if (format == 'markdown') {
         const markdown = editor.storage.markdown.getMarkdown();
         onChange(markdown);
-      // }
-      // if (format == 'blocks') {
-      //   const html = editor.getHTML();
-      //   console.log('saving html', { html })
-      //   onChange(html as any);
-      // }
+      }
+      if (format == 'blocks') {
+        const html = editor.getJSON();
+        onChange(html as any);
+      }
     },
   });
 
   useEffect(() => {
     if (!editor || !value) return;
 
-    // if (format == 'blocks') {
-    //   editor.commands.setContent(value);
-    //   return;
-    // }
+    if (format == 'blocks') {
+      editor.commands.setContent(value);
+      return;
+    }
 
     const currentContent = editor.storage.markdown.getMarkdown();
 
