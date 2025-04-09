@@ -19,7 +19,7 @@ import {
 } from '@tabler/icons-react';
 import { UseFormReturnType } from '@mantine/form';
 import { Tag } from '@/markket/tag.d';
-import { TagColorCodes } from '@/markket/tag.helpers';
+import { TagColorCodes, getTagColorHex } from '@/markket/tag.helpers';
 
 interface TagsInputProps {
   label?: string;
@@ -42,7 +42,11 @@ export default function TagsInput({
 
   useEffect(() => {
     if (!!value?.length) {
-      setTags(value);
+      console.log({ value })
+      setTags(value.map(t => ({
+        Label: t.Label,
+        Color: t.Color?.startsWith('#') ? t.Color : getTagColorHex(t.Color as string),
+      } as Tag)));
     }
   }, [value]);
 

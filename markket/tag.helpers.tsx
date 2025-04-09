@@ -47,11 +47,12 @@ export const TagColorCodes = [
 ]
 
 export const getTagColorHex = (colorName: string): string => {
+
   const index = TagColors.findIndex(color => color === colorName);
-  return index >= 0 ? TagColors[index] : "#0051BA"; // Default to Royal Blue if not found
+  return index >= 0 ? TagColorCodes[index] : "#0051BA";
 }
 
 export const getTagColorName = (hex: string): string => {
   const index = TagColorCodes.findIndex(color => color.toLowerCase() === hex.toLowerCase());
-  return index >= 0 ? TagColors[index] : "Royal Blue"; // Default to Royal Blue if not found
+  return index >= 0 ? TagColors[index] : "Royal Blue";
 }

@@ -7,6 +7,10 @@ type Values = Page | Article | Product | Event | Album | AlbumTrack;
 
 const client = new markketClient();
 
+// Are different to the cms.route.helpers
+// This occur client side, and can later require user input
+// Additionally these are particular to this client, API must remain agnostic
+// Basic cleanup to ensure the client formats data as expected by the API
 const transformBody = (values: Values, contentType: string) => {
 
   let body = values;

@@ -2,6 +2,9 @@ import ViewItem from '@/app/components/dashboard/actions/item.view';
 import FormItem from '@/app/components/dashboard/actions/item.form';
 import { Store, } from '@/markket';
 import { ElementType } from 'react';
+import { markketClient } from '@/markket/api.markket';
+
+const client = new markketClient();
 
 import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
@@ -126,7 +129,6 @@ export const actionsMap: Record<string, ActionComponent> = {
       },
       validation: {
         Title: commonSections.validations.title,
-        Content: commonSections.validations.content,
         slug: commonSections.validations.slug,
         SEO: commonSections.validations.seo,
       },
