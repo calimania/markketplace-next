@@ -94,6 +94,10 @@ export default function PageContent({ params, }: PageContentProps) {
       );
     }
 
+    if (node.bold) {
+      return <strong key={key}>{node.text}</strong>
+    }
+
     return <span key={key}>{node.text}</span>;
   };
 

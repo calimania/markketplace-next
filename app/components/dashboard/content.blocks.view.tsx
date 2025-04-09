@@ -8,6 +8,7 @@ export type ContentBlock = {
     text: string;
     type: string;
     url?: string;
+    bold?: boolean;
   }>;
 
   language?: string;
@@ -32,6 +33,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
 
     case 'paragraph':
       if (!block.children.some(child => child.text || child.url)) return null;
+
       return (
         <div>
           {block.children.map((child, i) =>
@@ -49,8 +51,8 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
                 </Anchor>
               </Group>
             ) : (
-                <Text key={i} component="p" >
-                  {child.text}
+                <Text key={i} component="p">
+                  {child.bold ? <strong>{child.text}</strong> : child.text}
                 </Text>
             )
           )}

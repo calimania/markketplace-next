@@ -33,8 +33,6 @@ export default async function DocsPage({ params }: DocsPageProps) {
   const response = await strapiClient.getPost(article_slug);
   const post = response?.data?.[0] as Article;
 
-  console.log({post});
-
   if (!post) {
     notFound();
   }
