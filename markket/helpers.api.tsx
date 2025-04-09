@@ -103,6 +103,7 @@ export const errorResponses = {
 export const validators = {
   config: () => !!markketConfig.api && !!markketConfig.markket_api_key,
   slug: (slug: string) => slug.length >= 5 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug),
+  short_slug: (slug: string) => slug.length >= 3 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug),
   storeContent: (store: Store) => store?.title && store?.Description && store?.slug,
   storePayload: (payload: { store: Store }) =>
     !!payload?.store?.title &&

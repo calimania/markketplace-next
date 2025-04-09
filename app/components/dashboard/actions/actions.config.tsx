@@ -22,7 +22,7 @@ type Values = Page | Article | Product | Event | Album | AlbumTrack;
 const client = new markketClient();
 
 const createContentAction = (contentType: string) =>
-  async (values: Values, storeId: string | number) => {
+  async (values: Values, storeId?: string | number) => {
     return await client.post(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}`, {
       body: {
         [contentType]: values,
@@ -31,7 +31,7 @@ const createContentAction = (contentType: string) =>
   };
 
 const updateContentAction = (contentType: string) =>
-  async (values: Values, id: string, storeId: string | number) => {
+  async (values: Values, id: string, storeId?: string | number) => {
     return await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
         [contentType]: values,
@@ -50,7 +50,7 @@ const commonSections = {
   },
   seo: {
     title: 'SEO Settings',
-    description: 'Optimize your content for search engines',
+    description: 'Used to index your content, social sharing & discovery',
     fields: [
       {
         name: 'metaTitle',
@@ -85,6 +85,13 @@ const commonSections = {
     title: (value: string) => (value.length < 3 ? 'Title must be at least 3 characters' : null),
     name: (value: string) => (value.length < 3 ? 'Name must be at least 3 characters' : null),
     slug: (value: string) => {
+      if (value.length < 3) return 'Slug must be at least 4 characters';
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+        return 'Slug can only contain lowercase letters, numbers, and hyphens';
+      }
+      return null;
+    },
+    store_slug: (value: string) => {
       if (value.length < 5) return 'Slug must be at least 5 characters';
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
         return 'Slug can only contain lowercase letters, numbers, and hyphens';
@@ -166,11 +173,13 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=albums&populate[]=albums.tracks`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'page',
     plural: 'pages',
     create: createContentAction('page'),
     update: updateContentAction('page'),
     form: {
+      description: 'Use pages to engage your users. Most layouts recommend a few basic page slugs [home, about, products, newsletter, blog]',
       initialValues: {
         Title: '',
         Content: '',
@@ -199,7 +208,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           {
             name: 'Content',
             label: 'Page Content',
-            type: 'markdown',
+            type: 'blocks',
             placeholder: 'Write your page content here...',
             required: true
           }
@@ -311,7 +320,7 @@ export const actionsMap: Record<string, ActionComponent> = {
       },
       validation: {
         title: commonSections.validations.title,
-        slug: commonSections.validations.slug,
+        slug: commonSections.validations.store_slug,
         SEO: commonSections.validations.seo,
         Description: commonSections.validations.description,
       },

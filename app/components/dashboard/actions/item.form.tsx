@@ -8,12 +8,16 @@ import {
 import { Store, SEO } from '@/markket';
 
 import DashboardForm from '@/app/components/ui/form'
+import { useContext } from 'react';
+import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { Remarkable } from 'remarkable';
 
 interface StoreFormValues {
   title: string;
   Description: string;
   slug: string;
   SEO?: SEO;
+  Content?: string | any[];
 };
 
 type ItemFormProps = {
@@ -26,6 +30,7 @@ type ItemFormProps = {
   previewUrl?: string;
   plural?: string;
   create?: any;
+  description?: string;
   update?: any;
   form?: {
     config: {
@@ -36,14 +41,20 @@ type ItemFormProps = {
   };
 };
 
-const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormProps) => {
-
+const FormItem = ({ id, item, create, update, form, singular, plural, description, action }: ItemFormProps) => {
+  const { store } = useContext(DashboardContext);
+  const md = new Remarkable();
 
   const handleSubmit = async (values: StoreFormValues) => {
     console.log("form item ", { action, update, id })
+
+    if (singular == 'page') {
+      values.Content = md.render(values?.Content as string);
+    }
+
     try {
-      if (action == 'new' && create) return create(values);
-      if (action == 'edit' && update && id) return update(values, item.documentId);
+      if (action == 'new' && create) return create(values, store.documentId);
+      if (action == 'edit' && update && id) return update(values, item.documentId, store.documentId);
     } catch (error) {
       console.warn({ error });
     }
@@ -57,6 +68,8 @@ const FormItem = ({ id, item, create, update, form, plural, action }: ItemFormPr
           action={action === 'new' ? 'create' : 'update'}
           onSubmit={handleSubmit}
           item={item}
+          singular={singular as string}
+          description={description as string}
           formConfig={{
             sections: form?.sections || [],
             initialValues: form?.config?.initialValues || {},

@@ -1,3 +1,5 @@
+'use client';
+
 import { ContentItem } from '@/app/hooks/common';
 import { useState, ReactNode, useContext, useEffect } from 'react';
 import {
@@ -91,6 +93,7 @@ interface ItemFormProps {
   formConfig: FormConfig;
   title?: string;
   description?: string;
+  singular?: string;
 }
 
 const FormItem = ({
@@ -98,6 +101,7 @@ const FormItem = ({
   onSubmit,
   action,
   item,
+  singular,
   formConfig,
   title,
   description,
@@ -107,12 +111,10 @@ const FormItem = ({
   const { store } = useContext(DashboardContext);
   const { fetchStores } = useAuth();
 
-
   const form = useForm({
     initialValues: formConfig.initialValues,
     validate: formConfig.validation
   });
-
 
   useEffect(() => {
     form.setValues(item);
@@ -155,7 +157,6 @@ const FormItem = ({
     }
   };
 
-  // Render field based on type
   const renderField = (field: FieldConfig) => {
     const inputProps = field.groupName
       ? form.getInputProps(`${field.groupName}.${field.name}`)
@@ -174,6 +175,7 @@ const FormItem = ({
           />
         );
       case 'markdown':
+      case 'blocks':
         return (
           <ContentEditor
             key={field.name}
@@ -183,6 +185,7 @@ const FormItem = ({
             value={inputProps.value || ''}
             onChange={inputProps.onChange}
             error={inputProps.error}
+            format={field.type}
           />
         );
       case 'urls':
@@ -302,7 +305,7 @@ const FormItem = ({
             </Group>
 
             <Text size="sm" c="dimmed">
-              {description || `Fill out the form below to ${action} a ${contentType}.`}
+              {description || `Fill out the form below to ${action} a ${singular}.`}
             </Text>
 
             {formConfig.sections.map((section, index) => (

@@ -52,8 +52,7 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
                 </Badge>
               </Group>
             </Group>
-          </Accordion.Control>
-            <ActionIcon size="lg" variant="subtle" color="gray">
+            </Accordion.Control>
               {onView && (
                 <Tooltip label="View album details">
                   <ActionIcon
@@ -66,8 +65,7 @@ export default function AlbumsView({ albums, onView }: AlbumsViewProps) {
                     <IconExternalLink size={16} />
                   </ActionIcon>
                 </Tooltip>
-              )}
-            </ActionIcon>
+            )}
           </Center>
           <Accordion.Panel>
             <Stack gap="md">

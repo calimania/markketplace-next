@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Container,
   Paper,
@@ -34,7 +36,6 @@ import ImagesView from '../item.images';
 import AlbumTrackList from '../album.tracks.component';
 import AlbumsView from '../album.page.component';
 import { useRouter } from 'next/navigation';
-
 
 const prefixMap: Record<string, string> = {
   article: 'blog',
