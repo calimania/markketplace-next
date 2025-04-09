@@ -17,8 +17,9 @@ import {
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml } from '@/markket/helpers.blocks';
 
+type tiptapDoc = { type: string, content: any[] }
 interface ContentEditorProps {
-  value?: string | any[];
+  value?: string | any[] | tiptapDoc;
   onChange: (value: string) => void;
   label?: string;
   description?: string;
@@ -123,7 +124,7 @@ const ContentEditor = ({
         },
       }),
     ],
-    content: format == 'markdown' ? value : blocksToHtml(value as any[]),
+    content: value,
     onUpdate: ({ editor }) => {
       if (format == 'markdown') {
         const markdown = editor.storage.markdown.getMarkdown();
@@ -140,6 +141,12 @@ const ContentEditor = ({
     if (!editor || !value) return;
 
     if (format == 'blocks') {
+      if ((value as tiptapDoc)?.type !== 'doc') {
+        const parsed = blocksToHtml(value as any[]);
+        editor.commands.setContent(parsed);
+        return;
+      }
+
       editor.commands.setContent(value);
       return;
     }

@@ -68,6 +68,27 @@ export class StrapiClient {
     }
   };
 
+  public delete = async (endpoint: string, id: string | number, options: any) => {
+    const _url = new URL(`api/${endpoint}/${id}`, this.baseUrl);
+    console.log('deleting record:', _url.toString());
+
+    try {
+      const response = await fetch(_url.toString(), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": options?.headers?.Authorization,
+        },
+        body: JSON.stringify({ data: options.data }),
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error("Record delete failed:", error);
+      return false;
+    }
+  };
+
   public create = async (endpoint: string, options: any) => {
     const _url = new URL(`api/${endpoint}`, this.baseUrl);
 
@@ -199,7 +220,7 @@ export class StrapiClient {
           'Content-Type': 'application/json',
           'Authorization': options?.headers?.Authorization || options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
         },
-        next: { revalidate: 0 },
+        next: { revalidate: 2 },
       });
 
       if (!response.ok) {

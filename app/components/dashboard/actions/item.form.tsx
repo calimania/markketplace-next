@@ -1,3 +1,4 @@
+'use client';
 
 // import SEOPreview from '../seo.preview';
 import { ContentItem } from '@/app/hooks/common';
@@ -8,7 +9,7 @@ import {
 import { Store, SEO } from '@/markket';
 
 import DashboardForm from '@/app/components/ui/form'
-import { useContext } from 'react';
+import { useContext, } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 
 interface StoreFormValues {
