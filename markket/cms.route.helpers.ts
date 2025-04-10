@@ -162,7 +162,14 @@ export const contentTypeConfig = {
       startDate: data.startDate,
       endDate: data.endDate,
       // location: data.location,
-      PRICES: data.PRICES,
+      creator: [userId],
+      PRICES: data.PRICES?.map(p => ({
+        Currency: p.Currency,
+        Description: p.Description,
+        Name: p.Name,
+        Price: p.Price,
+        STRIPE_ID: p.STRIPE_ID,
+      })),
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
