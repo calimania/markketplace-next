@@ -3,10 +3,10 @@ import FormItem from '@/app/components/dashboard/actions/item.form';
 import { Store, } from '@/markket';
 import { ElementType } from 'react';
 import { markketClient } from '@/markket/api.markket';
+import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 const client = new markketClient();
 
-import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 interface ActionComponent {
   view: ElementType;
@@ -28,11 +28,13 @@ const commonSections = {
       metaDescription: '',
       metaAuthor: '',
       metaKeywords: '',
+      metaUrl: '',
+      metaDate: '',
     }
   },
   seo: {
-    title: 'SEO Settings',
-    description: 'Used to index your content, social sharing & discovery',
+    title: 'Index information',
+    description: 'Metadata for social sharing & discovery',
     fields: [
       {
         name: 'metaTitle',
@@ -87,13 +89,12 @@ const commonSections = {
       metaDescription: (value: string | undefined) => ((value?.length || 0) < 10 ? 'Meta description must be at least 10 characters' : null),
     }
   },
-
   slugField: (contentType: string, required = true) => ({
     name: 'slug',
-    label: 'URL Slug',
+    label: 'Slug [url path]',
     type: 'text',
-    placeholder: `my-awesome-${contentType}`,
-    description: `This will be your ${contentType}'s URL path`,
+    placeholder: `2025-${contentType}`,
+    description: `The ${contentType}'s URL path suffix, and query identifier`,
     required
   }),
   tagsField: (name: string) => ({
@@ -342,11 +343,13 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Thumbnail&populate[]=Slides&populate[]=Tag&populate[]=PRICES`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'event',
     plural: 'events',
     create: createContentAction('event'),
     update: updateContentAction('event'),
     form: {
+      description: 'Host activities with your community, and share ',
       initialValues: {
         Name: '',
         Description: '',
@@ -364,6 +367,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           metaTitle: '',
           metaDescription: '',
           metaKeywords: '',
+          metaUrl: '',
         }
       },
       validation: {
@@ -382,7 +386,7 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Name',
             label: 'Event Name',
             type: 'text',
-            placeholder: 'My Awesome Event',
+            placeholder: 'Noche bohemia',
             required: true
           },
           commonSections.slugField('event'),
@@ -390,9 +394,10 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Description',
             label: 'Event Description',
             type: 'markdown',
-            placeholder: 'Describe your event in detail...',
+            placeholder: 'What does your favorite color taste like?',
             required: true
           },
+          commonSections.tagsField('Tag')
         ]
       },
       {

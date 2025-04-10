@@ -7,6 +7,7 @@ export const contentTypeConfig = {
       if (!data?.Title || !data?.Content || !data?.slug) {
         return { valid: false, error: 'Missing required fields for article' };
       }
+
       if (!validators.slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
@@ -26,7 +27,7 @@ export const contentTypeConfig = {
       store: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   page: {
     validate: (data: any) => {
@@ -53,7 +54,7 @@ export const contentTypeConfig = {
       store: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   product: {
     validate: (data: any) => {
@@ -82,7 +83,7 @@ export const contentTypeConfig = {
       stores: [storeId],
     }),
     linkToStore: true,
-    propLimit: 20, // Limit number of products per store
+    propLimit: 24,
   },
   track: {
     validate: (data: any) => {
@@ -111,7 +112,7 @@ export const contentTypeConfig = {
       store: storeId,
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 100,
   },
   album: {
     validate: (data: any) => {
@@ -140,11 +141,11 @@ export const contentTypeConfig = {
       store: storeId,
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   event: {
     validate: (data: any) => {
-      if (!data?.Name || !data?.slug || !data?.startDate) {
+      if (!data?.Name || !data?.slug) {
         return { valid: false, error: 'Missing required fields for event' };
       }
 
@@ -160,7 +161,7 @@ export const contentTypeConfig = {
       slug: data.slug,
       startDate: data.startDate,
       endDate: data.endDate,
-      location: data.location,
+      // location: data.location,
       PRICES: data.PRICES,
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
@@ -171,7 +172,7 @@ export const contentTypeConfig = {
       stores: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
 };
 
