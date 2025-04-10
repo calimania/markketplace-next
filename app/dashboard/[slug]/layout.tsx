@@ -230,7 +230,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </HoverCard>
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar p="md">
+      <AppShell.Navbar p="md" mt="lg" zIndex={1}>
         <Stack h="100%" gap={0}>
           <div>
             <Group mb="md">
@@ -259,7 +259,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
                   FAVORITES
                 </Text>
-                <ScrollArea h={favorites.length * 48} type="hover" mb="sm">
+                <ScrollArea.Autosize h={favorites.length * 48} type="hover" mb="sm">
                   <Stack gap="xs">
                     {favorites.map((link) => (
                       <MainLink
@@ -272,7 +272,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                       />
                     ))}
                   </Stack>
-                </ScrollArea>
+                </ScrollArea.Autosize>
                 <Divider mb="md" />
               </>
             )}
@@ -280,11 +280,11 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               NAVIGATION
             </Text>
             <ScrollArea.Autosize
-              type="auto"
+              type="always"
               h={regularLinks.length * 48}
-              offsetScrollbars
               viewportRef={viewportRef}
               scrollbarSize={8}
+              scrollbars="y"
             >
               <Stack gap="xs">
                 {regularLinks.map((link) => (
