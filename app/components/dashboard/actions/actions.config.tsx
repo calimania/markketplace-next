@@ -211,6 +211,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Slides&populate[]=Thumbnail&populate[]=Tag&populate[]=PRICES`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'product',
     plural: 'products',
     create: createContentAction('product'),
@@ -220,18 +221,16 @@ export const actionsMap: Record<string, ActionComponent> = {
         Name: '',
         Description: '',
         slug: '',
-        SKU: '',
         PRICES: [{
           Price: 0,
           Currency: 'USD',
-          Name: 'Standard',
-          Description: '',
+          Name: 'DIGITAL_Standard',
+          Description: 'online fullfilment',
         }],
         SEO: commonSections.initialValues.SEO,
       },
       validation: {
         Name: commonSections.validations.name,
-        Description: commonSections.validations.description,
         slug: commonSections.validations.slug,
         SEO: commonSections.validations.seo,
       },
@@ -244,24 +243,18 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Name',
             label: 'Product Name',
             type: 'text',
-            placeholder: 'Premium Widget',
+            placeholder: 'Shards of Andúril',
             required: true
           },
           commonSections.slugField('product'),
           {
             name: 'Description',
-            label: 'Product Description',
+            label: 'Description',
             type: 'markdown',
-            placeholder: 'Describe your product in detail...',
+            placeholder: '...also called the Flame of the West and the Sword Reforged, was the sword which was reforged from the shards of Narsil in Rivendell',
             required: true
           },
-          {
-            name: 'SKU',
-            label: 'SKU',
-            type: 'text',
-            placeholder: 'PROD-001',
-            description: 'Stock Keeping Unit - unique identifier for your product'
-          },
+          commonSections.tagsField('Tag'),
         ]
       },
       {

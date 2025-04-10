@@ -73,7 +73,13 @@ export const contentTypeConfig = {
       Description: data.Description,
       slug: data.slug,
       SKU: data.SKU,
-      PRICES: data.PRICES,
+      PRICES: data.PRICES?.map(p => ({
+        Currency: p.Currency,
+        Description: p.Description,
+        Name: p.Name,
+        Price: p.Price,
+        STRIPE_ID: p.STRIPE_ID,
+      })),
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
@@ -81,6 +87,7 @@ export const contentTypeConfig = {
         socialImage: data.SEO?.socialImage?.id,
       } : undefined,
       stores: [storeId],
+      creator: [userId],
     }),
     linkToStore: true,
     propLimit: 24,
