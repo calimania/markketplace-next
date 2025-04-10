@@ -73,7 +73,7 @@ export const contentTypeConfig = {
       Description: data.Description,
       slug: data.slug,
       SKU: data.SKU,
-      PRICES: data.PRICES?.map(p => ({
+      PRICES: data.PRICES?.map((p: any) => ({
         Currency: p.Currency,
         Description: p.Description,
         Name: p.Name,
@@ -170,7 +170,7 @@ export const contentTypeConfig = {
       endDate: data.endDate,
       // location: data.location,
       creator: [userId],
-      PRICES: data.PRICES?.map(p => ({
+      PRICES: data.PRICES?.map((p: any) => ({
         Currency: p.Currency,
         Description: p.Description,
         Name: p.Name,
