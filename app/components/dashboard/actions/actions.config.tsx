@@ -428,6 +428,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'album',
     plural: 'albums',
     create: createContentAction('album'),
@@ -436,9 +437,8 @@ export const actionsMap: Record<string, ActionComponent> = {
       initialValues: {
         title: '',
         description: '',
-        content: '',
+        content: [],
         slug: '',
-        displayType: 'grid',
         SEO: {
           metaTitle: '',
           metaDescription: '',
@@ -460,36 +460,24 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'title',
             label: 'Collection Title',
             type: 'text',
-            placeholder: 'My Awesome Collection',
+            placeholder: 'Rocka Rolla',
             required: true
           },
-          commonSections.slugField('collection'),
+          commonSections.slugField('album'),
           {
             name: 'description',
             label: 'Short Description',
             type: 'textarea',
-            placeholder: 'Briefly describe this collection',
+            placeholder: 'metal and rock jukebox',
             minRows: 2,
             required: true
           },
           {
             name: 'content',
-            label: 'Full Description',
-            type: 'markdown',
-            placeholder: 'Detailed description of your collection',
+            label: 'Content',
+            type: 'blocks',
+            placeholder: 'debut studio album by English heavy metal band Judas Priest, released on 6 September 1974 by Gull Records',
           },
-          {
-            name: 'displayType',
-            label: 'Display Type',
-            type: 'select',
-            placeholder: 'Choose display type',
-            options: [
-              { value: 'grid', label: 'Grid' },
-              { value: 'list', label: 'List' },
-              { value: 'carousel', label: 'Carousel' },
-            ],
-            description: 'How this collection will display its items'
-          }
         ]
       },
       commonSections.seo
@@ -501,8 +489,8 @@ export const actionsMap: Record<string, ActionComponent> = {
     edit: FormItem,
     singular: 'track',
     plural: 'tracks',
-    create: createContentAction('albumtrack'),
-    update: updateContentAction('albumtrack'),
+    create: createContentAction('track'),
+    update: updateContentAction('track'),
     form: {
       initialValues: {
         title: '',

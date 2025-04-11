@@ -5,18 +5,30 @@ import { getTagColorName } from '@/markket/tag.helpers';
 
 type Values = Page | Article | Product | Event | Album | AlbumTrack;
 
+export type contentTypes = 'page' | 'article' | 'product' | 'event' | 'album' | 'track';
+
 const client = new markketClient();
+
 
 // Are different to the cms.route.helpers
 // This occur client side, and can later require user input
 // Additionally these are particular to this client, API must remain agnostic
 // Basic cleanup to ensure the client formats data as expected by the API
-const transformBody = (values: Values, contentType: string) => {
+const transformBody = (values: Values, contentType: contentTypes) => {
 
   let body = values;
+
+
   if (['page', 'article'].includes(contentType)) {
     body = body as Page;
     body.Content = JSONDocToBlocks(body.Content);
+  }
+
+  if (contentType == 'album') {
+    return {
+      ...body,
+      content: JSONDocToBlocks((body as Album).content),
+    } as Album;
   }
 
   if (['article'].includes(contentType)) {
@@ -30,7 +42,7 @@ const transformBody = (values: Values, contentType: string) => {
   return body;
 }
 
-export const createContentAction = (contentType: string) =>
+export const createContentAction = (contentType: contentTypes) =>
   async (values: Values, storeId?: string | number) => {
     const body = transformBody(values, contentType);
 
@@ -41,7 +53,7 @@ export const createContentAction = (contentType: string) =>
     });
   };
 
-export const updateContentAction = (contentType: string) =>
+export const updateContentAction = (contentType: contentTypes) =>
   async (values: Values, id: string, storeId?: string | number) => {
     const body = transformBody(values, contentType);
 

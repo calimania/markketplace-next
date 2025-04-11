@@ -102,6 +102,7 @@ const ContentEditor = ({
   };
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Markdown.configure({
@@ -138,6 +139,7 @@ const ContentEditor = ({
   });
 
   useEffect(() => {
+    console.log({ value })
     if (!editor || !value) return;
 
     if (format == 'blocks') {

@@ -27,13 +27,13 @@ const mainLinks = [
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 0, href: '/dashboard/orders' },
   { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
   { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums' },
   { icon: IconMusicStar, label: 'Collection Items', notifications: 0, href: '/dashboard/tracks' },
   { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
-  { icon: IconClipboardPlus, label: 'Forms & Responses', href: '/dashboard/forms' },
-  { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
+  { icon: IconClipboardPlus, label: 'Forms', href: '/dashboard/forms' },
+  { icon: IconMoodEdit, label: 'Subscribers', href: '/dashboard/newsletters' },
+  { icon: IconShoppingBagEdit, label: 'Sales', notifications: 0, href: '/dashboard/orders' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
@@ -76,7 +76,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
     const url = new URL(window.location.href);
     url.searchParams.set('store', storeId);
 
-    if (url.pathname.includes('view') || url.pathname.includes('edit')) {
+    if (url.pathname.includes('view') || url.pathname.includes('edit') || url.pathname.includes('new')) {
       const parts = url.pathname.split('/');
       const newPath = [''].concat('dashboard', parts[2] || 'store').join('/');
 

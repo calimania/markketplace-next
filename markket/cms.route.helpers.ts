@@ -138,7 +138,6 @@ export const contentTypeConfig = {
       description: data.description,
       content: data.content,
       slug: data.slug,
-      displayType: data.displayType || 'grid',
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
