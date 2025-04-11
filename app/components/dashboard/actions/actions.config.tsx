@@ -487,6 +487,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=urls&populate[]=media`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'track',
     plural: 'tracks',
     create: createContentAction('track'),
@@ -518,28 +519,30 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'title',
             label: 'Item Title',
             type: 'text',
-            placeholder: 'My Collection Item',
+            placeholder: 'One for the Road',
             required: true
           },
-          commonSections.slugField('item'),
+          commonSections.slugField('winter'),
           {
             name: 'description',
             label: 'Short Description',
             type: 'textarea',
-            placeholder: 'Briefly describe this item',
+            description: 'For item lists, taglines',
+            placeholder: 'Where would you be without music',
             minRows: 2,
           },
           {
             name: 'content',
             label: 'Full Description',
-            type: 'markdown',
-            placeholder: 'Detailed description of your item',
+            description: 'Formatted content for the item page',
+            type: 'blocks',
+            placeholder: 'is the first song on the Judas Priest album Rocka Rolla',
           },
           {
             name: 'urls',
-            label: 'External Links',
+            label: 'Links',
             type: 'urls',
-            description: 'Links to external platforms or resources'
+            description: 'Social media, references, calls to action'
           }
         ]
       },

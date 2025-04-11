@@ -74,7 +74,7 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
                 onClick={() => router.push(`/dashboard/${plural}/new?store=${store.documentId}`)}
                 className='add-content-type new-item'
                 disabled={
-                  !['stores', 'pages', 'articles', 'events', 'products', 'albums'].includes(plural)
+                  !['stores', 'pages', 'articles', 'events', 'products', 'albums', 'tracks'].includes(plural)
                   || ((items?.length || 0) >= markketConfig.max_stores_per_user)
                 }
                 leftSection={<IconPlus size={16} />}

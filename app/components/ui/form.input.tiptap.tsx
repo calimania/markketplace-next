@@ -139,7 +139,6 @@ const ContentEditor = ({
   });
 
   useEffect(() => {
-    console.log({ value })
     if (!editor || !value) return;
 
     if (format == 'blocks') {

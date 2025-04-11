@@ -32,10 +32,11 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
       );
 
     case 'paragraph':
-      if (!block.children.some(child => child.text || child.url)) return null;
+      // it removes empty lines, and they might be intentional
+      // if (!block.children.some(child => child.text || child.url)) return null;
 
       return (
-        <div>
+        <Text component='p'>
           {block.children.map((child, i) =>
             child.url ? (
               <Group key={i} gap="xs" display="inline-flex" align="center">
@@ -51,12 +52,12 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
                 </Anchor>
               </Group>
             ) : (
-                <Text key={i} component="p">
-                  {child.bold ? <strong>{child.text}</strong> : child.text}
+                <Text key={i} component={child.bold ? 'strong' : 'span'} fw={child.bold && '700'}>
+                  {child.text}
                 </Text>
             )
           )}
-        </div>
+        </Text>
       );
 
     case 'code':

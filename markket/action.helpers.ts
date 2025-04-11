@@ -24,7 +24,7 @@ const transformBody = (values: Values, contentType: contentTypes) => {
     body.Content = JSONDocToBlocks(body.Content);
   }
 
-  if (contentType == 'album') {
+  if (['album', 'track'].includes(contentType)) {
     return {
       ...body,
       content: JSONDocToBlocks((body as Album).content),

@@ -98,7 +98,7 @@ export const contentTypeConfig = {
         return { valid: false, error: 'Missing required fields for track' };
       }
 
-      if (!validators.slug(data?.slug)) {
+      if (!validators.short_slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
 
@@ -127,7 +127,7 @@ export const contentTypeConfig = {
         return { valid: false, error: 'Missing required fields for album' };
       }
 
-      if (!validators.slug(data?.slug)) {
+      if (!validators.short_slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
 
