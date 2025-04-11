@@ -52,7 +52,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
                 </Anchor>
               </Group>
             ) : (
-                <Text key={i} component={child.bold ? 'strong' : 'span'} fw={child.bold && '700'}>
+                <Text key={i} component={child.bold ? 'strong' : 'span'} fw={child.bold ? '700' : '500'}>
                   {child.text}
                 </Text>
             )

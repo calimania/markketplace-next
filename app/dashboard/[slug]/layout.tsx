@@ -114,9 +114,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   useEffect(() => {
     // @TODO: persist in API
-    if (!favoriteLinks.length) { return; }
+    // if (!favoriteLinks.length) { return; }
 
-    localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks));
+    localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks || []));
   }, [favoriteLinks]);
 
   const handleStoreChange = (storeId: string | null) => {
