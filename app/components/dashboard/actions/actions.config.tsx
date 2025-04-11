@@ -42,7 +42,6 @@ const commonSections = {
         type: 'text',
         placeholder: 'SEO-friendly title',
         description: 'Title that appears in search engine results (50-60 characters recommended)',
-        required: true,
         groupName: 'SEO'
       },
       {
@@ -51,7 +50,6 @@ const commonSections = {
         type: 'textarea',
         placeholder: 'Brief description for search results...',
         description: 'Short description that appears in search results (150-160 characters recommended)',
-        required: true,
         minRows: 2,
         groupName: 'SEO'
       },
@@ -85,8 +83,9 @@ const commonSections = {
     content: (value: string) => (value?.length < 10 ? 'Content must be at least 10 characters' : null),
     description: (value: string) => (value.length < 10 ? 'Description must be at least 10 characters' : null),
     seo: {
-      metaTitle: (value: string | undefined) => ((value?.length || 0) < 3 ? 'Meta title must be at least 3 characters' : null),
-      metaDescription: (value: string | undefined) => ((value?.length || 0) < 10 ? 'Meta description must be at least 10 characters' : null),
+      // SEO should probably be optional, as we have the title, content and store info to fall back on
+      // metaTitle: (value: string | undefined) => ((value?.length || 0) < 3 ? 'Meta title must be at least 3 characters' : null),
+      // metaDescription: (value: string | undefined) => ((value?.length || 0) < 10 ? 'Meta description must be at least 10 characters' : null),
     }
   },
   slugField: (contentType: string, required = true) => ({
@@ -224,7 +223,7 @@ export const actionsMap: Record<string, ActionComponent> = {
         PRICES: [{
           Price: 0,
           Currency: 'USD',
-          Name: 'DIGITAL_Standard',
+          Name: 'Cash Transaction',
           Description: 'online fullfilment',
         }],
         SEO: commonSections.initialValues.SEO,

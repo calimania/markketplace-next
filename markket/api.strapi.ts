@@ -41,6 +41,12 @@ export class StrapiClient {
   }
 
   private _token = () => {
+    if (typeof window == 'undefined') {
+      console.warn('strapi._token called from server component');
+      console.trace();
+      return '';
+    }
+
     const _string = localStorage.getItem('markket.auth');
     const _json = _string ? JSON.parse(_string) : {};
     const { jwt } = _json;
