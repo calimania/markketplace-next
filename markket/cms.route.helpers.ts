@@ -7,6 +7,7 @@ export const contentTypeConfig = {
       if (!data?.Title || !data?.Content || !data?.slug) {
         return { valid: false, error: 'Missing required fields for article' };
       }
+
       if (!validators.slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
@@ -26,7 +27,7 @@ export const contentTypeConfig = {
       store: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   page: {
     validate: (data: any) => {
@@ -53,7 +54,7 @@ export const contentTypeConfig = {
       store: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   product: {
     validate: (data: any) => {
@@ -72,7 +73,13 @@ export const contentTypeConfig = {
       Description: data.Description,
       slug: data.slug,
       SKU: data.SKU,
-      PRICES: data.PRICES,
+      PRICES: data.PRICES?.map((p: any) => ({
+        Currency: p.Currency,
+        Description: p.Description,
+        Name: p.Name,
+        Price: p.Price,
+        STRIPE_ID: p.STRIPE_ID,
+      })),
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
@@ -80,9 +87,10 @@ export const contentTypeConfig = {
         socialImage: data.SEO?.socialImage?.id,
       } : undefined,
       stores: [storeId],
+      creator: [userId],
     }),
     linkToStore: true,
-    propLimit: 20, // Limit number of products per store
+    propLimit: 24,
   },
   track: {
     validate: (data: any) => {
@@ -90,7 +98,7 @@ export const contentTypeConfig = {
         return { valid: false, error: 'Missing required fields for track' };
       }
 
-      if (!validators.slug(data?.slug)) {
+      if (!validators.short_slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
 
@@ -111,7 +119,7 @@ export const contentTypeConfig = {
       store: storeId,
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 100,
   },
   album: {
     validate: (data: any) => {
@@ -119,7 +127,7 @@ export const contentTypeConfig = {
         return { valid: false, error: 'Missing required fields for album' };
       }
 
-      if (!validators.slug(data?.slug)) {
+      if (!validators.short_slug(data?.slug)) {
         return { valid: false, error: 'Invalid slug format' };
       }
 
@@ -130,7 +138,6 @@ export const contentTypeConfig = {
       description: data.description,
       content: data.content,
       slug: data.slug,
-      displayType: data.displayType || 'grid',
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
@@ -140,11 +147,11 @@ export const contentTypeConfig = {
       store: storeId,
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
   event: {
     validate: (data: any) => {
-      if (!data?.Name || !data?.slug || !data?.startDate) {
+      if (!data?.Name || !data?.slug) {
         return { valid: false, error: 'Missing required fields for event' };
       }
 
@@ -160,8 +167,15 @@ export const contentTypeConfig = {
       slug: data.slug,
       startDate: data.startDate,
       endDate: data.endDate,
-      location: data.location,
-      PRICES: data.PRICES,
+      // location: data.location,
+      creator: [userId],
+      PRICES: data.PRICES?.map((p: any) => ({
+        Currency: p.Currency,
+        Description: p.Description,
+        Name: p.Name,
+        Price: p.Price,
+        STRIPE_ID: p.STRIPE_ID,
+      })),
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
@@ -171,7 +185,7 @@ export const contentTypeConfig = {
       stores: [storeId],
     }),
     linkToStore: true,
-    propLimit: null,
+    propLimit: 50,
   },
 };
 

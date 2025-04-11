@@ -102,6 +102,7 @@ const ContentEditor = ({
   };
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Markdown.configure({
@@ -154,7 +155,7 @@ const ContentEditor = ({
     const currentContent = editor.storage.markdown.getMarkdown();
 
     if (currentContent !== value) {
-      editor.commands.setContent(currentContent);
+      editor.commands.setContent(value);
     }
   }, [editor, value, format]);
 

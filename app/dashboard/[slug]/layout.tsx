@@ -27,13 +27,13 @@ const mainLinks = [
   { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
   { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
   { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
-  { icon: IconShoppingBagEdit, label: 'Orders', notifications: 0, href: '/dashboard/orders' },
   { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
   { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums' },
   { icon: IconMusicStar, label: 'Collection Items', notifications: 0, href: '/dashboard/tracks' },
   { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
-  { icon: IconClipboardPlus, label: 'Forms & Responses', href: '/dashboard/forms' },
-  { icon: IconMoodEdit, label: 'Newsletters', href: '/dashboard/newsletters' },
+  { icon: IconClipboardPlus, label: 'Forms', href: '/dashboard/forms' },
+  { icon: IconMoodEdit, label: 'Subscribers', href: '/dashboard/newsletters' },
+  { icon: IconShoppingBagEdit, label: 'Sales', notifications: 0, href: '/dashboard/orders' },
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
@@ -76,7 +76,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
     const url = new URL(window.location.href);
     url.searchParams.set('store', storeId);
 
-    if (url.pathname.includes('view') || url.pathname.includes('edit')) {
+    if (url.pathname.includes('view') || url.pathname.includes('edit') || url.pathname.includes('new')) {
       const parts = url.pathname.split('/');
       const newPath = [''].concat('dashboard', parts[2] || 'store').join('/');
 
@@ -114,9 +114,9 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   useEffect(() => {
     // @TODO: persist in API
-    if (!favoriteLinks.length) { return; }
+    // if (!favoriteLinks.length) { return; }
 
-    localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks));
+    localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks || []));
   }, [favoriteLinks]);
 
   const handleStoreChange = (storeId: string | null) => {
@@ -230,7 +230,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </HoverCard>
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar p="md">
+      <AppShell.Navbar p="md" mt="lg" zIndex={1}>
         <Stack h="100%" gap={0}>
           <div>
             <Group mb="md">
@@ -259,7 +259,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
                   FAVORITES
                 </Text>
-                <ScrollArea h={favorites.length * 48} type="hover" mb="sm">
+                <ScrollArea.Autosize h={favorites.length * 48} type="hover" mb="sm">
                   <Stack gap="xs">
                     {favorites.map((link) => (
                       <MainLink
@@ -272,7 +272,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                       />
                     ))}
                   </Stack>
-                </ScrollArea>
+                </ScrollArea.Autosize>
                 <Divider mb="md" />
               </>
             )}
@@ -280,11 +280,11 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
               NAVIGATION
             </Text>
             <ScrollArea.Autosize
-              type="auto"
+              type="always"
               h={regularLinks.length * 48}
-              offsetScrollbars
               viewportRef={viewportRef}
               scrollbarSize={8}
+              scrollbars="y"
             >
               <Stack gap="xs">
                 {regularLinks.map((link) => (

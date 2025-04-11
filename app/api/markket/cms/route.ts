@@ -187,8 +187,8 @@ export async function DELETE(request: NextRequest) {
   try {
     const { valid, contentType, error } = getContentType(request);
 
-    if (contentType == 'store') {
-      return NextResponse.json({ error: 'Use a different endpoint to change stores' }, { status: 400 });
+    if (!['article', 'page', 'event', 'product', 'album', 'track', 'form'].includes(contentType as string)) {
+      return NextResponse.json({ error: `Invalid content type:  ${contentType}` }, { status: 400 });
     }
 
     if (!valid) {

@@ -3,10 +3,10 @@ import FormItem from '@/app/components/dashboard/actions/item.form';
 import { Store, } from '@/markket';
 import { ElementType } from 'react';
 import { markketClient } from '@/markket/api.markket';
+import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 const client = new markketClient();
 
-import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 interface ActionComponent {
   view: ElementType;
@@ -28,11 +28,13 @@ const commonSections = {
       metaDescription: '',
       metaAuthor: '',
       metaKeywords: '',
+      metaUrl: '',
+      metaDate: '',
     }
   },
   seo: {
-    title: 'SEO Settings',
-    description: 'Used to index your content, social sharing & discovery',
+    title: 'Index information',
+    description: 'Metadata for social sharing & discovery',
     fields: [
       {
         name: 'metaTitle',
@@ -87,13 +89,12 @@ const commonSections = {
       metaDescription: (value: string | undefined) => ((value?.length || 0) < 10 ? 'Meta description must be at least 10 characters' : null),
     }
   },
-
   slugField: (contentType: string, required = true) => ({
     name: 'slug',
-    label: 'URL Slug',
+    label: 'Slug [url path]',
     type: 'text',
-    placeholder: `my-awesome-${contentType}`,
-    description: `This will be your ${contentType}'s URL path`,
+    placeholder: `2025-${contentType}`,
+    description: `The ${contentType}'s URL path suffix, and query identifier`,
     required
   }),
   tagsField: (name: string) => ({
@@ -210,6 +211,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Slides&populate[]=Thumbnail&populate[]=Tag&populate[]=PRICES`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'product',
     plural: 'products',
     create: createContentAction('product'),
@@ -219,18 +221,16 @@ export const actionsMap: Record<string, ActionComponent> = {
         Name: '',
         Description: '',
         slug: '',
-        SKU: '',
         PRICES: [{
           Price: 0,
           Currency: 'USD',
-          Name: 'Standard',
-          Description: '',
+          Name: 'DIGITAL_Standard',
+          Description: 'online fullfilment',
         }],
         SEO: commonSections.initialValues.SEO,
       },
       validation: {
         Name: commonSections.validations.name,
-        Description: commonSections.validations.description,
         slug: commonSections.validations.slug,
         SEO: commonSections.validations.seo,
       },
@@ -243,24 +243,18 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Name',
             label: 'Product Name',
             type: 'text',
-            placeholder: 'Premium Widget',
+            placeholder: 'Shards of Andúril',
             required: true
           },
           commonSections.slugField('product'),
           {
             name: 'Description',
-            label: 'Product Description',
+            label: 'Description',
             type: 'markdown',
-            placeholder: 'Describe your product in detail...',
+            placeholder: '...also called the Flame of the West and the Sword Reforged, was the sword which was reforged from the shards of Narsil in Rivendell',
             required: true
           },
-          {
-            name: 'SKU',
-            label: 'SKU',
-            type: 'text',
-            placeholder: 'PROD-001',
-            description: 'Stock Keeping Unit - unique identifier for your product'
-          },
+          commonSections.tagsField('Tag'),
         ]
       },
       {
@@ -342,11 +336,13 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Thumbnail&populate[]=Slides&populate[]=Tag&populate[]=PRICES`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'event',
     plural: 'events',
     create: createContentAction('event'),
     update: updateContentAction('event'),
     form: {
+      description: 'Host activities with your community, and share ',
       initialValues: {
         Name: '',
         Description: '',
@@ -364,6 +360,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           metaTitle: '',
           metaDescription: '',
           metaKeywords: '',
+          metaUrl: '',
         }
       },
       validation: {
@@ -382,7 +379,7 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Name',
             label: 'Event Name',
             type: 'text',
-            placeholder: 'My Awesome Event',
+            placeholder: 'Noche bohemia',
             required: true
           },
           commonSections.slugField('event'),
@@ -390,9 +387,10 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'Description',
             label: 'Event Description',
             type: 'markdown',
-            placeholder: 'Describe your event in detail...',
+            placeholder: 'What does your favorite color taste like?',
             required: true
           },
+          commonSections.tagsField('Tag')
         ]
       },
       {
@@ -430,6 +428,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'album',
     plural: 'albums',
     create: createContentAction('album'),
@@ -438,9 +437,8 @@ export const actionsMap: Record<string, ActionComponent> = {
       initialValues: {
         title: '',
         description: '',
-        content: '',
+        content: [],
         slug: '',
-        displayType: 'grid',
         SEO: {
           metaTitle: '',
           metaDescription: '',
@@ -462,36 +460,24 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'title',
             label: 'Collection Title',
             type: 'text',
-            placeholder: 'My Awesome Collection',
+            placeholder: 'Rocka Rolla',
             required: true
           },
-          commonSections.slugField('collection'),
+          commonSections.slugField('album'),
           {
             name: 'description',
             label: 'Short Description',
             type: 'textarea',
-            placeholder: 'Briefly describe this collection',
+            placeholder: 'metal and rock jukebox',
             minRows: 2,
             required: true
           },
           {
             name: 'content',
-            label: 'Full Description',
-            type: 'markdown',
-            placeholder: 'Detailed description of your collection',
+            label: 'Content',
+            type: 'blocks',
+            placeholder: 'debut studio album by English heavy metal band Judas Priest, released on 6 September 1974 by Gull Records',
           },
-          {
-            name: 'displayType',
-            label: 'Display Type',
-            type: 'select',
-            placeholder: 'Choose display type',
-            options: [
-              { value: 'grid', label: 'Grid' },
-              { value: 'list', label: 'List' },
-              { value: 'carousel', label: 'Carousel' },
-            ],
-            description: 'How this collection will display its items'
-          }
         ]
       },
       commonSections.seo
@@ -501,10 +487,11 @@ export const actionsMap: Record<string, ActionComponent> = {
     url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=urls&populate[]=media`,
     view: ViewItem,
     edit: FormItem,
+    new: FormItem,
     singular: 'track',
     plural: 'tracks',
-    create: createContentAction('albumtrack'),
-    update: updateContentAction('albumtrack'),
+    create: createContentAction('track'),
+    update: updateContentAction('track'),
     form: {
       initialValues: {
         title: '',
@@ -532,28 +519,30 @@ export const actionsMap: Record<string, ActionComponent> = {
             name: 'title',
             label: 'Item Title',
             type: 'text',
-            placeholder: 'My Collection Item',
+            placeholder: 'One for the Road',
             required: true
           },
-          commonSections.slugField('item'),
+          commonSections.slugField('winter'),
           {
             name: 'description',
             label: 'Short Description',
             type: 'textarea',
-            placeholder: 'Briefly describe this item',
+            description: 'For item lists, taglines',
+            placeholder: 'Where would you be without music',
             minRows: 2,
           },
           {
             name: 'content',
             label: 'Full Description',
-            type: 'markdown',
-            placeholder: 'Detailed description of your item',
+            description: 'Formatted content for the item page',
+            type: 'blocks',
+            placeholder: 'is the first song on the Judas Priest album Rocka Rolla',
           },
           {
             name: 'urls',
-            label: 'External Links',
+            label: 'Links',
             type: 'urls',
-            description: 'Links to external platforms or resources'
+            description: 'Social media, references, calls to action'
           }
         ]
       },

@@ -43,6 +43,8 @@ const prefixMap: Record<string, string> = {
   page: 'about',
   product: 'product',
   store: 'store',
+  event: 'events',
+  album: 'album'
 }
 
 
@@ -51,7 +53,9 @@ const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem
 
   if (prefix == 'store') return `/store/${item.slug}`;
 
-  if (prefix == 'about' && item.slug == 'home') return `/store/${store.slug}`;
+  if (prefix == 'album') return `/store/${store?.slug}/${item.slug}`;
+
+  if (prefix == 'about' && item.slug == 'home') return `/store/${store?.slug}`;
 
   if (prefix == 'about' && ['products', 'about', 'newsletter', 'blog'].includes(item.slug)) return `/store/${store?.slug}/${item.slug}`
 
