@@ -25,6 +25,8 @@ interface AlbumsProps {
 
 function AlbumCard({ album, store_slug }: AlbumCardProps) {
 
+  const description = album.description || album?.SEO?.metaDescription;
+
   return (
     <Link href={`/store/${store_slug}/${album.slug}`} style={{ textDecoration: 'none' }}>
       <Card
@@ -57,9 +59,9 @@ function AlbumCard({ album, store_slug }: AlbumCardProps) {
           >
             {album.tracks.length} tracks
           </Badge>
-          {album?.SEO?.metaDescription && (
+        {description && (
             <Text size="sm" c="dimmed" mt="sm">
-              {album.SEO.metaDescription}
+            {description}
             </Text>
           )}
       </Card>
