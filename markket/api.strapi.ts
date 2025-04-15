@@ -242,6 +242,17 @@ export class StrapiClient {
     return {} as StrapiResponse<T>;
   };
 
+
+  public get = async (type: string, slug: string, store_slug = this.storeSlug) => {
+    console.log(`Get:${type}:${slug}`);
+
+    return await this.fetch<Store>({
+      contentType: type,
+      filters: { slug: store_slug },
+      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover',
+    });
+  }
+
   async getProduct(product_slug: string, store_slug: string) {
     return this.fetch({
       contentType: 'products',
@@ -341,6 +352,7 @@ export class StrapiClient {
       populate: 'SEO.socialImage'
     });
   };
+
 
   /**
    * Returns a page by its slug
