@@ -93,11 +93,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   }, [stores, authLoading]);
 
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('markket.ui.dashboard');
-    if (savedFavorites) {
-      setFavoriteLinks(JSON.parse(savedFavorites));
-    }
-
     const params = new URLSearchParams(window.location.search);
     const currentStoreId = params.get('store');
 
@@ -113,8 +108,16 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   }, [router, updateStoreInUrl, stores, selectedStore]);
 
   useEffect(() => {
+    const savedFavorites = localStorage.getItem('markket.ui.dashboard');
+
+    if (savedFavorites) {
+      setFavoriteLinks(JSON.parse(savedFavorites));
+    }
+  }, []);
+
+  useEffect(() => {
     // @TODO: persist in API
-    // if (!favoriteLinks.length) { return; }
+    if (!favoriteLinks.length) { return; }
 
     localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks || []));
   }, [favoriteLinks]);
