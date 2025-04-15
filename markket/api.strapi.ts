@@ -41,6 +41,12 @@ export class StrapiClient {
   }
 
   private _token = () => {
+    if (typeof window == 'undefined') {
+      console.warn('strapi._token called from server component');
+      console.trace();
+      return '';
+    }
+
     const _string = localStorage.getItem('markket.auth');
     const _json = _string ? JSON.parse(_string) : {};
     const { jwt } = _json;
@@ -236,6 +242,17 @@ export class StrapiClient {
     return {} as StrapiResponse<T>;
   };
 
+
+  public get = async (type: string, slug: string, store_slug = this.storeSlug) => {
+    console.log(`Get:${type}:${slug}`);
+
+    return await this.fetch<Store>({
+      contentType: type,
+      filters: { slug: store_slug },
+      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover',
+    });
+  }
+
   async getProduct(product_slug: string, store_slug: string) {
     return this.fetch({
       contentType: 'products',
@@ -335,6 +352,7 @@ export class StrapiClient {
       populate: 'SEO.socialImage'
     });
   };
+
 
   /**
    * Returns a page by its slug

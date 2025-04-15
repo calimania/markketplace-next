@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { strapiClient, markketClient } from '@/markket/api';
 import { Store } from '@/markket/store'
 
@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const [stores, setStores] = useState<Store[]>([]);
 
 
@@ -105,9 +106,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Auth verification failed:', error);
       logout();
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
+    if (user?.id && pathname.includes('dashboard')) {
+      fetchStores();
+    }
+
     const initAuth = async () => {
       await verifyAndRefreshUser();
 
@@ -115,14 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
-  }, [verifyAndRefreshUser]);
+  }, []);
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && pathname.includes('dashboard')) {
       fetchStores();
     }
 
-  }, [user?.id, fetchStores]);
+  }, [user?.id, fetchStores,]);
 
   const refreshUser = async () => {
     await verifyAndRefreshUser();

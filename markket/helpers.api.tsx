@@ -78,7 +78,8 @@ export async function fetchUserStores() {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch stores');
+      console.warn({ user_id, status: response.status });
+      throw new Error(`${response.status}:GET /stores`);
     }
 
     return await response.json();

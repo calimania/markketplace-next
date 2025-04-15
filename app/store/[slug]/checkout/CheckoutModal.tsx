@@ -19,6 +19,7 @@ import { createPaymentLink, type PaymentLinkOptions } from "../../../scripts/pay
 import { Price } from "@/markket/product";
 import { notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
+import { markketConfig } from "@/markket/config";
 
 interface Props {
   prices: Price[];
@@ -33,6 +34,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   const [tip, setTip] = useState(0);
   const [total, setTotal] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState({} as Price);
+  const [attempts, setAttempts] = useState(0)
 
   const isValidOrder = selectedPriceId && total > 0;
 
@@ -42,10 +44,20 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     totalPrice: 0,
     product: product.id,
     prices: [],
-    stripe_test: !!product.Name?.match(/TEST/i),
-    includes_shipping: !product.Name?.match(/digital/i),
+    stripe_test: false,
+    includes_shipping: false,
     redirect_to_url: url,
   } as PaymentLinkOptions);
+
+  useEffect(() => {
+    if (attempts >= 3) {
+      notifications.show({
+        title: 'Warning',
+        message: 'Struggling to redirect; Would you mind trying a different browser?',
+        color: 'orange',
+      })
+    }
+  }, [attempts]);
 
   useEffect(() => {
     const priceId = selectedPriceId;
@@ -97,8 +109,13 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     try {
       await createPaymentLink({
         ...options,
+        stripe_test: !!product?.Name?.toLowerCase()?.includes('test'),
+        // @TODO: control delivery country options at store level (name convention SHIPPING_US_CO_X, defaul US only)
+        includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
+        redirect_to_url: new URL(`/store/${store?.slug}/receipt`, markketConfig.markket_url).toString(),
       });
+
     } catch (error) {
       console.error('Payment link error:', error);
       notifications.show({
@@ -156,6 +173,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         <Container size="sm">
           <form onSubmit={(e) => {
             e.preventDefault();
+            setAttempts((prev) => prev + 1)
             redirectToPaymentLink(e);
           }}>
             <Stack gap="md">
@@ -163,10 +181,10 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                 label="Select Product Option"
                 description="Choose the option that best fits your needs"
                 placeholder="Available options..."
-                value={selectedPriceId || null}
+                value={selectedPriceId || ''}
                 onChange={handlePriceSelect}
                 data={prices.map((price) => ({
-                  value: price.STRIPE_ID,
+                  value: price.STRIPE_ID || '',
                   label: `${price.Name.replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
                 }))}
                 required

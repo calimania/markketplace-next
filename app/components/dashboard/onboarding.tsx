@@ -16,7 +16,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
   const { stores } = useAuth();
 
   return (
-    <Container size="md" py="xl">
+    <Container size="md" py="xl" className='dashboard-page'>
       <Stack gap="xl">
         <MotionPaper
           withBorder
@@ -24,6 +24,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
           radius="md"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="bg-slate-50"
         >
           <Stack gap="md">
             <Group>
@@ -31,10 +32,10 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 <IconRocket size={24} />
               </ThemeIcon>
               <div>
-                <Title order={1} size="h2">¡Welcome to Markkët!</Title>
-                <Text c="dimmed" size="lg">
-                  set up your electromechanical commerce store
-                </Text>
+                <Title order={1} size="h2">¡¡Markkët Dashboard!</Title>
+                <Title order={4}>
+                  your electromechanical commerce portal
+                </Title>
               </div>
             </Group>
           </Stack>
@@ -48,13 +49,13 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Timeline active={stores?.length ? 1 : 0} bulletSize={24} lineWidth={2}>
+          <Timeline active={stores?.length ? 1 : 0} bulletSize={32} lineWidth={4} >
             <Timeline.Item
               bullet={<IconBuildingStore size={12} />}
-              title="Create your first Store"
+              title="It starts with a story"
             >
               <Text c="dimmed" size="sm">
-                A store is the base unit in the mall, each store has its own brand, unique homepage,
+                A store is your base unit in the mall, each one has its own id, brand, unique content,
                 images, blog & catalogues
               </Text>
               {!stores.length && (<Button
@@ -64,7 +65,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 component="a"
                 href="/dashboard/stores/new"
               >
-                Create Store
+                Start Creating
               </Button>)}
             </Timeline.Item>
 
@@ -73,10 +74,10 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
               title="Make it yours"
             >
               <Text c="dimmed" size="sm">
-                Manage content, add images, titles and descriptions to personalize your store
+                Add titles, logos & links and you have a landing page ready to share!
               </Text>
 
-              {stores.length && (<Button
+              {stores.length ? (<Button
                 variant="light"
                 rightSection={<IconArrowRight size={16} />}
                 mt="md"
@@ -84,33 +85,30 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 href="/dashboard/stores/new"
               >
                 Store Dashboard
-              </Button>)}
+              </Button>) : null}
+            </Timeline.Item>
+            <Timeline.Item
+              bullet={<IconArticle size={12} />}
+              title="Write a litte"
+            >
+              <Text c="dimmed" size="sm">
+                Publish pages and articles to tell your story, inspire your audience
+              </Text>
             </Timeline.Item>
             <Timeline.Item
               bullet={<IconLibraryPhoto size={12} />}
               title="Add Pictures"
             >
               <Text c="dimmed" size="sm">
-                Upload some pictures with your brand colors & vibe, or use our
-                algorithms to create some
+                Decorate your posts, and products uploading your branded images
               </Text>
             </Timeline.Item>
-            <Timeline.Item
-              bullet={<IconArticle size={12} />}
-              title="Create Content"
-            >
-              <Text c="dimmed" size="sm">
-                Start adding pages and articles to share your story. Build your brand
-                with engaging content that connects with your audience.
-              </Text>
-            </Timeline.Item>
-
             <Timeline.Item
               bullet={<IconShoppingCart size={12} />}
-              title="Start Sharing"
+              title="Continuous Improvement"
             >
               <Text c="dimmed" size="sm">
-                Preview your bazaar, share it, and enjoy the compliments!
+                Preview your bazaar, share it, enjoy the compliments! implement feedback
               </Text>
             </Timeline.Item>
           </Timeline>
@@ -129,16 +127,16 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
             <Group gap="md">
               {[
                 {
-                  title: 'Dynamic',
-                  description: 'Create Products, Articles & Collections',
+                  title: 'Be original',
+                  description: 'Create from your heart',
                 },
                 {
-                  title: 'Mobile Friendly',
-                  description: 'Works great on all devices, optimized for performance',
+                  title: 'Participate',
+                  description: 'Find support & be supportive ',
                 },
                 {
-                  title: 'Online Sales',
-                  description: 'Set up Stripe to accept payments & receive payouts',
+                  title: 'Follow excellence',
+                  description: 'Success will chase you',
                 },
               ].map((tip) => (
                 <Paper

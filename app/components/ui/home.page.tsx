@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   IconRocket, IconBrandGithub, IconBuildingStore, IconCode,
   IconShoppingBag, IconFileTypeDoc, IconRadio,
-  IconHeartCode, IconBrandMysql, IconArrowRight,
+  IconHeartCode, IconSailboat, IconArrowRight,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
@@ -20,18 +20,18 @@ import { markketConfig } from "@/markket/config";
 const features = [
   {
     icon: IconRocket,
-    title: "Optimized for performance",
-    description: "Full of code & algorithms, includes APIs & Cyber"
+    title: "Performance & Security ",
+    description: "Created with code & algorithms, bioorganic inteligence"
   },
   {
     icon: IconBuildingStore,
-    title: "Quickstart",
-    description: "Create your landing page, blog & articles in minutes"
+    title: "Quickstart prototypes",
+    description: "Launch with easy landing pages, hyperlinks & payments"
   },
   {
     icon: IconCode,
-    title: "Begginer Friendly",
-    description: "Open source templates, enterprise & self-host alternatives"
+    title: "Devs & hackers",
+    description: "Open source templates, self-host & community support"
   },
 ];
 
@@ -46,7 +46,7 @@ const create_links = (prefix?: string) => {
     },
     {
       href: `${prefix}/about`,
-      icon: IconBrandMysql,
+      icon: IconSailboat,
       label: "About",
       variant: "light"
     },
@@ -73,7 +73,7 @@ type HomePageProps = {
 
 
 
-const HomePage = ({store, page}: HomePageProps) => {
+const HomePage = ({ store, page }: HomePageProps) => {
   const [links] = useState(create_links(store ? `/store/${store?.slug}` : ''));
   const { maybe } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,9 +84,9 @@ const HomePage = ({store, page}: HomePageProps) => {
   }, [maybe]);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section with Background */}
+    <div className="min-h-screen markketpage homepage">
       <BackgroundImage
+        className="homepage-hero"
         src={store?.Cover?.url || markketConfig.blank_cover_url}
         h={rem(500)}
       >
@@ -94,18 +94,18 @@ const HomePage = ({store, page}: HomePageProps) => {
           <div className="flex flex-col justify-center items-center h-full text-center text-white ">
             <img
               src={store?.Logo?.url || markketConfig.blank_logo_url}
-              alt={store?.SEO?.metaTitle || 'Markket Logo'}
+              alt={store?.SEO?.metaTitle || 'Markkët'}
               width={150}
               height={150}
               className="mb-8 rounded-2xl shadow-2xl bg-slate-50"
             />
             <Title className="text-5xl md:text-6xl font-bold mb-6 text-white bg-slate-900 p-2">
-              {store?.SEO?.metaTitle || 'Welcome to Markket'}
+              {store?.SEO?.metaTitle || store?.title || 'Mall'}
             </Title>
             <div className="my-2">
-              <Text size="xl" className="max-w-2xl mb-8 text-gray-200 bg-slate-800 p-2 p-2">
-                {store?.SEO?.metaDescription || 'Your one-stop marketplace for digital commerce'}
-              </Text>
+              <Title order={2} className="max-w-2xl mb-8 text-gray-200 bg-slate-800 p-2">
+                {store?.SEO?.metaDescription || 'Markkët'}
+              </Title>
             </div>
             <Group gap="md">
               <Button
@@ -116,7 +116,7 @@ const HomePage = ({store, page}: HomePageProps) => {
                 component="a"
                 href="/stores"
               >
-                Browse Stores
+                Mall
               </Button>
               <Button
                 size="xl"
@@ -153,11 +153,9 @@ const HomePage = ({store, page}: HomePageProps) => {
               </Button>
             ))}
           </Group>
-
-          {/* Features Grid with Animation */}
           <div className="py-10">
             <Title order={2} size="h1" ta="center" mb="xl">
-              our Markkët
+              Markkët
             </Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
               {features.map((feature, index) => (
@@ -167,42 +165,47 @@ const HomePage = ({store, page}: HomePageProps) => {
               ))}
             </SimpleGrid>
           </div>
-
-          <Paper
-            shadow="lg"
-            p="xl"
-            mt="xl"
-            withBorder
-            className="bg-gradient-to-r from-blue-50 to-indigo-50"
-          >
-            <Stack align="center" gap="md">
-              <Title order={2} size="h2" ta="center" className="gradient-text">
-                {isLoggedIn ? 'Manage Your Store' : 'Start Your Journey Today'}
-              </Title>
-              {!isLoggedIn && (
-                <Text c="dimmed" size="xl" ta="center" maw={600}>
-                  Join thousands of successful entrepreneurs on Markket
-                </Text>
-              )}
-              <Group mt="xl">
-                <Button
-                  component="a"
-                  href={isLoggedIn ? "/dashboard/store" : "/auth/register"}
-                  size="xl"
-                  leftSection={<IconHeartCode size={24} />}
-                  variant="white"
-                  className="transform hover:scale-105 transition-transform text-white border-fuchsia-300"
-                >
-                  {isLoggedIn ? 'Go to Dashboard' : 'Get Started'}
-                </Button>
-              </Group>
-            </Stack>
-          </Paper>
-
+        </Stack>
+      </Container>
+      <Paper
+        shadow="lg"
+        p="xl"
+        mt="xl"
+        withBorder
+        className="bg-gradient-to-r from-blue-50 to-indigo-50"
+      >
+        <Stack align="center" gap="md">
+          <Title order={2} size="h2" ta="center" className="gradient-text">
+            {isLoggedIn ? 'Content Manager' : 'Whoa, whoa, whoa'}
+          </Title>
+          {!isLoggedIn && (
+            <Text c="dimmed" size="xl" ta="center" maw={600}>
+              verify an email, write a title, add some pages, an article. <br />Baby, you&apos;ve got a store going
+            </Text>
+          )}
+          <Group mt="xl">
+            <Button
+              component="a"
+              href={isLoggedIn ? "/dashboard/store" : "/auth/register"}
+              size="xl"
+              leftSection={<IconHeartCode size={24} />}
+              variant="white"
+              className="transform hover:scale-105 transition-transform text-white border-fuchsia-300"
+            >
+              {isLoggedIn ? 'Go to Dashboard' : 'Get Started'}
+            </Button>
+          </Group>
+          <Text c="dimmed" size="sm" ta="center" maw={600} my="xl">
+            Dreams are worth fighting for, are you gonna be an artist or are you gonna be a doctor?!
+          </Text>
+        </Stack>
+      </Paper>
+      <Container size="lg" className="py-20">
+        <Stack gap="xl">
           {page?.albums && page.albums.length > 0 && (
             <div className="py-10">
               <Title order={2} size="h2" ta="center" mb="xl">
-                Featured Collections
+                Calima Collections
               </Title>
               <Albums albums={page.albums as Album[]} store_slug={store?.slug as ''} />
             </div>
