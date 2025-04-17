@@ -1,4 +1,6 @@
 import { markketConfig } from "@/markket/config";
+import qs from 'qs';
+import { format } from 'date-fns';
 
 const server = 'https://contentapi.cision.com/';
 
@@ -72,13 +74,16 @@ async function get() {
 
   console.log({token});
 
-  const response = await fetch( new URL(`/api/v1.0/releases`, server), {
+  const response = await fetch(new URL(`/api/v1.0/releases?${qs.stringify({
+    show_del: false,
+    mod_startdate: format(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), "yyyyMMdd'T'HHmmss-0000"),
+  })}`, server), {
     method: 'GET',
     headers: {
       'X-Client': user,
       Authorization: `Bearer ${token}`,
     },
-  })
+  });
 
   console.log(`CISION:News:${response.ok}:${response.status}`)
 

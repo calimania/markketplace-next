@@ -7,23 +7,21 @@
  */
 
 import News from "@/app/utils/cision";
-import { Title } from "@mantine/core";
+import Releases from '@/app/components/chisme/releases.page';
+import { strapiClient } from '@/markket/api';
+import { Page, Store } from "@/markket";
 
 const Chisme = async () => {
 
   const news = await News.get();
 
-  console.log({_o: news?.data[0], news})
+  const _store = await strapiClient.getStore();
+  const store = _store.data?.[0] as Store;
+  const _page = await strapiClient.getPage('chisme');
+  const page = _page.data?.[0] as Page;
+
   return (
-    <>
-      {news?.data?.map((n) => {
-         return (
-          <>xx
-          <Title order={2}>{n.title}</Title>
-          </>
-        )
-      }) }
-    </>
+    <Releases news={news?.data || []} store={store} page={page} />
   )
 };
 
