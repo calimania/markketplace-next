@@ -1,6 +1,6 @@
 import { markketConfig } from "@/markket/config";
 import qs from 'qs';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const server = 'https://contentapi.cision.com/';
 
@@ -23,7 +23,25 @@ export type Release = {
     thumbnailurl: string;
     type: string;
     url: string;
-  }[]
+  }[];
+  geography: string[];
+  industry: string[];
+  language: string;
+  source_company: string;
+  style: string;
+  sub_title: string[];
+  subject: string[];
+  ticker: string[];
+  websiteUrl: string[];
+};
+
+export const formatReleaseDate = (dateStr: string) => {
+  try {
+    return format(parseISO(dateStr), 'PPP');
+  } catch (e) {
+    console.error(e);
+    return dateStr;
+  }
 };
 
 /**
@@ -120,7 +138,7 @@ async function get_by_id(release_id: string) {
   if (!token) {
     return null;
   }
-  const response = await fetch(new URL(`/api/v1.0/releases?${release_id}`, server), {
+  const response = await fetch(new URL(`/api/v1.0/releases/${release_id}`, server), {
     method: 'GET',
     headers: {
       'X-Client': user,

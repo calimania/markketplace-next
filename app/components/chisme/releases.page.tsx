@@ -14,12 +14,13 @@ import {
   Box,
   Center,
 } from '@mantine/core';
-import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews } from '@tabler/icons-react';
-import { Release } from '@/app/utils/cision';
+import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle, IconBrandVlc } from '@tabler/icons-react';
+import { formatReleaseDate, Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
-import { format, parseISO } from 'date-fns';
+
 import PageContent from '@/app/components/ui/page.content';
 import classes from './chisme.module.css';
+
 
 type ReleasesPageProps = {
   news: Release[];
@@ -28,14 +29,7 @@ type ReleasesPageProps = {
 }
 
 export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
-  const formatReleaseDate = (dateStr: string) => {
-    try {
-      return format(parseISO(dateStr), 'PPP');
-    } catch (e) {
-      console.error(e);
-      return dateStr;
-    }
-  };
+
 
   return (
     <Container size="lg" py="xl">
@@ -98,10 +92,10 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               p="md"
               className={classes.releaseCard}
             >
-              <div>
+              <div id={`#${release.release_id}`}>
                 <Group>
                   {!!release.multimedia && (
-                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>
                       {release.multimedia.map((m, i) => (
                         <img
                           src={m.thumbnailurl}
@@ -154,7 +148,6 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               </div>
               <Group mt="md">
                 <Button
-                  disabled
                   component="a"
                   href={`/chisme/${release.release_id}`}
                   target={release.release_id}
@@ -162,8 +155,21 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
                   variant="light"
                   radius="md"
                   size="sm"
+                  leftSection={<IconBrandVlc size={18} />}
                 >
-                  Read Full Release
+                  View
+                </Button>
+                <Button
+                  component="a"
+                  href={`https://google.com/search?q="${encodeURIComponent(release.title)}" ${release?.company?.[0]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="light"
+                  radius="md"
+                  size="sm"
+                  leftSection={<IconBrandGoogle size={18} />}
+                >
+                  Read more
                 </Button>
               </Group>
             </Card>

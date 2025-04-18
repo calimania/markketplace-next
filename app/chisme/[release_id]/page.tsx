@@ -1,8 +1,9 @@
-import News from "@/app/utils/cision";
+import News, { Release } from "@/app/utils/cision";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { strapiClient } from '@/markket/api';
 import { Store } from '@/markket';
-import { Title, Container } from "@mantine/core";
+import ReleasePage from '@/app/components/chisme/release.page';
+
 
 type Props = {
   params: Promise<{release_id: string}>
@@ -28,15 +29,10 @@ export async function generateMetadata({params}: Props) {
 
 export default async function ChismeRelease({params}: Props) {
   const { release_id} = await params;
-  const releases = await News.get_by_id(release_id);
-
-  const release = releases?.data?.[0];
+  const _release = await News.get_by_id(release_id);
+  const release = _release?.data as Release;
 
   return (
-  <>
-      <Container>
-        <Title>{release.title}</Title>
-      </Container>
-  </>
+    <ReleasePage release={release} />
   )
 }
