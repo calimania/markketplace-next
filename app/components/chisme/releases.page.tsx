@@ -14,7 +14,7 @@ import {
   Box,
   Center,
 } from '@mantine/core';
-import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle } from '@tabler/icons-react';
+import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle, IconBrandVlc } from '@tabler/icons-react';
 import { Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
 import { format, parseISO } from 'date-fns';
@@ -98,7 +98,7 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               p="md"
               className={classes.releaseCard}
             >
-              <div id={`#/chisme/${release.release_id}`}>
+              <div id={`#${release.release_id}`}>
                 <Group>
                   {!!release.multimedia && (
                     <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>
@@ -155,8 +155,20 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               <Group mt="md">
                 <Button
                   component="a"
-                  href={`https://google.com/search?q="${release.title}" ${release?.company?.[0]}`}
+                  href={`/chisme/${release.release_id}`}
                   target={release.release_id}
+                  rel="noopener noreferrer"
+                  variant="light"
+                  radius="md"
+                  size="sm"
+                  leftSection={<IconBrandVlc size={18} />}
+                >
+                  View
+                </Button>
+                <Button
+                  component="a"
+                  href={`https://google.com/search?q="${encodeURIComponent(release.title)}" ${release?.company?.[0]}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   variant="light"
                   radius="md"

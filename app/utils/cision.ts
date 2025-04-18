@@ -120,7 +120,7 @@ async function get_by_id(release_id: string) {
   if (!token) {
     return null;
   }
-  const response = await fetch(new URL(`/api/v1.0/releases?${release_id}`, server), {
+  const response = await fetch(new URL(`/api/v1.0/releases/${release_id}`, server), {
     method: 'GET',
     headers: {
       'X-Client': user,
