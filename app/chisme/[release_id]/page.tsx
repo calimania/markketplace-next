@@ -1,4 +1,4 @@
-import News from "@/app/utils/cision";
+import News, { Release } from "@/app/utils/cision";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { strapiClient } from '@/markket/api';
 import { Store } from '@/markket';
@@ -32,10 +32,22 @@ export default async function ChismeRelease({params}: Props) {
 
   const release = releases?.data?.[0];
 
+
   return (
   <>
       <Container>
         <Title>{release.title}</Title>
+        {releases?.data?.map((r: Release, i: number) => {
+          console.log({ release })
+
+          return (
+            <div key={i}>
+              {r.title}
+              {r.body}
+              [{r.release_id}]
+            </div>
+          )
+        })}
       </Container>
   </>
   )

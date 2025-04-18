@@ -14,7 +14,7 @@ import {
   Box,
   Center,
 } from '@mantine/core';
-import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews } from '@tabler/icons-react';
+import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle } from '@tabler/icons-react';
 import { Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
 import { format, parseISO } from 'date-fns';
@@ -98,10 +98,10 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               p="md"
               className={classes.releaseCard}
             >
-              <div>
+              <div id={`#/chisme/${release.release_id}`}>
                 <Group>
                   {!!release.multimedia && (
-                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>
                       {release.multimedia.map((m, i) => (
                         <img
                           src={m.thumbnailurl}
@@ -154,16 +154,16 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
               </div>
               <Group mt="md">
                 <Button
-                  disabled
                   component="a"
-                  href={`/chisme/${release.release_id}`}
+                  href={`https://google.com/search?q="${release.title}" ${release?.company?.[0]}`}
                   target={release.release_id}
                   rel="noopener noreferrer"
                   variant="light"
                   radius="md"
                   size="sm"
+                  leftSection={<IconBrandGoogle size={18} />}
                 >
-                  Read Full Release
+                  Read more
                 </Button>
               </Group>
             </Card>
