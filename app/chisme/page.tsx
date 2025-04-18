@@ -10,6 +10,25 @@ import News from "@/app/utils/cision";
 import Releases from '@/app/components/chisme/releases.page';
 import { strapiClient } from '@/markket/api';
 import { Page, Store } from "@/markket";
+import { generateSEOMetadata } from "@/markket/metadata";
+
+export async function generateMetadata() {
+  const _store = await strapiClient.getStore();
+  const store = _store?.data?.[0] as Store;
+  const _page = await strapiClient.getPage('chisme');
+  const page = _page?.data?.[0] as Page;
+
+  return generateSEOMetadata({
+    slug: 'chisme',
+    entity: {
+      SEO: page?.SEO || store?.SEO,
+      title: page?.Title || `${store?.title} News`,
+      id: store?.id?.toString(),
+      url: `/chisme`,
+    },
+    type: "article",
+  });
+}
 
 const Chisme = async () => {
 

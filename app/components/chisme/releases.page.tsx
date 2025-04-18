@@ -1,6 +1,25 @@
-import { Container, Title, Paper } from '@mantine/core';
+'use client';
+
+import {
+  Container,
+  Title,
+  Paper,
+  Text,
+  Group,
+  Badge,
+  Stack,
+  Button,
+  Card,
+  SimpleGrid,
+  Box,
+  Center,
+} from '@mantine/core';
+import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews } from '@tabler/icons-react';
 import { Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
+import { format, parseISO } from 'date-fns';
+import PageContent from '@/app/components/ui/page.content';
+import classes from './chisme.module.css';
 
 type ReleasesPageProps = {
   news: Release[];
@@ -8,23 +27,184 @@ type ReleasesPageProps = {
   page?: Page;
 }
 
-export default function ReleasesPage ({news, store, page}: ReleasesPageProps) {
+export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
+  const formatReleaseDate = (dateStr: string) => {
+    try {
+      return format(parseISO(dateStr), 'PPP');
+    } catch (e) {
+      console.error(e);
+      return dateStr;
+    }
+  };
 
   return (
-    <Container>
-      <Title order={1}>{page?.Title || 'Chisme'}</Title>
-      {news?.map((n, i: number) => {
-        return (
-          <div key={i}>
-            <Paper withBorder>
-              <Title order={2}>{n.title}</Title>
-            </Paper>
-          </div>
-        )
-      })}
-      <Paper>
-        <p><strong>{store?.title}</strong></p>
-        <p></p>
+    <Container size="lg" py="xl">
+      <Paper
+        radius="md"
+        withBorder
+        p="xl"
+        mb="xl"
+        style={{
+          backgroundImage: 'linear-gradient(to right, #f0f2f5, #e6e9f0)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <Box
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            opacity: 0.1,
+            transform: 'translate(30%, -30%)'
+          }}
+        >
+          <IconNews size={150} stroke={1.5} />
+        </Box>
+        <Stack py="lg">
+          <Group>
+            <Title order={1}>{page?.Title || 'Latest News Releases'}</Title>
+            {store && (
+              <Badge
+                size="lg"
+                color="blue"
+                variant="outline"
+                leftSection={<IconBuildingStore size={14} />}
+              >
+                {store.title}
+              </Badge>
+            )}
+          </Group>
+        </Stack>
+      </Paper>
+      {page?.Content?.length && (
+        <Paper withBorder radius="md" p="lg" mb="xl">
+          <Box mb="md">
+            <PageContent params={{ page }} />
+          </Box>
+        </Paper>
+      )}
+      {news?.length ? (
+        <SimpleGrid
+          cols={1}
+        >
+          {news.map((release, index) => (
+            <Card
+              key={release.release_id || index}
+              withBorder
+              radius="md"
+              p="md"
+              className={classes.releaseCard}
+            >
+              <div>
+                <Group>
+                  {!!release.multimedia && (
+                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {release.multimedia.map((m, i) => (
+                        <img
+                          src={m.thumbnailurl}
+                          alt={m.caption}
+                          key={i}
+                          style={{
+                            display: 'inline-block',
+                            width: '100px',
+                            height: '100px',
+                            objectFit: 'cover',
+                            marginRight: '8px',
+                            borderRadius: '8px',
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <Group>
+                    <Text fw={700} size="lg">
+                      {release.title}
+                    </Text>
+                  </Group>
+                  <Badge
+                    color={release.status === 'published' ? 'green' : 'blue'}
+                    variant="light"
+                  >
+                    {release.status}
+                  </Badge>
+                </Group>
+              </div>
+              <div>
+                <Group >
+                  <Group>
+                    <IconCalendarEvent size={16} stroke={1.5} />
+                    <Text size="sm" color="dimmed">
+                      {formatReleaseDate(release.date)}
+                    </Text>
+                  </Group>
+
+                  {release.company && release.company.length > 0 && (
+                    <Group >
+                      {release.company.map((company, i) => (
+                        <Badge key={i} size="sm" variant="outline">
+                          {company}
+                        </Badge>
+                      ))}
+                    </Group>
+                  )}
+                </Group>
+              </div>
+              <Group mt="md">
+                <Button
+                  disabled
+                  component="a"
+                  href={`/chisme/${release.release_id}`}
+                  target={release.release_id}
+                  rel="noopener noreferrer"
+                  variant="light"
+                  radius="md"
+                  size="sm"
+                >
+                  Read Full Release
+                </Button>
+              </Group>
+            </Card>
+          ))}
+        </SimpleGrid>
+      ) : (
+        <Center py="xl">
+          <Stack align="center" >
+            <IconNews size={48} stroke={1.5} opacity={0.5} />
+            <Text size="xl" color="dimmed">
+              No news releases available at this time.
+            </Text>
+          </Stack>
+        </Center>
+      )}
+
+      {store && (
+        <Paper withBorder p="md" radius="md" mt="xl">
+          <Group >
+            <Group>
+              <IconBuildingStore size={20} />
+              <Text fw={500}>{store.title}</Text>
+            </Group>
+            {store.Description && (
+              <Text size="sm" color="dimmed" style={{ maxWidth: '70%' }}>
+                {typeof store.Description === 'string' && store.Description.length > 100
+                  ? `${store.Description.substring(0, 100)}...`
+                  : store.Description}
+              </Text>
+            )}
+          </Group>
+        </Paper>
+      )}
+
+      <Paper withBorder p="md" radius="md" mt="xl">
+        <Group >
+          <Group>
+            <IconCompass size={20} />
+            <Text fw={500} c="cyan"><a href="https://www.prnewswire.com/" target='_blank'>PR News Wire</a></Text>
+          </Group>
+        </Group>
       </Paper>
     </Container>
   );
