@@ -15,11 +15,12 @@ import {
   Center,
 } from '@mantine/core';
 import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle, IconBrandVlc } from '@tabler/icons-react';
-import { Release } from '@/app/utils/cision';
+import { formatReleaseDate, Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
-import { format, parseISO } from 'date-fns';
+
 import PageContent from '@/app/components/ui/page.content';
 import classes from './chisme.module.css';
+
 
 type ReleasesPageProps = {
   news: Release[];
@@ -28,14 +29,7 @@ type ReleasesPageProps = {
 }
 
 export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
-  const formatReleaseDate = (dateStr: string) => {
-    try {
-      return format(parseISO(dateStr), 'PPP');
-    } catch (e) {
-      console.error(e);
-      return dateStr;
-    }
-  };
+
 
   return (
     <Container size="lg" py="xl">
