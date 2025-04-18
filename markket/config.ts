@@ -21,4 +21,6 @@ export const markketConfig = {
   slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
   /** MARKKET_API_KEY */
   markket_api_key: process.env.MARKKET_API_KEY || '',
+  /** CISION_CREDENTIALS */
+  cision: process.env.CISION_CREDENTIALS || '',
 };
