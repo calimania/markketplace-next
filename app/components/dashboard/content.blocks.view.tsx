@@ -34,6 +34,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
     case 'paragraph':
       // it removes empty lines, and they might be intentional
       // if (!block.children.some(child => child.text || child.url)) return null;
+      // do: links displaying 'visit link' error
 
       return (
         <Text component='p'>

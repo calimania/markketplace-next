@@ -17,6 +17,7 @@ import {
 import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle, IconBrandVlc } from '@tabler/icons-react';
 import { formatReleaseDate, Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
+import { useEffect, useState } from 'react';
 
 import PageContent from '@/app/components/ui/page.content';
 import classes from './chisme.module.css';
@@ -28,7 +29,18 @@ type ReleasesPageProps = {
   page?: Page;
 }
 
-export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
+export default function ReleasesPage({ news: _news, store, page }: ReleasesPageProps) {
+  const [news, setNews] = useState(_news || []);
+
+  const getData = async () => {
+    const response = await fetch(`/api/chisme`, {});
+    const json = await response.json();
+    setNews(json?.data || []);
+  }
+
+  useEffect(() => {
+    getData();
+  }, []);
 
 
   return (

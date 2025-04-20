@@ -110,7 +110,7 @@ async function get() {
     show_del: false,
     mod_startdate: format(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), "yyyyMMdd'T'HHmmss-0000"),
     language: 'en|es',
-    keyword_or: 'art tech vc health wellness colombia latinx ecommerce screenprint business miami finance rock cumbia salsa teatro bogota calima markket a16z ycombinator colombia logotherapy data',
+    keyword_or: 'art tech vc health wellness colombia latinx ecommerce ketamine ayahuasca screenprint business miami finance rock cumbia salsa teatro bogota calima markket a16z ycombinator colombia logotherapy data breach',
     fields: 'title|body|date|release_id|company|multimedia',
     size: 50,
   })}`, server), {
@@ -144,6 +144,7 @@ async function get_by_id(release_id: string) {
       'X-Client': user,
       Authorization: `Bearer ${token}`,
     },
+    next: { revalidate: 100 },
   });
 
   console.log(`CISION:News:id:${release_id}:${response.ok}:${response.status}`)

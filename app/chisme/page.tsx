@@ -6,7 +6,6 @@
  * This module has a page to render lists & results, and display individual articles
  */
 
-import News from "@/app/utils/cision";
 import Releases from '@/app/components/chisme/releases.page';
 import { strapiClient } from '@/markket/api';
 import { Page, Store } from "@/markket";
@@ -32,15 +31,13 @@ export async function generateMetadata() {
 
 const Chisme = async () => {
 
-  const news = await News.get();
-
   const _store = await strapiClient.getStore();
   const store = _store.data?.[0] as Store;
   const _page = await strapiClient.getPage('chisme');
   const page = _page.data?.[0] as Page;
 
   return (
-    <Releases news={news?.data || []} store={store} page={page} />
+    <Releases news={[]} store={store} page={page} />
   )
 };
 
