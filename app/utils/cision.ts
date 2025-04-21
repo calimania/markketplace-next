@@ -81,6 +81,10 @@ async function Auth() {
   return token;
 };
 
+type GET = {
+  keyword_or?: string;
+}
+
 /**
  * // Release language. Example: language=en|fr -> find releases where language=en or language=fr. Case insensitive. Values: en|fr|fi|de|it|es|ru|no|pt|nl|pl|cs|id|sv|hi|gu|ms|ta|zhs|zht|ja|da|sk|th|ko|vi
  * // keyword keyword All keywords must be present in result. Multiple keywords are separated by space
@@ -94,7 +98,7 @@ async function Auth() {
  * // size - page size
  * // fields - Release fields returned in response. Available fields: title, summary, date, release_id, company, feed, industry, subject, geography, ticker, language, dateline, multimedia. Default: title|date|release_id|company.
  */
-async function get() {
+async function get({ keyword_or }: GET) {
   const [user, ] = markketConfig.cision?.split(':');
   console.info(`CISION:News:${!!cache.news}`);
 
@@ -110,7 +114,7 @@ async function get() {
     show_del: false,
     mod_startdate: format(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), "yyyyMMdd'T'HHmmss-0000"),
     language: 'en|es',
-    keyword_or: 'art tech vc health wellness colombia latinx ecommerce ketamine ayahuasca screenprint business miami finance rock cumbia salsa teatro bogota calima markket a16z ycombinator colombia logotherapy data breach',
+    keyword_or,
     fields: 'title|body|date|release_id|company|multimedia',
     size: 50,
   })}`, server), {
