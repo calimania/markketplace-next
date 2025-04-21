@@ -157,9 +157,31 @@ async function get_by_id(release_id: string) {
 }
 
 
+async function get_codes(code: 'industry' | 'subject' | 'geography' | 'exhange' | 'language') {
+  const [user,] = markketConfig.cision?.split(':');
+
+  const token = cache.token || await Auth();
+  if (!token) {
+    return null;
+  }
+  const response = await fetch(new URL(`/api/v1.0/codes/${code}`, server), {
+    method: 'GET',
+    headers: {
+      'X-Client': user,
+      Authorization: `Bearer ${token}`,
+    },
+    next: { revalidate: 100 },
+  });
+
+  console.log(`CISION:codes:${code}:${response.ok}:${response.status}`)
+  const json = await response.json();
+  return json;
+}
+
 const News = {
   get,
   get_by_id,
+  get_codes,
 }
 
 export default News;
