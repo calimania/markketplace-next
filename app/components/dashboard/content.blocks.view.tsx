@@ -9,8 +9,8 @@ export type ContentBlock = {
     type: string;
     url?: string;
     bold?: boolean;
-  }>;
-
+    children?: any;
+  }>
   language?: string;
 };
 
@@ -32,8 +32,6 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
       );
 
     case 'paragraph':
-      // it removes empty lines, and they might be intentional
-      // if (!block.children.some(child => child.text || child.url)) return null;
 
       return (
         <Text component='p'>
@@ -48,7 +46,7 @@ export const ContentBlock = ({ block }: { block: ContentBlock }) => {
                   <IconLink size={16} />
                 )}
                 <Anchor href={child.url} target="_blank">
-                  {child.text || 'Visit link'}
+                  {child?.children?.[0]?.text || 'Visit link'}
                 </Anchor>
               </Group>
             ) : (

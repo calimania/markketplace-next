@@ -1,9 +1,7 @@
-import News, { Release } from "@/app/utils/cision";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { strapiClient } from '@/markket/api';
 import { Store } from '@/markket';
 import ReleasePage from '@/app/components/chisme/release.page';
-
 
 type Props = {
   params: Promise<{release_id: string}>
@@ -28,11 +26,9 @@ export async function generateMetadata({params}: Props) {
 }
 
 export default async function ChismeRelease({params}: Props) {
-  const { release_id} = await params;
-  const _release = await News.get_by_id(release_id);
-  const release = _release?.data as Release;
+  const { release_id } = await params;
 
   return (
-    <ReleasePage release={release} />
+    <ReleasePage release_id={release_id} />
   )
 }

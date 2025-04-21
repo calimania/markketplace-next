@@ -12,11 +12,13 @@ import {
   Card,
   SimpleGrid,
   Box,
+  Skeleton,
   Center,
 } from '@mantine/core';
 import { IconCalendarEvent, IconCompass, IconBuildingStore, IconNews, IconBrandGoogle, IconBrandVlc } from '@tabler/icons-react';
 import { formatReleaseDate, Release } from '@/app/utils/cision';
 import { Store, Page } from '@/markket';
+import { useEffect, useState } from 'react';
 
 import PageContent from '@/app/components/ui/page.content';
 import classes from './chisme.module.css';
@@ -28,7 +30,20 @@ type ReleasesPageProps = {
   page?: Page;
 }
 
-export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
+export default function ReleasesPage({ news: _news, store, page }: ReleasesPageProps) {
+  const [news, setNews] = useState(_news || []);
+  const [loading, setLoading] = useState(true);
+
+  const getData = async () => {
+    const response = await fetch(`/api/chisme`, {});
+    const json = await response.json();
+    setNews(json?.data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    getData();
+  }, []);
 
 
   return (
@@ -80,7 +95,17 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
           </Box>
         </Paper>
       )}
-      {news?.length ? (
+
+      {loading && (
+        <>
+          <Skeleton height={50} circle mb="xl" />
+          <Skeleton height={32} radius="xs" />
+          <Skeleton height={32} mt={6} radius="xs" />
+          <Skeleton height={32} mt={6} width="70%" radius="xs" />
+        </>
+      )}
+
+      {!loading && (news?.length ? (
         <SimpleGrid
           cols={1}
         >
@@ -184,7 +209,7 @@ export default function ReleasesPage({ news, store, page }: ReleasesPageProps) {
             </Text>
           </Stack>
         </Center>
-      )}
+      ))}
 
       {store && (
         <Paper withBorder p="md" radius="md" mt="xl">
