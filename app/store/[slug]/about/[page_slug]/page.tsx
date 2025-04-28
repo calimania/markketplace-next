@@ -3,8 +3,9 @@ import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import PageContent from '@/app/components/ui/page.content';
 import { generateSEOMetadata } from '@/markket/metadata';
-import { Page } from "@/markket/page";
+import { Page, Album } from "@/markket";
 import { Metadata } from "next";
+import Albums from '@/app/components/ui/albums.grid';
 
 interface PageProps {
   params: Promise<{ page_slug: string, slug: string }>;
@@ -54,6 +55,17 @@ export default async function AboutPage({ params }: PageProps) {
         <Title order={1}>{page.Title}</Title>
 
         <PageContent params={{ page }} />
+
+        <div className="mb-6">
+          {page?.albums && page.albums.length > 0 && (
+            <div className="py-10">
+              <Title order={2} size="h2" ta="left" mb="xl">
+                Related
+              </Title>
+              <Albums albums={page.albums as Album[]} store_slug={slug as ''} />
+            </div>
+          )}
+        </div>
       </Stack>
     </Container>
   );

@@ -235,15 +235,16 @@ const ContentEditor = ({
             </Tabs.List>
 
             <Group>
-              <Tooltip label="Insert image">
-                <ActionIcon
-                  onClick={() => setImageModalOpen(true)}
-                  variant="light"
-                  color="blue"
-                >
-                  <IconPhoto size={16} />
-                </ActionIcon>
-              </Tooltip>
+              {format == 'markdown' && (
+                <Tooltip label="Insert image">
+                  <ActionIcon
+                    onClick={() => setImageModalOpen(true)}
+                    variant="light"
+                    color="blue"
+                  >
+                    <IconPhoto size={16} />
+                  </ActionIcon>
+                </Tooltip>)}
             </Group>
           </Group>
 
@@ -288,13 +289,15 @@ const ContentEditor = ({
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
-                  <ActionIcon
-                    variant="subtle"
-                    onClick={() => setImageModalOpen(true)}
-                    title="Insert image"
-                  >
-                    <IconPhotoPlus size={18} />
-                  </ActionIcon>
+                  {format == 'markdown' && (
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={() => setImageModalOpen(true)}
+                      title="Insert image"
+                    >
+                      <IconPhotoPlus size={18} />
+                    </ActionIcon>
+                  )}
                 </RichTextEditor.ControlsGroup>
               </RichTextEditor.Toolbar>
 
