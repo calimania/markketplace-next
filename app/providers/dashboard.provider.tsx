@@ -32,39 +32,42 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
     }
   }, [store]);
 
-  useEffect(() => {
-    const getAccountData = async (store_id: string) => {
-      if (lastId === store_id) {
-        setIsLoading(false);
-        return;
-      }
-
-      setLastId(store_id);
-      setIsLoading(true);
-
-      try {
-        const response = await fetch(new URL('/api/markket?stripe', markketConfig.api), {
-          body: JSON.stringify({
-            action: 'stripe.account',
-            store_id: store_id,
-          }),
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const { data } = await response.json();
-        setAccount(data);
-      } catch (error) {
-        console.error('Failed to fetch Stripe account:', error);
-      }
-
+  const getAccountData = async (store_id: string) => {
+    if (lastId === store_id) {
       setIsLoading(false);
+      return;
+    }
+    setAccount({} as StripeAccount);
+    setLastId(store_id);
+    setIsLoading(true);
 
-    };
+    try {
+      const response = await fetch(new URL('/api/markket?stripe', markketConfig.api), {
+        body: JSON.stringify({
+          action: 'stripe.account',
+          store_id: store_id,
+        }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const { data } = await response.json();
+      setAccount(data);
+    } catch (error) {
+      console.error('Failed to fetch Stripe account:', error);
+    }
 
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     if (store?.STRIPE_CUSTOMER_ID && store?.documentId) {
       getAccountData(store.documentId);
+    }
+
+    if (!store?.STRIPE_CUSTOMER_ID) {
+      setAccount({} as StripeAccount);
     }
   }, [store, lastId]);
 

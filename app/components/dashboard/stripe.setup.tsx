@@ -67,6 +67,9 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
     try {
       const account = await markket.stripeConnect('account', {
         store: store?.documentId,
+        // test_mode: true,
+        // account_type: 'custom',
+        // account_country: 'CO',
       });
 
       if (!account) {

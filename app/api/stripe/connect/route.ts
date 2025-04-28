@@ -44,9 +44,19 @@ export async function POST(req: NextRequest) {
   try {
     switch (action) {
       case 'account': {
-        const account = await stripe.accounts.create({
-          type: 'standard',
-          email: userEmail
+        const { test_mode, account_type, account_country } = body;
+        const account = await (!!test_mode ? stripeClient.getTestInstance() : stripe).accounts.create({
+          type: account_type || 'standard',
+          email: userEmail,
+          country: account_country || 'US',
+        // capabilities: {
+        //   transfers: {
+        //     requested: true,
+        //   },
+        // },
+        // tos_acceptance: {
+        //   service_agreement: 'recipient',
+        // },
         });
 
         console.log('stripe:connect:account:', { account: account?.id, store });
