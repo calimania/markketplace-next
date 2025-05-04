@@ -48,7 +48,7 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
     console.log("form item ", { action, update, id, values })
 
     try {
-      if (action == 'new' && create) return create(values, store.documentId);
+      if (action == 'new' && create) return create(values, store?.documentId);
       if (action == 'edit' && update && id) return update(values, item.documentId, store.documentId);
     } catch (error) {
       console.warn({ error });
