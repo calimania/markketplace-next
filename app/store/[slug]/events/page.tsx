@@ -1,11 +1,11 @@
-import { Event } from "@/markket/event.d";
-import { Store } from "@/markket/store.d";
+import { Store, Page, Event } from "@/markket";
 import { strapiClient } from "@/markket/api.strapi";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container, Title, Text, Paper, SimpleGrid, Group } from '@mantine/core';
 import Card from '@/app/components/events/event.card';
 import { EventMainImage } from "@/app/components/events/event.main.image";
+import PageContent from '@/app/components/ui/page.content';
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
@@ -16,11 +16,14 @@ export async function generateMetadata({ params }: EventsPageProps) {
   const response = await strapiClient.getStore(slug);
   const store = response?.data?.[0] as Store;
 
+  const pageResponse = await strapiClient.getPage('events');
+  const page = pageResponse?.data?.[0] as Page;
+
   return generateSEOMetadata({
     slug,
     entity: {
-      SEO: store?.SEO,
-      title: `${store?.title} Events`,
+      SEO: page?.SEO || store?.SEO,
+      title: page?.Title || `${store?.title} Events`,
       id: store?.id?.toString(),
       url: `/store/${slug}/events`,
     },
@@ -34,7 +37,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const store = storeResponse?.data?.[0] as Store;
 
   const response = await strapiClient.getPage('events', slug);
-  const eventPage = response?.data?.[0];
+  const eventPage = response?.data?.[0] as Page;
 
   if (!store) {
     notFound();
@@ -118,6 +121,8 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
           <Text size="lg">No events scheduled at the moment.</Text>
         </Paper>
       )}
+
+      <PageContent params={{ page: eventPage }} />
     </Container>
   );
-}
+};

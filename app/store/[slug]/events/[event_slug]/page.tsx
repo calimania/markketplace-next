@@ -76,7 +76,7 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                RSVP in external site
+                RSVP in {(new URL(event?.SEO?.metaUrl)?.hostname)}
               </a>
             </Button>
           )}
