@@ -109,7 +109,7 @@ export default async function AnyPage({ params }: AnyPageProps) {
   }
 
   return (
-    <Container size="lg" className="py-20">
+    <Container size="xl" className="py-20">
       <Stack gap="xl">
         {/* Hero Section */}
         <div className="text-center">

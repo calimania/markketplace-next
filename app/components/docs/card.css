@@ -2,3 +2,46 @@
     display: flex;
     align-items: center;
 }
+/* Neobrutalist blog card hover effects */
+.blog-card {
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s, background 0.2s;
+}
+
+.blog-card:hover {
+    box-shadow: 12px 12px 0 #0468ff, 0 8px 32px rgba(0, 0, 255, 0.10) !important;
+    border-color: #0ea5e9;
+    background: #e0f2fe;
+    transform: translateY(-4px) scale(1.02);
+}
+
+.blog-card-title a {
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.blog-card:hover .blog-card-title {
+    color: #0ea5e9 !important;
+    border-color: #0ea5e9 !important;
+}
+
+.blog-card:hover a {
+    color: #ff13f7 !important;
+    border-color: #ff13f7 !important;
+}
+
+.blog-card-img {
+    transition: transform 0.3s cubic-bezier(.4, 2, .6, 1);
+}
+
+.blog-card:hover .blog-card-img {
+    transform: scale(1.08) rotate(-1deg);
+}
+
+.blog-card-learn {
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.blog-card:hover .blog-card-learn {
+    background: #0ea5e9;
+    color: #fff;
+    border-color: #0ea5e9;
+}
