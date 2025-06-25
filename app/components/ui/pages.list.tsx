@@ -9,7 +9,7 @@ type PageListProps = {
   storeSlug?: string;
 };
 
-const excluded_list = ['docs', 'blog', 'newsletter', 'events', 'about', 'products'];
+const excluded_list = ['docs', 'blog', 'events', 'about', 'products'];
 
 export const PageList = ({ pages, storeSlug}: PageListProps) => {
   return (
