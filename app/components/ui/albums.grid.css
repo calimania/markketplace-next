@@ -1,0 +1,40 @@
+/* Neobrutalist Album Card Hover Effects */
+.album-card-neobrutal {
+  border: 3px solid #222 !important;
+  box-shadow: 6px 6px 0 #222;
+  background: #fffbe6 !important;
+  color: #222 !important;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.album-card-neobrutal:hover, .album-card-neobrutal:focus {
+  box-shadow: 12px 12px 0 #222, 0 8px 32px #0ea5e9aa;
+  border-color: #0ea5e9;
+  background: #e0f2fe !important;
+  color: #0ea5e9 !important;
+  transform: translateY(-4px) scale(1.02);
+}
+.album-card-img {
+  transition: transform 0.3s cubic-bezier(.4,2,.6,1);
+}
+.album-card-neobrutal:hover .album-card-img {
+  transform: scale(1.08) rotate(-1deg);
+}
+.album-card-title {
+  transition: color 0.2s;
+}
+.album-card-neobrutal:hover .album-card-title {
+  color: #0ea5e9;
+}
+.album-card-badge {
+  transition: background 0.2s, color 0.2s;
+}
+.album-card-neobrutal:hover .album-card-badge {
+  background: #0ea5e9 !important;
+  color: #fff !important;
+}
+.album-card-desc {
+  transition: color 0.2s;
+}
+.album-card-neobrutal:hover .album-card-desc {
+  color: #0ea5e9 !important;
+}

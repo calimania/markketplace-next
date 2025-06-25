@@ -12,6 +12,7 @@ import {
 } from '@mantine/core';
 import Link from 'next/link';
 import { IconUsers } from '@tabler/icons-react';
+import './albums.grid.css';
 
 interface AlbumCardProps {
   album: Album;
@@ -24,7 +25,6 @@ interface AlbumsProps {
 }
 
 function AlbumCard({ album, store_slug }: AlbumCardProps) {
-
   const description = album.description || album?.SEO?.metaDescription;
 
   return (
@@ -34,36 +34,44 @@ function AlbumCard({ album, store_slug }: AlbumCardProps) {
         padding="lg"
         radius="md"
         withBorder
-        className="transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+        className="album-card-neobrutal"
+        style={{
+          borderWidth: 3,
+          borderColor: '#222',
+          borderStyle: 'solid',
+          boxShadow: '6px 6px 0 #222',
+          background: '#fffbe6',
+          transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+        }}
       >
-        <>
-          <AspectRatio ratio={16 / 9} pos="relative">
-            <Image
-              src={album.cover?.url || album.SEO?.socialImage?.url}
-              alt={album.title}
-              height={200}
-            />
-            <Overlay
-              gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .85) 90%)"
-              opacity={0.5}
-            />
-          </AspectRatio>
-        </>
-          <Title order={3} lineClamp={2}>
-            {album.title}
-          </Title>
-          <Badge
-            leftSection={<IconUsers size={14} />}
-            variant="light"
-            mt="sm"
-          >
-            {album.tracks.length} tracks
-          </Badge>
+        <AspectRatio ratio={16 / 9} pos="relative" className="album-card-img-wrap">
+          <Image
+            src={album.cover?.url || album.SEO?.socialImage?.url}
+            alt={album.title}
+            style={{ objectFit: 'cover', objectPosition: 'top', width: '100%', height: '100%', borderRadius: 0, display: 'block', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)' }}
+            className="album-card-img"
+          />
+          <Overlay
+            gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .85) 90%)"
+            opacity={0.5}
+          />
+        </AspectRatio>
+        <Title order={3} lineClamp={2} className="album-card-title" mt="md">
+          {album.title}
+        </Title>
+        <Badge
+          leftSection={<IconUsers size={14} />}
+          variant="light"
+          mt="sm"
+          className="album-card-badge"
+        >
+          {album.tracks.length} tracks
+        </Badge>
         {description && (
-            <Text size="sm" c="dimmed" mt="sm">
+          <Text size="sm" c="dimmed" mt="sm" className="album-card-desc">
             {description}
-            </Text>
-          )}
+          </Text>
+        )}
       </Card>
     </Link>
   );
@@ -79,7 +87,7 @@ export default function Albums({ albums, store_slug }: AlbumsProps) {
   return (
     <Container size="xl" py="xl">
       <SimpleGrid
-        cols={{ base: 1, sm: 2, md: 3 }}
+        cols={{ base: 1, md: 2 }}
         spacing="xl"
         verticalSpacing="xl"
       >

@@ -88,7 +88,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <Container size={420} my={40}>
+    <Container size={633} my={40}>
       <Title ta="center" fw={900}>
         Welcome to Markket.ts!
       </Title>

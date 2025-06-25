@@ -5,6 +5,7 @@ import { IconHome, IconShoppingCart, IconLockBolt, IconArticle, IconInfoCircle, 
 import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
+import './store-navbar.css';
 
 function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () => void }) {
   return (
@@ -15,7 +16,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="subtle"
             leftSection={<IconHome size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn"
           >
             Store Home
           </Button>
@@ -25,7 +26,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="subtle"
             leftSection={<IconShoppingCart size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn"
           >
             Products
           </Button>
@@ -35,7 +36,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="subtle"
             leftSection={<IconArticle size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn"
           >
             Articles
           </Button>
@@ -45,7 +46,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="subtle"
             leftSection={<IconInfoCircle size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn"
           >
             About
           </Button>
@@ -58,7 +59,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="light"
             leftSection={<IconArrowLeft size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn store-nav-btn-light"
           >
             All Stores
           </Button>
@@ -68,7 +69,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="light"
             leftSection={<IconArrowLeft size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn store-nav-btn-light"
           >
             Markkët Home
           </Button>
@@ -78,7 +79,7 @@ function StoreNavigation({ slug, onNavigate }: { slug: string; onNavigate?: () =
             variant="light"
             leftSection={<IconLockBolt size={18} />}
             fullWidth
-            className="justify-start h-12"
+            className="justify-start h-12 store-nav-btn store-nav-btn-light"
           >
             Auth Page
           </Button>
