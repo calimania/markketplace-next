@@ -1,0 +1,32 @@
+/* Neobrutalist PageList card hover effects */
+.page-list-card {
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.page-list-card:hover {
+  box-shadow: 12px 12px 0 #222, 0 8px 32px rgba(0,0,0,0.10);
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+  transform: translateY(-4px) scale(1.02);
+}
+.page-list-img {
+  transition: transform 0.3s cubic-bezier(.4,2,.6,1);
+}
+.page-list-card:hover .page-list-img {
+  transform: scale(1.08) rotate(-1deg);
+}
+.page-list-title {
+  transition: color 0.2s;
+}
+.page-list-card:hover .page-list-title {
+  color: #0ea5e9;
+}
+.page-list-read {
+  transition: color 0.2s, gap 0.2s;
+}
+.page-list-card:hover .page-list-read {
+  color: #0ea5e9;
+  gap: 8px;
+}
+.page-list-footer {
+  border-top: 2px solid #222 !important;
+}
