@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Auth verification failed:', error);
       logout();
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     if (user?.id && pathname.includes('dashboard')) {
@@ -120,14 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
-  }, []);
+  }, [fetchStores, pathname, user?.id, verifyAndRefreshUser]);
 
   useEffect(() => {
     if (user?.id && pathname.includes('dashboard')) {
       fetchStores();
     }
 
-  }, [user?.id, fetchStores,]);
+  }, [user?.id, fetchStores, pathname]);
 
   const refreshUser = async () => {
     await verifyAndRefreshUser();
