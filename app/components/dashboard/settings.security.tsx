@@ -17,7 +17,7 @@ import {
 import { markketConfig } from '@/markket/config';
 
 const SecuritySettings = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
@@ -139,6 +139,11 @@ const SecuritySettings = () => {
           </Group>
         </Stack>
       </form>
+
+      <Divider my="xl" label="xxx" labelPosition="center" />
+      <Group justify="flex-end" mt="md">
+        <Button color="red" variant="outline" onClick={logout} leftSection={<IconX size={16} />}>Log out</Button>
+      </Group>
     </Paper>
   );
 };

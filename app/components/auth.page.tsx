@@ -49,7 +49,8 @@ export default function AuthPage() {
   const router = useRouter();
   const { logout, } = useAuth();
   const [store, setStore] = useState({} as Store);
-  const [isLoggedIn,] = useState(false);
+  const { maybe } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [page, setPage] = useState({} as Page);
 
   useEffect(() => {
@@ -62,8 +63,9 @@ export default function AuthPage() {
       setPage(data[0] as Page);
     };
 
+    setIsLoggedIn(maybe());
     fetchData();
-  }, []);
+  }, [maybe]);
 
   const loggedInOptions: Option[] = [
     {

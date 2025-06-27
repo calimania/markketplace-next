@@ -11,6 +11,7 @@ import { Store, SEO } from '@/markket';
 import DashboardForm from '@/app/components/ui/form'
 import { useContext, } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
+import { useRouter } from 'next/navigation';
 
 interface StoreFormValues {
   title: string;
@@ -43,16 +44,25 @@ type ItemFormProps = {
 
 const FormItem = ({ id, item, create, update, form, singular, plural, description, action }: ItemFormProps) => {
   const { store } = useContext(DashboardContext);
+  const router = useRouter();
 
   const handleSubmit = async (values: StoreFormValues) => {
     console.log("form item ", { action, update, id, values })
+    let result = null as (null | { data: { documentId: string } });
 
     try {
-      if (action == 'new' && create) return create(values, store?.documentId);
-      if (action == 'edit' && update && id) return update(values, item.documentId, store.documentId);
+      if (action == 'new' && create) {
+        result = await create(values, store?.documentId);
+      }
+      if (action == 'edit' && update && id) {
+        result = await update(values, item.documentId, store.documentId);
+      }
     } catch (error) {
       console.warn({ error });
     }
+
+    console.log(`${singular}:${action}`, { id: result?.data?.documentId });
+    router.push(`/dashboard/${singular}/`)
   };
 
   return (
