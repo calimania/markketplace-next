@@ -12,6 +12,7 @@ import DashboardForm from '@/app/components/ui/form'
 import { useContext, } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/auth.provider';
 
 interface StoreFormValues {
   title: string;
@@ -45,6 +46,7 @@ type ItemFormProps = {
 const FormItem = ({ id, item, create, update, form, singular, plural, description, action }: ItemFormProps) => {
   const { store } = useContext(DashboardContext);
   const router = useRouter();
+  const { fetchStores } = useAuth();
 
   const handleSubmit = async (values: StoreFormValues) => {
     console.log("form item ", { action, update, id, values })
@@ -62,7 +64,12 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
     }
 
     console.log(`${singular}:${action}`, { id: result?.data?.documentId });
-    router.push(`/dashboard/${singular}/`)
+    if (singular == 'store') {
+      setTimeout(async () => {
+        await fetchStores();
+        router.push(`/dashboard/${singular}/`)
+      }, 800);
+    }
   };
 
   return (
