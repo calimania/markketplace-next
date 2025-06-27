@@ -5,10 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Container, Paper, Title, Text, Button, Group } from '@mantine/core';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { markketClient  } from '@/markket/api.markket';
+import { Suspense } from 'react';
 
 import MagicLinkPage from '../../components/auth/magic.page';
 
-export default function MagicPage() {
+function MagicPage() {
   const router = useRouter();
   const params = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -85,3 +86,11 @@ export default function MagicPage() {
     </Container>
   );
 }
+
+export default function MagicPageWrapper() {
+  return (
+    <Suspense fallback={<div>...</div>}>
+      <MagicPage />
+    </Suspense>
+  );
+};

@@ -93,12 +93,17 @@ export default function RegisterPage() {
         Welcome to Markket.ts!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Already have an account?{' '}
-        <Anchor size="sm" component="button" onClick={() => router.push('/auth/login')}>
-          Login
+        Request a secret link{' '}
+        <Anchor size="sm" component="button" onClick={() => router.push('/auth/magic')}>
+          [ /auth/magic]
         </Anchor>
       </Text>
-
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Login with password?{' '}
+        <Anchor size="sm" component="button" onClick={() => router.push('/auth/login')}>
+          [ /auth/login]
+        </Anchor>
+      </Text>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>

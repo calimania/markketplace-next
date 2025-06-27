@@ -12,14 +12,11 @@ import {
   rem,
 } from '@mantine/core';
 import {
-  IconUserPlus,
   IconLogin,
-  IconKey,
-  IconBrandGithub,
+  IconWand,
   IconHomeHeart,
   IconLogout,
   IconDashboard,
-  IconMailHeart
 } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { useRouter } from 'next/navigation';
@@ -30,7 +27,6 @@ import { Store } from '@/markket/store';
 import { markketConfig } from '@/markket/config';
 import { Page } from '@/markket/page';
 
-import AuthUnconfirmed from './auth/auth.unconfirmed';
 import './auth.page.neobrutal.css';
 
 type Option = {
@@ -51,10 +47,9 @@ type Option = {
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout, confirmed, refreshUser, } = useAuth();
+  const { logout, } = useAuth();
   const [store, setStore] = useState({} as Store);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isLoggedIn,] = useState(false);
   const [page, setPage] = useState({} as Page);
 
   useEffect(() => {
@@ -69,16 +64,6 @@ export default function AuthPage() {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (isLoggedIn) refreshUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    setIsLoggedIn(maybe());
-    setIsConfirmed(confirmed());
-  }, [maybe, confirmed]);
 
   const loggedInOptions: Option[] = [
     {
@@ -115,34 +100,24 @@ export default function AuthPage() {
 
   const loggedOutOptions: Option[] = [
     {
+      title: 'Magic Link',
+      description: 'Speak, friend, and enter',
+      icon: IconWand,
+      action: () => router.push('/auth/magic'),
+      variant: 'filled',
+      action_txt: '🧙',
+      color: '#0ea5e9',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
+    },
+    {
       title: 'Sign In',
-      description: 'Welcome back! Access your store and manage your products',
+      description: 'Type a password and access your dashboard',
       icon: IconLogin,
       action: () => router.push('/auth/login'),
       variant: 'filled',
       action_txt: 'Sign in',
       color: '#0ea5e9',
       bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
-    },
-    {
-      title: 'Create Account',
-      description: 'Start selling with your own store. It’s free and easy!',
-      icon: IconUserPlus,
-      action: () => router.push('/auth/register'),
-      variant: 'light',
-      action_txt: 'Register',
-      color: '#f472b6',
-      bg: 'linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%)',
-    },
-    {
-      title: 'Reset Password',
-      description: 'Forgot your password? No worries, we’ll help you out!',
-      icon: IconKey,
-      action: () => router.push('/auth/forgot-password'),
-      variant: 'subtle',
-      action_txt: 'Request link',
-      color: '#fbbf24',
-      bg: 'linear-gradient(135deg, #fef9c3 0%, #fdf2f8 100%)',
     },
     {
       title: 'Back to Homepage',
@@ -154,63 +129,21 @@ export default function AuthPage() {
       color: '#0ea5e9',
       bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
     },
-    {
-      title: 'Continue with GitHub',
-      disabled: true,
-      description: '[coming soon] create an account using GitHub',
-      icon: IconBrandGithub,
-      action: () => {
-        const url = new URL(`/api/connect/github`, markketConfig.api);
-        window.location.href = url.toString();
-      },
-      variant: 'filled',
-      action_txt: 'GitHub',
-      color: '#333',
-      bg: 'linear-gradient(135deg, #e0e7ef 0%, #fdf2f8 100%)',
-    },
   ];
 
-  const unconfirmedOptions: Option[] = [
-    {
-      title: 'Login',
-      description: 'You need to enter your password after confirming your email',
-      icon: IconMailHeart,
-      action: () => router.push('/auth/login'),
-      variant: 'filled',
-      action_txt: 'Login',
-      color: '#0ea5e9',
-      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
-    },
-    {
-      title: 'Back to Homepage',
-      description: 'Explore the marketplace or discover new stores',
-      icon: IconHomeHeart,
-      action: () => router.push('/'),
-      variant: 'subtle',
-      action_txt: 'Go home',
-      color: '#f472b6',
-      bg: 'linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%)',
-    },
-  ];
-
-  const title = page?.Title || page?.SEO?.metaTitle || `Welcome to ${store?.title || 'Markket.ts'}!`;
+  const title = page?.Title || page?.SEO?.metaTitle || `Welcome to the prancin ${store?.title || 'Markket'}!`;
 
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
         {title}
       </Title>
-
       <Text c="dimmed" size="sm" ta="center" mt="sm">
         {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
 
-      {isLoggedIn && !isConfirmed && (
-        <AuthUnconfirmed />
-      )}
-
       <Stack mt={30}>
-        {(isLoggedIn ? (isConfirmed ? loggedInOptions : unconfirmedOptions) : loggedOutOptions).map((option, index) => (
+        {(isLoggedIn ? loggedInOptions : loggedOutOptions).map((option, index) => (
           <Paper
             key={index}
             withBorder
