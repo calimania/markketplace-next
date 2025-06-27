@@ -125,7 +125,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 className="text-white border-white hover:bg-white transition-all"
                 component="a"
                 leftSection={<IconArrowRight size={20} />}
-                href={!isLoggedIn ? '/auth/register' : '/dashboard/store'}
+                href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
               >
                 {!isLoggedIn ? 'Get Started' : 'Dashboard'}
               </Button>
@@ -186,7 +186,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
           <Group mt="xl">
             <Button
               component="a"
-              href={isLoggedIn ? "/dashboard/store" : "/auth/register"}
+              href={isLoggedIn ? "/dashboard/store" : "/auth/magic"}
               size="xl"
               leftSection={<IconHeartCode size={24} />}
               variant="white"

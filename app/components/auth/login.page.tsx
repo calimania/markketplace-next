@@ -106,9 +106,15 @@ export default function LoginPage() {
         Welcome back!
       </Title>
       <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Request a secret link{' '}
+        <Anchor size="sm" component="button" onClick={() => router.push('/auth/magic')}>
+          [ /auth/magic]
+        </Anchor>
+      </Text>
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
         Don&apos;t have an account yet?{' '}
         <Anchor size="sm" component="button" onClick={() => router.push('/auth/register')}>
-          Create account
+          [ /auth/register]
         </Anchor>
       </Text>
 

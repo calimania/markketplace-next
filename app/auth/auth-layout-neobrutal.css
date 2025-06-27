@@ -1,0 +1,79 @@
+.auth-layout-neobrutal form {
+  max-width: 360px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.auth-layout-neobrutal .mantine-TextInput-root,
+.auth-layout-neobrutal .mantine-PasswordInput-root {
+  margin-bottom: 1rem;
+}
+.auth-layout-neobrutal input[type="text"],
+.auth-layout-neobrutal input[type="email"],
+.auth-layout-neobrutal input[type="password"] {
+  border: 2.5px solid #0ea5e9 !important;
+  border-radius: 8px;
+  background: #23272e !important;
+  color: #fff !important;
+  font-size: 1.18rem;
+  font-family: monospace;
+  padding: 0.85rem 1.1rem;
+  box-shadow: 2px 2px 0 #f472b6;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+.auth-layout-neobrutal input:focus {
+  border-color: #f472b6 !important;
+  box-shadow: 4px 4px 0 #0ea5e9;
+  outline: none;
+  color: #fff !important;
+  background: #18181b !important;
+}
+.auth-layout-neobrutal button[type="submit"],
+.auth-layout-neobrutal .mantine-Button-root {
+  border: 2.5px solid #0ea5e9 !important;
+  background: #0ea5e9 !important;
+  color: #fff !important;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 1px;
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 #f472b6;
+  font-size: 1.18rem;
+  padding-top: 1.1rem;
+  padding-bottom: 1.1rem;
+  padding-left: 2.2rem;
+  padding-right: 2.2rem;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+.auth-layout-neobrutal button[type="submit"]:hover,
+.auth-layout-neobrutal .mantine-Button-root:hover {
+  background: #f472b6 !important;
+  color: #fff !important;
+  border-color: #f472b6 !important;
+  box-shadow: 6px 6px 0 #0ea5e9;
+  transform: translateY(-2px) scale(1.03);
+}
+.auth-layout-neobrutal label {
+  font-family: monospace;
+  font-weight: 700;
+  color: #0ea5e9;
+  letter-spacing: 0.5px;
+  font-size: 1.08rem;
+}
+.auth-layout-neobrutal .mantine-Text-root,
+.auth-layout-neobrutal .mantine-Anchor-root,
+.auth-layout-neobrutal .mantine-Group-root,
+.auth-layout-neobrutal .mantine-Stack-root {
+  font-size: 1.13rem;
+}
+.auth-layout-neobrutal .mantine-Title-root {
+  font-size: 2.1rem !important;
+}
+.auth-layout-neobrutal .mantine-Input-description {
+  font-size: 1.08rem !important;
+  color: #f472b6 !important;
+  font-family: monospace;
+  font-weight: 600;
+}

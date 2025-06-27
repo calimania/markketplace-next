@@ -1,0 +1,56 @@
+/* Neobrutalist Auth Option Paper & Button Effects */
+.auth-option-paper-neobrutal {
+  border: 3px solid #222 !important;
+  box-shadow: 6px 6px 0 #222;
+  background: #fffbe6 !important;
+  color: #222 !important;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.auth-option-paper-neobrutal:hover, .auth-option-paper-neobrutal:focus-within {
+  box-shadow: 12px 12px 0 #222, 0 8px 32px #0ea5e9aa;
+  border-color: #0ea5e9;
+  background: #e0f2fe !important;
+  color: #0ea5e9 !important;
+  transform: translateY(-4px) scale(1.02);
+}
+.auth-option-btn-neobrutal {
+  border: 2px solid #222 !important;
+  background: #fff !important;
+  color: #222 !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: box-shadow 0.18s, border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s;
+}
+.auth-option-paper-neobrutal:hover .auth-option-btn-neobrutal,
+.auth-option-btn-neobrutal:hover, .auth-option-btn-neobrutal:focus {
+  background: #0ea5e9 !important;
+  color: #fff !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 4px 16px #0ea5e9aa;
+  transform: scale(1.05) ;
+}
+.auth-option-icon-neobrutal {
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.auth-option-paper-neobrutal:hover .auth-option-icon-neobrutal {
+  background: #0ea5e9 !important;
+  color: #fff !important;
+  transform: scale(1.1) rotate(-8deg);
+}
+.auth-bottom-paper-neobrutal {
+  border: 3px solid #f472b6 !important;
+  box-shadow: 6px 6px 0 #f472b6 !important;
+  background: linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%) !important;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+  animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1);
+}
+.auth-bottom-paper-neobrutal:hover, .auth-bottom-paper-neobrutal:focus-within {
+  box-shadow: 12px 12px 0 #0ea5e9 !important;
+  border-color: #0ea5e9 !important;
+  background: linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%) !important;
+  transform: translateY(-4px) scale(1.02);
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}

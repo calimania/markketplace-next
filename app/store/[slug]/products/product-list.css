@@ -1,0 +1,10 @@
+/* Neobrutalist Product Card Hover Effects */
+.product-card-neobrutal {
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.product-card-neobrutal:hover {
+  box-shadow: 12px 12px 0 #222, 0 8px 32px rgba(0,0,0,0.10);
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+  transform: translateY(-4px) scale(1.02);
+}

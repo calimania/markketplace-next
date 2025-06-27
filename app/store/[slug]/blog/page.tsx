@@ -60,7 +60,7 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   const description = page?.SEO?.metaDescription || `Blog posts for ${store?.title || store?.SEO?.metaTitle}`;
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="xl" py="xl">
       <Stack gap="xl">
         <div className="text-center">
           <Title order={1}>
@@ -72,7 +72,7 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
           </Text>
         </div>
         {posts.length > 0 ? (
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
+          <SimpleGrid cols={{ base: 1, md: 2 }}>
             {posts.map((post) => (
               <BlogPostCard key={(post as Article)?.id} post={post as Article} prefix={`./store/${slug}/blog`} />
             ))}

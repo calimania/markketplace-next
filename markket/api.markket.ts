@@ -124,4 +124,24 @@ export class markketClient {
       body: options,
     });
   };
+
+
+  public verifyMagicCode = async (code: string): Promise<{ jwt?: string; user?: { id: string, username: string, email: string } }> => {
+
+    const _url = new URL(`/api/auth-magic/verify`, markketConfig.api);
+
+    const response = await fetch(_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    })
+
+    if (!response.ok) {
+      return {};
+    }
+
+    const json = response.json();
+
+    return json;
+  }
 };

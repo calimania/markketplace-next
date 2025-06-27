@@ -50,3 +50,7 @@ storybook-static
 *.draft*
 
 .turbo
+
+.bevel
+.vscode
+

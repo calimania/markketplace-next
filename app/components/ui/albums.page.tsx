@@ -22,6 +22,7 @@ import AlbumNav from '@/app/components/ui/album.nav';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import './albums.page.css';
 
 // @ts-expect-error Card is a special polymorphic component
 const MotionCard = motion(Card);
@@ -101,28 +102,39 @@ const AlbumPage = ({ store, album }: AlbumPageProps) => {
                 withBorder
                 radius="md"
                 padding="lg"
+                className="album-track-card-neobrutal"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0 }
                 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                style={{
+                  borderWidth: 3,
+                  borderColor: '#222',
+                  borderStyle: 'solid',
+                  boxShadow: '6px 6px 0 #222',
+                  background: '#fffbe6',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+                }}
               >
                 <div className="mb-md">
-                  <AspectRatio ratio={16 / 9}>
+                  <AspectRatio ratio={16 / 9} className="album-track-img-wrap-neobrutal">
                     <Image
                       src={track.SEO?.socialImage?.url}
                       alt={track.title}
                       fallbackSrc="https://placehold.co/600x400?text=Track"
+                      className="album-track-img-neobrutal"
+                      style={{ objectFit: 'cover', objectPosition: 'top', width: '100%', height: '100%', borderRadius: 0, display: 'block', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)' }}
                     />
                   </AspectRatio>
                 </div>
                 <Stack mt="md" gap="xs">
-                  <Text fw={500} size="lg" lineClamp={2}>
+                  <Text fw={500} size="lg" lineClamp={2} className="album-track-title-neobrutal">
                     <Link href={`/store/${store.slug}/${album.slug}/${track.slug}`} >
                       {track.title}
                     </Link>
                   </Text>
-                  <Text size="sm" c="dimmed" lineClamp={2}>
+                  <Text size="sm" c="dimmed" lineClamp={2} className="album-track-desc-neobrutal">
                     {track.description}
                   </Text>
                 </Stack>

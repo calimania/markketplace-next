@@ -1,0 +1,41 @@
+/* Hero Paper hover/focus effect */
+.product-hero-paper {
+  transition: box-shadow 0.25s, border-color 0.25s, background 0.25s;
+  border: 3px solid #222;
+  box-shadow: 6px 6px 0 #222;
+}
+.product-hero-paper:hover, .product-hero-paper:focus-within {
+  box-shadow: 12px 12px 0 #222, 0 8px 32px rgba(0,0,0,0.10);
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+}
+
+/* Animated divider */
+.product-divider {
+  border-top: 3px dashed #222 !important;
+  transition: border-color 0.3s, filter 0.3s;
+}
+.product-divider:hover {
+  border-color: #0ea5e9 !important;
+  filter: drop-shadow(0 2px 0 #0ea5e9);
+}
+
+/* About section fade-in */
+.about-fade-in {
+  animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1);
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* StoreHeaderButtons (if you want to target them) */
+.StoreHeaderButtons button, .StoreHeaderButtons a {
+  transition: transform 0.18s, box-shadow 0.18s, background 0.18s, color 0.18s;
+}
+.StoreHeaderButtons button:hover, .StoreHeaderButtons a:hover {
+  transform: scale(1.07) rotate(-2deg);
+  box-shadow: 0 4px 16px #0ea5e9aa;
+  background: #0ea5e9;
+  color: #fff;
+}

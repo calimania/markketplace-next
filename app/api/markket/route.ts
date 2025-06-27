@@ -145,7 +145,7 @@ async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get('path');
 
-  console.log(`Proxie:${req.method}:${path}`);
+  console.log(`Proxie:${req.method}:${markketConfig.api}:${path}`);
 
   if (!path) {
     return NextResponse.json(

@@ -19,6 +19,8 @@ import {
 } from "@mantine/core";
 import { IconShoppingBag } from '@tabler/icons-react';
 import PageContent from "@/app/components/ui/page.content";
+import './product-list.css';
+import './product-page-effects.css';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -77,6 +79,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         radius="md"
         p={40}
         mb={40}
+        className="product-hero-paper"
         style={{
           backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.95)), url(${page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url})`,
           backgroundSize: 'cover',
@@ -113,7 +116,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Box mb={40}>
         {products.length > 0 ? (
           <SimpleGrid
-            cols={{ base: 1, sm: 2, lg: 3 }}
+            cols={{ base: 1, sm: 2 }}
             spacing="xl"
             verticalSpacing="xl"
             className="product-grid"
@@ -121,8 +124,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {products.map((product) => (
               <Box
                 key={(product as Product).id}
-                style={{ transform: 'translateY(0)', transition: 'transform 0.2s' }}
-                className="hover:-translate-y-1"
+                className="product-card-neobrutal"
+                style={{
+                  transform: 'translateY(0)',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+                  borderWidth: 3,
+                  borderColor: '#222',
+                  borderStyle: 'solid',
+                  boxShadow: '6px 6px 0 #222',
+                  background: '#fffbe6',
+                  borderRadius: 16,
+                }}
               >
                 <ProductCard
                   product={product as Product}
@@ -143,8 +155,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Store Description */}
       {store?.Description && (
         <>
-          <Divider my={40} />
-          <Paper p="xl" radius="md" withBorder>
+          <Divider my={40} className="product-divider" />
+          <Paper p="xl" radius="md" withBorder className="about-fade-in">
             <Title order={2} size="h3" mb="md" ta="center">
               About {store.title}
             </Title>

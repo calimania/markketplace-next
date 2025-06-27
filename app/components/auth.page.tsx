@@ -12,14 +12,11 @@ import {
   rem,
 } from '@mantine/core';
 import {
-  IconUserPlus,
   IconLogin,
-  IconKey,
-  IconBrandGithub,
+  IconWand,
   IconHomeHeart,
   IconLogout,
   IconDashboard,
-  IconMailHeart
 } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { useRouter } from 'next/navigation';
@@ -30,7 +27,7 @@ import { Store } from '@/markket/store';
 import { markketConfig } from '@/markket/config';
 import { Page } from '@/markket/page';
 
-import AuthUnconfirmed from './auth/auth.unconfirmed';
+import './auth.page.neobrutal.css';
 
 type Option = {
   title: string;
@@ -39,6 +36,9 @@ type Option = {
   action: () => null | void;
   variant: string;
   disabled?: boolean;
+  action_txt?: string;
+  color?: string; // accent color
+  bg?: string; // background gradient or color
 };
 
 /**
@@ -47,10 +47,9 @@ type Option = {
  */
 export default function AuthPage() {
   const router = useRouter();
-  const { maybe, logout, confirmed, refreshUser, } = useAuth();
+  const { logout, } = useAuth();
   const [store, setStore] = useState({} as Store);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isLoggedIn,] = useState(false);
   const [page, setPage] = useState({} as Page);
 
   useEffect(() => {
@@ -66,137 +65,117 @@ export default function AuthPage() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (isLoggedIn) refreshUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    setIsLoggedIn(maybe());
-    setIsConfirmed(confirmed());
-  }, [maybe, confirmed]);
-
   const loggedInOptions: Option[] = [
     {
       title: 'Dashboard',
-      description: 'Go to your dashboard',
+      description: 'Content Management',
       icon: IconDashboard,
       action: () => router.push('/dashboard/store'),
       variant: 'filled',
+      action_txt: 'Open dashboard',
+      color: '#0ea5e9',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
     },
     {
       title: 'Homepage',
-      description: 'Not all those who wander are lost',
+      description: 'Explore the marketplace or discover new stores',
       icon: IconHomeHeart,
       action: () => router.push('/'),
       variant: 'subtle',
+      action_txt: 'Go home',
+      color: '#f472b6',
+      bg: 'linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%)',
     },
     {
       title: 'Sign Out',
-      description: 'See you soon!',
+      description: 'See you soon! Come back anytime 💖',
       icon: IconLogout,
       action: () => logout(),
       variant: 'light',
+      action_txt: 'Sign out',
+      color: '#fbbf24',
+      bg: 'linear-gradient(135deg, #fef9c3 0%, #fdf2f8 100%)',
     },
   ];
 
   const loggedOutOptions: Option[] = [
     {
+      title: 'Magic Link',
+      description: 'Speak, friend, and enter',
+      icon: IconWand,
+      action: () => router.push('/auth/magic'),
+      variant: 'filled',
+      action_txt: '🧙',
+      color: '#0ea5e9',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
+    },
+    {
       title: 'Sign In',
-      description: 'Access your store and manage your products',
+      description: 'Type a password and access your dashboard',
       icon: IconLogin,
       action: () => router.push('/auth/login'),
       variant: 'filled',
+      action_txt: 'Sign in',
+      color: '#0ea5e9',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
     },
     {
-      title: 'Create Account',
-      description: 'Start selling with your own store',
-      icon: IconUserPlus,
-      action: () => router.push('/auth/register'),
-      variant: 'light',
-    },
-    {
-      title: 'Continue with GitHub',
-      disabled: true,
-      description: 'Sign in or create an account using GitHub',
-      icon: IconBrandGithub,
-      action: () => {
-        const url = new URL(`/api/connect/github`, markketConfig.api);
-        window.location.href = url.toString();
-      },
-      variant: 'filled',
-    },
-    {
-      title: 'Reset Password',
-      description: 'Forgot your password? No problem',
-      icon: IconKey,
-      action: () => router.push('/auth/forgot-password'),
-      variant: 'subtle',
-    },
-    {
-      title: 'Homepage',
-      description: 'Not all those who wander are lost',
+      title: 'Back to Homepage',
+      description: 'Explore the marketplace or discover new stores',
       icon: IconHomeHeart,
       action: () => router.push('/'),
       variant: 'subtle',
+      action_txt: '/',
+      color: '#0ea5e9',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
     },
   ];
 
-  const unconfirmedOptions: Option[] = [
-    {
-      title: 'Login',
-      description: 'You need to enter your password after confirming your email',
-      icon: IconMailHeart,
-      action: () => router.push('/auth/login'),
-      variant: 'filled',
-    },
-    {
-      title: 'Homepage',
-      description: 'Not all those who wander are lost',
-      icon: IconHomeHeart,
-      action: () => router.push('/'),
-      variant: 'subtle',
-    },
-  ];
-
-  const title = page?.Title || page?.SEO?.metaTitle || `Welcome to ${store?.title || 'Markket.ts'}!`;
+  const title = page?.Title || page?.SEO?.metaTitle || `Welcome to the prancin ${store?.title || 'Markket'}!`;
 
   return (
     <Container size={480} my={40}>
       <Title ta="center" fw={900}>
         {title}
       </Title>
-
       <Text c="dimmed" size="sm" ta="center" mt="sm">
         {isLoggedIn ? 'What would you like to do?' : 'Choose an option to continue'}
       </Text>
 
-      {isLoggedIn && !isConfirmed && (
-        <AuthUnconfirmed />
-      )}
-
       <Stack mt={30}>
-        {(isLoggedIn ? (isConfirmed ? loggedInOptions : unconfirmedOptions) : loggedOutOptions).map((option, index) => (
+        {(isLoggedIn ? loggedInOptions : loggedOutOptions).map((option, index) => (
           <Paper
             key={index}
             withBorder
             p="lg"
             radius="md"
             shadow="sm"
-            className="hover:shadow-md transition-shadow"
+            className="auth-option-paper-neobrutal"
+            style={{
+              borderWidth: 3,
+              borderColor: option.color || '#222',
+              borderStyle: 'solid',
+              boxShadow: `6px 6px 0 ${option.color || '#222'}`,
+              background: option.bg || '#fffbe6',
+              transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+            }}
           >
             <Group>
               <ThemeIcon
                 variant={option.variant}
                 size={60}
                 radius="md"
+                className="auth-option-icon-neobrutal"
+                style={{ background: option.color, color: '#fff' }}
               >
                 <option.icon style={{ width: rem(32), height: rem(32) }} />
               </ThemeIcon>
 
               <Stack gap="xs" style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
-                  {option.title}
+                  <a href="javascript:void(0)" onClick={!option.disabled ? option.action : () => { }}>
+                    {option.title}
+                  </a>
                 </Text>
                 <Text size="sm" c="dimmed">
                   {option.description}
@@ -208,15 +187,41 @@ export default function AuthPage() {
                 disabled={!!option.disabled}
                 onClick={option.action}
                 rightSection={<option.icon size={16} />}
+                className="auth-option-btn-neobrutal"
+                style={{
+                  borderWidth: 2,
+                  borderColor: option.color || '#222',
+                  borderStyle: 'solid',
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  background: option.color ? `${option.color}22` : '#fff',
+                  color: option.color || '#222',
+                  transition: 'box-shadow 0.18s, border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s',
+                }}
               >
-                Continue
+                {option.action_txt || 'Continue'}
               </Button>
             </Group>
           </Paper>
         ))}
       </Stack>
       {page?.Content && (
-        <Paper withBorder p="lg" mt={30} radius="md">
+        <Paper
+          withBorder
+          p="lg"
+          mt={30}
+          radius="md"
+          className="auth-bottom-paper-neobrutal"
+          style={{
+            borderWidth: 3,
+            borderColor: '#f472b6', // pink-400
+            borderStyle: 'solid',
+            boxShadow: '6px 6px 0 #f472b6',
+            background: 'linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%)',
+            transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+            animation: 'fadeInUp 0.7s cubic-bezier(.4,2,.6,1)',
+          }}
+        >
          <PageContent params={{ page }} />
         </Paper>)
       }
