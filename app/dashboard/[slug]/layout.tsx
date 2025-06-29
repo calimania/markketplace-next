@@ -264,7 +264,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
                   FAVORITES
                 </Text>
-                <ScrollArea.Autosize h={favorites.length * 48} type="hover" mb="sm">
                   <Stack gap="xs">
                     {favorites.map((link) => (
                       <MainLink
@@ -276,13 +275,12 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                         onFavorite={() => toggleFavorite(link.label)}
                       />
                     ))}
-                  </Stack>
-                </ScrollArea.Autosize>
+                </Stack>
                 <Divider mb="md" />
               </>
             )}
             <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
-              NAVIGATION
+              CONTENT
             </Text>
             <ScrollArea.Autosize
               type="always"
@@ -319,7 +317,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </Stack>
       </AppShell.Navbar>
-      <AppShell.Main py="sm">
+      <AppShell.Main py="sm" className='!min-h-[90vh]'>
         <ProtectedRoute>
           <DashboardProvider store={selectedStore as Store}>
             {children}
