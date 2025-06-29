@@ -1,6 +1,5 @@
 'use client';
 
-// import SEOPreview from '../seo.preview';
 import { ContentItem } from '@/app/hooks/common';
 import {
   Container,
@@ -75,7 +74,6 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
             validation: form?.config?.validation || {},
           }}
         />
-        {/* // SEOPReview // </Paper></Container> */}
       </Paper>
     </Container>
   );
