@@ -3,7 +3,6 @@
   border: 3px solid #222 !important;
   box-shadow: 6px 6px 0 #222;
   background: #fffbe6 !important;
-  color: #222 !important;
   transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
 }
 .auth-option-paper-neobrutal:hover, .auth-option-paper-neobrutal:focus-within {
@@ -15,8 +14,6 @@
 }
 .auth-option-btn-neobrutal {
   border: 2px solid #222 !important;
-  background: #fff !important;
-  color: #222 !important;
   font-weight: 700;
   letter-spacing: 1px;
   transition: box-shadow 0.18s, border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s;

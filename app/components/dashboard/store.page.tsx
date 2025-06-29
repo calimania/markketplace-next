@@ -32,29 +32,31 @@ export default function StoreDashboardPage() {
   }
 
   if (store) {
-    return (<>
-      <Container size="lg" pt="md" pb="xs">
-        <Stack gap="sm">
-          <Group justify="space-between">
-            <Button
-              variant="light"
-              leftSection={<IconBuildingStore size={16} />}
-              onClick={() => router.push(`/dashboard/stores`)}
-            >
-              Your stores
-            </Button>
+    return (
+      <div className="pt-[50px] ">
+        <Container size="lg" pb="xs">
+          <Stack gap="sm">
+            <Group justify="space-between">
+              <Button
+                variant="light"
+                leftSection={<IconBuildingStore size={16} />}
+                onClick={() => router.push(`/dashboard/stores`)}
+              >
+                Your stores
+              </Button>
 
-            <Button
-              variant="light"
-              rightSection={<IconPencilCog size={16} />}
-              onClick={() => router.push(`/dashboard/stores/edit/${store.documentId}?store=${store.documentId}`)}
-            >
-              Edit
-            </Button>
-          </Group>
-        </Stack>
-      </Container>
-      <ViewItem item={store} store={store} singular="store" previewUrl={`/store/${store.slug}`} />
-    </>);
+              <Button
+                variant="light"
+                rightSection={<IconPencilCog size={16} />}
+                onClick={() => router.push(`/dashboard/stores/edit/${store.documentId}?store=${store.documentId}`)}
+              >
+                Edit
+              </Button>
+            </Group>
+          </Stack>
+        </Container>
+        <ViewItem item={store} store={store} singular="store" previewUrl={`/store/${store.slug}`} />
+      </div>
+    );
   }
 };
