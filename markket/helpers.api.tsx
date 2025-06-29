@@ -74,7 +74,7 @@ export async function fetchUserStores() {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
-      next: { revalidate: 3 }
+      next: { revalidate: 1 }
     });
 
     if (!response.ok) {

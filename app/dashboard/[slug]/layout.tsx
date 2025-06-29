@@ -43,6 +43,8 @@ type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
+export const fetchCache = 'force-no-store';
+
 export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);

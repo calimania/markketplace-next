@@ -6,23 +6,16 @@ import {
   Container,
   Paper,
 } from '@mantine/core';
-import { Store, SEO } from '@/markket';
+import { Store, type ContentTypes } from '@/markket';
 
 import DashboardForm from '@/app/components/ui/form'
 import { useContext, } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
-import { useRouter } from 'next/navigation';
 
-interface StoreFormValues {
-  title: string;
-  Description: string;
-  slug: string;
-  SEO?: SEO;
-  Content?: string | { type: string, content: any[] };
-};
+export type FormValues = ContentTypes;
 
-type ItemFormProps = {
-  onSubmit: (values: StoreFormValues) => void;
+export type ItemFormProps = {
+  onSubmit: (values: FormValues) => void;
   action: string;
   item: ContentItem;
   id?: string;
@@ -42,13 +35,13 @@ type ItemFormProps = {
   };
 };
 
-const FormItem = ({ id, item, create, update, form, singular, plural, description, action }: ItemFormProps) => {
+const FormItem = ({ id, item, create, update, form, singular, plural, description, action, onSubmit }: ItemFormProps) => {
   const { store } = useContext(DashboardContext);
-  const router = useRouter();
 
-  const handleSubmit = async (values: StoreFormValues) => {
-    console.log("form item ", { action, update, id, values })
-    let result = null as (null | { data: { documentId: string } });
+  const handleSubmit = async (values: FormValues) => {
+    console.log(`form:${action}:${singular}`, { update, id });
+
+    let result = null as (null | { data: FormValues });
 
     try {
       if (action == 'new' && create) {
@@ -61,8 +54,9 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
       console.warn({ error });
     }
 
-    console.log(`${singular}:${action}`, { id: result?.data?.documentId });
-    router.push(`/dashboard/${singular}/`)
+    console.log(`${singular}:${action}`, { result, id: result?.data?.documentId });
+
+    if (onSubmit) onSubmit({ item: result?.data });
   };
 
   return (
@@ -81,6 +75,7 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
             validation: form?.config?.validation || {},
           }}
         />
+        {/* // SEOPReview // </Paper></Container> */}
       </Paper>
     </Container>
   );

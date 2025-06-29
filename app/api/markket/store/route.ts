@@ -5,6 +5,8 @@ import { fetchUserStores, errorResponses, validators } from '@/markket/helpers.a
 import { Store } from '@/markket';
 import { headers } from 'next/headers';
 
+export const fetchCache = 'force-no-store';
+
 export async function GET() {
 
   try {

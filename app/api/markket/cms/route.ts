@@ -7,6 +7,8 @@ import { actionsMap } from '@/app/components/dashboard/actions/actions.config';
 
 import { getContentType, contentTypeConfig, validateStoreAccess } from '@/markket/cms.route.helpers';
 
+export const fetchCache = 'force-no-store';
+
 export async function POST(request: NextRequest) {
   if (!validators.config()) {
     return errorResponses.missingConfig();

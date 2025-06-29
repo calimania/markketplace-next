@@ -1,12 +1,11 @@
 import ViewItem from '@/app/components/dashboard/actions/item.view';
-import FormItem from '@/app/components/dashboard/actions/item.form';
+import FormItem from './action.form';
 import { Store, } from '@/markket';
 import { ElementType } from 'react';
 import { markketClient } from '@/markket/api.markket';
 import { createContentAction, updateContentAction } from '@/markket/action.helpers';
 
 const client = new markketClient();
-
 
 interface ActionComponent {
   view: ElementType;
@@ -19,6 +18,7 @@ interface ActionComponent {
   create?: any;
   update?: any;
   form_sections?: any[];
+  documentId?: string;
 }
 
 const commonSections = {
