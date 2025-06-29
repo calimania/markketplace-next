@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 
-const MotionPaper = motion(Paper as any);
+const MotionPaper = motion.create(Paper as any);
 
 const OnboardingComponent = ({ }: { slug?: string }) => {
   const { stores } = useAuth();

@@ -16,6 +16,14 @@ export { Subscriber } from './newsletter';
 export { Order } from './order';
 export { Tag } from './tag';
 
+type EventRecord = Event;
+
+/**
+ *
+ */
+export type ContentTypes = Page | Article | Store | Product | EventRecord | Album | AlbumTrack | Tag;
+
+
 /**
  * @typedef {Object} StrapiResponse
  */

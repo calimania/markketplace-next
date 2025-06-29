@@ -226,7 +226,7 @@ export class StrapiClient {
           'Content-Type': 'application/json',
           'Authorization': options?.headers?.Authorization || options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
         },
-        next: { revalidate: 2 },
+        next: { revalidate: 1 },
       });
 
       if (!response.ok) {

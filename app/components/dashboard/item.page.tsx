@@ -80,7 +80,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           <Button
             variant="light"
             leftSection={<IconArrowLeft size={16} />}
-            onClick={() => router.push(`/dashboard/${slug}`)}
+            onClick={() => router.push(`/dashboard/${slug}?store=${store.documentId}`)}
           >
             Back to {options.plural}
           </Button>
@@ -98,6 +98,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           className="ViewItem | FormItem"
           store={store}
           id={item?.id}
+          documentId={item?.documentId}
           singular={options.singular}
           plural={options.plural}
           create={options.create}
