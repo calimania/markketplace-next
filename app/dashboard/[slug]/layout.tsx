@@ -138,7 +138,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   if (loading || authLoading) {
     return (
       <Container px={0}>
-        <Paper p="xs" withBorder mt="xl" px={0}>
+        <Paper p="xs" withBorder mt="xl">
           <Group justify="center">
             <Loader size="sm" />
             <Text>Loading...</Text>
@@ -264,7 +264,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                 <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
                   FAVORITES
                 </Text>
-                <ScrollArea.Autosize h={favorites.length * 48} type="hover" mb="sm">
                   <Stack gap="xs">
                     {favorites.map((link) => (
                       <MainLink
@@ -276,8 +275,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                         onFavorite={() => toggleFavorite(link.label)}
                       />
                     ))}
-                  </Stack>
-                </ScrollArea.Autosize>
+                </Stack>
                 <Divider mb="md" />
               </>
             )}
@@ -319,7 +317,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </Stack>
       </AppShell.Navbar>
-      <AppShell.Main py="md">
+      <AppShell.Main py="sm">
         <ProtectedRoute>
           <DashboardProvider store={selectedStore as Store}>
             {children}
