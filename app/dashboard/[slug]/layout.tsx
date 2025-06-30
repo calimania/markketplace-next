@@ -3,14 +3,13 @@
 import {
   AppShell, Burger, Container, Paper, Group, Text, Loader,
   Select, Avatar, UnstyledButton, Divider, Button, Stack,
-  TextInput, ScrollArea, HoverCard, Box, ActionIcon,
+  TextInput, HoverCard, Box, ActionIcon,
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  IconBuildingStore, IconArticle, IconShoppingCart, IconFileTypeDoc,
-  IconShoppingBagEdit, IconTicket, IconLibraryPhoto, IconMusicStar,
-  IconMessageChatbot, IconClipboardPlus, IconMoodEdit, IconCashBanknoteHeart,
+  IconBuildingStore, IconArticle, IconShoppingCart, IconFileTypeDoc, IconTicket, IconLibraryPhoto, IconMusicStar,
+  IconShoppingBagEdit, IconMessageChatbot, IconClipboardPlus, IconMoodEdit, IconCashBanknoteHeart,
   IconWindmill, IconUserCircle, IconSearch, IconHomeStar,
 } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -19,18 +18,18 @@ import { useAuth } from '@/app/providers/auth.provider';
 import { Store } from '@/markket/store.d';
 import ProtectedRoute from '@/app/components/protectedRoute';
 import { DashboardProvider } from '@/app/providers/dashboard.provider';
-import { useState, useRef, useCallback, useEffect, } from 'react';
+import { useState, useCallback, useEffect, } from 'react';
 import { MainLink } from '@/app/components/dashboard/ui.menu';
 
 const mainLinks = [
-  { icon: IconHomeStar, label: 'Store', href: '/dashboard/store' },
-  { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products' },
-  { icon: IconArticle, label: 'Articles', href: '/dashboard/articles' },
-  { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages' },
-  { icon: IconTicket, label: 'Events', href: '/dashboard/events' },
-  { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums' },
-  { icon: IconMusicStar, label: 'Collection Items', notifications: 0, href: '/dashboard/tracks' },
-  { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox' },
+  { icon: IconHomeStar, label: 'Store', href: '/dashboard/store', visible: true, },
+  { icon: IconArticle, label: 'Articles', href: '/dashboard/articles', visible: true },
+  { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages', visible: true },
+  { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products', visible: true },
+  { icon: IconTicket, label: 'Events', href: '/dashboard/events', visible: true },
+  { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums', visible: true },
+  { icon: IconMusicStar, label: 'Collection Items', notifications: 0, href: '/dashboard/tracks', visible: true },
+  { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/inbox', },
   { icon: IconClipboardPlus, label: 'Forms', href: '/dashboard/forms' },
   { icon: IconMoodEdit, label: 'Subscribers', href: '/dashboard/newsletters' },
   { icon: IconShoppingBagEdit, label: 'Sales', notifications: 0, href: '/dashboard/orders' },
@@ -52,27 +51,21 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [favoriteLinks, setFavoriteLinks] = useState<string[]>([]);
-  const viewportRef = useRef<HTMLDivElement>(null);
+
+  const filteredLinks = mainLinks.filter(link => {
+    if (searchQuery.toLowerCase()) {
+      if (link.label.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return true;
+      }
+    } else if (link.visible) {
+      return true;
+    }
+  });
 
   let hideSelector = false;
   if (typeof window === 'object') {
     hideSelector = window.location.pathname.includes('settings') || window.location.pathname.includes('stores');
   }
-
-  const filteredLinks = mainLinks.filter(link =>
-    link.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const toggleFavorite = (linkLabel: string) => {
-    setFavoriteLinks(prev => {
-      if (prev.includes(linkLabel)) {
-        return prev.filter(l => l !== linkLabel);
-      } else {
-        return [...prev, linkLabel];
-      }
-    });
-  };
 
   const updateStoreInUrl = useCallback((storeId: string) => {
     const url = new URL(window.location.href);
@@ -109,21 +102,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [router, updateStoreInUrl, stores, selectedStore]);
 
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('markket.ui.dashboard');
-
-    if (savedFavorites) {
-      setFavoriteLinks(JSON.parse(savedFavorites));
-    }
-  }, []);
-
-  useEffect(() => {
-    // @TODO: persist in API
-    if (!favoriteLinks.length) { return; }
-
-    localStorage.setItem('markket.ui.dashboard', JSON.stringify(favoriteLinks || []));
-  }, [favoriteLinks]);
-
   const handleStoreChange = (storeId: string | null) => {
     if (!storeId) return;
 
@@ -155,9 +133,6 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const currentActive = getActiveLink();
-
-  const favorites = filteredLinks.filter(link => favoriteLinks.includes(link.label));
-  const regularLinks = filteredLinks.filter(link => !favoriteLinks.includes(link.label));
 
   return (
     <AppShell
@@ -259,60 +234,37 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             <Divider mb="md" />
           </div>
           <Box className="flex-1 flex flex-col overflow-hidden">
-            {favorites.length > 0 && (
-              <>
-                <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
-                  FAVORITES
-                </Text>
-                  <Stack gap="xs">
-                    {favorites.map((link) => (
-                      <MainLink
-                        {...link}
-                        key={`fav-${link.label}`}
-                        store_id={selectedStore?.documentId}
-                        active={currentActive === link.href}
-                        favorite={true}
-                        onFavorite={() => toggleFavorite(link.label)}
-                      />
-                    ))}
-                </Stack>
-                <Divider mb="md" />
-              </>
-            )}
-            <Text size="xs" c="dimmed" fw={500} mb="xs" px="xs">
-              CONTENT
-            </Text>
-            <ScrollArea.Autosize
-              type="always"
-              h={regularLinks.length * 48}
-              viewportRef={viewportRef}
-              scrollbarSize={8}
-              scrollbars="y"
-            >
-              <Stack gap="xs">
-                {regularLinks.map((link) => (
-                  <MainLink
-                    {...link}
-                    key={link.label}
-                    store_id={selectedStore?.documentId}
-                    active={currentActive === link.href}
-                    favorite={favoriteLinks.includes(link.label)}
-                    onFavorite={() => toggleFavorite(link.label)}
-                  />
-                ))}
-              </Stack>
-            </ScrollArea.Autosize>
+            <Stack gap="xs">
+              {filteredLinks.map((link) => (
+                <MainLink
+                  {...link}
+                  key={link.label}
+                  store_id={selectedStore?.documentId}
+                  active={currentActive === link.href}
+                />
+              ))}
+            </Stack>
           </Box>
           <div className="mt-auto pt-3">
             <Divider mb="md" />
             <Button
               fullWidth
+              leftSection={<IconWindmill size={16} />}
+              className='mb-4'
+              variant="light"
+              component={Link}
+              href="/dashboard/settings"
+            >
+              Settings
+            </Button>
+            <Button
+              fullWidth
               leftSection={<IconBuildingStore size={16} />}
               variant="light"
               component={Link}
-              href="/"
+              href="/auth"
             >
-              Home
+              Auth
             </Button>
           </div>
         </Stack>

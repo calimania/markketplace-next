@@ -72,7 +72,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
   const urls = (item as Store).URLS || (item as AlbumTrack)?.urls;
 
   return (
-    <Container size="md" py="xl" >
+    <Container size="lg" py="xl" >
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}

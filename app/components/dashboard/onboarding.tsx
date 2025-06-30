@@ -1,3 +1,5 @@
+'use client';
+
 import { useAuth } from '@/app/providers/auth.provider';
 import {
   Paper, Text, Title, Container, ThemeIcon,
@@ -9,11 +11,13 @@ import {
   IconLibraryPhoto
 } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 const MotionPaper = motion.create(Paper as any);
 
 const OnboardingComponent = ({ }: { slug?: string }) => {
   const { stores } = useAuth();
+  const router = useRouter();
 
   return (
     <Container size="md" py="xl" className='dashboard-page'>
@@ -68,23 +72,21 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 Start Creating
               </Button>)}
             </Timeline.Item>
-
             <Timeline.Item
               bullet={<IconPalette size={12} />}
               title="Make it yours"
             >
               <Text c="dimmed" size="sm">
-                Add titles, logos & links and you have a landing page ready to share!
+                Add titles, logos & links and to personalize your store!
               </Text>
-
               {stores.length ? (<Button
                 variant="light"
                 rightSection={<IconArrowRight size={16} />}
                 mt="md"
                 component="a"
-                href="/dashboard/stores/new"
+                href={`/dashboard/stores?store=`}
               >
-                Store Dashboard
+                Store List
               </Button>) : null}
             </Timeline.Item>
             <Timeline.Item
@@ -92,8 +94,22 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
               title="Write a litte"
             >
               <Text c="dimmed" size="sm">
-                Publish pages and articles to tell your story, inspire your audience
+                Create basic pages, like about us and
               </Text>
+              {stores.length ? (<Button
+                variant="light"
+                rightSection={<IconArrowRight size={16} />}
+                mt="md"
+                component="a"
+                onClick={() => {
+                  const params = new URLSearchParams(window.location.search);
+                  const currentStoreId = params.get('store');
+                  router.push(`/dashboard/pages?store=${currentStoreId}`)
+                }}
+              // href={`/dashboard/pages?store=${currentStoreId}`}
+              >
+                Pages
+              </Button>) : null}
             </Timeline.Item>
             <Timeline.Item
               bullet={<IconLibraryPhoto size={12} />}
