@@ -11,6 +11,7 @@ import {
   IconBuildingStore, IconArticle, IconShoppingCart, IconFileTypeDoc, IconTicket, IconLibraryPhoto, IconMusicStar,
   IconShoppingBagEdit, IconMessageChatbot, IconClipboardPlus, IconMoodEdit, IconCashBanknoteHeart,
   IconWindmill, IconUserCircle, IconSearch, IconHomeStar,
+  IconMessageUser,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -36,6 +37,7 @@ const mainLinks = [
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
+  { icon: IconMessageUser, label: 'Customer Center', href: '/dashboard/crm', visible: true }
 ];
 
 type DashboardLayoutProps = {
@@ -184,7 +186,16 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             <HoverCard.Target>
               <UnstyledButton>
                 <Group>
-                  <IconUserCircle size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                  {!user?.avatar?.url ? <IconUserCircle size={28} style={{ color: 'var(--mantine-color-blue-6)' }} /> : (
+                    <Avatar
+                      src={user?.avatar?.url}
+                      size="sm"
+                      radius="md"
+                      color="blue"
+                    >
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  )}
                   <Text fw={500}>{user?.username}</Text>
                 </Group>
               </UnstyledButton>
@@ -192,7 +203,16 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             <HoverCard.Dropdown>
               <Stack>
                 <Group>
-                  <IconUserCircle size={32} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                  {!user?.avatar?.url ? <IconUserCircle size={32} style={{ color: 'var(--mantine-color-blue-6)' }} /> : (
+                    <Avatar
+                      src={user?.avatar?.url}
+                      size="md"
+                      radius="md"
+                      color="blue"
+                    >
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  )}
                   <div>
                     <Text fw={500}>{user?.username}</Text>
                     <Text size="xs" c="dimmed">{user?.email}</Text>

@@ -7,6 +7,7 @@ import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import { IconBuildingStore, IconPencilCog, IconCoin, IconInfoHexagonFilled } from '@tabler/icons-react';
 import StripeSetup from './stripe.setup';
+import StripeHeader from './stripe.header';
 import { Tabs } from '@mantine/core';
 
 
@@ -75,6 +76,7 @@ export default function StoreDashboardPage() {
               </>
             </Tabs.Panel>
             <Tabs.Panel value="stripe">
+              <StripeHeader />
               <StripeSetup store={store} stripe={stripe} />
             </Tabs.Panel>
           </Tabs>
