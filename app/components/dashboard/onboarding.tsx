@@ -19,6 +19,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
   const { stores } = useAuth();
   const router = useRouter();
 
+  // @TODO : stripe payouts reminder - last step maybe ?
   return (
     <Container size="md" py="xl" className='dashboard-page'>
       <Stack gap="xl">

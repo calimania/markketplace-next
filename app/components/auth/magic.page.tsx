@@ -114,7 +114,7 @@ export default function MagicLinkPage() {
                 Send Link
               </Button>
               <div>
-                {page.Title ? <PageContent params={{ page }} /> : (
+                {page?.Title ? <PageContent params={{ page }} /> : (
                   <>
                     🧿
                     <br />

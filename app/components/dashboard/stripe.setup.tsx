@@ -68,7 +68,8 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
         store: store?.documentId,
         account_country: accountCountry,
         // test_mode: true,
-        account_type: ['CO', 'SV'].includes(accountCountry) ? 'express' : 'standard',
+        // CA, MX, USA : standard
+        account_type: ['CO', 'SV', 'IL',].includes(accountCountry) ? 'express' : 'standard',
       });
 
       if (!account) {
@@ -112,7 +113,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
           </Group>
 
           <Text className="text-sky-800 text-lg font-semibold">
-            Markket integrates with Stripe to securely send payouts. Your Stripe account is linked to the main email of the person who created this store. You&apos;ll be able to track sales, handle refunds, and receive payouts directly to your bank account.
+            Markket integrates with Stripe to securely send payouts. You&apos;ll be able to track sales, handle refunds, and receive payouts directly to your bank account.
           </Text>
 
           {!store?.STRIPE_CUSTOMER_ID && (
@@ -133,11 +134,13 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
                   disabled={loading}
                 >
                   <option value="US">United States</option>
+                  <option value="CA">Canada</option>
                   <option value="CO">Colombia</option>
                   <option value="MX">Mexico</option>
                   <option value="SV">El Salvador</option>
+                  <option value="IL">Israel</option>
                 </select>
-                <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located. This cannot be changed after setup.</Text>
+                <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located.</Text>
                 <Text size="xs">
                   Contact us [ email@markket.place ] or via
                   <a href="https://de.markket.place/store/next/blog/discord" target="_blank">

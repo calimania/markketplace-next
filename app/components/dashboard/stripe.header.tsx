@@ -31,6 +31,8 @@ const COUNTRY_MAP: Record<string, { name: string; flag: string }> = {
   CO: { name: 'Colombia', flag: '🇨🇴' },
   MX: { name: 'Mexico', flag: '🇲🇽' },
   SV: { name: 'El Salvador', flag: '🇸🇻' },
+  IL: { name: 'Israel', flag: '🇮🇱' },
+  CA: { name: 'Canada', flag: '🇨🇦' },
 };
 
 export default function StripeHeader() {
