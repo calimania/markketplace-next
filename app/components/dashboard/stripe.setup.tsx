@@ -22,6 +22,7 @@ import { Store, StripeAccount } from '@/markket'
 
 export default function StripePage({ store, stripe }: { store: Store, stripe: StripeAccount }) {
   const [loading, setLoading] = useState(false);
+  const [accountCountry, setAccountCountry] = useState<'US' | 'CO' | 'MX'>('US');
   const markket = new markketClient();
 
   const openDashboard = async () => {
@@ -61,15 +62,13 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
 
   const handleCreateAccount = async () => {
     setLoading(true);
-
     const markket = new markketClient();
-
     try {
       const account = await markket.stripeConnect('account', {
         store: store?.documentId,
+        account_country: accountCountry,
         // test_mode: true,
         // account_type: 'custom',
-        // account_country: 'CO',
       });
 
       if (!account) {
@@ -103,37 +102,53 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
 
   return (
     <>
-      <Paper withBorder radius="md" p="xl">
-        <Stack gap="lg">
+      <Paper withBorder radius="xl" p="xl" className="border-4 border-black bg-gradient-to-br from-blue-50 to-fuchsia-50 relative overflow-hidden shadow-xl">
+        <span className="absolute -top-8 left-8 w-24 h-24 bg-fuchsia-100 rounded-full opacity-30 z-0" />
+        <span className="absolute bottom-0 right-0 w-32 h-32 bg-sky-100 rounded-full opacity-30 z-0" />
+        <Stack gap="lg" className="relative z-10">
           <Group>
-            <IconBuildingStore size={32} color="var(--mantine-color-blue-6)" />
-            <Title order={2}>Stripe Payments</Title>
+            <IconBuildingStore size={36} className="text-blue-600 drop-shadow" />
+            <Title order={2} className="font-black text-fuchsia-700 tracking-tight">Stripe Payments</Title>
           </Group>
 
-          <Text c="dimmed">
-            Markket uses Stripe connect to send payouts.
-            You&apos;ll be able to track sales, handle refunds, and receive payouts directly to your bank account.
+          <Text className="text-sky-800 text-lg font-semibold">
+            Markket integrates with Stripe to securely send payouts. Your Stripe account is linked to the main email of the person who created this store. You&apos;ll be able to track sales, handle refunds, and receive payouts directly to your bank account.
           </Text>
 
           {!store?.STRIPE_CUSTOMER_ID && (
-            <Text c="dimmed">
-              You can continue using every other feature, to create albums, blog posts, and products;
-              however, for compliance & technical reasons, payouts will be disabled until you set up your Stripe account
+            <Text className="text-fuchsia-700 font-semibold">
+              You can use all other features (albums, blog posts, products), but payouts are disabled until you connect your Stripe account. This is required for compliance and security.
             </Text>
           )}
 
           <Group justify="space-between" mt="md">
             {!store?.STRIPE_CUSTOMER_ID && (
-              <Button
-                leftSection={<IconCreditCard size={20} />}
-                onClick={handleCreateAccount}
-                disabled={loading}
-                loading={loading}
-                size="md"
-                variant="filled"
-              >
-                {loading ? 'Setting up...' : 'Create Stripe Account'}
-              </Button>
+              <div className="w-full flex flex-col gap-2">
+                <label htmlFor="stripe-country" className="font-semibold text-sky-900">Country for Stripe Account</label>
+                <select
+                  id="stripe-country"
+                  className="rounded-lg border-2 border-black px-3 py-2 bg-white text-fuchsia-700 font-bold focus:ring-2 focus:ring-fuchsia-200"
+                  value={accountCountry}
+                  onChange={e => setAccountCountry(e.target.value as 'US' | 'CO' | 'MX')}
+                  disabled={loading}
+                >
+                  <option value="US">United States</option>
+                  {/* <option value="CO">Colombia</option> */}
+                  <option value="MX">Mexico</option>
+                </select>
+                <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located. This cannot be changed after setup.</Text>
+                <Button
+                  leftSection={<IconCreditCard size={20} />}
+                  onClick={handleCreateAccount}
+                  disabled={loading}
+                  loading={loading}
+                  size="md"
+                  variant="filled"
+                  className="border-2 border-black bg-yellow-100 text-fuchsia-700 font-bold hover:bg-fuchsia-200 hover:text-fuchsia-900 transition-all shadow-md mt-2"
+                >
+                  {loading ? 'Setting up...' : `Create Stripe Account (${accountCountry})`}
+                </Button>
+              </div>
             )}
 
             {store?.STRIPE_CUSTOMER_ID && (
@@ -144,6 +159,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
                 loading={loading}
                 size="md"
                 variant="filled"
+                className="border-2 border-black bg-sky-100 text-blue-900 font-bold hover:bg-blue-200 hover:text-fuchsia-700 transition-all shadow-md"
               >
                 {loading ? 'Setting up...' : 'Stripe Onboarding'}
               </Button>
@@ -152,7 +168,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
             {store?.STRIPE_CUSTOMER_ID && (
               <a
                 onClick={openDashboard}
-                className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                className="flex items-center space-x-2 text-blue-600 hover:text-fuchsia-700 font-bold border-b-2 border-dotted border-blue-400"
                 href="https://dashboard.stripe.com/"
                 target="_blank"
               >
@@ -170,6 +186,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
               href="https://docs.stripe.com/security"
               target="_blank"
               rightSection={<IconExternalLink size={16} />}
+              className="border-2 border-black bg-white text-blue-900 font-bold hover:bg-blue-50 hover:text-fuchsia-700 transition-all shadow-sm"
             >
               Security at Stripe
             </Button>
@@ -179,6 +196,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
             icon={<IconAlertCircle size={16} />}
             title="Important Information"
             color="blue"
+            className="border-2 border-black bg-blue-50 text-blue-900 mt-4"
           >
             To accept payments, you&apos;ll need to:
             <ul className="list-disc pl-6 mt-2">
@@ -190,36 +208,46 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
         </Stack>
       </Paper>
 
-      {/* Additional Info Section */}
-      <Paper withBorder radius="md" p="xl" mt="xl">
-        {!store?.STRIPE_CUSTOMER_ID && (<Stack gap="md">
-          <Title order={3}>What happens next?</Title>
-          <Text c="dimmed">
-            After clicking &quot;Setup Stripe Account&quot;, you&apos;ll be redirected to Stripe to:
-          </Text>
-          <ol className="list-decimal pl-6">
-            <li className="mb-2">Complete your account setup</li>
-            <li className="mb-2">Verify your identity and business details</li>
-            <li className="mb-2">Connect your bank account for receiving payments</li>
-            <li>Start accepting payments from customers</li>
-          </ol>
-        </Stack>
+      <Paper withBorder radius="xl" p="xl" mt="xl" className="border-4 border-black bg-white/80">
+        {!store?.STRIPE_CUSTOMER_ID ? (
+          <Stack gap="md">
+            <Title order={3} className="text-fuchsia-700 font-bold">What happens next?</Title>
+            <Text className="text-sky-800">
+              After clicking <b>Setup Stripe Account</b>, you&apos;ll be redirected to Stripe to:
+            </Text>
+            <ol className="list-decimal pl-6 text-blue-900">
+              <li className="mb-2">Select the country for your account</li>
+              <li className="mb-2">Complete your account setup</li>
+              <li className="mb-2">Verify your identity and business details</li>
+              <li className="mb-2">Connect your bank account for receiving payments</li>
+              <li className="mb-2">Questions? email@markket.place</li>
+              <li>Start accepting payments from customers</li>
+            </ol>
+          </Stack>
+        ) : (
+          <Stack gap="md" mt="xl">
+              <Title order={3} className="text-fuchsia-700 font-bold">Why Stripe? Payouts?</Title>
+              <ol className="list-decimal pl-6 text-blue-900">
+                <li className="mb-2">Enterprise level encryption</li>
+                <li className="mb-2">Regulatory liaisons</li>
+                <li className="mb-2">Identity verification & compliance</li>
+                <li className="mb-2">Easy refunds, & customer management</li>
+              </ol>
+              <Title order={3} className="text-fuchsia-700 font-bold">Collaborative accounts</Title>
+              <Text className="text-sky-800">
+                Each store is associated with one Stripe account (the main email that created the link). The main user can use the Stripe dashboard to manage access.<br />
+                We&apos;re working to add more features and control here. If you need a special flow, please reach out!
+              </Text>
+              <Title order={3} className="text-fuchsia-700 font-bold">Community Accounts</Title>
+              <Text className="text-sky-800">
+                If your community expects multiple stores to receive payouts in a single Stripe account, contact our team. We can manually link accounts or improve your workflow.
+              </Text>
+              <Title order={3} className="text-fuchsia-700 font-bold">Support</Title>
+              <Text className="text-sky-800">
+                The easiest way to reach our team is by emailing <b>email@markket.place</b>
+              </Text>
+            </Stack>
         )}
-
-        <Stack gap="md" mt="xl">
-          <Title order={3}>Why Stripe? Payouts?</Title>
-          <Text c="dimmed">
-            Storing private and sensitive information like credit cards is very complex, malign actors
-            are always looking for ways to steal this information, and there are many regulatory nuances.
-            At Markket we want to keep your data safe, and your transactions aways from prying eyes
-          </Text>
-          <ol className="list-decimal pl-6">
-            <li className="mb-2">Enterprise level encryption</li>
-            <li className="mb-2">Regulatory liasons</li>
-            <li className="mb-2">Identity verification & compliance</li>
-            <li className="mb-2">Easy refunds, & customer management</li>
-          </ol>
-        </Stack>
       </Paper>
     </>
   );

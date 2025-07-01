@@ -15,17 +15,16 @@ const ReleasePage = ({ release_id }: Props) => {
   const [loading, setLoading] = useState(true);
   const [release, setRelease] = useState({} as Release);
 
-  const getData = async () => {
-    const response = await fetch(`/api/chisme?release_id=${release_id}`);
-    const json = await response.json();
-    setRelease(json?.release)
-    setLoading(false);
-  }
-
-
   useEffect(() => {
+    const getData = async () => {
+      const response = await fetch(`/api/chisme?release_id=${release_id}`);
+      const json = await response.json();
+      setRelease(json?.release)
+      setLoading(false);
+    };
+
     getData();
-  }, []);
+  }, [release_id]);
 
   if (loading) {
     return (

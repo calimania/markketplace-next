@@ -2,6 +2,8 @@
 
 import { ContentItem } from '@/app/hooks/common';
 import { useState, ReactNode, useContext, useEffect } from 'react';
+import SEOPreview from '../dashboard/seo.preview';
+
 import {
   TextInput,
   Container,
@@ -159,10 +161,113 @@ const FormItem = ({
     }
   };
 
+  // Helper to slugify a string
+  const slugify = (str: string) =>
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 64);
+
   const renderField = (field: FieldConfig) => {
     const inputProps = field.groupName
       ? form.getInputProps(`${field.groupName}.${field.name}`)
       : form.getInputProps(field.name);
+
+    if (field.name == 'slug') {
+      return (
+        <TextInput
+          key={field.name}
+          label={field.label}
+          placeholder={field.placeholder}
+          description={field.description}
+          required={field.required}
+          name={field.name}
+          value={form.values.slug}
+          {...{ ...inputProps, }}
+          onBlur={(e) => {
+            const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+            if (!form.values.slug && title) {
+              form.setFieldValue('slug', slugify(title));
+            } else {
+              form.setFieldValue('slug', slugify(e.target.value));
+            }
+          }}
+          onFocus={() => {
+            const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+            if (!form.values.slug && title) {
+              form.setFieldValue('slug', slugify(title));
+            }
+          }}
+        />
+      );
+    }
+
+    if (field.groupName == 'SEO') {
+      if (field.name === 'metaTitle') {
+        console.log({ values: form.values })
+        return (
+          <TextInput
+            key={field.name}
+            label={field.label}
+            placeholder={field.placeholder}
+            description={field.description}
+            required={field.required}
+            {...inputProps}
+            onBlur={() => {
+              const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+              if (!form.values.SEO?.metaTitle && title) {
+                form.setFieldValue('SEO.metaTitle', title);
+              }
+            }}
+          />
+        );
+      }
+
+      if (field.name === 'metaKeywords') {
+        return (
+          <Textarea
+            key={field.name}
+            label={field.label}
+            placeholder={field.placeholder}
+            description={field.description}
+            required={field.required}
+            minRows={field.minRows || 3}
+            {...inputProps}
+            onBlur={() => {
+              const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+              if (!form.values.SEO?.metaKeywords && title) {
+                form.setFieldValue('SEO.metaKeywords', title.replace(/ /g, ', '))
+              }
+            }}
+          />
+        );
+      }
+
+      // if (field.name === 'metaDescription') {
+      // Adapt to different ContentType
+      // return (
+      //     <Textarea
+      //       key={field.name}
+      //       label={field.label}
+      //       placeholder={field.placeholder}
+      //       description={field.description}
+      //       required={field.required}
+      //       minRows={field.minRows || 3}
+      //       onBlur={() => {
+      //         if (!form.values.SEO?.metaDescription && form.values.title) {
+      //           form.setFieldValue('SEO.metaDescription', form.values.title.slice(0, 140));
+      //         }
+      //       }}
+      //       {...inputProps}
+      //     />
+      //   );
+      // }
+    }
 
     switch (field.type) {
       case 'text':
@@ -344,6 +449,9 @@ const FormItem = ({
             </Group>
           </Stack>
         </form>
+      </Paper>
+      <Paper pt="sm">
+        <SEOPreview SEO={form.values?.SEO} previewUrl={`/${form.values.slug}`} />
       </Paper>
     </Container>
   );

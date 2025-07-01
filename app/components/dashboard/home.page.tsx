@@ -9,11 +9,8 @@ import ProductDashboardPage from '@/app/components/dashboard/product.page';
 import EventsDashboardPage from '@/app/components/dashboard/event.page';
 import AlbumsDashboardPage from '@/app/components/dashboard/album.page';
 import AlbumTracksDashboardPage from '@/app/components/dashboard/album.tracks.page';
-import InboxDashboardPage from '@/app/components/dashboard/inbox.page';
-import FormsDashboardPage from '@/app/components/dashboard/form.page';
-import NewsletterDashboardPage from '@/app/components/dashboard/newsletter.page';
-import OrderDashboardPage from '@/app/components/dashboard/order.page';
 import StoresDashboardPage from '@/app/components/dashboard/store.list.page';
+import CRMDashboardPage from '@/app/components/dashboard/crm.page';
 
 import { Container, Title } from '@mantine/core';
 import { useAuth } from '@/app/providers/auth.provider';
@@ -43,18 +40,12 @@ export default function AnyDashboardPage({slug}: {slug: string}) {
       return <EventsDashboardPage />;
     case 'albums':
       return <AlbumsDashboardPage />;
-    case 'inbox':
-      return <InboxDashboardPage />;
-    case 'forms':
-      return <FormsDashboardPage />;
-    case 'newsletters':
-      return <NewsletterDashboardPage />;
-    case 'orders':
-      return <OrderDashboardPage />;
     case 'stores':
       return <StoresDashboardPage />
     case 'tracks':
       return <AlbumTracksDashboardPage />
+    case 'crm':
+      return <CRMDashboardPage />
     case 'onboarding':
       return <OnboardingComponent slug={slug} />
   }

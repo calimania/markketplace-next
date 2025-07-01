@@ -1,11 +1,10 @@
 'use client'
 
 import {
-   Badge,  ActionIcon,  UnstyledButton, Group, Text,
+   Badge,  UnstyledButton, Group, Text,
 } from '@mantine/core';
 import {
  IconSettings,
-  IconStarFilled,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 
@@ -16,8 +15,6 @@ export function MainLink({
   href,
   active,
   store_id,
-  favorite,
-  onFavorite,
 }: {
   icon: typeof IconSettings;
   label: string;
@@ -25,8 +22,7 @@ export function MainLink({
     store_id?: string;
   href?: string;
     active?: boolean;
-  favorite?: boolean;
-  onFavorite?: () => void;
+
 }) {
   return (
     <UnstyledButton
@@ -69,22 +65,6 @@ export function MainLink({
             >
               {notifications}
             </Badge>
-          )}
-
-          {onFavorite && (
-            <ActionIcon
-              variant="subtle"
-              color={favorite ? "yellow" : "gray"}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onFavorite();
-              }}
-              size="xs"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <IconStarFilled size={14} />
-            </ActionIcon>
           )}
         </Group>
       </Group>

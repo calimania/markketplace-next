@@ -23,15 +23,14 @@ const FormItem = (props: ItemFormProps) => {
     if (singular == 'store') {
       setTimeout(async () => {
         await fetchStores();
-        return router.push(`/dashboard/${singular}/?store=${item?.documentId || data?.item?.documentId || ''}`);
-      }, ((action == 'create' ? 2 : 2) * 1000));
+        return router.push(`/dashboard/store/?store=${data?.item?.documentId || ''}`);
+      }, ((2) * 1000));
       return;
     }
 
     setTimeout(async () => {
-      await fetchStores();
       return router.push(`/dashboard/${plural}/view/${item?.documentId || data?.item?.documentId || ''}?store=${currentStoreId}`);
-    }, ((action == 'create' ? 2 : 2) * 1000));
+    }, ((1.5) * 1000));
   }
 
   if (waiting) {

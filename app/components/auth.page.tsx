@@ -17,6 +17,7 @@ import {
   IconHomeHeart,
   IconLogout,
   IconDashboard,
+  IconGhost,
 } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { useRouter } from 'next/navigation';
@@ -75,8 +76,18 @@ export default function AuthPage() {
       action: () => router.push('/dashboard/store'),
       variant: 'filled',
       action_txt: 'Open dashboard',
-      color: '#0ea5e9',
-      bg: 'linear-gradient(135deg, #e0f2fe 0%, #fdf2f8 100%)',
+      color: '#06b6d4',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #06b6d4 100%)',
+    },
+    {
+      title: 'Onboarding Wizard',
+      description: 'Ideas to get started',
+      icon: IconGhost,
+      action: () => router.push('/dashboard/onboarding'),
+      variant: 'filled',
+      action_txt: 'Onboarding',
+      color: '#d946ef',
+      bg: 'linear-gradient(135deg, #e0f2fe 0%, #d946ef 100%)',
     },
     {
       title: 'Homepage',
@@ -84,9 +95,9 @@ export default function AuthPage() {
       icon: IconHomeHeart,
       action: () => router.push('/'),
       variant: 'subtle',
-      action_txt: 'Go home',
+      action_txt: ' Main Page ',
       color: '#f472b6',
-      bg: 'linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 100%)',
+      bg: 'linear-gradient(135deg, #fdf2f8 0%, #f472b6 100%)',
     },
     {
       title: 'Sign Out',
@@ -94,9 +105,9 @@ export default function AuthPage() {
       icon: IconLogout,
       action: () => logout(),
       variant: 'light',
-      action_txt: 'Sign out',
+      action_txt: ' < <   End session  > >   ',
       color: '#fbbf24',
-      bg: 'linear-gradient(135deg, #fef9c3 0%, #fdf2f8 100%)',
+      bg: 'linear-gradient(135deg, #fef9c3 0%, #fbbf24 100%)',
     },
   ];
 
@@ -188,7 +199,7 @@ export default function AuthPage() {
                 variant={option.variant}
                 disabled={!!option.disabled}
                 onClick={option.action}
-                rightSection={<option.icon size={16} />}
+                leftSection={<option.icon size={18} />}
                 className="auth-option-btn-neobrutal"
                 style={{
                   borderWidth: 2,
@@ -196,7 +207,7 @@ export default function AuthPage() {
                   borderStyle: 'solid',
                   fontWeight: 700,
                   letterSpacing: 1,
-                  background: option.color ? `${option.color}22` : '#fff',
+                  background: option.bg ? `${option.bg}` : '#fff',
                   color: option.color || '#222',
                   transition: 'box-shadow 0.18s, border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s',
                 }}

@@ -15,6 +15,7 @@ import {
   IconLink,
   IconCheck,
   IconWorld,
+  IconPacman,
   IconBrandGoogle,
   IconUserCircle,
   IconPhoto,
@@ -63,9 +64,10 @@ const PreviewSEO = ({ SEO, previewUrl }: PreviewSEOProps) => {
                 </a>
               </Text>
               <Group gap={4}>
-                <IconWorld size={14} style={{ color: 'var(--mantine-color-green-7)' }} />
+                {!previewUrl && <IconWorld size={16} style={{ color: 'var(--mantine-color-green-7)' }} />}
+                {previewUrl && <IconPacman size={16} style={{ color: 'var(--mantine-color-green-7)' }} />}
                 <Text size="xs" c="dimmed" truncate>
-                  {SEO.metaUrl || 'de.markket.place'}
+                  {SEO.metaUrl || previewUrl || 'de.markket.place'}
                 </Text>
               </Group>
               <Text size="sm" lineClamp={2} c="dark.6">
