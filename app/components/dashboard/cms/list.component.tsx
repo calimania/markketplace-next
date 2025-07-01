@@ -1,4 +1,3 @@
-
 import {
   Table,
   Text,
@@ -73,8 +72,8 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
   const articles = items;
   if (!items.length) {
     return (
-      <Paper p="xl" withBorder>
-        <Text ta="center" c="dimmed">
+      <Paper p="xl" withBorder radius="xl" className="border-4 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-sky-50 shadow-lg">
+        <Text ta="center" c="dimmed" className="text-lg font-bold text-fuchsia-700">
           No {plural} found.
         </Text>
       </Paper>
@@ -82,27 +81,28 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
   }
 
   return (
-    <Paper withBorder radius="md">
+    <Paper withBorder radius="xl" className="border-4 border-black bg-white/90 shadow-xl">
       <Table.ScrollContainer minWidth={800}>
-        <Table verticalSpacing="sm" horizontalSpacing="md">
-          <Table.Thead>
+        <Table verticalSpacing="md" horizontalSpacing="lg" className="rounded-xl">
+          <Table.Thead className="bg-fuchsia-50 border-b-2 border-fuchsia-200">
             <Table.Tr>
-              <Table.Th style={{ width: 100 }}>Actions</Table.Th>
-              <Table.Th>{singular.charAt(0).toUpperCase()}{singular.slice(1)}</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Last Updated</Table.Th>
-              {'Tags' in items?.[0] && <Table.Th>Tags</Table.Th>}
+              <Table.Th style={{ width: 120 }} className="text-fuchsia-700 font-bold">Actions</Table.Th>
+              <Table.Th className="text-sky-900 font-bold">{singular.charAt(0).toUpperCase()}{singular.slice(1)}</Table.Th>
+              <Table.Th className="text-sky-900 font-bold">Status</Table.Th>
+              <Table.Th className="text-sky-900 font-bold">Last Updated</Table.Th>
+              {'Tags' in items?.[0] && <Table.Th className="text-sky-900 font-bold">Tags</Table.Th>}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {articles.map((item) => (
-              <Table.Tr key={item.documentId}>
-                  <Table.Td>
+              <Table.Tr key={item.documentId} className="hover:bg-fuchsia-50 transition-all">
+                <Table.Td>
                   <Group gap={4} justify="flex-end" wrap="nowrap">
-                    <Tooltip label="Edit">
+                    <Tooltip label="Edit" color="fuchsia" withArrow>
                       <ActionIcon
-                        variant="subtle"
-                        color="gray"
+                        variant="light"
+                        color="fuchsia"
+                        className="border-2 border-fuchsia-200 bg-white hover:bg-fuchsia-100"
                         onClick={() => handleAction('edit', item)}
                       >
                         <IconEdit size={16} />
@@ -110,7 +110,7 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                     </Tooltip>
                     <Menu position="bottom-end" withArrow>
                       <Menu.Target>
-                        <ActionIcon variant="subtle" color="gray">
+                        <ActionIcon variant="light" color="fuchsia" className="border-2 border-fuchsia-200 bg-white hover:bg-fuchsia-100">
                           <IconDotsVertical size={16} />
                         </ActionIcon>
                       </Menu.Target>
@@ -159,23 +159,24 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                 <Table.Td>
                   <Group gap="sm" wrap="nowrap">
                     <Avatar
-                      size={40}
-                      radius="md"
+                      size={44}
+                      radius="xl"
                       src={
                         item.SEO?.socialImage?.formats?.thumbnail?.url || item.SEO?.socialImage?.formats.thumbnail?.url
                         || item.SEO?.socialImage?.url || item?.cover?.thumbnail?.url || item?.Favicon?.url
                       }
                       alt={(item as Article).Title || (item as Album).title || (item as Product).Name}
+                      className="border-2 border-fuchsia-200 bg-white"
                     >
-                      <IconPhoto size={20} />
+                      <IconPhoto size={22} />
                     </Avatar>
                     <div>
-                      <Text size="sm" fw={500} lineClamp={1}>
-                        <a href="#" onClick={() => handleAction('view', item)} className="text-blue-600 hover:text-blue-900">
+                      <Text size="md" fw={700} lineClamp={1} className="text-sky-900">
+                        <a href="#" onClick={() => handleAction('view', item)} className="hover:underline">
                           {(item as Article).Title || (item as Album).title || (item as Product).Name}
                         </a>
                       </Text>
-                      <Text size="xs" c="dimmed">
+                      <Text size="xs" c="dimmed" className="italic">
                         {item.slug}
                       </Text>
                     </div>
@@ -184,13 +185,14 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                 <Table.Td>
                   <Badge
                     color={(item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'yellow' : 'green'}
-                    variant="light"
+                    variant="filled"
+                    className="border-2 border-black font-bold"
                   >
                     {(!!item?.SEO?.excludeFromSearch || !item.publishedAt) ? 'Draft' : 'Published'}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">
+                  <Text size="sm" className="text-fuchsia-700 font-semibold">
                     {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
                   </Text>
                 </Table.Td>
@@ -203,12 +205,13 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                           size="sm"
                           variant="outline"
                           color={tag.Color}
+                          className="border-2 border-black font-bold"
                         >
                           {tag.Label}
                         </Badge>
                       ))}
                       {((item as HasTags).Tags?.length || 0) > 2 && (
-                        <Badge size="sm" variant="outline" color="gray">
+                        <Badge size="sm" variant="outline" color="gray" className="border-2 border-black font-bold">
                           +{(item as HasTags).Tags!.length - 2}
                         </Badge>
                       )}

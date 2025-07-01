@@ -186,17 +186,25 @@ const FormItem = ({
           value={form.values.slug}
           {...{ ...inputProps, }}
           onBlur={(e) => {
-            form.setFieldValue('slug', slugify(e.target.value));
+            const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+            if (!form.values.slug && title) {
+              form.setFieldValue('slug', slugify(title));
+            } else {
+              form.setFieldValue('slug', slugify(e.target.value));
+            }
           }}
           onFocus={() => {
-            if (!form.values.slug && form.values.title) {
-              form.setFieldValue('slug', slugify(form.values.title));
+            const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
+            if (!form.values.slug && title) {
+              form.setFieldValue('slug', slugify(title));
             }
           }}
         />
       );
     }
-    console.log({ field })
+
     if (field.groupName == 'SEO') {
       if (field.name === 'metaTitle') {
         console.log({ values: form.values })
@@ -210,6 +218,7 @@ const FormItem = ({
             {...inputProps}
             onBlur={() => {
               const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
+
               if (!form.values.SEO?.metaTitle && title) {
                 form.setFieldValue('SEO.metaTitle', title);
               }
@@ -230,7 +239,7 @@ const FormItem = ({
             {...inputProps}
             onBlur={() => {
               const title = form?.values?.title || form?.values?.Title || form?.values?.Name;
-              console.log({ title, v: form.values })
+
               if (!form.values.SEO?.metaKeywords && title) {
                 form.setFieldValue('SEO.metaKeywords', title.replace(/ /g, ', '))
               }

@@ -25,6 +25,7 @@ import {
 import ProfileForm from '@/app/components/ui/profile.form';
 import StoreSettingsList from '@/app/components/dashboard/settings/store.list';
 import SecuritySettings from './settings.security';
+import NotificationsSettingsTab from './notifications.settings';
 
 
 const settingsTabs = [
@@ -141,10 +142,7 @@ export default function SettingsPage(): ReactElement {
 
             <Tabs.Panel value="notifications">
               <Stack>
-                <Title order={4}>Notification Preferences</Title>
-                <Text size="sm" c="dimmed" maw={600}>
-                  Choose how you want to be notified about activity.
-                </Text>
+                <NotificationsSettingsTab />
               </Stack>
             </Tabs.Panel>
 
