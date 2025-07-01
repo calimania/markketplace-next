@@ -68,7 +68,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
         store: store?.documentId,
         account_country: accountCountry,
         // test_mode: true,
-        // account_type: 'custom',
+        account_type: ['CO', 'SV'].includes(accountCountry) ? 'express' : 'standard',
       });
 
       if (!account) {
@@ -133,10 +133,17 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
                   disabled={loading}
                 >
                   <option value="US">United States</option>
-                  {/* <option value="CO">Colombia</option> */}
+                  <option value="CO">Colombia</option>
                   <option value="MX">Mexico</option>
+                  <option value="SV">El Salvador</option>
                 </select>
                 <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located. This cannot be changed after setup.</Text>
+                <Text size="xs">
+                  Contact us [ email@markket.place ] or via
+                  <a href="https://de.markket.place/store/next/blog/discord" target="_blank">
+                    [ / discord ]
+                  </a> with questions or help requests.
+                </Text>
                 <Button
                   leftSection={<IconCreditCard size={20} />}
                   onClick={handleCreateAccount}
