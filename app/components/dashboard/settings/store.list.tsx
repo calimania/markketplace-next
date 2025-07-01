@@ -2,7 +2,7 @@ import { Text, Button, Group, Stack, Paper, Title, Badge } from '@mantine/core';
 import Link from 'next/link';
 import { markketConfig } from '@/markket/config';
 import { Store } from '@/markket/store';
-import { IconTrafficCone } from '@tabler/icons-react';
+import { IconTrafficCone, IconBrandAppleArcade } from '@tabler/icons-react';
 
 type StoreSettingsListPageProps = {
   stores: Store[];
@@ -22,10 +22,11 @@ const StoreSettingsListPage = ({stores}: StoreSettingsListPageProps) => {
             <Button
               variant="light"
               component='a'
-              href="/dashboard/stores/new"
+              href={`/dashboard/stores/new/?store=new`}
+              leftSection={<IconBrandAppleArcade size={18} />}
               className="border-2 border-black bg-yellow-100 text-fuchsia-700 font-bold hover:bg-fuchsia-200 hover:text-fuchsia-900 transition-all shadow-md rounded-xl px-6 py-2"
             >
-              + Create New Store
+              Create New Store
             </Button>
           </>
         ) : (

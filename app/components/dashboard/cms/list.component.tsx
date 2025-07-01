@@ -13,10 +13,10 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
-  IconCopy,
+  // IconCopy,
   IconDotsVertical,
-  IconRocket,
-  IconRocketOff,
+  // IconRocket,
+  // IconRocketOff,
   IconPhoto,
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -121,13 +121,13 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                         >
                           View
                         </Menu.Item>
-                        <Menu.Item
+                        {/* <Menu.Item
                           leftSection={<IconCopy size={14} />}
                           onClick={() => handleAction('clone', item)}
                         >
                           Clone
-                        </Menu.Item>
-                        {item.publishedAt ? (
+                        </Menu.Item> */}
+                        {/* {item.publishedAt ? (
                           <Menu.Item
                             leftSection={<IconRocketOff size={14} />}
                             onClick={() => handleAction('unpublish', item)}
@@ -143,7 +143,7 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                           >
                             Publish
                           </Menu.Item>
-                        )}
+                        )} */}
                         <Menu.Divider />
                         <Menu.Item
                           leftSection={<IconTrash size={14} />}

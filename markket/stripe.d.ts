@@ -3,6 +3,8 @@
 export interface StripeAccount {
   info: {
     test_mode: boolean;
+    country?: string;
+    id?: string;
     business_profile: {
       name: string;
       url: string;

@@ -1,4 +1,4 @@
-import { Container, Group, Paper, Stack, Title, Text, Button, Skeleton } from '@mantine/core';
+import { Container, Group, Paper, Stack, Title, Text, Button, Skeleton, Modal } from '@mantine/core';
 import { IconArticle, IconPlus, IconSearch, IconMicroscope } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import ItemList from '@/app/components/dashboard/cms/list.component';
@@ -6,6 +6,8 @@ import { Store } from '@/markket';
 
 import { ContentItem } from '@/app/hooks/common.d';
 import { markketConfig } from '@/markket/config';
+import { useState } from 'react';
+import { notifications } from '@mantine/notifications';
 
 type CMSComponent = {
   singular: string;
@@ -23,6 +25,8 @@ const Icons: Record<string, any> = {
 
 const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, description }: CMSComponent) => {
   const router = useRouter();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<ContentItem | null>(null);
 
   const Icon = Icons[singular as string] || IconArticle;
 
@@ -41,6 +45,40 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
 
   return (
     <Container size="lg" py="xl">
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title={<span className="font-black text-fuchsia-700 flex items-center gap-2">🗑️ Delete {singular.charAt(0).toUpperCase() + singular.slice(1)}?</span>}
+        centered
+        radius="xl"
+        classNames={{ content: 'border-4 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-sky-50 shadow-xl', title: 'font-bold' }}
+      >
+        <Stack gap="md">
+          <Text className="text-sky-800 text-lg font-semibold">
+            Are you sure you want to delete <b>{itemToDelete?.title || singular}</b>? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end">
+            <Button variant="light" color="gray" onClick={() => setDeleteModalOpen(false)} className="border-2 border-black">Cancel</Button>
+            <Button
+              color="red"
+              className="border-2 border-black font-bold bg-red-100 hover:bg-fuchsia-200 hover:text-fuchsia-900 transition-all shadow-md"
+              onClick={async () => {
+                setDeleteModalOpen(false);
+                notifications.show({
+                  title: 'Coming soon!',
+                  message: 'Delete functionality will be available soon.',
+                  color: 'yellow',
+                  icon: '🦄',
+                });
+                // TODO: Call API to delete item, then refresh list or show success notification
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <Stack gap="lg">
         <Paper p="md" withBorder>
           <Group justify="space-between" wrap="nowrap">
@@ -97,20 +135,24 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
               singular={singular}
               actions={{
                 onView: (item) => {
+                  if (plural == 'stores') {
+                    return router.push(`/dashboard/${singular}?store=${item.documentId}`);
+                  }
                   router.push(`/dashboard/${plural}/view/${item.documentId}?store=${store.documentId}`);
                 },
                 onEdit: (item) => {
                   router.push(`/dashboard/${plural}/edit/${item.documentId}?store=${store.documentId}`);
                 },
                 onDelete: async (item) => {
-                  console.log('Deleting article:', item.documentId);
+                  setItemToDelete(item);
+                  setDeleteModalOpen(true);
                 },
-                onPublish: async (item) => {
-                  console.log('Publishing article:', item.documentId);
-                },
-                onUnpublish: async (item) => {
-                  console.log('Unpublishing article:', item.documentId);
-                },
+                // onPublish: async (item) => {
+                //   console.log('Publishing article:', item.documentId);
+                // },
+                // onUnpublish: async (item) => {
+                //   console.log('Unpublishing article:', item.documentId);
+                // },
               }}
             />
         )}
