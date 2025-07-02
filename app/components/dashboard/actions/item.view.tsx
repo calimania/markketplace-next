@@ -36,6 +36,7 @@ import ImagesView from '../item.images';
 import AlbumTrackList from '../album.tracks.component';
 import AlbumsView from '../album.page.component';
 import { useRouter } from 'next/navigation';
+import ImageManager from '../item.image.manager';
 
 const prefixMap: Record<string, string> = {
   article: 'blog',
@@ -62,14 +63,19 @@ const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem
   return `/store/${store?.slug}/${prefix}/${item.slug}`;
 }
 
-const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, store: Store, singular: string, previewUrl?: string }) => {
+export type ViewItemProps = {
+  item: ContentItem, store: Store, singular: string, previewUrl?: string, imageSection?: boolean, imageManager?: boolean, refresh?: any
+}
+
+const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imageManager, refresh }: ViewItemProps) => {
   const md = new Remarkable();
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
   const router = useRouter();
+  console.log({ refresh })
 
   const seo_url = seoUrl(previewUrl, store, item, prefixMap[singular]);
 
-  const urls = (item as Store).URLS || (item as AlbumTrack)?.urls;
+  const urls = (item as Store)?.URLS || (item as AlbumTrack)?.urls;
 
   return (
     <Container size="lg" py="xl" >
@@ -89,7 +95,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                 fontWeight: 800,
               }}
             >
-               {(item as Article).Title || (item as Album).title || (item as Product).Name}
+              {(item as Article)?.Title || (item as Album)?.title || (item as Product)?.Name}
             </Title>
             <Group gap="lg">
               <Group gap="xs">
@@ -125,7 +131,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
                 </Text>
               </Group>
             </Group>
-            {item.slug && (<Group gap="xs">
+            {item?.slug && (<Group gap="xs">
               <ThemeIcon size="md" variant="light" color="magenta">
                 <IconSailboat size={16} />
               </ThemeIcon>
@@ -134,7 +140,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </Text>
             </Group>)}
 
-            {(item.Tags || item.Tag) && (
+            {(item?.Tags || item?.Tag) && (
               <>
                 <Divider />
                 <Group gap="xs">
@@ -163,7 +169,7 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
             )}
           </Stack>
 
-          {(item.Description || item.Content || item.content) && (
+          {(item?.Description || item?.Content || item?.content) && (
             <Paper
               withBorder
               p="xl"
@@ -258,19 +264,24 @@ const ViewItem = ({ item, store, singular, previewUrl }: { item: ContentItem, st
               </Accordion.Item>
             ))}
           </Accordion>
-          <div>
-            <Group gap="xs" mb="lg">
-              <IconPhotoHexagon size={16} color="magenta" /> Images
-            </Group>
-            {['Cover', 'Logo', 'media', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures', 'SEO.socialImage'].map((name) => (
-              <ImagesView
-                key={name}
-                item={item as ContentItem & Record<string, any>}
-                name={name as any}
-                multiple={item[name] && Array.isArray(item[name])}
-              />
-            ))}
-          </div>
+          {imageSection && (
+            <div>
+              <Group gap="xs" mb="lg">
+                <IconPhotoHexagon size={16} color="magenta" /> Images
+              </Group>
+              {['Cover', 'Logo', 'media', 'Favicon', 'Slides', 'socialImage', 'Thumbnail', 'image', 'images', 'photo', 'photos', 'picture', 'pictures', 'SEO.socialImage'].map((name) => (
+                <ImagesView
+                  key={name}
+                  item={item as ContentItem & Record<string, any>}
+                  name={name as any}
+                  multiple={item[name] && Array.isArray(item[name])}
+                />
+              ))}
+            </div>
+          )}
+          {imageManager && (
+            <ImageManager item={item} store={store} singular="store" refresh={refresh} />
+          )}
         </Stack>
       </Paper>
     </Container>

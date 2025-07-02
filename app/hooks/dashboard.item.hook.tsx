@@ -36,5 +36,11 @@ export function useCMSItem<T>(
     }
   }, [id, contentType, options?.append]);
 
-  return { item, loading, error };
+  const refresh = async () => {
+    const json = await markket.fetch(`/api/markket?path=/api/${contentType}/${id}&${options?.append || ''}`, {});
+    setLoading(false);
+    setItem(json?.data as T);
+  }
+
+  return { item, loading, error, refresh };
 };

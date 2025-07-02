@@ -33,9 +33,10 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
 
   const Component = options[action] as ElementType;
 
-  const { item, loading, error } = useCMSItem<ContentItem>(slug as ContentType, id, {
+  const { item, loading, error, refresh } = useCMSItem<ContentItem>(slug as ContentType, id, {
     append: options?.url || '',
   });
+
 
   if (loading && action !== 'new') {
     return (
@@ -104,6 +105,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           create={options.create}
           action={action}
           update={options.update}
+          refresh={refresh}
           form={{ config: options.form, sections: options.form_sections }}
           description={options.form?.description}
         />
