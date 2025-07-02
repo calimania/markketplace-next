@@ -2,10 +2,9 @@ import { ContentTypes, Store } from "@/markket"
 import { Group, Tooltip, ScrollArea, Paper, Text, Title, Button, Stack, Box } from '@mantine/core';
 import { useState } from 'react';
 import ImageModal from './image.modal';
-import { markketClient } from "@/markket/api.markket";
 import { IconCactus, IconCameraPlus } from "@tabler/icons-react";
 
-import { ImageConfig } from './item.image.config';
+import { ImageConfig, ImageActions } from './item.image.config';
 
 export type ImageManagerProps = {
   item?: ContentTypes,
@@ -17,26 +16,7 @@ export type ImageManagerProps = {
 const PLACEHOLDER = 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/4dd22c1b57887fe28307fb4784c974bb.png';
 
 const map = ImageConfig;
-
-const upload = (documentid: string, kind?: string) => {
-
-  return async (path: string, img: File, alt: string, multiIndex?: number) => {
-    console.log(`uploading:${kind}`, { path, img, multiIndex });
-
-    await markket.uploadImage(img, path, documentid, alt);
-  }
-}
-
-const markket = new markketClient();
-
-// Fix actions type and add onToggleMode prop to ImageModal
-const actions: Record<string, (documentId: string) => { upload: (path: string, img: any, alt: string, multiIndex?: number) => Promise<void> }> = {
-  store: (documentId) => {
-    return ({
-      upload: upload(documentId, 'store'),
-    })
-  },
-};
+const actions = ImageActions;
 
 const THUMB_SIZE = 96;
 
@@ -188,12 +168,13 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
           if (url) {
             // @TODO: PUT request to replace image in the singular record
           } else {
-            await actions[singular](item.id).upload(modalState.key, img, alt || modalState.key, modalState.multiIndex);
+            await actions[singular](item).upload(modalState.key, img, alt || modalState.key, modalState.multiIndex);
           }
+
           setTimeout(() => {
             if (refresh) refresh();
             setModalState({ open: false });
-          }, 1 * 1000);
+          }, 1.1 * 1000);
         }}
         onInsert={() => setModalState({ open: false })}
         onToggleMode={() => setModalState((s) => ({ ...s, mode: s.mode === 'preview' ? 'replace' : 'preview' }))}

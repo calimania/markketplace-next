@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Modal, Stack, SegmentedControl, Paper, Text, Center, Loader, TextInput, Button, Group, FileButton, Progress, ActionIcon, Box, Image as MantineImage
 } from '@mantine/core';
-import { IconLink, IconUpload, IconFileUpload, IconX, IconCheck, IconPhotoPlus, } from '@tabler/icons-react';
+import { IconLink, IconUpload, IconFileUpload, IconX, IconPhotoPlus, } from '@tabler/icons-react';
 
 const PLACEHOLDER = 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/079a9ce3daa373036a6bc77c1739d424.png';
 
@@ -36,7 +36,6 @@ const ImageModal = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Reset state when modal opens/closes
   useEffect(() => {
     if (imageModalOpen) {
       setImageUrl(initialImageUrl);
@@ -63,10 +62,7 @@ const ImageModal = ({
         const height = (this as HTMLImageElement).height;
         const width = (this as HTMLImageElement).width as number;
 
-        console.log({ height, width, maxWidth });
-
         if (maxWidth && width > maxWidth) {
-
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d')
           const ratio = maxWidth / (width < 1 ? 1 : width);
@@ -146,15 +142,14 @@ const ImageModal = ({
                 <img
                   src={previewUrl || imageUrl || PLACEHOLDER}
                   alt={imageAlt || 'Preview'}
-                  style={{
-                    // maxWidth: maxWidth ? maxWidth : '100%',
+                    style={{
                     objectFit: 'contain',
                     border: maxWidth ? '2px dashed #e879f9' : 'none',
                     borderRadius: 12,
                     background: '#fff',
                     margin: '0 auto',
                     display: 'block',
-                    opacity: (!previewUrl && !imageUrl) ?  0.3 : 1,
+                      opacity: (!previewUrl && !imageUrl) ? 0.3 : 1,
                   }}
                   onError={e => {
                     (e.target as HTMLImageElement).src = PLACEHOLDER;
@@ -238,27 +233,23 @@ const ImageModal = ({
                           <IconX size={14} />
                         </ActionIcon>
                       </Box>
-                      {uploadProgress > 0 && (
-                        <Stack mt="md">
-                          <Group justify="apart" m="md">
-                            <Text size="xs">Uploading...</Text>
-                            <Text size="xs" fw={500}>{uploadProgress}%</Text>
-                          </Group>
-                          <Progress
-                            value={uploadProgress}
-                            size="sm"
-                            color={uploadProgress === 100 ? 'green' : 'blue'}
-                            radius="xl"
-                          />
-                          {uploadProgress === 100 && (
-                            <Group m={5}>
-                              <IconCheck size={14} color="green" />
-                              <Text size="xs" c="green">Upload complete!</Text>
+                        {uploadProgress > 0 && (
+                          <Stack mt="md">
+                            <Group justify="apart" m="md">
+                              <Text size="xs">Uploading...</Text>
+                              <Text size="xs" fw={500}>{uploadProgress}%</Text>
                             </Group>
-                          )}
-                        </Stack>
-                      )}
-                      <Text size="sm" truncate fw={500}>{imageFile?.name}</Text>
+                            <Progress
+                              value={uploadProgress}
+                              size="md"
+                              color={uploadProgress > 80 ? 'green' : 'blue'}
+                              radius="xl"
+                            />
+                          </Stack>
+                        )}
+                        <Text size="sm" truncate fw={500}>
+                          {imageFile?.name}
+                        </Text>
                     </Stack>
                   )}
                 </Paper>

@@ -71,7 +71,6 @@ const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imag
   const md = new Remarkable();
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
   const router = useRouter();
-  console.log({ refresh })
 
   const seo_url = seoUrl(previewUrl, store, item, prefixMap[singular]);
 
