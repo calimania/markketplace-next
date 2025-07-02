@@ -46,6 +46,10 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     populate: ['SEO', 'SEO.socialImage'],
     sort: 'updatedAt:desc'
   },
+  stores: {
+    populate: ['SEO', 'SEO.socialImage', 'URLS', 'Cover'],
+    sort: 'updatedAt:desc'
+  }
 };
 
 export function useCMSItems<T>(

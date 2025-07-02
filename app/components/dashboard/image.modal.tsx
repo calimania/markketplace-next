@@ -28,7 +28,7 @@ const ImageModal = ({
   mode = 'preview',
   onToggleMode,
 }: ImageModalProps) => {
-  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('url');
+  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('upload');
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
   const [imageAlt, setImageAlt] = useState(initialImageAlt);
   const [isUploading, setIsUploading] = useState(false);
@@ -49,8 +49,42 @@ const ImageModal = ({
 
   const handleFileUpload = (file: File | null) => {
     if (!file) return;
-    setImageFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+    reader.onload = function (e) {
+
+      const image = new Image();
+
+      image.src = e.target?.result as string;
+
+      image.onload = async function () {
+        const height = (this as HTMLImageElement).height;
+        const width = (this as HTMLImageElement).width as number;
+
+        console.log({ height, width, maxWidth });
+
+        if (maxWidth && width > maxWidth) {
+
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d')
+          const ratio = maxWidth / (width < 1 ? 1 : width);
+          canvas.width = width * ratio + .5 | 0
+          canvas.height = height * ratio + .5 | 0
+          canvas.style.display = 'none';
+          ctx?.drawImage(image, 0, 0, canvas.width, canvas.height)
+          document.body.appendChild(canvas)
+          const blob: Blob = await new Promise(rs => canvas.toBlob(rs as any, '1'));
+          const resizedFile = new File([blob], file.name, file)
+          setImageFile(resizedFile);
+          setPreviewUrl(URL.createObjectURL(resizedFile));
+        } else {
+          setImageFile(file);
+          setPreviewUrl(URL.createObjectURL(file));
+        }
+      };
+    };
   };
 
   const resetFileInput = () => {
@@ -96,7 +130,7 @@ const ImageModal = ({
         >
           {mode == 'preview' ? 'Replace Image' : 'Preview'}
         </Button></>}
-      size="xl"
+      size="96%"
       centered
       radius="xl"
       classNames={{ content: 'border-4 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-sky-50 shadow-xl' }}
@@ -105,7 +139,7 @@ const ImageModal = ({
         {mode == 'preview' && (
           <Paper withBorder p="xs" radius="md">
             {/* {Future: Edit Canvas/Gen AI /Clipper Controls, enable a toolbar in preview mode' - insert text )} */}
-            <Center style={{ height: maxWidth ? maxWidth + 20 : 180, background: 'var(--mantine-color-gray-0)' }} p="xs">
+            <Center style={{ background: 'var(--mantine-color-gray-0)' }} p="xs">
               {isUploading ? (
                 <Loader size="sm" />
               ) : (
@@ -113,8 +147,7 @@ const ImageModal = ({
                   src={previewUrl || imageUrl || PLACEHOLDER}
                   alt={imageAlt || 'Preview'}
                   style={{
-                    maxWidth: maxWidth ? maxWidth : '100%',
-                    maxHeight: maxWidth ? maxWidth : 180,
+                    // maxWidth: maxWidth ? maxWidth : '100%',
                     objectFit: 'contain',
                     border: maxWidth ? '2px dashed #e879f9' : 'none',
                     borderRadius: 12,
@@ -148,6 +181,7 @@ const ImageModal = ({
             {imageUploadOption === 'url' && (
               <TextInput
                 label="Image URL"
+                readOnly
                 placeholder="https://example.com/image.jpg"
                 value={imageUrl}
                 onChange={e => setImageUrl(e.currentTarget.value)}
@@ -185,11 +219,11 @@ const ImageModal = ({
                     </Stack>
                   ) : (
                     <Stack my="md">
-                      <Box pos="relative">
+                        <Box pos="relative" className='max-h-[200px] overflow-scroll max-w-[96%] mx-auto'>
                         <MantineImage
                           src={previewUrl}
                           alt="Preview"
-                          height={maxWidth ? maxWidth : 200}
+                            height={'200px'}
                           fit="contain"
                           radius="md"
                         />
@@ -246,7 +280,7 @@ const ImageModal = ({
           {mode == 'replace' && (
             <Button
               onClick={handleReplaceImage}
-              disabled={isUploading || !(imageUrl || previewUrl)}
+              disabled={isUploading || !(imageUrl || previewUrl) || (imageUploadOption == 'upload' && !imageFile)}
               leftSection={<IconPhotoPlus size={16} />}
             >
               { imageUploadOption == 'upload' ?  'Upload' : 'Replace'}

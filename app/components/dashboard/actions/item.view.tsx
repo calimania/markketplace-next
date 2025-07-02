@@ -280,7 +280,7 @@ const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imag
             </div>
           )}
           {imageManager && (
-            <ImageManager item={item} store={store} singular="store" refresh={refresh} />
+            <ImageManager item={item} store={store} singular={singular} refresh={refresh} />
           )}
         </Stack>
       </Paper>

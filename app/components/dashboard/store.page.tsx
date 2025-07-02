@@ -26,7 +26,7 @@ export default function StoreDashboardPage() {
     }, 180);
   }, [store?.id])
 
-  if (isLoading || !store) {
+  if (isLoading || !item) {
     return (
       <Container size="lg" pb="xs">
         <Skeleton height={50} circle mb="xl" />
