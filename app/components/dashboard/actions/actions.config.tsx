@@ -272,7 +272,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     ]
   },
   stores: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides&populate[]=URLS`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides&populate[]=URLS&populate[]=Thumbnail`,
     view: ViewItem,
     edit: FormItem,
     new: FormItem,

@@ -5,33 +5,35 @@ import { DashboardContext } from '@/app/providers/dashboard.provider';
 import ViewItem from '@/app/components/dashboard/actions/item.view';
 import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';
 import { useRouter } from 'next/navigation';
-import { IconBuildingStore, IconPencilCog, IconCoin, IconInfoHexagonFilled } from '@tabler/icons-react';
+import { IconBuildingStore, IconPencilCog, IconCoin, IconInfoHexagonFilled, } from '@tabler/icons-react';
 import StripeSetup from './stripe.setup';
 import StripeHeader from './stripe.header';
 import { Tabs } from '@mantine/core';
-
+import { useCMSItem } from '@/app/hooks/dashboard.item.hook';
 
 export default function StoreDashboardPage() {
   const { store, stripe } = useContext(DashboardContext);
   const [isLoading, setIsLoading] = useState(0);
   const router = useRouter();
 
+  const { refresh, item } = useCMSItem('stores', store?.documentId, { append: 'populate[]=SEO.socialImage&populate=Cover&populate[]=Favicon&populate[]=Slides&populate[]=Logo' });
+
   useEffect(() => {
     setIsLoading(store?.id);
 
     setTimeout(() => {
       setIsLoading(0);
-    }, 160);
+    }, 180);
   }, [store?.id])
 
-  if (isLoading) {
+  if (isLoading || !item) {
     return (
-      <>
+      <Container size="lg" pb="xs">
         <Skeleton height={50} circle mb="xl" />
-        <Skeleton height={8} radius="xl" />
+        <Skeleton height={120} radius="sm" />
         <Skeleton height={8} mt={6} radius="xl" />
         <Skeleton height={8} mt={6} width="70%" radius="xl" />
-      </>
+      </Container>
     );
   }
 
@@ -48,7 +50,7 @@ export default function StoreDashboardPage() {
                 Payouts [stripe]
               </Tabs.Tab>
               {/* <Tabs.Tab value="settings" leftSection={<IconSettings size={12} />}>
-                Settings
+                Stats
               </Tabs.Tab> */}
             </Tabs.List>
             <Tabs.Panel value="store">
@@ -72,7 +74,7 @@ export default function StoreDashboardPage() {
                     </Button>
                   </Group>
                 </Stack>
-                <ViewItem item={store} store={store} singular="store" previewUrl={`/store/${store.slug}`} />
+                <ViewItem item={item} store={store} singular="store" previewUrl={`/store/${store.slug}`} imageManager imageSection={false} refresh={refresh} />
               </>
             </Tabs.Panel>
             <Tabs.Panel value="stripe">
