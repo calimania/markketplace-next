@@ -108,7 +108,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           refresh={refresh}
           form={{ config: options.form, sections: options.form_sections }}
           description={options.form?.description}
-          imageManager={['page'].includes(options.singular)}
+          imageManager={['page', 'article'].includes(options.singular)}
         />
       </Stack>
       {(action !== 'new' && options.singular !== 'store') && (
