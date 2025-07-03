@@ -1,7 +1,7 @@
 import { ContentTypes } from "@/markket";
 import { markketClient, _validImageRef } from "@/markket/api.markket";
 
-type supported_kind = 'store' | 'page' | 'article' | 'product' | 'event' | 'album';
+type supported_kind = 'store' | 'page' | 'article' | 'product' | 'event' | 'album' | 'track';
 
 const seo = {
   'SEO.socialImage': {
@@ -43,6 +43,10 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
   album: {
     ...seo,
     cover: { max_width: 1200 }
+  },
+  track: {
+    // media,
+    ...seo,
   }
 };
 
@@ -59,7 +63,8 @@ const upload = (item: ContentTypes, kind: supported_kind) => {
     }
 
     if (item.id) {
-      await markket.uploadImage(img, path, item.id, alt, `api::${kind}.${kind}` as _validImageRef);
+      const ref = ((kind == 'track') ? 'api::album.track' : `api::${kind}.${kind}`) as _validImageRef;
+      await markket.uploadImage(img, path, item.id, alt, ref);
       return;
     }
   }
@@ -95,6 +100,11 @@ const ImageActions: Record<string, (documentId: string) => { upload: (path: stri
   album: (item) => {
     return ({
       upload: upload(item, 'album'),
+    })
+  },
+  track: (item) => {
+    return ({
+      upload: upload(item, 'track'),
     })
   }
 };

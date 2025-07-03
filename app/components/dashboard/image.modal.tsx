@@ -107,10 +107,15 @@ const ImageModal = ({
       setUploadProgress(66);
     }, 0.5 * 1000);
 
-     return setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(88);
-      }, 1.1 * 1000 );
+
+    setTimeout(() => {
+      setUploadProgress(88);
+    }, 0.8 * 1000);
+
+    return setTimeout(() => {
+      setIsUploading(false);
+      setUploadProgress(98);
+    }, 1.1 * 1000);
   };
 
   return (
@@ -271,7 +276,7 @@ const ImageModal = ({
           {mode == 'replace' && (
             <Button
               onClick={handleReplaceImage}
-              disabled={isUploading || !(imageUrl || previewUrl) || (imageUploadOption == 'upload' && !imageFile)}
+              disabled={(uploadProgress > 0 && uploadProgress < 100) || !(imageUrl || previewUrl) || (imageUploadOption == 'upload' && !imageFile)}
               leftSection={<IconPhotoPlus size={16} />}
             >
               { imageUploadOption == 'upload' ?  'Upload' : 'Replace'}

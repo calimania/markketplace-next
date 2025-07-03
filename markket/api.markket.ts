@@ -7,7 +7,7 @@ type fetchOptions = {
   cache?: any;
 };
 
-export type _validImageRef = 'common.SEO' | 'api::store.store' | 'api::page.page';
+export type _validImageRef = 'common.SEO' | 'api::store.store' | 'api::page.page' | 'api::album.album' | 'api::album.track' | 'api::event.event' | 'api::product.product' | 'api::article.article';
 
 /**
  * Utitilities to easily communitcate with our routes in /api/markket
