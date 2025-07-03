@@ -1,7 +1,9 @@
 import { ContentTypes } from "@/markket";
 import { markketClient, _validImageRef } from "@/markket/api.markket";
 
-const ImageConfig: Record<'store', Record<string, { multi?: boolean, max_width?: number }>>  = {
+type supported_kind = 'store' | 'page';
+
+const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_width?: number }>> = {
   store: {
     Logo: {
       max_width: 1200,
@@ -14,11 +16,16 @@ const ImageConfig: Record<'store', Record<string, { multi?: boolean, max_width?:
     Cover: {
       max_width: 1280,
     },
+  },
+  page: {
+    'SEO.socialImage': {
+      max_width: 1200
+    }
   }
 };
 
 
-const upload = (item: ContentTypes, kind: 'store' | 'page') => {
+const upload = (item: ContentTypes, kind: supported_kind) => {
   const markket = new markketClient();
 
   return async (path: string, img: File, alt: string, multiIndex?: number) => {

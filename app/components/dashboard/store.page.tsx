@@ -74,7 +74,7 @@ export default function StoreDashboardPage() {
                     </Button>
                   </Group>
                 </Stack>
-                <ViewItem item={item} store={store} singular="store" previewUrl={`/store/${store.slug}`} imageManager imageSection={false} refresh={refresh} />
+                <ViewItem item={item} store={store} singular="store" previewUrl={`/store/${store.slug}`} imageManager refresh={refresh} />
               </>
             </Tabs.Panel>
             <Tabs.Panel value="stripe">
