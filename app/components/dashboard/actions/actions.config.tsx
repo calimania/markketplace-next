@@ -424,7 +424,7 @@ export const actionsMap: Record<string, ActionComponent> = {
     ]
   },
   albums: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=tracks&populate[]=cover`,
     view: ViewItem,
     edit: FormItem,
     new: FormItem,

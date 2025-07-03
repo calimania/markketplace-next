@@ -7,6 +7,8 @@ type fetchOptions = {
   cache?: any;
 };
 
+export type _validImageRef = 'common.SEO' | 'api::store.store' | 'api::page.page' | 'api::album.album' | 'api::album.track' | 'api::event.event' | 'api::product.product' | 'api::article.article';
+
 /**
  * Utitilities to easily communitcate with our routes in /api/markket
  */
@@ -44,12 +46,12 @@ export class markketClient {
     return jwt;
   };
 
-  public uploadImage = async (file: File, field: string, refId: string | number, alt?: string) => {
+  public uploadImage = async (file: File, field: string, refId: string | number, alt?: string, ref?: _validImageRef) => {
     this.readToken();
 
     const formData = new FormData();
     formData.append('files', file);
-    formData.append('ref', 'api::store.store');
+    formData.append('ref', ref || 'api::store.store');
     formData.append('refId', refId as string);
     formData.append('field', field);
     formData.append("fileInfo", JSON.stringify({

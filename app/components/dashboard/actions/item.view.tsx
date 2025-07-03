@@ -67,11 +67,10 @@ export type ViewItemProps = {
   item: ContentItem, store: Store, singular: string, previewUrl?: string, imageSection?: boolean, imageManager?: boolean, refresh?: any
 }
 
-const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imageManager, refresh }: ViewItemProps) => {
+const ViewItem = ({ item, store, singular, previewUrl, imageManager, refresh }: ViewItemProps) => {
   const md = new Remarkable();
   const [showUrls, { toggle: toggleUrls }] = useDisclosure(false);
   const router = useRouter();
-  console.log({ refresh })
 
   const seo_url = seoUrl(previewUrl, store, item, prefixMap[singular]);
 
@@ -264,7 +263,9 @@ const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imag
               </Accordion.Item>
             ))}
           </Accordion>
-          {imageSection && (
+          {imageManager ? (
+            <ImageManager item={item} store={store} singular={singular} refresh={refresh} />
+          ) : (
             <div>
               <Group gap="xs" mb="lg">
                 <IconPhotoHexagon size={16} color="magenta" /> Images
@@ -278,9 +279,6 @@ const ViewItem = ({ item, store, singular, previewUrl, imageSection = true, imag
                 />
               ))}
             </div>
-          )}
-          {imageManager && (
-            <ImageManager item={item} store={store} singular={singular} refresh={refresh} />
           )}
         </Stack>
       </Paper>
