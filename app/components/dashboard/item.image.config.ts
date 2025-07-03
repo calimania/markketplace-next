@@ -1,7 +1,7 @@
 import { ContentTypes } from "@/markket";
 import { markketClient, _validImageRef } from "@/markket/api.markket";
 
-type supported_kind = 'store' | 'page' | 'article';
+type supported_kind = 'store' | 'page' | 'article' | 'product';
 
 const seo = {
   'SEO.socialImage': {
@@ -29,6 +29,11 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
   article: {
     ...seo,
     cover: { max_width: 1200 }
+  },
+  product: {
+    ...seo,
+    //Slides,
+    Thumbnail: { max_width: 840 }
   }
 };
 
@@ -66,6 +71,11 @@ const ImageActions: Record<string, (documentId: string) => { upload: (path: stri
   article: (item) => {
     return ({
       upload: upload(item, 'article'),
+    })
+  },
+  product: (item) => {
+    return ({
+      upload: upload(item, 'product'),
     })
   }
 };
