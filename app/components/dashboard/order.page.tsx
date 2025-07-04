@@ -95,8 +95,9 @@ const OrderTab = () => {
                     disabled={updating === order.id}
                     onChange={e => handleStatusChange(order, e.target.value)}
                   >
+                    <option value="open" disabled={order.Status == 'complete'}>Opened</option>
                     <option value="pending" disabled>Pending</option>
-                    <option value="complete">Paid</option>
+                    <option value="complete" disabled={order.Status == 'open'}>Paid {order.status}</option>
                     <option value="shipped" disabled>Shipped</option>
                     <option value="refunded" disabled>Refunded</option>
                   </select>
