@@ -221,12 +221,7 @@ export const actionsMap: Record<string, ActionComponent> = {
         Name: '',
         Description: '',
         slug: '',
-        PRICES: [{
-          Price: 0,
-          Currency: 'USD',
-          Name: 'Cash Transaction',
-          Description: 'online fullfilment',
-        }],
+        PRICES: [],
         SEO: commonSections.initialValues.SEO,
         Thumbnail: {},
       },

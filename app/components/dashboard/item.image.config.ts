@@ -14,7 +14,7 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
     Logo: {
       max_width: 1200,
     },
-    Slides: { multi: true, max_width: 1600, can_change: false },
+    Slides: { multi: true, max_width: 1600, },
     Favicon: { max_width: 120 },
     'SEO.socialImage': {
       max_width: 1200,
@@ -32,12 +32,12 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
   },
   product: {
     ...seo,
-    Slides: { multi: true, max_width: 1600, can_change: false },
+    Slides: { multi: true, max_width: 1600, },
     Thumbnail: { max_width: 840 }
   },
   event: {
     ...seo,
-    Slides: { multi: true, max_width: 1600, can_change: false },
+    Slides: { multi: true, max_width: 1600, },
     Thumbnail: { max_width: 840 }
   },
   album: {
@@ -45,7 +45,7 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
     cover: { max_width: 1200 }
   },
   track: {
-    media: { multi: true, max_width: 1600, can_change: false },
+    media: { multi: true, max_width: 1600, },
     ...seo,
   }
 };
