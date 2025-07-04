@@ -37,7 +37,7 @@ const mainLinks = [
   { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
   { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
   { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
-  { icon: IconMessageUser, label: 'Customer Center', href: '/dashboard/crm', visible: true }
+  { icon: IconMessageUser, label: 'Customer Center', href: '/dashboard/crm#sales', visible: true }
 ];
 
 type DashboardLayoutProps = {
@@ -128,13 +128,11 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
-  const getActiveLink = () => {
-    if (typeof window !== 'object') return '';
-    const path = window.location.pathname;
-    return mainLinks.find(link => path.includes(link.href))?.href || '';
-  };
+  const isActive = (link: { href: string }): boolean => {
+    if (typeof window !== 'object') return false;
 
-  const currentActive = getActiveLink();
+    return link.href?.includes(window.location.pathname);
+  };
 
   return (
     <AppShell
@@ -266,7 +264,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
                   {...link}
                   key={link.label}
                   store_id={selectedStore?.documentId}
-                  active={currentActive === link.href}
+                  active={!!isActive(link)}
                 />
               ))}
             </Stack>

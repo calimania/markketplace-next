@@ -2,13 +2,11 @@ import { useEffect } from 'react';
 import { Tabs, rem } from '@mantine/core';
 import { IconMessageChatbot, IconClipboardPlus, IconMoodEdit, IconShoppingBagEdit, IconInfoCircle, } from '@tabler/icons-react';
 
-
 import InboxDashboardPage from '@/app/components/dashboard/inbox.page';
 import FormsDashboardPage from '@/app/components/dashboard/form.page';
 import NewsletterDashboardPage from '@/app/components/dashboard/newsletter.page';
 import OrderDashboardPage from '@/app/components/dashboard/order.page';
 import CRMAboutPage from '@/app/components/dashboard/crm.about.page';
-
 
 const tabList = [
   { value: 'sales', label: 'Sales', icon: IconShoppingBagEdit },
@@ -21,7 +19,7 @@ const tabList = [
 const CRMDashboardPage = () => {
   // Get tab from hash or default to inbox
   const hash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
-  const initialTab = tabList.some(t => t.value === hash) ? hash : 'inbox';
+  const initialTab = tabList.some(t => t.value === hash) ? hash : 'sales';
 
   // Update hash in URL when tab changes
   const handleTabChange = (tab: string | null) => {
