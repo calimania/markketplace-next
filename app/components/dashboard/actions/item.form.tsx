@@ -47,7 +47,7 @@ const FormItem = ({ id, item, create, update, form, singular, plural, descriptio
         result = await create(values, store?.documentId);
       }
       if (action == 'edit' && update && id) {
-        result = await update(values, item.documentId, store.documentId);
+        result = await update(values, item.documentId, store.documentId, item);
       }
     } catch (error) {
       console.warn({ error });

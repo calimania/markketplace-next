@@ -103,7 +103,7 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
 
           return (
             <Box key={key} style={{ width: '100%' }}>
-              <Text className="font-extrabold text-blue-700 mb-1 text-center text-xs tracking-wide rounded-lg px-2 py-1 inline-block">
+              <Text className="font-extrabold text-blue-700 mb-1 tracking-wide rounded-lg px-2 py-1">
                 {key}
               </Text>
               <ScrollArea type="auto" offsetScrollbars>
@@ -113,20 +113,20 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
                     const alt = img && img.alternativeText ? img.alternativeText : `${key} #${i + 1}`;
                     return (
                       <Box key={key + i} style={{ textAlign: 'center' }}>
-                        <Text className="text-left font-extrabold text-blue-700 mt-1 text-xs tracking-wide rounded-lg px-2 py-1 inline-block">
-                          <Group>
-                            <Button
-                              size="xs"
-                              variant="light"
-                              color="blue"
-                              className="mt-1 border-2 border-blue-300 font-bold text-blue-700 hover:bg-blue-100"
-                              onClick={() => setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
-                            >
-                              <IconCameraPlus size={18} color={`#db2777`} />
-                            </Button>
+                        <Group>
+                          {config[key].can_change != false && (<Button
+                            size="xs"
+                            variant="light"
+                            color="blue"
+                            className={`mt-1 border-2 border-blue-300 font-bold text-blue-700 hover:bg-blue-100 `}
+                            onClick={() => setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
+                          >
+                            <IconCameraPlus size={18} color={`#db2777`} />
+                          </Button>)}
+                          <Text className="text-left font-extrabold text-blue-700 mt-1 text-xs tracking-wide rounded-lg px-2 py-1 inline-block">
                             #{i + 1}
-                          </Group>
-                        </Text>
+                          </Text>
+                        </Group>
                         <Tooltip label={`${key} #${i + 1}`}>
                           <img
                             src={src}
@@ -140,10 +140,10 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
                               boxShadow: '3px 3px 0 #000',
                               background: '#fff',
                               marginRight: 12,
-                              cursor: 'pointer',
+                              cursor: config[key].can_change == false ? 'not-allowed' : 'pointer',
                               transition: 'transform 0.1s',
                             }}
-                            onClick={() => setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
+                            onClick={() => (config[key].can_change != false) && setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
                           />
                         </Tooltip>
                       </Box>
@@ -169,12 +169,12 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
             // @TODO: PUT request to replace image in the singular record
           } else {
             await actions[singular](item).upload(modalState.key, img, alt || modalState.key, modalState.multiIndex);
+            if (refresh) refresh();
           }
 
           setTimeout(() => {
-            if (refresh) refresh();
             setModalState({ open: false });
-          }, 1.1 * 1000);
+          }, 100);
         }}
         onInsert={() => setModalState({ open: false })}
         onToggleMode={() => setModalState((s) => ({ ...s, mode: s.mode === 'preview' ? 'replace' : 'preview' }))}

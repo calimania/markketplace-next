@@ -1,9 +1,9 @@
 import ViewItem from '@/app/components/dashboard/actions/item.view';
 import FormItem from './action.form';
-import { Store, } from '@/markket';
+import { ContentTypes, Store, } from '@/markket';
 import { ElementType } from 'react';
 import { markketClient } from '@/markket/api.markket';
-import { createContentAction, updateContentAction } from '@/markket/action.helpers';
+import { createContentAction, updateContentAction, normalizeImages } from '@/markket/action.helpers';
 
 const client = new markketClient();
 
@@ -126,6 +126,7 @@ export const actionsMap: Record<string, ActionComponent> = {
         slug: '',
         Tags: [],
         SEO: commonSections.initialValues.SEO,
+        cover: {},
       },
       validation: {
         Title: commonSections.validations.title,
@@ -227,6 +228,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           Description: 'online fullfilment',
         }],
         SEO: commonSections.initialValues.SEO,
+        Thumbnail: {},
       },
       validation: {
         Name: commonSections.validations.name,
@@ -272,16 +274,21 @@ export const actionsMap: Record<string, ActionComponent> = {
     ]
   },
   stores: {
-    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides&populate[]=URLS&populate[]=Thumbnail`,
+    url: `populate[]=SEO&populate[]=SEO.socialImage&populate[]=Cover&populate[]=Favicon&populate[]=Logo&populate[]=Slides&populate[]=URLS`,
     view: ViewItem,
     edit: FormItem,
     new: FormItem,
     singular: 'store',
     plural: 'stores',
-    update: async (values: Store, id: string) => {
+    update: async (values: Store, id: string, documentId?: string, item?: ContentTypes) => {
+      const request_body = normalizeImages({
+        ...(item as Store),
+        ...values,
+      }, 'store');
+
       return await client.put(`/api/markket/store?id=${id}`, {
         body: {
-          store: values,
+          store: request_body,
         },
       });
     },

@@ -24,13 +24,13 @@ const FormItem = (props: ItemFormProps) => {
       setTimeout(async () => {
         await fetchStores();
         return router.push(`/dashboard/store/?store=${data?.item?.documentId || ''}`);
-      }, ((2) * 1000));
+      }, (1000));
       return;
     }
 
     setTimeout(async () => {
       return router.push(`/dashboard/${plural}/view/${item?.documentId || data?.item?.documentId || ''}?store=${currentStoreId}`);
-    }, ((1.5) * 1000));
+    }, ((0.8) * 1000));
   }
 
   if (waiting) {

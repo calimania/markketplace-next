@@ -25,6 +25,8 @@ export const contentTypeConfig = {
         socialImage: data.SEO?.socialImage?.id,
       } : undefined,
       store: [storeId],
+      cover: data.cover,
+      Slides: data.Slides,
     }),
     linkToStore: true,
     propLimit: 50,
@@ -73,6 +75,8 @@ export const contentTypeConfig = {
       Description: data.Description,
       slug: data.slug,
       SKU: data.SKU,
+      Thumbnail: data.Thumbnail,
+      Slides: data.Slides,
       PRICES: data.PRICES?.map((p: any) => ({
         Currency: p.Currency,
         Description: p.Description,
@@ -109,6 +113,7 @@ export const contentTypeConfig = {
       description: data.description,
       content: data.content,
       slug: data.slug,
+      media: data.media,
       urls: data.urls?.map(({ URL, Label }: { URL: string, Label: string }) => ({ URL, Label })),
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
@@ -138,6 +143,7 @@ export const contentTypeConfig = {
       description: data.description,
       content: data.content,
       slug: data.slug,
+      cover: data.cover,
       SEO: data.SEO ? {
         metaTitle: data.SEO?.metaTitle,
         metaDescription: data.SEO?.metaDescription,
@@ -168,6 +174,8 @@ export const contentTypeConfig = {
       startDate: data.startDate,
       endDate: data.endDate,
       // location: data.location,
+      Thumbnail: data.Thumbnail,
+      Slides: data.Slides,
       creator: [userId],
       PRICES: data.PRICES?.map((p: any) => ({
         Currency: p.Currency,

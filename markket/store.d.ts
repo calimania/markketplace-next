@@ -51,4 +51,5 @@ export interface Store {
   Favicon: ImageData;
   URLS: URL[],
   SEO: SEO;
+  Slides: ImageData[];
 };
