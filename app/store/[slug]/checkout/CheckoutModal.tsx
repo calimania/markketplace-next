@@ -42,7 +42,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
 
   const [options, setOptions] = useState({
     totalPrice: 0,
-    product: product.id,
+    product: product.documentId,
     prices: [],
     stripe_test: false,
     includes_shipping: false,
