@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useContext, useState } from 'react';
@@ -25,8 +24,7 @@ import {
   IconFileExport,
 } from '@tabler/icons-react';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
-import { Subscriber } from '@/markket/newsletter';
-import DashboardCMS from '@/app/components/dashboard/cms';
+import { Subscriber } from '@/markket';
 
 const NewsletterPage = () => {
   const { store } = useContext(DashboardContext);
@@ -61,18 +59,20 @@ const NewsletterPage = () => {
               </Button>
               <Menu position="bottom-end">
                 <Menu.Target>
-                  <Button leftSection={<IconDownload size={16} />}>
+                  <Button leftSection={<IconDownload size={16} />} disabled>
                     Export List
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item
+                    disabled
                     leftSection={<IconFileExport size={14} />}
                     onClick={() => { }}
                   >
                     Export as CSV
                   </Menu.Item>
                   <Menu.Item
+                    disabled
                     leftSection={<IconFileExport size={14} />}
                     onClick={() => { }}
                   >
@@ -125,14 +125,28 @@ const NewsletterPage = () => {
             </Tabs.List>
 
             <Tabs.Panel value="subscribers" p="md">
-              <DashboardCMS
-                singular="subscriber"
-                plural="subscribers"
-                items={[]}
-                loading={loading}
-                store={store}
-                description={'Manage your customers, newsletter subscribers and communications'}
-              ></DashboardCMS>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border text-sm">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 border">Email</th>
+                      <th className="p-2 border">Date Subscribed</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr><td colSpan={2} className="p-4 text-center">Loading...</td></tr>
+                    ) : subscribers?.length ? subscribers.map((sub: any) => (
+                      <tr key={sub.id} className="hover:bg-gray-50">
+                        <td className="p-2 border">{sub.email || sub.Email || '—'}</td>
+                        <td className="p-2 border">{sub.createdAt ? new Date(sub.createdAt).toLocaleString() : '—'}</td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan={2} className="p-4 text-center">No subscribers found.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </Tabs.Panel>
 
             <Tabs.Panel value="settings" p="md">

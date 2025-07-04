@@ -71,6 +71,8 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         quantity,
         price: String(selectedPriceId),
         currency: "usd",
+        unit_amount: price?.Price,
+        Name: price?.Name,
       } as unknown as Price,
     ];
 
@@ -79,6 +81,8 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         unit_amount: String(tip),
         Currency: "usd",
         product: product.SKU,
+        quantity: 1,
+        Name: 'Tip',
       } as unknown as Price);
     }
 

@@ -31,12 +31,12 @@ const DEFAULT_OPTIONS: Record<ContentType, FetchOptions> = {
     sort: 'updatedAt:desc'
   },
   subscribers: {
-    populate: [],
+    populate: ['stores'],
     sort: 'updatedAt:desc'
   },
   orders: {
-    populate: [],
-    sort: 'updatedAt:desc'
+    populate: ['Shipping_Address', 'Details', 'Payment_attempts'],
+    sort: 'createdAt:desc'
   },
   inboxes: {
     populate: [],
@@ -78,7 +78,7 @@ export function useCMSItems<T>(
           includeAuth: true,
           filters: {
             //  some models connect with multiple stores - and some are 1:1
-            [['products', 'events'].includes(contentType) ? 'stores' : 'store']: {
+            [['products', 'events', 'subscribers'].includes(contentType) ? 'stores' : 'store']: {
               $eq: store?.id,
             },
           },

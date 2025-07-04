@@ -11,10 +11,10 @@ import CRMAboutPage from '@/app/components/dashboard/crm.about.page';
 
 
 const tabList = [
-  { value: 'inbox', label: 'Inbox', icon: IconMessageChatbot },
-  { value: 'forms', label: 'Forms', icon: IconClipboardPlus },
-  { value: 'subscribers', label: 'Subscribers', icon: IconMoodEdit },
   { value: 'sales', label: 'Sales', icon: IconShoppingBagEdit },
+  { value: 'subscribers', label: 'Subscribers', icon: IconMoodEdit },
+  { value: 'inbox', label: 'Inbox', icon: IconMessageChatbot },
+  { value: 'forms', label: 'Forms', icon: IconClipboardPlus, disabled: true },
   { value: 'about', label: 'About & FAQ', icon: IconInfoCircle },
 ];
 
@@ -54,6 +54,7 @@ const CRMDashboardPage = () => {
             key={tab.value}
             value={tab.value}
             leftSection={<tab.icon size={22} style={{ marginRight: rem(4) }} />}
+            disabled={tab.disabled}
             className="font-bold text-fuchsia-700 text-lg px-6 py-3 rounded-xl hover:bg-fuchsia-100 transition-all"
           >
             {tab.label}
