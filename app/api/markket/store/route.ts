@@ -113,7 +113,7 @@ export async function PUT(request: NextRequest) {
       return errorResponses.invalidSlug()
     }
 
-    const { title, Description, slug, URLS, SEO } = payload.store;
+    const { title, Description, slug, URLS, SEO, Favicon, Cover, Slides, Logo } = payload.store;
     const data = {
       title,
       Description,
@@ -125,6 +125,10 @@ export async function PUT(request: NextRequest) {
         metaKeywords: SEO?.metaKeywords,
         socialImage: SEO?.socialImage?.id,
       },
+      Favicon,
+      Cover,
+      Slides,
+      Logo,
     };
 
     const response = await strapiClient.update('stores', store.documentId, {

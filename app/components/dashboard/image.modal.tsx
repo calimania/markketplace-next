@@ -105,17 +105,17 @@ const ImageModal = ({
 
     setTimeout(() => {
       setUploadProgress(66);
-    }, 0.5 * 1000);
+    }, 0.3 * 1000);
 
 
     setTimeout(() => {
       setUploadProgress(88);
-    }, 0.8 * 1000);
+    }, 0.7 * 1000);
 
-    return setTimeout(() => {
+    setTimeout(() => {
       setIsUploading(false);
       setUploadProgress(98);
-    }, 1.1 * 1000);
+    }, 0.9 * 1000);
   };
 
   return (

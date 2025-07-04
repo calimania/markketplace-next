@@ -9,12 +9,12 @@ const seo = {
   }
 }
 
-const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_width?: number }>> = {
+const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_width?: number, can_change?: boolean }>> = {
   store: {
     Logo: {
       max_width: 1200,
     },
-    // Slides: { multi: true , max_width: 1600, },
+    Slides: { multi: true, max_width: 1600, can_change: false },
     Favicon: { max_width: 120 },
     'SEO.socialImage': {
       max_width: 1200,
@@ -32,12 +32,12 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
   },
   product: {
     ...seo,
-    //Slides,
+    Slides: { multi: true, max_width: 1600, can_change: false },
     Thumbnail: { max_width: 840 }
   },
   event: {
     ...seo,
-    //Slides,
+    Slides: { multi: true, max_width: 1600, can_change: false },
     Thumbnail: { max_width: 840 }
   },
   album: {
@@ -45,7 +45,7 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
     cover: { max_width: 1200 }
   },
   track: {
-    // media,
+    media: { multi: true, max_width: 1600, can_change: false },
     ...seo,
   }
 };

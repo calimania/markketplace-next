@@ -1,7 +1,8 @@
-import { Page, Article, Product, Event, Album, AlbumTrack , Tag } from '@/markket';
+import { Page, Article, Product, Event, Album, AlbumTrack, Tag, ContentTypes } from '@/markket';
 import { markketClient } from '@/markket/api';
 import { JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { getTagColorName } from '@/markket/tag.helpers';
+import { ImageConfig } from '@/app/components/dashboard/item.image.config';
 
 type Values = Page | Article | Product | Event | Album | AlbumTrack;
 
@@ -9,6 +10,35 @@ export type contentTypes = 'page' | 'article' | 'product' | 'event' | 'album' | 
 
 const client = new markketClient();
 
+
+export function normalizeImages(body: any, contentType: string) {
+  const config = ImageConfig[contentType as keyof typeof ImageConfig];
+  if (!config) return body;
+
+  const result = { ...body };
+
+  Object.keys(config).forEach((field) => {
+    if (field.startsWith('SEO')) return;
+    const value = body[field];
+    const isMulti = config[field].multi;
+
+    if (isMulti) {
+      if (Array.isArray(value) && value.length > 0) {
+        result[field] = value.filter(Boolean).map((img: any) => img?.id).filter(Boolean);
+      } else {
+        result[field] = [];
+      }
+    } else {
+      if (value && value.id) {
+        result[field] = value.id;
+      } else {
+        result[field] = null;
+      }
+    }
+  });
+
+  return result;
+}
 
 // Are different to the cms.route.helpers
 // This occur client side, and can later require user input
@@ -54,8 +84,18 @@ export const createContentAction = (contentType: contentTypes) =>
   };
 
 export const updateContentAction = (contentType: contentTypes) =>
-  async (values: Values, id: string, storeId?: string | number) => {
-    const body = transformBody(values, contentType);
+  async (values: Values, id: string, storeId?: string | number, item?: ContentTypes) => {
+    let body = values;
+
+    if (item?.documentId) {
+      body = {
+        ...item,
+        ...values,
+      }
+    }
+
+    body = normalizeImages(body, contentType);
+    body = transformBody(body, contentType);
 
     return await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
