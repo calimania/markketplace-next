@@ -1,10 +1,12 @@
 import { ContentTypes, Store } from "@/markket"
-import { Group, Tooltip, ScrollArea, Paper, Text, Title, Button, Stack, Box } from '@mantine/core';
+import { Group, Tooltip, ScrollArea, Paper, Text, Title, Button, Stack, Box, Modal } from '@mantine/core';
 import { useState } from 'react';
 import ImageModal from './image.modal';
-import { IconCactus, IconCameraPlus } from "@tabler/icons-react";
+import { IconCactus, IconCameraPlus, IconTrash } from "@tabler/icons-react";
 
 import { ImageConfig, ImageActions } from './item.image.config';
+
+import { updateContentAction, } from '@/markket/action.helpers';
 
 export type ImageManagerProps = {
   item?: ContentTypes,
@@ -25,9 +27,8 @@ function getNested(obj: any, path: string): any {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
-const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
+const ImageManager = ({ store, singular, item, refresh }: ImageManagerProps) => {
   const config = map[singular as 'store'] || {};
-
   const [modalState, setModalState] = useState<{
     open: boolean;
     key?: string;
@@ -37,6 +38,7 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
     mode?: 'preview' | 'replace';
     multiIndex?: number;
   }>({ open: false });
+  const [confirmState, setConfirmState] = useState<{ open: boolean, key?: string, imgId?: string | number, index?: number }>({ open: false });
 
   // Separate single and multi image keys
   const singleKeys = Object.keys(config).filter(k => !config[k]?.multi && k !== 'Slides');
@@ -109,20 +111,35 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
               <ScrollArea type="auto" offsetScrollbars>
                 <Group gap="md" align="center" wrap="nowrap">
                   {(imgs.length > 0 ? [...imgs, {}] : [{}]).map((img: any, i: number) => {
+                    if (i >= 5) { return <span key={key + i} /> }
+
                     const src = img && img.url ? img.url : PLACEHOLDER;
                     const alt = img && img.alternativeText ? img.alternativeText : `${key} #${i + 1}`;
                     return (
                       <Box key={key + i} style={{ textAlign: 'center' }}>
                         <Group>
-                          {config[key].can_change != false && (<Button
-                            size="xs"
-                            variant="light"
-                            color="blue"
-                            className={`mt-1 border-2 border-blue-300 font-bold text-blue-700 hover:bg-blue-100 `}
-                            onClick={() => setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
-                          >
-                            <IconCameraPlus size={18} color={`#db2777`} />
-                          </Button>)}
+                          {img?.url ? (
+                            <Button
+                              size="xs"
+                              variant="subtle"
+                              color="red"
+                              className="mt-1 border-2 border-red-300 font-bold text-red-700 hover:bg-red-100"
+                              onClick={() => setConfirmState({ open: true, key, imgId: img.id, index: i })}
+                              title="Remove image"
+                            >
+                              <IconTrash size={18} />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="xs"
+                              variant="light"
+                              color="blue"
+                              className={`mt-1 border-2 border-blue-300 font-bold text-blue-700 hover:bg-blue-100 `}
+                              onClick={() => setModalState({ open: true, key, url: src, alt, maxWidth: config[key]?.max_width, mode: (img?.url ? 'preview' : 'replace'), multiIndex: i })}
+                            >
+                              <IconCameraPlus size={18} color={`#db2777`} />
+                            </Button>
+                          )}
                           <Text className="text-left font-extrabold text-blue-700 mt-1 text-xs tracking-wide rounded-lg px-2 py-1 inline-block">
                             #{i + 1}
                           </Text>
@@ -155,6 +172,25 @@ const ImageManager = ({ singular, item, refresh  }: ImageManagerProps) => {
           );
         })}
       </Stack>
+      {/* Confirm Modal for deleting multi-image */}
+      <Modal opened={confirmState.open} onClose={() => setConfirmState({ open: false })} title="Remove Image?" centered>
+        <Text mb="md">Are you sure you want to remove this image? This cannot be undone.</Text>
+        <Group justify="flex-end">
+          <Button variant="default" onClick={() => setConfirmState({ open: false })}>Cancel</Button>
+          <Button color="red" onClick={async () => {
+            if (!confirmState.key || confirmState.index === undefined) return setConfirmState({ open: false });
+            const imgs = Array.isArray(getNested(item, confirmState.key)) ? getNested(item, confirmState.key) : [];
+            const newImgs = imgs.filter((img: any, idx: number) => idx !== confirmState.index);
+
+            await updateContentAction(singular as ContentTypes)({
+              ...item,
+              [confirmState.key]: newImgs
+            }, item?.documentId, store?.documentId);
+            setConfirmState({ open: false });
+            if (refresh) refresh();
+          }}>Remove</Button>
+        </Group>
+      </Modal>
       <ImageModal
         imageModalOpen={modalState.open}
         handleCloseModal={() => setModalState({ open: false })}
