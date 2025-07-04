@@ -42,7 +42,7 @@ const prefixMap: Record<string, string> = {
   article: 'blog',
   track: 'track',
   page: 'about',
-  product: 'product',
+  product: 'products',
   store: 'store',
   event: 'events',
   album: 'album'
