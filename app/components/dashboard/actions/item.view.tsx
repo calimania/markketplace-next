@@ -246,14 +246,13 @@ const ViewItem = ({ item, store, singular, previewUrl, imageManager, refresh }: 
               <AlbumTrackList tracks={(item as Album).tracks} />
             </Paper>
           )}
-
           {(item as Product)?.PRICES && (
             <Group gap="xs">
               <IconPigMoney size={16} color={item.SKU ? 'green' : 'red'} />Prices
             </Group>)}
           <Accordion defaultValue={['']} multiple mb="lg">
             {(item as Product)?.PRICES?.map((item, index) => (
-              <Accordion.Item key={item.Name} value={index.toString()}>
+              <Accordion.Item key={`${item.Name}-${index}`} value={index.toString()}>
                 <Accordion.Control icon={<IconCurrencyDollar color={item.STRIPE_ID ? 'green' : 'red'} />}>
                   {item.Price} {item.Currency} - {item.Name}
                 </Accordion.Control>

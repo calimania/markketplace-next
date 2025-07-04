@@ -11,7 +11,10 @@ const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY || '';
 // Disabled in production
 const STRIPE_TEST_PRIVATE_KEY = process.env.STRIPE_TEST_PRIVATE_KEY || '';
 
-const stripe: StripeInstance & { start: () => void; getInstance: () => Stripe, getTestInstance: () => Stripe, } = {
+const stripe: StripeInstance & { enabled: () => boolean, start: () => void; getInstance: () => Stripe, getTestInstance: () => Stripe, } = {
+  enabled: () => {
+    return !!STRIPE_PRIVATE_KEY
+  },
   start: () => {
     if (!STRIPE_PRIVATE_KEY) {
       console.error('Stripe secret key is not set in environment variables');

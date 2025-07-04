@@ -24,7 +24,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconBuildingStore, IconSpade, IconDeviceFloppy, IconDisc, IconArticle, IconShoppingCart } from '@tabler/icons-react';
+import { IconBuildingStore, IconSpade, IconDeviceFloppy, IconDisc, IconArticle, IconShoppingCart, IconPencilX } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useAuth } from '@/app/providers/auth.provider';
@@ -47,6 +47,7 @@ export type FieldType =
   | 'tags'
   | 'markdown'
   | 'blocks'
+  | 'prices'
   | 'password';
 
 // Define field configuration
@@ -406,6 +407,100 @@ const FormItem = ({
             {...inputProps}
           />
         );
+      case 'prices':
+        // @TODO: abstract to component
+        if (action === 'update') {
+          const prices = form.values?.PRICES || [];
+          return (
+            <Stack key={field.name} mt="md">
+              <Group justify="space-between" align="center">
+                <Text fw={700} mb={4}>Prices</Text>
+                <Button
+                  size="xs"
+                  variant="light"
+                  onClick={() => {
+                    const newPrices = [...prices, { Name: '', Description: '', Price: 1, Currency: 'USD', STRIPE_ID: '' }];
+                    form.setFieldValue('PRICES', newPrices);
+                  }}
+                >
+                  + Add Price
+                </Button>
+              </Group>
+              <table className="min-w-full border text-sm mb-2">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="p-2 border">Name</th>
+                    <th className="p-2 border">Description</th>
+                    <th className="p-2 border">Price</th>
+                    <th className="p-2 border">Currency</th>
+                    <th className="p-2 border">{' '}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prices.map((p: any, i: number) => (
+                    <tr key={i}>
+                      <td className="p-2 border">
+                        <TextInput
+                          value={p.Name}
+                          onChange={e => {
+                            const newPrices = [...prices];
+                            newPrices[i].Name = e.target.value;
+                            form.setFieldValue('PRICES', newPrices);
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 border">
+                        <TextInput
+                          value={p.Description}
+                          onChange={e => {
+                            const newPrices = [...prices];
+                            newPrices[i].Description = e.target.value;
+                            form.setFieldValue('PRICES', newPrices);
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 border">
+                        <NumberInput
+                          value={p.Price}
+                          min={0}
+                          readOnly={!!p.STRIPE_ID}
+                          onChange={val => {
+                            if (p.STRIPE_ID) return; // Don't allow editing if synced to Stripe
+                            const newPrices = [...prices];
+                            newPrices[i].Price = val as number;
+                            form.setFieldValue('PRICES', newPrices);
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 border">
+                        <TextInput value={p.Currency} readOnly />
+                        <input type="hidden" value={p.STRIPE_ID} name={`PRICES[${i}].STRIPE_ID`} />
+                      </td>
+                      <td className="p-2 border text-center">
+                        <Button
+                          size="xs"
+                          color="red"
+                          variant="subtle"
+                          onClick={() => {
+                            const newPrices = prices.filter((_: any, idx: number) => idx !== i);
+                            form.setFieldValue('PRICES', newPrices);
+                          }}
+                        >
+                          <IconPencilX size={18} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Stack>
+          );
+        }
+        return (
+          <div>
+            <Text className='text-xs text-cyan-950'>{action == 'create' && 'Add during edit'}</Text>
+          </div>
+        )
       default:
         return null;
     }
