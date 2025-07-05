@@ -26,7 +26,7 @@ const DashboardWaitingAction = (props: DashboardWaitingProps) => {
   const verb = action === 'new' ? 'Creating' : 'Editing';
 
   return (
-    <Paper radius="xl" shadow="lg" p="xl" className="brutal-waiting bg-gradient-to-br from-blue-50 to-fuchsia-50 border border-fuchsia-200 relative overflow-hidden" withBorder>
+    <Paper radius="xl" shadow="lg" p="xl" className="brutal-waiting mb-8 bg-gradient-to-br from-blue-50 to-fuchsia-50 border border-fuchsia-200 relative overflow-hidden" withBorder>
       <span className="absolute -top-8 left-8 w-24 h-24 bg-fuchsia-100 rounded-full opacity-30 z-0" />
       <span className="absolute bottom-0 right-0 w-32 h-32 bg-sky-100 rounded-full opacity-30 z-0" />
       <Stack align="center" gap="lg" className="relative z-10">
