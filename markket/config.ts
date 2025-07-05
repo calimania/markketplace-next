@@ -13,7 +13,7 @@ export const markketConfig = {
   max_albums_per_store: 15,
   max_tracks_per_album: 25,
   max_events_per_store: 25,
-  blank_image_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/8c99b7f0412e6ececd4fae78e3617ae7.png",
+  blank_image_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/4dd22c1b57887fe28307fb4784c974bb.png",
   blank_favicon_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/43c188106f4d950987346842a05e0cbf.png",
   blank_logo_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/f96148440e7ccf81fe2c36a779c06e30.png",
   blank_cover_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/c2491ef7c413165be47c9882a08d7ffd.png",
@@ -29,4 +29,7 @@ export const markketConfig = {
   markket_api_key: process.env.MARKKET_API_KEY || '',
   /** CISION_CREDENTIALS */
   cision: process.env.CISION_CREDENTIALS || '',
+  extensions: {
+    unsplash_access_key: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
+  }
 };
