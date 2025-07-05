@@ -40,9 +40,6 @@ const TrackView = ({ track }: { track: AlbumTrack }) => {
             height={300}
             slideSize="100%"
             slideGap="md"
-            loop
-            align="start"
-            slidesToScroll={1}
             onSlideChange={setActiveSlide}
           >
             {track.media.map((media, index) => (
