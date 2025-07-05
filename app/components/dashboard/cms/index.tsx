@@ -23,6 +23,36 @@ const Icons: Record<string, any> = {
   page: IconMicroscope,
 };
 
+// @TODO: Adds more complex logic that considers subscription for additional services
+// @TODO: The CMS needs to display more items to support stores with additional content
+// @TODO: Allow to DELETE and recycle content easier
+const canAddMore = (singular: string, length: number) => {
+  const l = length || 1;
+
+  switch (singular) {
+    case 'store':
+      return l <= markketConfig.max_stores_per_user;
+    case 'article':
+      return l <= markketConfig.max_articles_per_store;
+    case 'page':
+      return l <= markketConfig.max_pages_per_store;
+    case 'album':
+      return l <= markketConfig.max_albums_per_store;
+    case 'product':
+      return l <= markketConfig.max_products_per_store;
+    case 'event':
+      return l <= markketConfig.max_events_per_store;
+    default:
+      return l <= 20;
+  }
+}
+
+/**
+ * Displays CMS Dashboard pages - depending on the action by {path}
+ *
+ * @param props
+ * @returns
+ */
 const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, description }: CMSComponent) => {
   const router = useRouter();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -78,7 +108,6 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
           </Group>
         </Stack>
       </Modal>
-
       <Stack gap="lg">
         <Paper p="md" withBorder>
           <Group justify="space-between" wrap="nowrap">
@@ -99,7 +128,6 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
                 )}
               </div>
             </Group>
-
             <Group gap="sm">
               <Button
                 variant="light"
@@ -113,7 +141,7 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
                 className='add-content-type new-item'
                 disabled={
                   !['stores', 'pages', 'articles', 'events', 'products', 'albums', 'tracks'].includes(plural)
-                  || ((items?.length || 0) >= markketConfig.max_stores_per_user)
+                  || !!!canAddMore(singular, items.length)
                 }
                 leftSection={<IconPlus size={16} />}
               >
@@ -122,40 +150,31 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
             </Group>
           </Group>
         </Paper>
-
-        {loading ? (
-          <Stack gap="md">
-            <Skeleton height={50} radius="md" />
-            <Skeleton height={50} radius="md" />
-            <Skeleton height={50} radius="md" />
-          </Stack>
-        ) : (
-            <ItemList items={items}
-              plural={plural}
-              singular={singular}
-              actions={{
-                onView: (item) => {
-                  if (plural == 'stores') {
-                    return router.push(`/dashboard/${singular}?store=${item.documentId}`);
-                  }
-                  router.push(`/dashboard/${plural}/view/${item.documentId}?store=${store.documentId}`);
-                },
-                onEdit: (item) => {
-                  router.push(`/dashboard/${plural}/edit/${item.documentId}?store=${store.documentId}`);
-                },
-                onDelete: async (item) => {
-                  setItemToDelete(item);
-                  setDeleteModalOpen(true);
-                },
-                // onPublish: async (item) => {
-                //   console.log('Publishing article:', item.documentId);
-                // },
-                // onUnpublish: async (item) => {
-                //   console.log('Unpublishing article:', item.documentId);
-                // },
-              }}
-            />
-        )}
+        <ItemList items={items}
+          plural={plural}
+          singular={singular}
+          actions={{
+            onView: (item) => {
+              if (plural == 'stores') {
+                return router.push(`/dashboard/${singular}?store=${item.documentId}`);
+              }
+              router.push(`/dashboard/${plural}/view/${item.documentId}?store=${store.documentId}`);
+            },
+            onEdit: (item) => {
+              router.push(`/dashboard/${plural}/edit/${item.documentId}?store=${store.documentId}`);
+            },
+            onDelete: async (item) => {
+              setItemToDelete(item);
+              setDeleteModalOpen(true);
+            },
+            // onPublish: async (item) => {
+            //   console.log('Publishing article:', item.documentId);
+            // },
+            // onUnpublish: async (item) => {
+            //   console.log('Unpublishing article:', item.documentId);
+            // },
+          }}
+        />
       </Stack>
     </Container>
   )

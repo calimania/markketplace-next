@@ -11,7 +11,8 @@ export async function GET() {
 
   try {
     const stores = await fetchUserStores();
-    return NextResponse.json(stores);
+
+    return NextResponse.json(stores, { status: stores?.status || 200 });
   } catch (error) {
     console.error('Route error:', error);
     return errorResponses.internalError();

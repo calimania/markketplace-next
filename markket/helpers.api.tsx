@@ -77,9 +77,13 @@ export async function fetchUserStores() {
       next: { revalidate: 1 }
     });
 
+
     if (!response.ok) {
-      console.warn({ user_id, status: response.status });
-      throw new Error(`${response.status}:GET /stores`);
+      console.warn(`fetch:error:user.stores`, { user_id, status: response.status });
+
+      return ({
+        status: response.status
+      });
     }
 
     return await response.json();

@@ -7,6 +7,12 @@ const MAX_STORES = parseInt(process.env.NEXT_PUBLIC_MAX_STORES_PER_USER || '2', 
 export const markketConfig = {
   /**MAX_STORES_PER_USER | artificial limit in the instance for store owners */
   max_stores_per_user: MAX_STORES,
+  max_pages_per_store: 15,
+  max_articles_per_store: 25,
+  max_products_per_store: 15,
+  max_albums_per_store: 15,
+  max_tracks_per_album: 25,
+  max_events_per_store: 25,
   blank_image_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/8c99b7f0412e6ececd4fae78e3617ae7.png",
   blank_favicon_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/43c188106f4d950987346842a05e0cbf.png",
   blank_logo_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/f96148440e7ccf81fe2c36a779c06e30.png",

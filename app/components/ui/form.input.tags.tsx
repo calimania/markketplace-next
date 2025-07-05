@@ -42,7 +42,6 @@ export default function TagsInput({
 
   useEffect(() => {
     if (!!value?.length) {
-      console.log({ value })
       setTags(value.map(t => ({
         Label: t.Label,
         Color: t.Color?.startsWith('#') ? t.Color : getTagColorHex(t.Color as string),

@@ -3,6 +3,7 @@ import {
   Modal, Stack, SegmentedControl, Paper, Text, Center, Loader, TextInput, Button, Group, FileButton, Progress, ActionIcon, Box, Image as MantineImage
 } from '@mantine/core';
 import { IconLink, IconUpload, IconFileUpload, IconX, IconPhotoPlus, } from '@tabler/icons-react';
+import { Dropzone } from '@mantine/dropzone';
 
 const PLACEHOLDER = 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/079a9ce3daa373036a6bc77c1739d424.png';
 
@@ -195,28 +196,36 @@ const ImageModal = ({
                 <Text size="sm" fw={500}>Upload Image</Text>
                 <Paper withBorder p="md" radius="md" bg={previewUrl ? 'transparent' : 'var(--mantine-color-gray-0)'}>
                   {!previewUrl ? (
-                    <Stack my="md" align="center" py={20}>
-                      <IconFileUpload size={32} opacity={0.5} />
-                      <div>
-                        <Text size="sm">Drag images here or click to select files</Text>
-                        <Text size="xs" c="dimmed">JPEG, PNG, GIF up to 5MB</Text>
-                      </div>
-                      <FileButton
-                        onChange={handleFileUpload}
-                        accept="image/png,image/jpeg,image/gif"
-                      >
-                        {(props) => (
-                          <Button
-                            variant="light"
-                            radius="md"
-                            leftSection={<IconUpload size={14} />}
-                            {...props}
-                          >
-                            Select file
-                          </Button>
-                        )}
-                      </FileButton>
-                    </Stack>
+                    <Dropzone
+                      onDrop={(files) => handleFileUpload(files[0])}
+                      onReject={() => { }}
+                      maxSize={5 * 1024 * 1024}
+                      accept={["image/png", "image/jpeg", "image/gif"]}
+                      multiple={false}
+                    >
+                      <Stack my="md" align="center" py={20}>
+                        <IconFileUpload size={32} opacity={0.5} />
+                        <div>
+                          <Text size="sm">Drag images here or click to select files</Text>
+                          <Text size="xs" c="dimmed">JPEG, PNG, GIF up to 5MB</Text>
+                        </div>
+                        <FileButton
+                          onChange={handleFileUpload}
+                          accept="image/png,image/jpeg,image/gif"
+                        >
+                          {(props) => (
+                            <Button
+                              variant="light"
+                              radius="md"
+                              leftSection={<IconUpload size={14} />}
+                              {...props}
+                            >
+                              Select file
+                            </Button>
+                          )}
+                        </FileButton>
+                      </Stack>
+                    </Dropzone>
                   ) : (
                     <Stack my="md">
                         <Box pos="relative" className='max-h-[200px] overflow-scroll max-w-[96%] mx-auto'>

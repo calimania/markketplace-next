@@ -42,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
   confirmed: () => false,
 });
 
+
 /**
  * Provider to manage authentication state, and stores associated with the user
  *
@@ -56,8 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [stores, setStores] = useState<Store[]>([]);
 
 
+  const clearLocalStorage = (next: string) => {
+    localStorage.removeItem('markket.auth');
+    router.push(`/auth?next=${next}`);
+  }
+
   const readLocalStorage = () => {
     const storedAuth = localStorage.getItem('markket.auth');
+
     if (storedAuth) {
       try {
         const parsedAuth = JSON.parse(storedAuth);
@@ -79,8 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await client.fetch('/api/markket/store', {
         cache: 'no-store'
       });
-      const { data } = response;
-      setStores(data || []);
+
+      setStores(response?.data || []);
     } catch (error) {
       console.error('Failed to fetch stores:', error);
     }
@@ -96,6 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       readLocalStorage();
       const userData = await strapiClient.me();
+
+      if (userData?.status == 401) {
+        clearLocalStorage(`/dashboard`);
+        console.error('401:redirecting');
+        return;
+      }
 
       if (userData) {
         const storedAuth = localStorage.getItem('markket.auth');

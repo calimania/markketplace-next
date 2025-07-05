@@ -136,8 +136,14 @@ export class StrapiClient {
       },
     });
 
+    if (response.status == 401) {
+      console.warn('expired.token:strapi.me');
+      return { status: response.status };
+    }
+
     if (!response.ok) {
-      return null;
+      console.warn('server.error:strapi.me');
+      return { status: response.status };
     }
 
     return response.json();

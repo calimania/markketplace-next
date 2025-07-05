@@ -23,21 +23,21 @@ import { useState, useCallback, useEffect, } from 'react';
 import { MainLink } from '@/app/components/dashboard/ui.menu';
 
 const mainLinks = [
-  { icon: IconHomeStar, label: 'Store', href: '/dashboard/store', visible: true, },
-  { icon: IconArticle, label: 'Articles', href: '/dashboard/articles', visible: true },
-  { icon: IconFileTypeDoc, label: 'Pages', href: '/dashboard/pages', visible: true },
-  { icon: IconShoppingCart, label: 'Products', href: '/dashboard/products', visible: true },
-  { icon: IconTicket, label: 'Events', href: '/dashboard/events', visible: true },
-  { icon: IconLibraryPhoto, label: 'Collections', href: '/dashboard/albums', visible: true },
-  { icon: IconMusicStar, label: 'Collection Items', notifications: 0, href: '/dashboard/tracks', visible: true },
-  { icon: IconMessageChatbot, label: 'Inbox', notifications: 0, href: '/dashboard/crm#inbox', },
-  { icon: IconClipboardPlus, label: 'Forms', href: '/dashboard/crm#forms' },
-  { icon: IconMoodEdit, label: 'Subscribers', href: '/dashboard/crm#newsletter' },
-  { icon: IconShoppingBagEdit, label: 'Sales', notifications: 0, href: '/dashboard/crm#orders' },
-  { icon: IconCashBanknoteHeart, label: 'Payouts [Stripe]', href: '/dashboard/stripe' },
-  { icon: IconBuildingStore, label: 'Settings', href: '/dashboard/settings' },
-  { icon: IconWindmill, label: 'Stores', href: '/dashboard/stores' },
-  { icon: IconMessageUser, label: 'Customer Center', href: '/dashboard/crm#sales', visible: true }
+  { label: 'Store', icon: IconHomeStar, href: '/dashboard/store', visible: true, },
+  { label: 'Articles [/blog]', icon: IconArticle, href: '/dashboard/articles', visible: true },
+  { label: 'Pages [/about]', icon: IconFileTypeDoc, href: '/dashboard/pages', visible: true },
+  { label: 'Products', icon: IconShoppingCart, href: '/dashboard/products', visible: true },
+  { label: 'Events', icon: IconTicket, href: '/dashboard/events', visible: true },
+  { label: 'Collections [/]', icon: IconLibraryPhoto, href: '/dashboard/albums', visible: true },
+  { label: 'Customer Center', icon: IconMessageUser, notifications: 0, href: '/dashboard/crm#sales', visible: true },
+  { label: 'Collection Items', icon: IconMusicStar, href: '/dashboard/tracks', },
+  { label: 'Inbox', icon: IconMessageChatbot, href: '/dashboard/crm#inbox', },
+  { label: 'Forms', icon: IconClipboardPlus, href: '/dashboard/crm#forms' },
+  { label: 'Subscribers', icon: IconMoodEdit, href: '/dashboard/crm#newsletter' },
+  { label: 'Sales', icon: IconShoppingBagEdit, notifications: 0, href: '/dashboard/crm#orders' },
+  { label: 'Payouts [Stripe]', icon: IconCashBanknoteHeart, href: '/dashboard/stripe' },
+  { label: 'Settings', icon: IconBuildingStore, href: '/dashboard/settings' },
+  { label: 'Stores', icon: IconWindmill, href: '/dashboard/stores' },
 ];
 
 type DashboardLayoutProps = {
@@ -131,7 +131,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const isActive = (link: { href: string }): boolean => {
     if (typeof window !== 'object') return false;
 
-    return link.href?.includes(window.location.pathname);
+    return window.location.pathname?.includes(link.href);
   };
 
   return (

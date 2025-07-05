@@ -81,7 +81,7 @@ const DashboardItemPage = ({ id, action, slug, }: DashboardItemPageProps) => {
           <Button
             variant="light"
             leftSection={<IconArrowLeft size={16} />}
-            onClick={() => router.push(`/dashboard/${slug}?store=${store.documentId}`)}
+            onClick={() => router.push(`/dashboard/${slug}?store=${store?.documentId || ''}`)}
           >
             Back to {options.plural}
           </Button>
