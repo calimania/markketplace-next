@@ -11,13 +11,13 @@ import {
   Text,
   Avatar,
   FileButton,
-  ActionIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
-import { IconUpload, IconTrash, IconUser } from '@tabler/icons-react';
+import { IconUpload, IconUser, IconCameraBolt } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import { strapiClient, markketClient } from '@/markket/api';
+import ImageModal from '../dashboard/image.modal';
 
 interface ProfileFormValues {
   username: string;
@@ -27,11 +27,11 @@ interface ProfileFormValues {
   avatar?: File | null;
 }
 
-
 export default function ProfileForm() {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
   const markket = new markketClient();
 
@@ -99,6 +99,7 @@ export default function ProfileForm() {
 
   const handleAvatarUpload = async (file: File) => {
     if (!user?.id) return;
+    if (!file) return;
 
     try {
       setLoading(true);
@@ -128,6 +129,15 @@ export default function ProfileForm() {
     }
   };
 
+  // Handler for modal image upload
+  const handleModalImageReplace = ({ img }: { url: string; alt: string; img?: File }) => {
+    if (img) {
+      setAvatar(img);
+      handleAvatarUpload(img);
+      setImageModalOpen(false);
+    }
+  };
+
   return (
     <Paper withBorder p="md" radius="md">
       <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -149,30 +159,44 @@ export default function ProfileForm() {
               </Avatar>
               <Stack gap="xs">
                 <FileButton
-                  onChange={(file) => file && handleAvatarUpload(file)}
+                  onChange={(file) => {
+                    if (file) {
+                      setAvatar(file);
+                      handleAvatarUpload(file);
+                    }
+                  }}
                   accept="image/png,image/jpeg"
                 >
-                  {(props) => (
+                  {({ onClick }) => (
                     <Button
+                      disabled
                       variant="light"
                       size="xs"
-                      leftSection={<IconUpload size={14} />}
-                      {...props}
+                      leftSection={<IconUpload size={16} />}
+                      onClick={onClick}
+                      tabIndex={0}
                     >
-                      Upload avatar
+                      Upload Picture
                     </Button>
                   )}
                 </FileButton>
-                {avatar && (
-                  <ActionIcon
-                    variant="subtle"
-                    color="red"
-                    onClick={() => setAvatar(null)}
-                    size="sm"
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                )}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  color="fuchsia"
+                  onClick={() => setImageModalOpen(true)}
+                >
+                  <IconCameraBolt size={18} />Image Modal
+                </Button>
+                <ImageModal
+                  imageModalOpen={imageModalOpen}
+                  handleCloseModal={() => setImageModalOpen(false)}
+                  imageUrl={user?.avatar?.url || ''}
+                  imageAlt={user?.displayName || user?.username || ''}
+                  maxWidth={760}
+                  mode="replace"
+                  onReplace={handleModalImageReplace}
+                />
               </Stack>
             </Group>
           </Group>

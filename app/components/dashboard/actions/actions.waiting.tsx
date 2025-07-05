@@ -87,11 +87,12 @@ const DashboardWaitingAction = (props: DashboardWaitingProps) => {
             </Group>
           ))}
         </Stack>
-        <Text size="xs" className="text-center text-fuchsia-500 mt-4 brutal-shadow">
-          {singular && (singular.toLowerCase().includes('artist') || singular.toLowerCase().includes('community')) && (
-            <>Thanks to technology, artists can support their communities like never before! <IconHeart size={16} className="inline ml-1" color="#f472b6" /></>
-          )}
-        </Text>
+        <Group>
+          <IconHeart size={16} className="inline ml-1" color="#f472b6" />
+          <Text size="xs" className="text-center text-fuchsia-500 mt-4 brutal-shadow">
+            Thanks to modern innovations, artists can feed their cats!
+          </Text>
+        </Group>
       </Stack>
     </Paper>
   );

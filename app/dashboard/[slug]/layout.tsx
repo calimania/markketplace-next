@@ -131,7 +131,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const isActive = (link: { href: string }): boolean => {
     if (typeof window !== 'object') return false;
 
-    return link.href?.includes(window.location.pathname);
+    return window.location.pathname?.includes(link.href);
   };
 
   return (

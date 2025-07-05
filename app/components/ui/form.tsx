@@ -208,7 +208,7 @@ const FormItem = ({
 
     if (field.groupName == 'SEO') {
       if (field.name === 'metaTitle') {
-        console.log({ values: form.values })
+
         return (
           <TextInput
             key={field.name}
