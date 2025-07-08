@@ -53,12 +53,12 @@ export default function NotFound() {
           404
         </Title>
         <Title order={3} size="h3" mt="xl">
-          {page.Title || ''}
+          {page?.Title || ''}
         </Title>
 
         {page?.Content && <PageContent params={{ page }} />}
 
-        {!loading && !page.Content && (
+        {!loading && !page?.Content && (
           <>
             <Title order={2} size="h1" mt="xl">
               You&apos;ve found a secret place...

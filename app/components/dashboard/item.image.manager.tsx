@@ -111,7 +111,7 @@ const ImageManager = ({ store, singular, item, refresh }: ImageManagerProps) => 
               </Text>
               <Group gap="md" align="center" wrap="wrap" style={{ width: '100%', flexWrap: 'wrap' }}>
                 {(imgs.length > 0 ? [...imgs, {}] : [{}]).map((img: any, i: number) => {
-                  if (i >= 5) { return <span key={key + i} /> }
+                  if (i >= markketConfig.max_images_per_slide) { return <span key={key + i} /> }
 
                   const src = img && img.url ? img.url : PLACEHOLDER;
                   const alt = img && img.alternativeText ? img.alternativeText : `${key} #${i + 1}`;
