@@ -1,12 +1,14 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import { useCMSItems } from '@/app/hooks/dashboard.items.hook';
 import { Order } from '@/markket/';
+import { useSearchParams } from 'next/navigation';
 
 const OrderDetailsModal = ({ order, onClose }: { order: any, onClose: () => void }) => {
   if (!order) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
@@ -44,6 +46,17 @@ const OrderTab = () => {
   const { items: orders, loading } = useCMSItems<Order>('orders', store);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  // Open modal if order_id param matches an order
+  useEffect(() => {
+    if (!orders?.length) return;
+    const orderId = searchParams?.get('order_id');
+    if (orderId) {
+      const found = orders.find((o: any) => o.id == orderId || o.documentId == orderId || o.uuid == orderId);
+      if (found) setSelectedOrder(found);
+    }
+  }, [orders, searchParams]);
 
   const handleStatusChange = async (order: any, newStatus: string) => {
     setUpdating(order.id);
