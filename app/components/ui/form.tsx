@@ -166,7 +166,7 @@ const FormItem = ({
   const slugify = (str: string) =>
     str
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^a-z.0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .substring(0, 64);
 
@@ -208,7 +208,7 @@ const FormItem = ({
 
     if (field.groupName == 'SEO') {
       if (field.name === 'metaTitle') {
-
+        console.log({ values: form.values })
         return (
           <TextInput
             key={field.name}

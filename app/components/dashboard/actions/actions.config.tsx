@@ -68,14 +68,14 @@ const commonSections = {
     name: (value: string) => (value.length < 3 ? 'Name must be at least 3 characters' : null),
     slug: (value: string) => {
       if (value.length < 3) return 'Slug must be at least 3 characters';
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+      if (!/^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(value)) {
         return 'Slug can only contain lowercase letters, numbers, and hyphens';
       }
       return null;
     },
     store_slug: (value: string) => {
       if (value.length < 5) return 'Slug must be at least 5 characters';
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+      if (!/^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(value)) {
         return 'Slug can only contain lowercase letters, numbers, and hyphens';
       }
       return null;
