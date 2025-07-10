@@ -17,7 +17,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconMailStar } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { Page } from '@/markket';
+import { Page, Store } from '@/markket';
 import { strapiClient } from '@/markket/api.strapi';
 import { markketConfig } from '@/markket/config';
 import PageContent from '../ui/page.content';
@@ -31,12 +31,16 @@ export default function MagicLinkPage() {
   const [state, setState] = useState({ success: false, error: null});
   const router = useRouter();
   const [page, setPage] = useState({} as Page);
+  const [store, setStore] = useState({} as Store);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await strapiClient.getPage('auth.magic', markketConfig.slug);
 
       setPage(data[0] as Page);
+
+      const { data: store } = await strapiClient.getStore(markketConfig.slug);
+      setStore(store?.[0] || {});
     };
 
     fetchData();
@@ -59,7 +63,10 @@ export default function MagicLinkPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          email: (values?.email).toLowerCase().trim(),
+          store_id: store?.documentId,
+        }),
       });
 
       const data = await response.json();
@@ -92,7 +99,7 @@ export default function MagicLinkPage() {
   return (
     <Container size={633} my={40}>
       <Title ta="center" fw={900}>
-        {page?.SEO?.metaTitle || 'Welcome to Markkët.ts!'}
+        {page?.SEO?.metaTitle || store?.SEO?.metaTitle || 'Welcome to Markkët.ts!'}
       </Title>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         {!!state?.success && (
