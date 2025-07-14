@@ -35,12 +35,12 @@ export default function MagicLinkPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await strapiClient.getPage('auth.magic', markketConfig.slug);
+      const { data: pages } = await strapiClient.getPage('auth.magic', markketConfig.slug);
 
-      setPage(data[0] as Page);
+      setPage(pages?.[0] as Page);
 
-      const { data: store } = await strapiClient.getStore(markketConfig.slug);
-      setStore(store?.[0] || {});
+      const { data: stores } = await strapiClient.getStore(markketConfig.slug);
+      setStore(stores?.[0] || {});
     };
 
     fetchData();

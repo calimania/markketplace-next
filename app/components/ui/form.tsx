@@ -208,7 +208,7 @@ const FormItem = ({
 
     if (field.groupName == 'SEO') {
       if (field.name === 'metaTitle') {
-        console.log({ values: form.values })
+
         return (
           <TextInput
             key={field.name}
@@ -289,7 +289,7 @@ const FormItem = ({
             key={field.name}
             label={field.label}
             description={field.description}
-            placeholder={field.placeholder || 'Write your content here...'}
+            placeholder={field.placeholder}
             value={inputProps.value || ''}
             onChange={inputProps.onChange}
             error={inputProps.error}
