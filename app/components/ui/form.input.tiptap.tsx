@@ -146,6 +146,17 @@ const ContentEditor = ({
         onChange(html as any);
       }
     },
+    onCreate: ({ editor }) => {
+      if (format == 'markdown') {
+        const markdown = editor.storage.markdown.getMarkdown();
+        onChange(markdown);
+      }
+
+      if (format == 'blocks') {
+        const html = editor.getJSON();
+        onChange(html as any);
+      }
+    }
   });
 
   useEffect(() => {

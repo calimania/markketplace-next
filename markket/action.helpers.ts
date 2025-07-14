@@ -85,6 +85,7 @@ export const createContentAction = (contentType: contentTypes) =>
 
 export const updateContentAction = (contentType: contentTypes) =>
   async (values: Values, id: string, storeId?: string | number, item?: ContentTypes) => {
+    console.info(`updating:${contentType}:${id}`);
     let body = values;
 
     if (item?.documentId) {
