@@ -29,12 +29,20 @@ interface ContentEditorProps {
   format?: 'markdown' | 'blocks';
 }
 
+/**
+ * Tiptap editor compatible with Mantine, Strapi and Markkët
+ *
+ * used by the ui.form to create blocks & markdown fields
+ *
+ * @param props
+ * @returns
+ */
 const ContentEditor = ({
   value = '',
   onChange,
   label = 'Content',
   description,
-  placeholder = 'Type your content here...',
+  placeholder = 'The Music of the Ainur There was Eru, the One, who in Arda is called Iluvatar; and he made first the Ainur, the Holy Ones, that were the offspring of his thought, and they were with him before aught else was made.',
   minHeight = 300,
   error,
   format = 'markdown',
@@ -126,11 +134,13 @@ const ContentEditor = ({
       }),
     ],
     content: value,
-    onUpdate: ({ editor }) => {
+    // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
+    onBlur: ({ editor }) => {
       if (format == 'markdown') {
         const markdown = editor.storage.markdown.getMarkdown();
         onChange(markdown);
       }
+
       if (format == 'blocks') {
         const html = editor.getJSON();
         onChange(html as any);
