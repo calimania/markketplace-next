@@ -1,34 +1,26 @@
-# Markkët Client
+# Markkët
 
-## NextJS application compatible with Markkët API
+[ de.markket.place](https://de.markket.place)
 
-Client for  Markkëtplace stores & managers
+## Typescript Client
 
-This client requires a Markket API, connects to our live version by default
+## NextJS & npm utilities
 
-The `STORE_SLUG` determines the store in the instance that manages subscriptions, & other ownership tasks
+For  Markkëtplace stores & managers
 
-Allow for new stores to be created, and for store owners to login in a friendly interface to manage & preview their content
+Self host for full instnace control, or `npm i` individual components
 
-Easily publish new content, and allow your users to grow their online presence
-
-### Manage storefronts
+### Store Dashboard
 
 New & existing users can manage their accounts, and store content
 
-### Multi user & stores
+### Types
 
-Individual store fronts can use static site templates to read all the data during build time [markketplace-astro](https://github.com/calimania/markketplace-astro)
+Typescript definitions for development and build time checks and LLMs
 
-This client combines server & browser isomorphic javascript to interact with our decentralized markket instances
+### Mall
 
-Server operations are performed with keys generated secretly for broad operations
-
-Users perform operations in the browser with their granted credentials
-
-### Self hosting
-
-Create an account in our instance, or deploy in your infrastructure for more control & customization
+Displays connect communities across multiple stores
 
 ### Open source ecosystem
 
@@ -36,9 +28,6 @@ The markkët API is powered by Strapi, Postgres, Docker & Redis
 
 This client uses typescript, react, tailwind, mantine, tabler & is open to community contributions
 
-### NextJS
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
@@ -46,7 +35,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 Use the following ENV Vars to connect to our live API. This applications adds extended functionality to our markket ecosystem, with new API routes & dashboards
 
-```
+```bash
+# // .env.example
 MARKKET_URL=https://api.markket.place/
 MARKKET_STORE_SLUG=next
 NODE_ENV=development
@@ -99,6 +89,8 @@ Markket Next extends the functionality from the Markket APIc
 - [Markket API github](https://github.com/calimania/markketplace)
 
 ## UI
+
+### Markket
 
 ### Mantine
 

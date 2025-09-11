@@ -25,7 +25,7 @@ import { useAuth } from '@/app/providers/auth.provider';
 import { strapiClient } from '@/markket/api.strapi';
 import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { Page } from '@/markket/page';
 
 import './auth.page.neobrutal.css';
@@ -59,7 +59,7 @@ export default function AuthPage() {
       const { data: [_store] } = await strapiClient.getStore();
       setStore(_store as Store);
 
-      const { data } = await strapiClient.getPage('auth', markketConfig.slug);
+      const { data } = await strapiClient.getPage('auth', markketplace.slug);
 
       setPage(data[0] as Page);
     };

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { validateUserAndToken } from '@/markket/helpers.api';
 
-const MARKKET_API = markketConfig.api;
-const ADMIN_TOKEN = markketConfig.admin_token;
+const MARKKET_API = markketplace.api;
+const ADMIN_TOKEN = markketplace.admin_token;
 
 /**
  * @swagger

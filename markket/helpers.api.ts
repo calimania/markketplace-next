@@ -1,15 +1,15 @@
-import { markketConfig } from "./config";
+import { markketplace } from "./config";
 import {headers } from 'next/headers';
 import qs from 'qs';
-import { Store } from "@/markket";
+import { Store } from "./store";
 import { NextResponse } from 'next/server';
 import { strapiClient } from "./api.strapi";
 
 export async function verifyToken(token: string) {
-  if (!token || !markketConfig.api) return null;
+  if (!token || !markketplace.api) return null;
 
   try {
-    const response = await fetch(new URL('api/users/me', markketConfig.api), {
+    const response = await fetch(new URL('api/users/me', markketplace.api), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export async function verifyToken(token: string) {
 }
 
 export async function validateUserAndToken() {
-  if (!markketConfig.api || !markketConfig.markket_api_key) {
+  if (!markketplace.api || !markketplace.markket_api_key) {
     throw new Error('Server configuration missing');
   }
 
@@ -70,7 +70,7 @@ export async function fetchUserStores() {
       throw new Error('Missing user credentials');
     }
 
-    const response = await fetch(new URL(`api/stores?${query}`, markketConfig.api), {
+    const response = await fetch(new URL(`api/stores?${query}`, markketplace.api), {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -106,7 +106,7 @@ export const errorResponses = {
 }
 
 export const validators = {
-  config: () => !!markketConfig.api && !!markketConfig.markket_api_key,
+  config: () => !!markketplace.api && !!markketplace.markket_api_key,
   slug: (slug: string) => slug.length >= 5 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
   short_slug: (slug: string) => slug.length >= 3 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
   storeContent: (store: Store) => store?.title && store?.Description && store?.slug,

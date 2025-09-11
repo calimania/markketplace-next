@@ -5,7 +5,7 @@ import { IconHomeStar, IconBow } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { strapiClient } from '@/markket/api.strapi';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { Page } from '@/markket';
 import { useEffect, useState, useCallback } from 'react';
 import PageContent from '@/app/components/ui/page.content';
@@ -17,7 +17,7 @@ export default function NotFound() {
   const [loading, setLoading] = useState(false);
 
   const fetchPage = useCallback(async () => {
-    const response = await strapiClient.getPage('404', markketConfig.slug);
+    const response = await strapiClient.getPage('404', markketplace.slug);
     //  page = response?.data?.[0] as Page;
     setPage(response?.data?.[0] as Page);
     setLoading(false);

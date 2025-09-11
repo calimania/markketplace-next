@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { strapiClient } from '@/markket/api';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { fetchUserStores, errorResponses, validators } from '@/markket/helpers.api';
 import { Store } from '@/markket';
 import { headers } from 'next/headers';
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   try {
     const stores = await fetchUserStores();
 
-    if (stores?.data?.length >= markketConfig.max_stores_per_user) {
+    if (stores?.data?.length >= markketplace.max_stores_per_user) {
       return errorResponses.storeLimit(stores?.data?.length);
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     const response = await strapiClient.create('stores', {
       headers: {
-        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
+        'Authorization': `Bearer ${markketplace.markket_api_key}`,
       },
       data
     });
@@ -134,7 +134,7 @@ export async function PUT(request: NextRequest) {
 
     const response = await strapiClient.update('stores', store.documentId, {
       headers: {
-        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
+        'Authorization': `Bearer ${markketplace.markket_api_key}`,
       },
       data,
     });

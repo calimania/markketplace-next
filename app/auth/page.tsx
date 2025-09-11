@@ -1,11 +1,11 @@
 import { strapiClient } from '@/markket/api.strapi';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Metadata } from 'next';
 import AuthPageComponent from '@/app/components/auth.page';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: [page] } = await strapiClient.getPage('auth', markketConfig.slug) || { data: [] };
+  const { data: [page] } = await strapiClient.getPage('auth', markketplace.slug) || { data: [] };
 
   return generateSEOMetadata({
     slug: 'auth',

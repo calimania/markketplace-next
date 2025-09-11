@@ -15,7 +15,7 @@ import {
   Accordion,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Article, Product, Album, Store, URL, Page, AlbumTrack } from '@/markket';
+import { Article, Product, Album, Store, URL, Page, AlbumTrack } from '@/markket/index.d';
 import {
   IconCalendar,
   IconClock,
@@ -28,15 +28,15 @@ import {
   IconAlbum,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
-import { ContentBlock } from '../content.blocks.view';
-import SEOPreview from '../seo.preview';
+import { ContentBlock } from './content.blocks.view';
+import SEOPreview from './seo.preview';
 import { ContentItem } from '@/app/hooks/common';
 import { Remarkable } from 'remarkable';
-import ImagesView from '../item.images';
-import AlbumTrackList from '../album.tracks.component';
-import AlbumsView from '../album.page.component';
+import ImagesView from './item.images';
+import AlbumTrackList from './album.tracks.component';
+import AlbumsView from './album.page.component';
 import { useRouter } from 'next/navigation';
-import ImageManager from '../item.image.manager';
+import ImageManager from './item.image.manager';
 
 const prefixMap: Record<string, string> = {
   article: 'blog',

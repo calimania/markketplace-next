@@ -10,13 +10,13 @@ import '@mantine/code-highlight/styles.css';
 import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 
 async function generateMetadata(): Promise<Metadata> {
   const storeData = await strapiClient.getStore();
   const store = storeData?.data?.[0] as Store;
   const seo = store?.SEO;
-  const favicon = store?.Favicon?.formats?.thumbnail?.url || markketConfig.blank_favicon_url;
+  const favicon = store?.Favicon?.formats?.thumbnail?.url || markketplace.blank_favicon_url;
 
   return {
     title: seo?.metaTitle || "Markkët Next",

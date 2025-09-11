@@ -1,13 +1,13 @@
 
-const MAX_STORES = parseInt(process.env.NEXT_PUBLIC_MAX_STORES_PER_USER || '2', 10);
+const MAX_STORES: number = parseInt(process.env.NEXT_PUBLIC_MAX_STORES_PER_USER || '2', 10);
 
 /**
  * Runtime configuration for the Markket app
  */
-export const markketConfig = {
+export const markketplace = {
   /**MAX_STORES_PER_USER | artificial limit in the instance for store owners */
   max_stores_per_user: MAX_STORES,
-  max_pages_per_store: 15,
+  max_pages_per_store: 25,
   max_articles_per_store: 25,
   max_products_per_store: 15,
   max_albums_per_store: 15,

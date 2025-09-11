@@ -1,4 +1,4 @@
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 import qs from 'qs';
 import { format, parseISO } from 'date-fns';
 
@@ -48,7 +48,7 @@ export const formatReleaseDate = (dateStr: string) => {
  * Connects to the CISION API to exchange credentials for a token
  */
 async function Auth() {
-  const [user, password] = markketConfig.cision?.split(':');
+  const [user, password] = markketplace.cision?.split(':');
   console.info(`CISION:Token:${user}`);
 
   if (!user || !password) {
@@ -99,7 +99,7 @@ type GET = {
  * // fields - Release fields returned in response. Available fields: title, summary, date, release_id, company, feed, industry, subject, geography, ticker, language, dateline, multimedia. Default: title|date|release_id|company.
  */
 async function get({ keyword_or }: GET) {
-  const [user, ] = markketConfig.cision?.split(':');
+  const [user,] = markketplace.cision?.split(':');
   console.info(`CISION:News:${!!cache.news}`);
 
   if (cache.news) return cache.news;
@@ -134,7 +134,7 @@ async function get({ keyword_or }: GET) {
 }
 
 async function get_by_id(release_id: string) {
-  const [user,] = markketConfig.cision?.split(':');
+  const [user,] = markketplace.cision?.split(':');
 // console.info(`CISION:News:${!!cache.news}`);
 // if (cache.news) return cache.news;
 
@@ -158,7 +158,7 @@ async function get_by_id(release_id: string) {
 
 
 async function get_codes(code: 'industry' | 'subject' | 'geography' | 'exhange' | 'language') {
-  const [user,] = markketConfig.cision?.split(':');
+  const [user,] = markketplace.cision?.split(':');
 
   const token = cache.token || await Auth();
   if (!token) {

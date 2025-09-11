@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';
-import ViewItem from '@/app/components/dashboard/actions/item.view';
+import ViewItem from '@/markket/components/item.view';
 import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import { IconBuildingStore, IconPencilCog, IconCoin, IconInfoHexagonFilled, } from '@tabler/icons-react';

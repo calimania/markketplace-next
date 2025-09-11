@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import stripeClient from '@/markket/stripe.server';
-import { markketConfig } from '@/markket/config';
+import stripeClient from '@/lib/stripe/server';
+import { markketplace } from '@/markket/config';
 
 /**
  * @swagger POST /api/stripe/connect
@@ -62,13 +62,13 @@ export async function POST(req: NextRequest) {
         console.log('stripe:connect:account:', { account: account?.id, store });
 
         if (account?.id) {
-          const updateStore = await fetch(new URL(`/api/stores/${store}`, markketConfig.api), {
+          const updateStore = await fetch(new URL(`/api/stores/${store}`, markketplace.api), {
             method: 'PUT',
             body: JSON.stringify({
               data: { STRIPE_CUSTOMER_ID: account?.id, }
             }),
             headers: {
-              Authorization: `Bearer ${markketConfig.admin_token}`,
+              Authorization: `Bearer ${markketplace.admin_token}`,
               "Content-Type": "application/json",
             }
           });

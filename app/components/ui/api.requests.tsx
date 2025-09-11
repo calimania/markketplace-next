@@ -1,7 +1,7 @@
 'use client';
 
 import { strapiClient } from '@/markket/api.strapi';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { Button, Divider, Paper, Title } from '@mantine/core';
 import { useState } from 'react';
 import { IconHttpGet} from '@tabler/icons-react';
@@ -19,7 +19,7 @@ const PreviewRequests = () => {
   return (
     <Paper withBorder p="sm" my="md" className='blocks-content'>
       <Title order={4}>Request Preview </Title>
-      <Title order={5}>url: <small>{markketConfig.markket_url}</small></Title>
+      <Title order={5}>url: <small>{markketplace.markket_url}</small></Title>
       <p><strong>endpoint</strong> /store </p>
       <Divider/>
       <Button variant="filled" aria-label="Settings" leftSection={<IconHttpGet size={24} stroke={1.5} />} onClick={() => { exec('store') }}>

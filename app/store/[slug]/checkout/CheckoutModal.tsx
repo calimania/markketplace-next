@@ -19,7 +19,7 @@ import { createPaymentLink, type PaymentLinkOptions } from "../../../scripts/pay
 import { Price } from "@/markket/product";
 import { notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 
 interface Props {
   prices: Price[];
@@ -117,7 +117,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         // @TODO: control delivery country options at store level (name convention SHIPPING_US_CO_X, defaul US only)
         includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
-        redirect_to_url: new URL(`/store/${store?.slug}/receipt`, markketConfig.markket_url).toString(),
+        redirect_to_url: new URL(`/store/${store?.slug}/receipt`, markketplace.markket_url).toString(),
       });
 
     } catch (error) {

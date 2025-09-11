@@ -1,0 +1,156 @@
+@NEXT:
+
+- [ ] inbox widget in receipt page
+- [ ] when saving Product, get usd_price of PRICES
+- [ ] links not working in tiptapp - articles
+- [ ] slug for article starts with YEAR-
+- [ ] store.isMarketplace & conditional field stores?
+- [ ] strapi endpoint /related [products,pages,blogs,stores] in each service and controller
+- [ ] product attribute extensions fields
+- [ ] Crowdfunding? template - https://crowdfundr.com/dropindust?ref=
+- [ ] Prixel printing kit - https://prixel.com/products/the-prixel-printing-kit
+- [ ] price editor, digital products, subscription options
+- [ ] move Tags editing to item.view
+- [ ] fail error in CMS still says success
+- [ ] use store settings reply-to email
+- [ ] use store settings support email
+- [ ] edit order status [crm dashboard]
+- [ ] notify buyer of order change
+- [ ] buyer order_id status page
+- [ ] product[inventory] attribute component
+- [ ] price inventory, reduce number after sales
+- [ ] price inventory, restrict sales
+- [ ] order receipt email, store parameter
+- [ ] item.edit form meta title fix, include store.title
+- [ ] item.edit form meta description suggestion
+- [ ] store settings dashboard modify some
+- [ ] markket-next changes store_slug under url?
+- [ ] code not expiring on 15 seconds maybe or being PUT correctly?
+- [ ] confirm email during verify if it wasn't already
+- [ ] Xcelerator post
+- [ ] image modal lets you search from the library and pick an existing pic
+- [ ] image upload in tiptap editor
+- [ ] tiptap error with urls
+- [ ] abstract componenets to cafecito
+- [ ] layout, header store selection type autocomplete~ component
+- [ ] generate types from get-schema
+- [ ] tiptap editor, prevent ctrl+s (PUT draft or save to local storage)
+- [ ] tiptap editor, drafts in local storage
+- [ ] tiptap editor preserve content on REST error
+- [ ] POSTMAN automated tests
+- [ ] AUTOMATED REST POST tests after deploy
+- [ ] magic user code, invite collaborator to store
+- [ ] magic code for buyers - token with no user
+- [ ] Static sites can be created via API
+- [ ] manage custom domain
+- [ ] github api - trigger build of github website
+- [ ] Deployment or Event ContentType
+- [ ] album tracks are edited in album item.view, individual image managers
+- [ ] add albums[/collections] to pages
+- [ ] add albums[/collections] to products
+- [ ] rearrange slides in image.manager
+- [ ] edit Stripe Product name with API in update
+- [ ] edit Stripe product picture on save
+- [ ] delete / hide content [SEO.hide attribute]
+- [ ] publish / unpublish CMS items
+- [ ] when magic link login, swap confirmed to true
+- [ ] image.modal canvas generation images with text
+- [ ] better image modal unsplash (open libraries) integration
+- [ ] item form, display error when save create (store.slug)
+- [ ] display events in /store/slug/events
+- [ ] event details & RSVP in /store/slug/events/id
+- [ ] crm.orders endpoint
+- [ ] bootstrap initial content (startup|landing_page|community|magazine|store|crowdfund)
+- [ ] Events send calendar invite after RSVP
+- [ ] Email event subscribers (zoom instructions, access, etc)
+- [ ] Product.Extensions format (JSON, lifecycle, and API processing)
+- [ ] SKU and price ids for events
+- [ ] add DATEs to event, forms
+- [ ] react dev template
+- [ ] improvements to client, store display
+- [ ] better debugging (console.log audits)
+- [ ] sendgrid templates & strapi?
+- [ ] 2FA for admin
+- [ ] soc2 plugin compliance
+- [ ] audit log
+- [ ] pagination and additional results
+- [ ] dynamically restrict content limits for subscriptions
+- [ ] postgres backups
+
+## 2025
+
+### September
+
+- [ ] created components folder
+
+### August
+
+- [x] review store[content] create limit server side
+- [x] fix SSR:SEO in routes under /store
+- [x] Seo.title generate input description and store name title
+- [x] temp disable image modal in tiptop editor
+- [x] move PRICE editing to item.view
+- [x] disable checkout if not prices
+- [x] review automatic price creation amount (cents) (stripe sync)
+- [x] fancy paintings art store template
+- [x] bugs with tiptap content editing, deleting content
+- [x] tiptap bug preventing typing
+- [x] markdown editor
+- [x] explain test purchase, /portal - carlos
+- [x] display blogs in farmday
+- [x] display blog in farmday
+- [x] farmday-astro SEO
+- [x] farmday receipt email points to correct url
+- [x] farmday-astro render Page
+- [x] astro (namaku|farmday) magic link dashboard
+- [x] farmday disable /portal without user
+- [x] farmday display orders in portal
+- [x] farmday display some other page in portal
+- [x] farmday template dashboard
+- [x] fetch orders for buyer [proxy jwt]
+- [x] farmday /product pages
+- [x] slug should contain dots?
+- [x] farmday-astro needs to call api.farmday.io
+- [x] farmday login data
+- [x] magic link normalize lowercase email trim
+- [x] store_settings customize emails
+- [x] run in domain farmday (api)
+- [x] run farmday in extensioin route
+- [x] review store create limits restrictions
+- [x] api.farmday.io
+- [x] store.configuration object schema
+- [x] deploy markket.farmday.io
+- [x] email notify store.user[] when order
+- [x] markket api sync with stripe
+- [x] load URL into canvas in image modal
+- [x] dynamic action view waiting screen
+- [x] max stores per user (article, page, album, product, )
+- [x] markket api creates prices and product ids
+- [x] page[slug=receipt] in receipt page, better design, find by order_id
+- [x] creating stripe.product _id in dashboard
+- [x] creating stripe.price_id [] in dashboard
+- [x] multiple image upload & delete (use ids to sort / delete)
+- [x] add SKU to product (markket-next)
+- [x] add ids to prices (markket-next)
+- [x] create Orders when payment.link
+- [x] redirect to receipt - currently charging $0.33 + 3.3% of the transaction, with a maximum of $99.9
+- [x] update order when stripe.checkout complete
+- [x] display order in dashboard, pagination
+- [x] upload multiple images (delete at index)
+- [x] editing overrides images
+- [x] individual image upload for every content type
+- [x] error after creating store and old data
+- [x] uplod SEO image
+- [x] upload cover to article
+- [x] upload thumbnail to product
+- [x] upload logo to store
+- [x] upload cover for store
+- [x] fetch stores after login
+- [x] passwordless login plugin
+- [x] passwordless login & register in client
+- [x] Better dashboard layout
+- [x] Better dashboard nav menu
+- [x] Test neobrutalism components
+- [x] Better onboarding steps in dashboard
+- [x] Upload image modal
+- [x] Better display blog list

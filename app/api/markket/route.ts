@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { verifyToken } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
 
@@ -145,7 +145,7 @@ async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get('path');
 
-  console.log(`Proxie:${req.method}:${markketConfig.api}:${path}`);
+  console.log(`Proxie:${req.method}:${markketplace.api}:${path}`);
 
   if (!path) {
     return NextResponse.json(
@@ -169,7 +169,7 @@ async function handler(req: NextRequest) {
   }
   const targetUrl = new URL(
     path,
-    markketConfig.api,
+    markketplace.api,
   );
 
   requestUrl.searchParams.delete('path');
@@ -183,7 +183,7 @@ async function handler(req: NextRequest) {
     const fetchOptions: RequestInit = {
       method: req.method,
       headers: {
-        'Authorization': `Bearer ${markketConfig.admin_token}`,
+        'Authorization': `Bearer ${markketplace.admin_token}`,
       }
     };
 

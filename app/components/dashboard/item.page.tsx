@@ -3,12 +3,12 @@
 import { useContext, ElementType } from "react";
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
-import { Article, Page, Product, Store } from '@/markket';
+import { Article, Page, Product, Store } from '@/markket/index.d';
 
 import { Container, Stack, Skeleton, Paper, Text, Button, Group } from '@mantine/core';
 import { IconArrowLeft, IconEdit, } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { actionsMap } from './actions/actions.config';
+import { actionsMap } from '@/markket/actions.config';
 
 type ContentItem = Article | Page | Product | Store;
 

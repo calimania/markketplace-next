@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import stripeClient, { Stripe } from '@/markket/stripe.server';
-import { markketConfig } from '@/markket/config';
+import stripeClient, { Stripe } from '@/lib/stripe/server';
+import { markketplace } from '@/markket/config';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -62,11 +62,11 @@ export async function POST(req: NextRequest) {
       user_key_or_id: event?.account || '',
     };
 
-    const _log = await fetch(new URL('/api/markket', markketConfig.api), {
+    const _log = await fetch(new URL('/api/markket', markketplace.api), {
       method: 'POST',
       body: JSON.stringify({ data: markket }),
       headers: {
-        Authorization: `Bearer ${markketConfig.admin_token}`,
+        Authorization: `Bearer ${markketplace.admin_token}`,
         'Content-Type': 'application/json',
       },
     });
