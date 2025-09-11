@@ -4,14 +4,12 @@ import { markketConfig } from '@/markket/config';
 import { errorResponses, validators, countContentTypeItems } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
 import { actionsMap } from '@/app/components/dashboard/actions/actions.config';
-import stripeServer from '@/markket/stripe.server';
 
 import { getContentType, contentTypeConfig, validateStoreAccess } from '@/markket/cms.route.helpers';
-import { ContentTypes, Product } from '@/markket';
+import { ContentTypes, } from '@/markket';
 
 export const fetchCache = 'force-no-store';
 
-// @TODO: Abtract STRIPE integration
 export async function POST(request: NextRequest) {
   if (!validators.config()) {
     return errorResponses.missingConfig();
@@ -67,19 +65,6 @@ export async function POST(request: NextRequest) {
       storeId as string,
     ) as ContentTypes;
 
-    if (contentType == 'product' && !((transformedData as Product).SKU)) {
-      const stripe = stripeServer.getInstance();
-      const stripeProduct = await stripe.products.create({
-        name: transformedData.Name,
-        description: transformedData.Description || undefined,
-        metadata: {
-          slug: transformedData.slug,
-        },
-      });
-
-      transformedData.SKU = stripeProduct.id;
-    }
-
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
 
     const response = await strapiClient.create(contentTypePlural, {
@@ -112,7 +97,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// @TODO: Abtract STRIPE integration
 export async function PUT(request: NextRequest) {
   if (!validators.config()) {
     return errorResponses.missingConfig();
@@ -161,47 +145,6 @@ export async function PUT(request: NextRequest) {
     const validation = config.validate(payload[contentType as string]);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
-    }
-
-    if (['product'].includes(contentType as string) && stripeServer.enabled()) {
-      const product = payload[contentType as string];
-      const stripe = stripeServer.getInstance();
-
-      if (!product.SKU) {
-        const stripeProduct = await stripe.products.create({
-          name: product.Name,
-          description: product.Description || undefined,
-          metadata: {
-            slug: product.slug,
-            documentId: product.documentId,
-          },
-        });
-        console.log({ stripeProduct })
-        product.SKU = stripeProduct.id;
-      }
-
-      // For each price, create Stripe price if not present
-      if (Array.isArray(product.PRICES)) {
-        for (let i = 0; i < product.PRICES.length; i++) {
-          const price = product.PRICES[i];
-
-          if (!price.STRIPE_ID && price.Price > 0) {
-            const stripePrice = await stripe.prices.create({
-              unit_amount: Math.round(price.Price * 100),
-              currency: price.Currency.toLowerCase(),
-              product: product.SKU,
-              nickname: price.Name,
-              metadata: {
-                description: price.Description,
-                productId: product.documentId,
-              },
-            });
-            product.PRICES[i].STRIPE_ID = stripePrice.id;
-          }
-        }
-      }
-
-      payload[contentType as string] = product;
     }
 
     const transformedData = config.transform(
