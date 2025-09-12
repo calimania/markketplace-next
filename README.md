@@ -2,6 +2,8 @@
 
 [ de.markket.place](https://de.markket.place)
 
+[![Typing SVG](https://typingsvg.vercel.app/api/svg?center=false&lines=%5B%7B%22text%22%3A%22Markk%C3%ABt+%22%2C%22color%22%3A%22%23ff1a7d%22%7D%2C%7B%22text%22%3A%22Markk%C3%ABtplace%22%2C%22color%22%3A%22%23ff5cab%22%7D%5D)](https://github.com/whiteSHADOW1234/TypingSVG)
+
 ## Typescript Client
 
 ## NextJS & npm utilities

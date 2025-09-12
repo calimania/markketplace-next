@@ -12,9 +12,21 @@ import AlbumTracksDashboardPage from '@/app/components/dashboard/album.tracks.pa
 import StoresDashboardPage from '@/app/components/dashboard/store.list.page';
 import CRMDashboardPage from '@/app/components/dashboard/crm.page';
 
-import { Container, Title } from '@mantine/core';
+import { Container, Title, Grid, Button, Text } from '@mantine/core';
 import { useAuth } from '@/app/providers/auth.provider';
 import OnboardingComponent from './onboarding';
+import { IconShoppingCart, IconArticle, IconSettings, IconBuildingStore, IconAlbum, IconCalendar, IconUser, IconHome } from '@tabler/icons-react';
+
+const dashboardLinks = [
+  { url: '/dashboard/products', icon: <IconShoppingCart size={20} />, title: 'Products' },
+  { url: '/dashboard/articles', icon: <IconArticle size={20} />, title: 'Articles' },
+  { url: '/dashboard/store', icon: <IconBuildingStore size={20} />, title: 'Store' },
+  { url: '/dashboard/settings', icon: <IconSettings size={20} />, title: 'Settings' },
+  { url: '/dashboard/albums', icon: <IconAlbum size={20} />, title: 'Albums' },
+  { url: '/dashboard/events', icon: <IconCalendar size={20} />, title: 'Events' },
+  { url: '/dashboard/crm', icon: <IconUser size={20} />, title: 'CRM' },
+  { url: '/dashboard/pages', icon: <IconHome size={20} />, title: 'Pages' },
+];
 
 export default function AnyDashboardPage({slug}: {slug: string}) {
   const { stores, isLoading } = useAuth();
@@ -50,13 +62,22 @@ export default function AnyDashboardPage({slug}: {slug: string}) {
       return <OnboardingComponent slug={slug} />
   }
 
+  // If no matching slug, show navigation grid
   return (
-    <>
-      <Container>
-        <Title order={2} mb="md">
-          {`${slug} Dashboard`}
-        </Title>
-      </Container>
-    </>
+    <Container size="md" py="xl">
+      <Title order={2} mb="md">
+        Dashboard
+      </Title>
+      <Text mb="xs" fw={500}>Navigation</Text>
+      <Grid gutter="md">
+        {dashboardLinks.map((link) => (
+          <Grid.Col span={6} key={link.url}>
+            <Button leftSection={link.icon} fullWidth variant="light" component="a" href={link.url}>
+              {link.title}
+            </Button>
+          </Grid.Col>
+        ))}
+      </Grid>
+    </Container>
   );
 };

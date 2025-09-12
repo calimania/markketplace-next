@@ -66,10 +66,17 @@ export async function POST(request: NextRequest) {
   // ...business logic abstracted from UI
 }
 ```
+## 7. Thoughtful User Experience
+
+- **Thoughtful about user experience** and design aesthetics
+- **Consistent** as much as possible on margin, padding, centering dynamics
+- **Readable** easy to navigate and understand without bloat
+- **Clean** and elegant, for an enjoyable user experience
+
 
 ---
 
-## 7. Summary
+## 8. Summary
 
 By following these best practices and architectural patterns, Markketplace agents remain secure, maintainable, and scalable. All integrations with Strapi, Stripe, SendGrid, and Zoom are abstracted behind server API routes, ensuring a clean separation of concerns and a high-quality developer experience.
 

@@ -1,6 +1,6 @@
 # Features
 
-## Planned
+## Upcoming
 
 - [ ] inbox widget in receipt page
 - [ ] links not working in tiptapp - articles
@@ -68,10 +68,15 @@
 - [ ] soc2 plugin compliance
 - [ ] audit log
 - [ ] pagination and additional results
-- [ ] dynamically restrict content limits for subscriptions
+- [ ] dynamically restrict content limits
 - [ ] postgres backups
-
+i
 ## 2025
+
+### November
+
+- [ ] <title> in products and store sections
+- [ ] meta in store sections
 
 ### September
 
@@ -80,14 +85,33 @@
 - [x] edit Stripe product picture on save
 - [x] product.PRICES editor
 - [x] code verification fixes
-- [ ] better image manager
-- [ ] hide content from noindex, [SEO]
-- [ ] retrieve display orders
-- [ ] price hidden attribute
-- [ ] price inventory, reduce number after sales
-- [ ] price inventory, restrict sales
-- [ ] Generate initial SEO on save
-- [ ] SEO.edit in item view page (preview component)
+- [ ] store bootstrap content : after create, (pages, blog, products)
+- [ ] tiptap, local storage prevent error , or prevent close tab
+- [ ] not showing page list in /about
+- [ ] tiptap bugs, formatting errors
+- [ ] fixed bugs in image manager
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] enable payouts in sweden
+- [ ] auth/magic button to dashboard if logged in
+- [ ] SEO editor in same preview component, item.view
+- [ ] remove edit price in edit view, and disclaimer in create
+- [ ] edit one price at a time
+- [ ] /blog/about/products/events needs to be more consistent
+- [ ] prettier newsletter page
+- [ ] display orders in dashboard
+- [ ] dashboard design improvements
+- [ ] headers#anchor links in parsing Content
+- [ ] discord support link review
+- [ ] calima blog post dale summit NYC
+- [ ] mercury ach/ stripe bypass (farmday)
+- [ ] custom next.CSS for custom themes
+- [ ] ignore hidden price[]
+- [ ] ignore sold out price[]
+- [ ] edit additional price attributes
+- [ ] better onboarding checklist
+- [ ] better action.waiting page, remove
+- [ ] better afterSave action.helpers (stripe_sync, default_SEO)
 - [x] when saving Product, get usd_price of PRICES
 
 ### August
