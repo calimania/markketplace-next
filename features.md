@@ -1,15 +1,16 @@
-@NEXT:
+# Features
+
+## Planned
 
 - [ ] inbox widget in receipt page
-- [ ] when saving Product, get usd_price of PRICES
 - [ ] links not working in tiptapp - articles
 - [ ] slug for article starts with YEAR-
 - [ ] store.isMarketplace & conditional field stores?
 - [ ] strapi endpoint /related [products,pages,blogs,stores] in each service and controller
 - [ ] product attribute extensions fields
+- [ ] price editor, digital products, subscription options
 - [ ] Crowdfunding? template - https://crowdfundr.com/dropindust?ref=
 - [ ] Prixel printing kit - https://prixel.com/products/the-prixel-printing-kit
-- [ ] price editor, digital products, subscription options
 - [ ] move Tags editing to item.view
 - [ ] fail error in CMS still says success
 - [ ] use store settings reply-to email
@@ -17,15 +18,11 @@
 - [ ] edit order status [crm dashboard]
 - [ ] notify buyer of order change
 - [ ] buyer order_id status page
-- [ ] product[inventory] attribute component
-- [ ] price inventory, reduce number after sales
-- [ ] price inventory, restrict sales
 - [ ] order receipt email, store parameter
 - [ ] item.edit form meta title fix, include store.title
 - [ ] item.edit form meta description suggestion
 - [ ] store settings dashboard modify some
 - [ ] markket-next changes store_slug under url?
-- [ ] code not expiring on 15 seconds maybe or being PUT correctly?
 - [ ] confirm email during verify if it wasn't already
 - [ ] Xcelerator post
 - [ ] image modal lets you search from the library and pick an existing pic
@@ -49,9 +46,6 @@
 - [ ] add albums[/collections] to pages
 - [ ] add albums[/collections] to products
 - [ ] rearrange slides in image.manager
-- [ ] edit Stripe Product name with API in update
-- [ ] edit Stripe product picture on save
-- [ ] delete / hide content [SEO.hide attribute]
 - [ ] publish / unpublish CMS items
 - [ ] when magic link login, swap confirmed to true
 - [ ] image.modal canvas generation images with text
@@ -81,7 +75,20 @@
 
 ### September
 
-- [ ] created components folder
+- [x] created components folder
+- [x] edit Stripe Product name with API in update
+- [x] edit Stripe product picture on save
+- [x] product.PRICES editor
+- [x] code verification fixes
+- [ ] better image manager
+- [ ] hide content from noindex, [SEO]
+- [ ] retrieve display orders
+- [ ] price hidden attribute
+- [ ] price inventory, reduce number after sales
+- [ ] price inventory, restrict sales
+- [ ] Generate initial SEO on save
+- [ ] SEO.edit in item view page (preview component)
+- [x] when saving Product, get usd_price of PRICES
 
 ### August
 

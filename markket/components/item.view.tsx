@@ -12,7 +12,6 @@ import {
   ThemeIcon,
   Collapse,
   Button,
-  Accordion,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Article, Product, Album, Store, URL, Page, AlbumTrack } from '@/markket/index.d';
@@ -22,8 +21,6 @@ import {
   IconBubbleTea,
   IconSailboat,
   IconLinkPlus,
-  IconCurrencyDollar,
-  IconPigMoney,
   IconPhotoHexagon,
   IconAlbum,
 } from '@tabler/icons-react';
@@ -37,6 +34,7 @@ import AlbumTrackList from './album.tracks.component';
 import AlbumsView from './album.page.component';
 import { useRouter } from 'next/navigation';
 import ImageManager from './item.image.manager';
+import ItemPricesManager from './item.prices';
 
 const prefixMap: Record<string, string> = {
   article: 'blog',
@@ -77,7 +75,7 @@ const ViewItem = ({ item, store, singular, previewUrl, imageManager, refresh }: 
   const urls = (item as Store)?.URLS || (item as AlbumTrack)?.urls;
 
   return (
-    <Container size="lg" py="xl" >
+    <Container size="900px" py="xl" >
       {item?.SEO && (
         <SEOPreview
            SEO={item?.SEO}
@@ -247,21 +245,8 @@ const ViewItem = ({ item, store, singular, previewUrl, imageManager, refresh }: 
             </Paper>
           )}
           {(item as Product)?.PRICES && (
-            <Group gap="xs">
-              <IconPigMoney size={16} color={item.SKU ? 'green' : 'red'} />Prices
-            </Group>)}
-          <Accordion defaultValue={['']} multiple mb="lg">
-            {(item as Product)?.PRICES?.map((item, index) => (
-              <Accordion.Item key={`${item.Name}-${index}`} value={index.toString()}>
-                <Accordion.Control icon={<IconCurrencyDollar color={item.STRIPE_ID ? 'green' : 'red'} />}>
-                  {item.Price} {item.Currency} - {item.Name}
-                </Accordion.Control>
-                <Accordion.Panel>
-                  {item.Description}
-                </Accordion.Panel>
-              </Accordion.Item>
-            ))}
-          </Accordion>
+            <ItemPricesManager item={item} refresh={refresh} />
+          )}
           {imageManager ? (
             <ImageManager item={item} store={store} singular={singular} refresh={refresh} />
           ) : (

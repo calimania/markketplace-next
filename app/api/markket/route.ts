@@ -145,14 +145,19 @@ async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get('path');
 
-  console.log(`Proxie:${req.method}:${markketplace.api}:${path}`);
-
   if (!path) {
     return NextResponse.json(
       { error: 'Path parameter is required' },
       { status: 400 }
     );
   }
+
+  const targetUrl = new URL(
+    path,
+    markketplace.api,
+  );
+
+  console.log(`Proxie:${req.method}:${targetUrl.toString()}`);
 
   const headersList = await headers();
   const token = headersList.get('authorization')?.split('Bearer ')[1];
@@ -167,10 +172,7 @@ async function handler(req: NextRequest) {
       );
     }
   }
-  const targetUrl = new URL(
-    path,
-    markketplace.api,
-  );
+
 
   requestUrl.searchParams.delete('path');
   targetUrl.search = requestUrl.searchParams.toString();

@@ -104,5 +104,11 @@ export const updateContentAction = (contentType: contentTypes) =>
       console.warn({ response })
     }
 
+    // event and products, and other afterSave calls managed here - third party sync usually
+    if (contentType == 'product') {
+      const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
+      console.log({ x })
+    }
+
     return response;
   };

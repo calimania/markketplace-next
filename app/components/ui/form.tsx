@@ -530,16 +530,17 @@ const FormItem = ({
                 {section.fields.map(renderField)}
               </Stack>
             ))}
-            <Group justify="flex-end" mt="xl">
-              <Button
-                type="submit"
-                loading={loading}
-                leftSection={action === 'create' ? <IconDisc size={16} /> : <IconDeviceFloppy size={16} />}
-              >
-                {action === 'create' ? 'Create' : 'Update'} {singular}
-              </Button>
-            </Group>
           </Stack>
+          <Group justify="flex-end" mt="xl">
+            <Button
+              type="submit"
+              loading={loading}
+              leftSection={action === 'create' ? <IconDisc size={16} /> : <IconDeviceFloppy size={16} />}
+              style={{ minWidth: 140 }}
+            >
+              {action === 'create' ? 'Create' : 'Update'} {singular}
+            </Button>
+          </Group>
         </form>
       </Paper>
       <Paper pt="sm">
