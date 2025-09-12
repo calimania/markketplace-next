@@ -5,7 +5,7 @@ import ItemList from '@/app/components/dashboard/cms/list.component';
 import { Store } from '@/markket';
 
 import { ContentItem } from '@/app/hooks/common.d';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
 
@@ -31,17 +31,17 @@ const canAddMore = (singular: string, length: number) => {
 
   switch (singular) {
     case 'store':
-      return l <= markketConfig.max_stores_per_user;
+      return l <= markketplace.max_stores_per_user;
     case 'article':
-      return l <= markketConfig.max_articles_per_store;
+      return l <= markketplace.max_articles_per_store;
     case 'page':
-      return l <= markketConfig.max_pages_per_store;
+      return l <= markketplace.max_pages_per_store;
     case 'album':
-      return l <= markketConfig.max_albums_per_store;
+      return l <= markketplace.max_albums_per_store;
     case 'product':
-      return l <= markketConfig.max_products_per_store;
+      return l <= markketplace.max_products_per_store;
     case 'event':
-      return l <= markketConfig.max_events_per_store;
+      return l <= markketplace.max_events_per_store;
     default:
       return l <= 20;
   }
@@ -112,7 +112,8 @@ const CMSIndex = ({ singular = 'item', plural = 'items', items, loading, store, 
         <Paper p="md" withBorder>
           <Group justify="space-between" wrap="nowrap">
             <Group gap="md">
-              <Icon size={24} style={{ color: 'var(--mantine-color-blue-6)' }} />
+              <Icon size={27} style={{ color: 'var(--mantine-color-blue-6)' }} />
+              <strong className=''>[ {items?.length} ]</strong>
               <div>
                 <Title order={2} size="h3">
                   {plural.charAt(0).toUpperCase() + plural.slice(1)}

@@ -15,7 +15,7 @@ import { Store, Page, Album } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
 import Albums from '@/app/components/ui/albums.grid';
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 
 const features = [
   {
@@ -86,13 +86,13 @@ const HomePage = ({ store, page }: HomePageProps) => {
     <div className="min-h-screen markketpage homepage">
       <BackgroundImage
         className="homepage-hero"
-        src={store?.Cover?.url || markketConfig.blank_cover_url}
+        src={store?.Cover?.url || markketplace.blank_cover_url}
         h={rem(500)}
       >
         <Container size="lg" h="100%" className="relative z-10">
           <div className="flex flex-col justify-center items-center h-full text-center text-white ">
             <img
-              src={store?.Logo?.url || markketConfig.blank_logo_url}
+              src={store?.Logo?.url || markketplace.blank_logo_url}
               alt={store?.SEO?.metaTitle || 'Markkët'}
               width={150}
               height={150}

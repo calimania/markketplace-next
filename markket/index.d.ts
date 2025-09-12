@@ -2,19 +2,19 @@
  * @module markket
  * @description Types for Markket API requests & responses
  */
-export { Article, } from './article';
-export { Store, URL, Media } from './store';
-export { StripeAccount } from './stripe';
-export { SEO } from './seo';
-export { Page } from './page';
-export { Product } from './product';
-export { Event } from './event';
-export { Album, AlbumTrack } from './album';
-export { InboxMessage } from './inbox';
-export { Form } from './form';
-export { Subscriber } from './newsletter';
-export { Order } from './order';
-export { Tag } from './tag';
+export { type Article } from './article';
+export { type Store, type URL, type Media } from './store';
+export { type StripeAccount } from './stripe';
+export { type SEO } from './seo';
+export { type Page } from './page';
+export { type Product } from './product';
+export { type Event } from './event';
+export { type Album, type AlbumTrack } from './album';
+export { type InboxMessage } from './inbox';
+export { type Form } from './form';
+export { type Subscriber } from './newsletter';
+export { type Order } from './order';
+export { type Tag } from './tag';
 
 type EventRecord = Event;
 
@@ -56,3 +56,7 @@ export interface FetchOptions {
     pageSize?: number;
   };
 }
+
+export type Values = Page | Article | Product | Event | Album | AlbumTrack;
+
+export type contentTypes = 'page' | 'article' | 'product' | 'event' | 'album' | 'track';

@@ -5,7 +5,7 @@ import {
   Container,
   Paper,
 } from '@mantine/core';
-import { Store, type ContentTypes } from '@/markket';
+import { Store, type ContentTypes } from '../index.d';
 
 import DashboardForm from '@/app/components/ui/form'
 import { useContext, } from 'react';

@@ -5,7 +5,7 @@ import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
 import Markdown from "@/app/components/ui/page.markdown";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 import ProductCard from "@/app/components/ui/product.card";
 import {
   Container,
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   let page = StoreProductPage;
   if (!page) {
-    const { data } = await strapiClient.getPage('products', markketConfig.slug);
+    const { data } = await strapiClient.getPage('products', markketplace.slug);
     page = data?.[0];
   }
 
@@ -56,7 +56,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   let page = StoreProductPage;
   if (!page) {
-    const { data } = await strapiClient.getPage('products', markketConfig.slug);
+    const { data } = await strapiClient.getPage('products', markketplace.slug);
     page = data?.[0];
   }
 

@@ -1,6 +1,6 @@
 import { Text, Button, Group, Stack, Paper, Title, Badge } from '@mantine/core';
 import Link from 'next/link';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { Store } from '@/markket/store';
 import { IconTrafficCone, IconBrandAppleArcade } from '@tabler/icons-react';
 
@@ -16,7 +16,7 @@ const StoreSettingsListPage = ({stores}: StoreSettingsListPageProps) => {
   return (
     <>
       <Group justify="space-between" align="center" className="mb-6">
-        {stores?.length < markketConfig?.max_stores_per_user ? (
+        {stores?.length < markketplace?.max_stores_per_user ? (
           <>
             <Text className="text-fuchsia-700 font-bold text-lg">You can create up to two stores</Text>
             <Button

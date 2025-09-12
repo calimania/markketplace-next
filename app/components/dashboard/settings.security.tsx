@@ -14,7 +14,7 @@ import {
   Divider,
   rem,
 } from '@mantine/core';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 
 const SecuritySettings = () => {
   const { user, logout } = useAuth();
@@ -43,7 +43,7 @@ const SecuritySettings = () => {
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
-      const response = await fetch(new URL('/api/auth/change-password', markketConfig.api), {
+      const response = await fetch(new URL('/api/auth/change-password', markketplace.api), {
         method: 'POST',
         body: JSON.stringify({
           currentPassword: values.currentPassword,

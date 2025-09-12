@@ -1,5 +1,5 @@
 import { Price } from "@/markket/product";
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 
 export type PaymentLinkOptions = {
   totalPrice: number;
@@ -30,7 +30,7 @@ export const createPaymentLink = async (
     redirect_to_url: options?.redirect_to_url || '',
   };
 
-  const request = await fetch(new URL('/api/markket', markketConfig.api), {
+  const request = await fetch(new URL('/api/markket', markketplace.api), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

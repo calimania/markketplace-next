@@ -1,15 +1,16 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { strapiClient } from '@/markket/api';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { errorResponses, validators, countContentTypeItems } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
-import { actionsMap } from '@/app/components/dashboard/actions/actions.config';
+import { actionsMap } from '@/markket/actions.config';
 
 import { getContentType, contentTypeConfig, validateStoreAccess } from '@/markket/cms.route.helpers';
-import { ContentTypes, } from '@/markket';
+import { ContentTypes } from '@/markket/index.d';
 
 export const fetchCache = 'force-no-store';
 
+// Stripe integration moved to dedicated /api/stripe routes
 export async function POST(request: NextRequest) {
   if (!validators.config()) {
     return errorResponses.missingConfig();
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
         contentType as string,
         config.propLimit as number,
         storeId,
-        markketConfig.markket_api_key,
+        markketplace.markket_api_key,
       );
 
       console.log({ limit, config });
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const response = await strapiClient.create(contentTypePlural, {
       headers: {
-        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
+        'Authorization': `Bearer ${markketplace.markket_api_key}`,
       },
       data: transformedData
     });
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Stripe integration moved to dedicated /api/stripe routes
 export async function PUT(request: NextRequest) {
   if (!validators.config()) {
     return errorResponses.missingConfig();
@@ -157,7 +159,7 @@ export async function PUT(request: NextRequest) {
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
     const response = await strapiClient.update(contentTypePlural, id, {
       headers: {
-        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
+        'Authorization': `Bearer ${markketplace.markket_api_key}`,
       },
       data: transformedData
     });
@@ -219,7 +221,7 @@ export async function DELETE(request: NextRequest) {
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
     const response = await strapiClient.delete(contentTypePlural, id, {
       headers: {
-        'Authorization': `Bearer ${markketConfig.markket_api_key}`,
+        'Authorization': `Bearer ${markketplace.markket_api_key}`,
       }
     });
 

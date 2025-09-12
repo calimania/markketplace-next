@@ -1,5 +1,5 @@
 import { Store } from './store';
-import { User } from './user';
+import { User } from './user.d';
 
 export interface InboxMessage {
   id: number;

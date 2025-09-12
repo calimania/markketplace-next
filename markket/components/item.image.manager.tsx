@@ -1,13 +1,13 @@
-import { ContentTypes, Store } from "@/markket"
+import { type ContentTypes, type  Store } from "@/markket/index.d"
 import { Group, Tooltip, Paper, Text, Title, Button, Stack, Box, Modal } from '@mantine/core';
 import { useState } from 'react';
 import ImageModal from './image.modal';
 import { IconCactus, IconCameraPlus, IconTrash } from "@tabler/icons-react";
 
-import { ImageConfig, ImageActions } from './item.image.config';
+import { ImageConfig, ImageActions } from '../item.image.config';
 
 import { updateContentAction, } from '@/markket/action.helpers';
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 
 export type ImageManagerProps = {
   item?: ContentTypes,
@@ -16,7 +16,7 @@ export type ImageManagerProps = {
   refresh?: () => null;
 }
 
-const PLACEHOLDER = markketConfig.blank_image_url;
+const PLACEHOLDER = markketplace.blank_image_url;
 
 const map = ImageConfig;
 const actions = ImageActions;
@@ -111,7 +111,7 @@ const ImageManager = ({ store, singular, item, refresh }: ImageManagerProps) => 
               </Text>
               <Group gap="md" align="center" wrap="wrap" style={{ width: '100%', flexWrap: 'wrap' }}>
                 {(imgs.length > 0 ? [...imgs, {}] : [{}]).map((img: any, i: number) => {
-                  if (i >= markketConfig.max_images_per_slide) { return <span key={key + i} /> }
+                  if (i >= markketplace.max_images_per_slide) { return <span key={key + i} /> }
 
                   const src = img && img.url ? img.url : PLACEHOLDER;
                   const alt = img && img.alternativeText ? img.alternativeText : `${key} #${i + 1}`;

@@ -54,3 +54,8 @@ storybook-static
 .bevel
 .vscode
 
+# NPM distribution files
+dist
+
+*.tgz
+.rollup.cache

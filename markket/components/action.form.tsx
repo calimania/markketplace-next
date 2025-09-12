@@ -1,6 +1,6 @@
 "use client";
 
-import { default as ActionForm, ItemFormProps, FormValues } from '@/app/components/dashboard/actions/item.form';
+import { default as ActionForm, ItemFormProps, FormValues } from './item.form';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth.provider';
 import { useState } from 'react';

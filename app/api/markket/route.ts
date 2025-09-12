@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { verifyToken } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
 
@@ -145,14 +145,19 @@ async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get('path');
 
-  console.log(`Proxie:${req.method}:${markketConfig.api}:${path}`);
-
   if (!path) {
     return NextResponse.json(
       { error: 'Path parameter is required' },
       { status: 400 }
     );
   }
+
+  const targetUrl = new URL(
+    path,
+    markketplace.api,
+  );
+
+  console.log(`Proxie:${req.method}:${targetUrl.toString()}`);
 
   const headersList = await headers();
   const token = headersList.get('authorization')?.split('Bearer ')[1];
@@ -167,10 +172,7 @@ async function handler(req: NextRequest) {
       );
     }
   }
-  const targetUrl = new URL(
-    path,
-    markketConfig.api,
-  );
+
 
   requestUrl.searchParams.delete('path');
   targetUrl.search = requestUrl.searchParams.toString();
@@ -183,7 +185,7 @@ async function handler(req: NextRequest) {
     const fetchOptions: RequestInit = {
       method: req.method,
       headers: {
-        'Authorization': `Bearer ${markketConfig.admin_token}`,
+        'Authorization': `Bearer ${markketplace.admin_token}`,
       }
     };
 

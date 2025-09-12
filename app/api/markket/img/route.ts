@@ -1,5 +1,5 @@
 
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (action === 'unsplash') {
-    const accessKey = markketConfig.extensions?.unsplash_access_key;
+    const accessKey = markketplace.extensions?.unsplash_access_key;
     if (!accessKey) {
       return NextResponse.json({ error: 'Unsplash access key not set' }, { status: 500 });
     }

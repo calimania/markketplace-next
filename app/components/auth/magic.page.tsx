@@ -17,9 +17,9 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconMailStar } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { Page, Store } from '@/markket';
+import { type Page, type Store } from '@/markket/index.d';
 import { strapiClient } from '@/markket/api.strapi';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 import PageContent from '../ui/page.content';
 
 interface MagicLinkPage {
@@ -35,11 +35,11 @@ export default function MagicLinkPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: pages } = await strapiClient.getPage('auth.magic', markketConfig.slug);
+      const { data: pages } = await strapiClient.getPage('auth.magic', markketplace.slug);
 
       setPage(pages?.[0] as Page);
 
-      const { data: stores } = await strapiClient.getStore(markketConfig.slug);
+      const { data: stores } = await strapiClient.getStore(markketplace.slug);
       setStore(stores?.[0] || {});
     };
 

@@ -2,7 +2,7 @@
 
 import { ContentItem } from '@/app/hooks/common';
 import { useState, ReactNode, useContext, useEffect } from 'react';
-import SEOPreview from '../dashboard/seo.preview';
+import SEOPreview from '@/markket/components/seo.preview';
 
 import {
   TextInput,
@@ -419,7 +419,7 @@ const FormItem = ({
                   size="xs"
                   variant="light"
                   onClick={() => {
-                    const newPrices = [...prices, { Name: '', Description: '', Price: 1, Currency: 'USD', STRIPE_ID: '' }];
+                    const newPrices = [...prices, { Name: '', Description: '', Price: 1, Currency: 'USD' }];
                     form.setFieldValue('PRICES', newPrices);
                   }}
                 >
@@ -463,9 +463,7 @@ const FormItem = ({
                         <NumberInput
                           value={p.Price}
                           min={0}
-                          readOnly={!!p.STRIPE_ID}
                           onChange={val => {
-                            if (p.STRIPE_ID) return; // Don't allow editing if synced to Stripe
                             const newPrices = [...prices];
                             newPrices[i].Price = val as number;
                             form.setFieldValue('PRICES', newPrices);
@@ -474,7 +472,6 @@ const FormItem = ({
                       </td>
                       <td className="p-2 border">
                         <TextInput value={p.Currency} readOnly />
-                        <input type="hidden" value={p.STRIPE_ID} name={`PRICES[${i}].STRIPE_ID`} />
                       </td>
                       <td className="p-2 border text-center">
                         <Button
@@ -533,16 +530,17 @@ const FormItem = ({
                 {section.fields.map(renderField)}
               </Stack>
             ))}
-            <Group justify="flex-end" mt="xl">
-              <Button
-                type="submit"
-                loading={loading}
-                leftSection={action === 'create' ? <IconDisc size={16} /> : <IconDeviceFloppy size={16} />}
-              >
-                {action === 'create' ? 'Create' : 'Update'} {singular}
-              </Button>
-            </Group>
           </Stack>
+          <Group justify="flex-end" mt="xl">
+            <Button
+              type="submit"
+              loading={loading}
+              leftSection={action === 'create' ? <IconDisc size={16} /> : <IconDeviceFloppy size={16} />}
+              style={{ minWidth: 140 }}
+            >
+              {action === 'create' ? 'Create' : 'Update'} {singular}
+            </Button>
+          </Group>
         </form>
       </Paper>
       <Paper pt="sm">

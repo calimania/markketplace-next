@@ -1,4 +1,4 @@
-import { markketConfig } from "./config";
+import { markketplace } from "./config";
 
 type fetchOptions = {
   method?: string;
@@ -19,7 +19,7 @@ export class markketClient {
 
   constructor() {
     if (typeof window == 'undefined') {
-      this.baseUrl = markketConfig.markket_url as string;
+      this.baseUrl = markketplace.markket_url as string;
       this.token = '';
       this._id = ''
     } else {
@@ -135,7 +135,7 @@ export class markketClient {
 
   public verifyMagicCode = async (code: string): Promise<{ jwt?: string; user?: { id: string, username: string, email: string } }> => {
 
-    const _url = new URL(`/api/auth-magic/verify`, markketConfig.api);
+    const _url = new URL(`/api/auth-magic/verify`, markketplace.api);
 
     const response = await fetch(_url, {
       method: 'POST',

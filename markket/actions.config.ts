@@ -1,6 +1,6 @@
-import ViewItem from '@/app/components/dashboard/actions/item.view';
-import FormItem from './action.form';
-import { ContentTypes, Store, } from '@/markket';
+import ViewItem from './components/item.view';
+import FormItem from './components/action.form';
+import { ContentTypes, Store, } from '.';
 import { ElementType } from 'react';
 import { markketClient } from '@/markket/api.markket';
 import { createContentAction, updateContentAction, normalizeImages } from '@/markket/action.helpers';

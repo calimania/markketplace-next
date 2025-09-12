@@ -1,9 +1,9 @@
-import { StrapiResponse, FetchOptions } from '.';
+import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store';
 import { Page } from './page';
 import qs from 'qs';
 
-export type { StrapiResponse, FetchOptions };
+export { type StrapiResponse, type FetchOptions };
 
 interface FilterOperator {
   operator: '$eq' | '$contains' | '$in' | '$gt' | '$lt' | '$gte' | '$lte' | '$ne';

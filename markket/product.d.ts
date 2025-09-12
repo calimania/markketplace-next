@@ -9,7 +9,10 @@ interface Price {
   Currency: string;
   STRIPE_ID: string;
   Description: string;
+  inventory: number;
   Name: string;
+  hidden: boolean;
+  extra: any;
 }
 
 interface ImageFormat {

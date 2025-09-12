@@ -1,12 +1,8 @@
-import { Page, Article, Product, Event, Album, AlbumTrack, Tag, ContentTypes } from '@/markket';
+import { Page, Article, Album, type Tag, ContentTypes, Values, contentTypes } from './index.d';
 import { markketClient } from '@/markket/api';
 import { JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { getTagColorName } from '@/markket/tag.helpers';
-import { ImageConfig } from '@/app/components/dashboard/item.image.config';
-
-type Values = Page | Article | Product | Event | Album | AlbumTrack;
-
-export type contentTypes = 'page' | 'article' | 'product' | 'event' | 'album' | 'track';
+import { ImageConfig } from './item.image.config';
 
 const client = new markketClient();
 
@@ -63,10 +59,10 @@ const transformBody = (values: Values, contentType: contentTypes) => {
 
   if (['article'].includes(contentType)) {
     body = body as Article;
-    body.Tags = body?.Tags?.map((t) => ({
+    body.Tags = body?.Tags?.map((t: Tag) => ({
       Label: t.Label,
       Color: getTagColorName(t.Color as string)
-    } as Tag )) || [];
+    })) || [];
   }
 
   return body;
@@ -98,9 +94,21 @@ export const updateContentAction = (contentType: contentTypes) =>
     body = normalizeImages(body, contentType);
     body = transformBody(body, contentType);
 
-    return await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
+    const response = await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
         [contentType]: body,
       },
     });
+
+    if (!response?.ok) {
+      console.warn({ response })
+    }
+
+    // event and products, and other afterSave calls managed here - third party sync usually
+    if (contentType == 'product') {
+      const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
+      console.log({ x })
+    }
+
+    return response;
   };

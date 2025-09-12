@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { markketConfig } from './markket/config';
+import { markketplace } from './markket/config';
 
 /**
  * Routes that require authentication
@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const verifyResponse = await fetch(new URL(`/api/users/me`, markketConfig.api), {
+    const verifyResponse = await fetch(new URL(`/api/users/me`, markketplace.api), {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -69,12 +69,12 @@ export async function middleware(request: NextRequest) {
     if (storeId || request.nextUrl.pathname.includes('/api/stripe/connect')) {
 
       if (storeId) {
-        const url = new URL(`/api/stores/${storeId}?populate=users`, markketConfig.api);
+        const url = new URL(`/api/stores/${storeId}?populate=users`, markketplace.api);
 
         const storeResponse = await fetch(url,
           {
             headers: {
-              'Authorization': `Bearer ${markketConfig.admin_token}`,
+              'Authorization': `Bearer ${markketplace.admin_token}`,
             },
           }
         );

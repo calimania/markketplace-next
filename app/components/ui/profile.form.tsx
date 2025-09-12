@@ -17,7 +17,7 @@ import { showNotification } from '@mantine/notifications';
 import { IconUpload, IconUser, IconCameraBolt } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import { strapiClient, markketClient } from '@/markket/api';
-import ImageModal from '../dashboard/image.modal';
+import ImageModal from '@/markket/components/image.modal';
 
 interface ProfileFormValues {
   username: string;

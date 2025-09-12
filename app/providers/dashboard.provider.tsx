@@ -3,7 +3,7 @@
 import { createContext  } from 'react';
 import { Store, StripeAccount } from '@/markket';
 import { useState, useEffect } from 'react';
-import { markketConfig } from '@/markket/config';
+import { markketplace } from '@/markket/config';
 
 export type DashboardContextType = { store: Store, stripe: StripeAccount, isLoading: boolean, setSelectedStore: (store: Store) => void };
 
@@ -44,7 +44,7 @@ export function DashboardProvider({ children, store }: { children: React.ReactNo
       setIsLoading(true);
 
       try {
-        const response = await fetch(new URL('/api/markket?stripe', markketConfig.api), {
+        const response = await fetch(new URL('/api/markket?stripe', markketplace.api), {
           body: JSON.stringify({
             action: 'stripe.account',
             store_id: store_id,

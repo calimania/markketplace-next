@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/app/providers/auth.provider";
-import { markketConfig } from "@/markket/config";
+import { markketplace } from "@/markket/config";
 import {
   Paper,
   Text,
@@ -43,7 +43,7 @@ const AuthUnconfirmed = () => {
 
     try {
       const request = await fetch(
-        new URL('/api/auth/send-email-confirmation', markketConfig.api),
+        new URL('/api/auth/send-email-confirmation', markketplace.api),
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
