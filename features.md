@@ -70,26 +70,12 @@
 - [ ] pagination and additional results
 - [ ] dynamically restrict content limits
 - [ ] postgres backups
-i
+
 ## 2025
 
-### November
-
-- [ ] <title> in products and store sections
-- [ ] meta in store sections
-
-### September
-
-- [x] created components folder
-- [x] edit Stripe Product name with API in update
-- [x] edit Stripe product picture on save
-- [x] product.PRICES editor
-- [x] code verification fixes
 - [ ] store bootstrap content : after create, (pages, blog, products)
 - [ ] tiptap, local storage prevent error , or prevent close tab
 - [ ] not showing page list in /about
-- [ ] tiptap bugs, formatting errors
-- [ ] fixed bugs in image manager
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
 - [ ] enable payouts in sweden
@@ -112,6 +98,29 @@ i
 - [ ] better onboarding checklist
 - [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
+
+### November
+
+- [ ] <title> in products and store sections
+- [ ] meta in store sections
+- [ ] use new store.dashboard endpoints
+- [ ] new onboarding: create 1st store & info
+- [ ] use SEO endpoints to generate, skip asking
+- [ ] better dashboard create,edit
+- [ ] enable display events
+- [ ] tiptap bugs, formatting errors
+- [ ] bug: image manager
+- [ ] enable RSVP to events
+- [ ] pexels search
+- [ ] unsplash search
+
+### September
+
+- [x] created components folder
+- [x] edit Stripe Product name with API in update
+- [x] edit Stripe product picture on save
+- [x] product.PRICES editor
+- [x] code verification fixes
 - [x] when saving Product, get usd_price of PRICES
 
 ### August
