@@ -7,9 +7,7 @@ import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
 import { markketColors } from '@/markket/colors.config';
-
 import Albums from '@/app/components/ui/albums.grid';
-
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
@@ -31,9 +29,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     entity: {
       url: `/${slug}`,
       SEO: store?.SEO,
+      Description: store?.Description,
+      Logo: store?.Logo,
       id: store?.id?.toString(),
     },
-    type: 'article',
+    type: 'website',
+    defaultDescription: `Welcome to ${store?.title || 'our store'}`,
   });
 };
 
@@ -50,13 +51,8 @@ export default async function StorePage({
     notFound();
   }
 
-  // Fetch visibility settings
   const visibilityResponse: StoreVisibilityResponse | null = await strapiClient.getStoreVisibility(store.documentId);
   const visibility = visibilityResponse?.data;
-
-  console.log({ visibility })
-
-  // Define section links based on visibility
   const sectionLinks = [
     {
       url: `/store/${slug}/products`,
@@ -170,8 +166,6 @@ export default async function StorePage({
               </Text>
             )}
           </div>
-
-          {/* Beautiful Section Links */}
           {sectionLinks.length > 0 && (
             <div>
               <Title order={2} className="mb-6" ta="center">Explore</Title>

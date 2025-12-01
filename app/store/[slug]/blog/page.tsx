@@ -29,11 +29,14 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     slug,
     entity: {
       SEO: page?.SEO,
-      title: page?.Title || `${slug} Blog`,
+      title: page?.Title,
       id: page?.id?.toString(),
       url: `/store/${slug}/blog`,
     },
     type: 'website',
+    defaultTitle: 'Blog',
+    defaultDescription: 'Discover our latest stories, insights, and updates.',
+    keywords: ['blog', 'articles', 'stories', 'news', 'insights'],
   });
 };
 
@@ -61,7 +64,7 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   const description = page?.SEO?.metaDescription || `Blog posts for ${store?.title || store?.SEO?.metaTitle}`;
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="lg" py="xl">
       <Stack gap="xl">
         <StorePageHeader
           icon={<IconArticle size={48} />}

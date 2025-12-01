@@ -20,15 +20,32 @@ export async function generateMetadata({ params }: EventsPageProps) {
   const eventResponse = await strapiClient.getEventBySlug(slug, event_slug);
   const event = eventResponse?.data?.[0] as Event;
 
+  const eventName = event?.Name || 'Event';
+  const eventDate = event?.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+  const location = '';
+
+  const description = event?.Description
+    ? event.Description.substring(0, 160).replace(/<[^>]*>/g, '')
+    : `${eventName}${eventDate ? ' on ' + eventDate : ''}${location ? ' at ' + location : ''}. Join us!`;
+
   return generateSEOMetadata({
     slug,
     entity: {
       SEO: event?.SEO || store?.SEO,
-      title: `${event?.Name} | ${store.title} Event`,
-      id: store?.id?.toString(),
+      Name: event?.Name,  // Pass real value, not fallback
+      Description: description,
+      id: event?.id?.toString(),
       url: `/store/${slug}/events/${event_slug}`,
     },
     type: "article",
+    defaultTitle: 'Event',
+    keywords: [
+      'event',
+      'workshop',
+      'meetup',
+      eventName,
+      ...(event?.Tag?.map(t => t.Label) || []),
+    ],
   });
 }
 
@@ -44,7 +61,6 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   const eventsResponse = await strapiClient.getEventBySlug(event_slug, slug);
 
   const event = (eventsResponse?.data?.[0] || []) as Event;
-  console.log(event);
 
   return (
     <Container size="xl" py="xl">

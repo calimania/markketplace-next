@@ -1,4 +1,4 @@
-import { Container, LoadingOverlay } from '@mantine/core';
+import { Container, LoadingOverlay, Stack } from '@mantine/core';
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -8,6 +8,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import StorePageHeader from '@/app/components/ui/store.page.header';
+import PageContent from '@/app/components/ui/page.content';
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
@@ -24,8 +25,10 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
     entity: {
       url: `/${slug}`,
       SEO: page?.SEO,
+      title: page?.Title,
     },
     type: 'article',
+    defaultTitle: 'About',
   });
 };
 
@@ -62,9 +65,13 @@ export default async function AboutPage({ params }: AboutPageProps) {
         iconColor="var(--mantine-color-teal-6)"
       />
 
-      <Suspense fallback={<LoadingOverlay visible />}>
-        <PageList pages={customPages} storeSlug={slug} />
-      </Suspense>
+      <Stack gap="xl">
+        <PageContent params={{ page: aboutPage }} />
+
+        <Suspense fallback={<LoadingOverlay visible />}>
+          <PageList pages={customPages} storeSlug={slug} />
+        </Suspense>
+      </Stack>
     </Container>
   );
 };

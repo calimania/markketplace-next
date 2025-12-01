@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { strapiClient } from '@/markket/api.strapi';
 import "./globals.css";
 import '@/app/styles/main.scss';
@@ -12,14 +11,17 @@ import { Notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
 import { markketplace } from "@/markket/config";
 
-async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   const storeData = await strapiClient.getStore();
   const store = storeData?.data?.[0] as Store;
   const seo = store?.SEO;
   const favicon = store?.Favicon?.formats?.thumbnail?.url || markketplace.blank_favicon_url;
 
   return {
-    title: seo?.metaTitle || "Markkët Next",
+    title: {
+      default: seo?.metaTitle || "Markkët Next",
+      template: "%s"
+    },
     description: seo?.metaDescription || "Dashboard for Markkët storefronts",
     keywords: seo?.metaKeywords,
     authors: seo?.metaAuthor ? [{ name: seo.metaAuthor }] : undefined,
@@ -40,18 +42,6 @@ import '@mantine/core/styles.css';
 
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = await generateMetadata();
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,9 +52,7 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider>

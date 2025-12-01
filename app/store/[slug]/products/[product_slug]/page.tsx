@@ -12,16 +12,31 @@ interface ProductSlugPageProps {
 export async function generateMetadata({ params }: ProductSlugPageProps): Promise<Metadata> {
   const { slug, product_slug } = await params;
   const { data } = await strapiClient.getProduct(product_slug, slug);
-  const page = data?.[0] as Page;
+  const product = data?.[0] as Product;
+  const productName = product?.Name || 'Product';
+  const price = product?.price ? `$${product.price}` : '';
+  const description = product?.Description
+    ? product.Description.substring(0, 150).replace(/<[^>]*>/g, '')
+    : `${productName}${price ? ' - ' + price : ''}. Available now.`;
 
   return generateSEOMetadata({
-    slug: `store/${slug}/products/${product_slug}`,
+    slug,
     entity: {
-      url: `store/${slug}/products/${product_slug}`,
-      SEO: page?.SEO,
-      id: page?.id?.toString(),
+      url: `/store/${slug}/products/${product_slug}`,
+      SEO: product?.SEO,
+      id: product?.id?.toString(),
+      Name: product?.Name,  // Pass real value, not fallback
+      Description: description,
     },
-    defaultTitle: `Products`,
+    type: 'article',
+    defaultTitle: 'Product',
+    keywords: [
+      'product',
+      'buy',
+      'shop',
+      productName,
+      ...(product?.Tag?.map(t => t.Label) || []),
+    ],
   });
 };
 

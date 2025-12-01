@@ -1,6 +1,5 @@
 import { Paper, Title, Text, Stack, Box } from '@mantine/core';
 import { ReactNode } from 'react';
-import PageContent from './page.content';
 import { Page } from '@/markket/page';
 import { markketColors } from '@/markket/colors.config';
 
@@ -17,7 +16,6 @@ export default function StorePageHeader({
   icon,
   title,
   description,
-  page,
   backgroundImage,
   iconColor = markketColors.sections.shop.main,
 }: StorePageHeaderProps) {
@@ -56,11 +54,7 @@ export default function StorePageHeader({
           {title}
         </Title>
 
-        {page?.Content ? (
-          <Box maw={600} mx="auto">
-            <PageContent params={{ page }} />
-          </Box>
-        ) : description ? (
+        {description ? (
           <Text size="sm" ta="center" maw={600} mx="auto" style={{ lineHeight: 1.6, color: markketColors.neutral.mediumGray }}>
             {description}
           </Text>

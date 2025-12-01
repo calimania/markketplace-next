@@ -20,10 +20,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/${slug}`,
+      url: `/store/${slug}/about/${page_slug}`,
       SEO: page?.SEO,
+      Title: page?.Title,  // Use page title from database
     },
     type: 'article',
+    defaultTitle: 'About',
   });
 };
 

@@ -51,8 +51,6 @@
 - [ ] image.modal canvas generation images with text
 - [ ] better image modal unsplash (open libraries) integration
 - [ ] item form, display error when save create (store.slug)
-- [ ] display events in /store/slug/events
-- [ ] event details & RSVP in /store/slug/events/id
 - [ ] crm.orders endpoint
 - [ ] bootstrap initial content (startup|landing_page|community|magazine|store|crowdfund)
 - [ ] Events send calendar invite after RSVP
@@ -61,7 +59,6 @@
 - [ ] SKU and price ids for events
 - [ ] add DATEs to event, forms
 - [ ] react dev template
-- [ ] improvements to client, store display
 - [ ] better debugging (console.log audits)
 - [ ] sendgrid templates & strapi?
 - [ ] 2FA for admin
@@ -75,7 +72,6 @@
 
 - [ ] store bootstrap content : after create, (pages, blog, products)
 - [ ] tiptap, local storage prevent error , or prevent close tab
-- [ ] not showing page list in /about
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
 - [ ] enable payouts in sweden
@@ -83,13 +79,11 @@
 - [ ] SEO editor in same preview component, item.view
 - [ ] remove edit price in edit view, and disclaimer in create
 - [ ] edit one price at a time
-- [ ] /blog/about/products/events needs to be more consistent
 - [ ] prettier newsletter page
 - [ ] display orders in dashboard
 - [ ] dashboard design improvements
 - [ ] headers#anchor links in parsing Content
-- [ ] discord support link review
-- [ ] calima blog post dale summit NYC
+- [ ] mattermost link
 - [ ] mercury ach/ stripe bypass (farmday)
 - [ ] custom next.CSS for custom themes
 - [ ] ignore hidden price[]
@@ -99,20 +93,27 @@
 - [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
 
-### November
+### December
 
-- [ ] <title> in products and store sections
-- [ ] meta in store sections
-- [ ] use new store.dashboard endpoints
 - [ ] new onboarding: create 1st store & info
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
-- [ ] enable display events
 - [ ] tiptap bugs, formatting errors
 - [ ] bug: image manager
-- [ ] enable RSVP to events
+- [ ] enable paid RSVP to events
 - [ ] pexels search
 - [ ] unsplash search
+- [ ] past list of events for some reason
+
+### November
+
+- [x] <title> in products and store sections
+- [x] meta in store sections
+- [x] not showing page list in /about
+- [x] use new store.dashboard endpoints
+- [x] /blog/about/products/events needs to be more consistent
+- [x] display events in /store/slug/events
+- [x] event details & RSVP in /store/slug/events/id
 
 ### September
 

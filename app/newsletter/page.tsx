@@ -13,13 +13,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const response = await strapiClient.getPage(slug);
   const page = response?.data?.[0] as Page;
 
+  const storeResponse = await strapiClient.getStore();
+  const store = storeResponse?.data?.[0] as Store;
+
   return generateSEOMetadata({
-    slug,
+    slug: store?.slug || 'markket',
     entity: {
-      url: `/newsletter`,
+      url: `/store/${store.slug}/about/newsletter`,
       SEO: page?.SEO,
+      Title: page?.Title,
     },
     type: 'article',
+    defaultTitle: 'Newsletter',
+    defaultDescription: 'Subscribe to our newsletter for updates, stories, and exclusive content.',
+    keywords: ['newsletter', 'subscribe', 'updates', 'stories'],
   });
 };
 

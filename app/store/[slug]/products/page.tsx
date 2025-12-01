@@ -29,7 +29,9 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
+
   const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+  const { data: products } = await strapiClient.getProducts({ page: 1, pageSize: 100 }, { filter: '', sort: '' }, slug);
 
   let page = StoreProductPage;
   if (!page) {
@@ -37,18 +39,23 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     page = data?.[0];
   }
 
+  const productCount = products?.length || 0;
+  const productNames = (products as Product[])?.slice(0, 5).map(p => p.Name).filter(Boolean) || [];
+
   return generateSEOMetadata({
-    slug: `store/${slug}/products`,
+    slug,
     entity: {
       url: `/store/${slug}/products`,
       SEO: page?.SEO,
       id: page?.id?.toString(),
     },
-    defaultTitle: `Products`,
+    defaultTitle: `Shop`,
+    defaultDescription: productCount > 0
+      ? `Browse ${productCount} products. ${productNames.slice(0, 3).join(', ')}${productNames.length > 3 ? ' and more' : ''}.`
+      : `Discover our curated collection of quality products.`,
+    keywords: ['products', 'shop', 'buy', 'ecommerce', ...productNames.slice(0, 5)],
   });
-};
-
-export default async function ProductPage({ params }: ProductPageProps) {
+}; export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
@@ -75,7 +82,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const title = StoreProductPage?.Title || `${store?.title} Products`;
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="lg" py="xl">
       <StorePageHeader
         icon={<IconShoppingBag size={48} />}
         title={title}

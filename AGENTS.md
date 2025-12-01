@@ -115,7 +115,63 @@ sections: {
 
 ---
 
-## 9. Summary
+## 9. SEO & Metadata Best Practices
+
+All pages must have rich, descriptive metadata for discoverability. Use `generateSEOMetadata` from `markket/metadata.ts` with dynamic content.
+
+### Title Structure
+- **Format**: `{Page Title} | {Store Name}`
+- **Examples**:
+  - "Shop | Artisan Collective"
+  - "Summer Workshop 2025 | Creative Studio"
+  - "Blog | Tech Hub"
+- **Length**: 50-60 characters optimal
+
+### Description Guidelines
+- **Include counts**: "Browse 24 products" or "Join us for 3 upcoming events"
+- **Include names**: First 3-5 product/article/event names
+- **Call to action**: "Discover", "Join us", "Explore"
+- **Length**: 150-160 characters optimal
+- **Example**: "Browse 24 products including Handmade Pottery, Vintage Textiles, Organic Soaps and more."
+
+### Keywords Strategy
+```typescript
+generateSEOMetadata({
+  slug,
+  entity: { SEO, title, url },
+  defaultTitle: 'Shop',
+  defaultDescription: 'Browse 24 products...',
+  keywords: ['products', 'shop', 'buy', ...productNames.slice(0, 5)],
+})
+```
+
+- **Base keywords**: Content type (products, articles, events)
+- **Dynamic keywords**: Entity names (first 5)
+- **Store keywords**: From database `metaKeywords` field
+- **Avoid duplication**: Filter unique values
+
+### OpenGraph & Social
+
+- Always include store logo or social image
+- Alt text format: `{Title} - {Description}`
+- Image dimensions: 1200x630px optimal
+- Card type: `summary_large_image`
+
+### Canonical URLs
+
+- Use clean paths: `/{slug}` not `/store/{slug}`
+- Always absolute URLs with `metadataBase`
+- No trailing slashes
+
+### robots.txt
+
+- Respect `excludeFromSearch` from database
+- Default: `index: true, follow: true`
+- Test pages: `index: false, follow: false`
+
+---
+
+## 10. Summary
 
 By following these best practices and architectural patterns, Markketplace agents remain secure, maintainable, and scalable. All integrations with Strapi, Stripe, SendGrid, and Zoom are abstracted behind server API routes, ensuring a clean separation of concerns and a high-quality developer experience.
 
