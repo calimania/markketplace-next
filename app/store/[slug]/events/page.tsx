@@ -2,10 +2,10 @@ import { Store, Page, Event } from "@/markket";
 import { strapiClient } from "@/markket/api.strapi";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
-import { Container, Title, Text, Paper, SimpleGrid, Group } from '@mantine/core';
+import { Container, Text, Paper, SimpleGrid } from '@mantine/core';
+import { IconCalendar } from '@tabler/icons-react';
 import Card from '@/app/components/events/event.card';
-import { EventMainImage } from "@/app/components/events/event.main.image";
-import PageContent from '@/app/components/ui/page.content';
+import StorePageHeader from '@/app/components/ui/store.page.header';
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
@@ -49,44 +49,14 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
   return (
     <Container size="lg" py="xl">
-      <Paper
-        shadow="sm"
-        radius="md"
-        mb="xl"
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <Group align="flex-start" wrap="nowrap">
-          {eventPage?.SEO?.socialImage && (
-            <div style={{
-              width: 280,
-              height: 200,
-              flexShrink: 0,
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 'var(--mantine-radius-md)',
-            }}>
-              <EventMainImage
-                title={eventPage.Title}
-                image={eventPage.SEO.socialImage}
-              />
-            </div>
-          )}
-
-          <div style={{ flex: 1, padding: 'var(--mantine-spacing-lg)' }}>
-            <Title order={1} size="h2" mb="md">
-              {eventPage?.Title || `${store?.title} Events`}
-            </Title>
-            {eventPage?.SEO?.metaDescription && (
-              <Text size="lg" c="dimmed" maw={600}>
-                {eventPage.SEO.metaDescription}
-              </Text>
-            )}
-          </div>
-        </Group>
-      </Paper>
+      <StorePageHeader
+        icon={<IconCalendar size={48} />}
+        title={eventPage?.Title || `${store?.title} Events`}
+        description={eventPage?.SEO?.metaDescription}
+        page={eventPage}
+        backgroundImage={eventPage?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
+        iconColor="var(--mantine-color-green-6)"
+      />
 
       <SimpleGrid
         cols={{ base: 1, sm: 2, lg: 3 }}
@@ -121,8 +91,6 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
           <Text size="lg">No events scheduled at the moment.</Text>
         </Paper>
       )}
-
-      <PageContent params={{ page: eventPage }} />
     </Container>
   );
 };

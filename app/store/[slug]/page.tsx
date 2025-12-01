@@ -1,11 +1,12 @@
 
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
-import { Container, Title, Text, Stack, Paper, Box, Overlay, Grid, Card, Group, Button, GridCol } from "@mantine/core";
-import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews } from '@tabler/icons-react';
+import { Container, Title, Text, Stack, Paper, Box, Overlay, Grid, Card, Button, GridCol, Divider } from "@mantine/core";
+import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
+import { markketColors } from '@/markket/colors.config';
 
 import Albums from '@/app/components/ui/albums.grid';
 
@@ -63,7 +64,8 @@ export default async function StorePage({
       title: 'Shop',
       description: `Browse ${visibility?.content_summary?.products_count || 0} products`,
       show: visibility ? visibility.show_shop : true,
-      color: 'blue',
+      color: markketColors.sections.shop.main,
+      bgColor: markketColors.sections.shop.light,
     },
     {
       url: `/store/${slug}/blog`,
@@ -71,7 +73,8 @@ export default async function StorePage({
       title: 'Blog',
       description: `Read ${visibility?.content_summary?.articles_count || 0} articles`,
       show: visibility ? visibility.show_blog : true,
-      color: 'violet',
+      color: markketColors.sections.blog.main,
+      bgColor: markketColors.sections.blog.light,
     },
     {
       url: `/store/${slug}/events`,
@@ -81,15 +84,8 @@ export default async function StorePage({
         ? `${visibility?.content_summary?.upcoming_events_count} upcoming events`
         : `${visibility?.content_summary?.events_count || 0} events`,
       show: visibility ? visibility.show_events : true,
-      color: 'green',
-    },
-    {
-      url: `/store/${slug}/about/newsletter`,
-      icon: <IconNews size={24} />,
-      title: 'Newsletter',
-      description: 'Subscribe to updates',
-      show: visibility ? visibility.show_newsletter : true,
-      color: 'orange',
+      color: markketColors.sections.events.main,
+      bgColor: markketColors.sections.events.light,
     },
     {
       url: `/store/${slug}/about`,
@@ -97,13 +93,23 @@ export default async function StorePage({
       title: 'About',
       description: 'Learn more about us',
       show: visibility ? visibility.show_about : true,
-      color: 'teal',
+      color: markketColors.sections.about.main,
+      bgColor: markketColors.sections.about.light,
+    },
+    {
+      url: `/store/${slug}/about/newsletter`,
+      icon: <IconNews size={24} />,
+      title: 'Newsletter',
+      description: 'Subscribe to updates',
+      show: visibility ? visibility.show_newsletter : true,
+      color: markketColors.sections.newsletter.main,
+      bgColor: markketColors.sections.newsletter.light,
     },
   ].filter(link => link.show);
 
   return (
     <div>
-      <Box pos="relative" h={300} mb={50}>
+      <Box pos="relative" h={350} mb={60}>
         <Box
           style={{
             backgroundImage: `url(${store.Cover?.url || store?.SEO?.socialImage?.url || ''})`,
@@ -111,11 +117,12 @@ export default async function StorePage({
             backgroundPosition: 'center',
             height: '100%',
             width: '100%',
+            filter: 'brightness(0.95)',
           }}
         >
           <Overlay
-            gradient="linear-gradient(180deg, rgba(36, 85, 214, 0.2) 0%, rgba(36, 85, 214, 0.4) 100%)"
-            opacity={0.6}
+            gradient="linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%)"
+            opacity={0.7}
             zIndex={1}
           />
         </Box>
@@ -126,9 +133,9 @@ export default async function StorePage({
           style={{ transform: 'translate(-50%, 50%)' }}
           bottom={0}
           shadow="xl"
-          p="md"
+          p="lg"
           withBorder
-          radius="md"
+          radius="lg"
           bg="white"
           className="z-10"
         >
@@ -138,7 +145,10 @@ export default async function StorePage({
               alt={store.SEO?.metaTitle}
               width={150}
               height={150}
-              className="rounded-md object-contain"
+              className="rounded-lg object-contain"
+              style={{
+                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))',
+              }}
             />
           )}
         </Paper>
@@ -164,42 +174,52 @@ export default async function StorePage({
           {/* Beautiful Section Links */}
           {sectionLinks.length > 0 && (
             <div>
-              <Title order={2} className="mb-6">Explore</Title>
+              <Title order={2} className="mb-6" ta="center">Explore</Title>
               <Grid gutter="md">
                 {sectionLinks.map((link) => (
                   <GridCol span={{ base: 12, sm: 6, md: 4 }} key={link.url}>
                     <Card
-                      shadow="sm"
+                      shadow="none"
                       padding="lg"
                       radius="md"
-                      withBorder
                       component="a"
                       href={link.url}
-                      className="transition-all hover:shadow-md hover:-translate-y-1"
-                      style={{ cursor: 'pointer' }}
+                      style={{
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        background: markketColors.neutral.white,
+                        borderWidth: '1px',
+                        borderColor: markketColors.neutral.gray,
+                      }}
+                      className="hover:shadow-sm"
                     >
-                      <Group gap="md" mb="xs">
-                        <Box style={{ color: `var(--mantine-color-${link.color}-6)` }}>
-                          {link.icon}
+                      <Stack gap="md" align="center">
+                        <Box
+                          style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: '8px',
+                            background: markketColors.neutral.offWhite,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background 0.2s ease',
+                          }}
+                        >
+                          <Box style={{ color: link.color }}>
+                            {link.icon}
+                          </Box>
                         </Box>
-                        <div>
-                          <Text fw={600} size="lg">
+
+                        <div style={{ textAlign: 'center' }}>
+                          <Text fw={500} size="md" mb={4} style={{ color: markketColors.neutral.charcoal }}>
                             {link.title}
                           </Text>
-                          <Text size="sm" c="dimmed">
+                          <Text size="xs" style={{ color: markketColors.neutral.mediumGray }}>
                             {link.description}
                           </Text>
                         </div>
-                      </Group>
-                      <Button
-                        variant="light"
-                        color={link.color}
-                        fullWidth
-                        mt="md"
-                        radius="md"
-                      >
-                        Visit {link.title}
-                      </Button>
+                      </Stack>
                     </Card>
                   </GridCol>
                 ))}
@@ -212,6 +232,58 @@ export default async function StorePage({
           {homePage?.Title && <Title order={2}>{homePage.Title}</Title>}
           <PageContent params={{ page: homePage }} />
           <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
+
+          {/* Newsletter CTA */}
+          {(visibility ? visibility.show_newsletter : true) && (
+            <>
+              <Divider my="xl" />
+              <Paper
+                p="xl"
+                radius="md"
+                style={{
+                  background: markketColors.neutral.offWhite,
+                  borderWidth: '1px',
+                  borderColor: markketColors.neutral.gray,
+                }}
+              >
+                <Stack align="center" gap="md">
+                  <Box
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: '8px',
+                      background: markketColors.rosa.light,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <IconMail size={28} color={markketColors.rosa.main} stroke={1.5} />
+                  </Box>
+                  <Title order={3} ta="center" fw={500} style={{ color: markketColors.neutral.charcoal }}>
+                    Stay Updated
+                  </Title>
+                  <Text size="sm" ta="center" maw={500} style={{ color: markketColors.neutral.mediumGray, lineHeight: 1.5 }}>
+                    Subscribe to our newsletter and be the first to know about new products, events, and exclusive offers.
+                  </Text>
+                  <Button
+                    component="a"
+                    href={`/store/${slug}/about/newsletter`}
+                    size="md"
+                    radius="md"
+                    style={{
+                      background: markketColors.rosa.main,
+                      color: 'white',
+                      fontWeight: 500,
+                    }}
+                    leftSection={<IconMail size={18} />}
+                  >
+                    Subscribe to Newsletter
+                  </Button>
+                </Stack>
+              </Paper>
+            </>
+          )}
         </Stack>
       </Container>
     </div>

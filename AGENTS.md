@@ -73,10 +73,49 @@ export async function POST(request: NextRequest) {
 - **Readable** easy to navigate and understand without bloat
 - **Clean** and elegant, for an enjoyable user experience
 
+---
+
+## 8. Design System & Color Palette
+
+Markketplace uses a sophisticated color system inspired by Latin American vibrancy meets Scandinavian/Japanese minimalism. All colors are defined in `markket/colors.config.ts` and should be imported consistently across the codebase.
+
+### Primary Colors
+- **Mexican Rosa** (#E4007C): Hero color for CTAs, newsletter sections, and primary actions
+- **Cyan** (#00BCD4): Shop/products section
+- **Magenta** (#E91E63): Blog/articles section
+- **Green** (#4CAF50): Events/calendar section
+
+### Neutrals (Scandinavian/Japanese inspired)
+- White (#FFFFFF), Off-White (#FAFAFA), Light Gray (#F5F5F5)
+- Medium Gray (#9E9E9E), Dark Gray (#616161), Charcoal (#424242)
+
+### Section Colors (for navigation & headers)
+```typescript
+sections: {
+  shop: { main: '#00BCD4', light: '#E0F7FA' },      // Cyan
+  blog: { main: '#E91E63', light: '#FCE4EC' },      // Magenta
+  events: { main: '#4CAF50', light: '#E8F5E9' },    // Green
+  newsletter: { main: '#E4007C', light: '#FFE5F1' }, // Rosa
+  about: { main: '#00BCD4', light: '#E0F7FA' },     // Cyan
+}
+```
+
+### Gradients
+- **Hero**: Rosa → Magenta (for newsletter CTAs and primary cards)
+- **Fresh**: Cyan → Rosa
+- **Sunset**: Rosa → Coral
+- **Elegant**: Subtle neutral gradients for backgrounds
+
+### Usage Guidelines
+- Import colors: `import { markketColors } from '@/markket/colors.config'`
+- Use section colors for navigation icons and buttons
+- Apply subtle hover effects: scale-[1.02], opacity-90
+- Maintain minimal shadows: 0 2px 8px rgba(0, 0, 0, 0.08)
+- Use border-radius: xl (16px) for cards, lg (12px) for buttons
 
 ---
 
-## 8. Summary
+## 9. Summary
 
 By following these best practices and architectural patterns, Markketplace agents remain secure, maintainable, and scalable. All integrations with Strapi, Stripe, SendGrid, and Zoom are abstracted behind server API routes, ensuring a clean separation of concerns and a high-quality developer experience.
 

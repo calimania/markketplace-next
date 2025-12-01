@@ -367,9 +367,9 @@ export class StrapiClient {
     return this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        Active: {
-          $eq: true
-        },
+        // Active: {
+        // $eq: true
+        // },
         store: {
           slug: {
             $eq: store_slug
