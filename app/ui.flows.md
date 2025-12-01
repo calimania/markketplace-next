@@ -10,6 +10,12 @@ This flow is **designed to familiarize new users** with:
 
 …so that they can then explore the dashboard, start adding content, and feel comfortable navigating Markket without getting lost.
 
+When user has no stores, the top navbar shows a create store button.
+
+Depending on the onboarding status, different UI elements are displayed. To guide them on the basics.
+
+If the user only has one store, there's no <select>, just the (logo) name of the store
+
 
 ### Step 0: Email Capture
 
@@ -147,6 +153,29 @@ This flow is **designed to familiarize new users** with:
 - **Use Markdown / WYSIWYG inputs** → consistent content formatting for About/Blog/Newsletter
 
 ---
+
+
+## Step 8: Payment Setup & Welcome
+
+**Component:** `FinalOnboardPanel`
+**Condition:** user completed store + pages onboarding
+**Content:**
+- Welcome message: "Congrats! Your store is ready 🎉"
+- Payment / Stripe info:
+  - "Connect your Stripe account to start receiving payments."
+  - Options:
+    - Button: "Connect Stripe Now" → opens Stripe Connect flow
+    - Link/Button: "Do this later" → redirects to `/settings/payment`
+- Tip: "You can always update your Stripe settings later from your dashboard."
+- CTA: "Go to Dashboard" → redirects `/dashboard`
+
+**UI Notes:**
+- Highlight Stripe button for immediate action
+- Show friendly checkmarks for completed onboarding steps
+- Optional animated celebration or progress confetti to reinforce achievement
+- Keep the panel concise and welcoming
+**Next:** User lands on Dashboard with completed store + basic pages
+
 
 ## Optional Enhancements
 

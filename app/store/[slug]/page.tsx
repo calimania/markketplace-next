@@ -1,7 +1,8 @@
 
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
-import { Container, Title, Text, Stack, Paper, Box, Overlay } from "@mantine/core";
+import { Container, Title, Text, Stack, Paper, Box, Overlay, Grid, Card, Group, Button, GridCol } from "@mantine/core";
+import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import Markdown from '@/app/components/ui/page.markdown';
@@ -10,8 +11,8 @@ import Albums from '@/app/components/ui/albums.grid';
 
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
+import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
-import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
 import { Album } from '@/markket/album';
 
 interface PageProps {
@@ -47,6 +48,58 @@ export default async function StorePage({
   if (!store) {
     notFound();
   }
+
+  // Fetch visibility settings
+  const visibilityResponse: StoreVisibilityResponse | null = await strapiClient.getStoreVisibility(store.documentId);
+  const visibility = visibilityResponse?.data;
+
+  console.log({ visibility })
+
+  // Define section links based on visibility
+  const sectionLinks = [
+    {
+      url: `/store/${slug}/products`,
+      icon: <IconShoppingCart size={24} />,
+      title: 'Shop',
+      description: `Browse ${visibility?.content_summary?.products_count || 0} products`,
+      show: visibility ? visibility.show_shop : true,
+      color: 'blue',
+    },
+    {
+      url: `/store/${slug}/blog`,
+      icon: <IconArticle size={24} />,
+      title: 'Blog',
+      description: `Read ${visibility?.content_summary?.articles_count || 0} articles`,
+      show: visibility ? visibility.show_blog : true,
+      color: 'violet',
+    },
+    {
+      url: `/store/${slug}/events`,
+      icon: <IconCalendar size={24} />,
+      title: 'Events',
+      description: visibility?.has_upcoming_events
+        ? `${visibility?.content_summary?.upcoming_events_count} upcoming events`
+        : `${visibility?.content_summary?.events_count || 0} events`,
+      show: visibility ? visibility.show_events : true,
+      color: 'green',
+    },
+    {
+      url: `/store/${slug}/about/newsletter`,
+      icon: <IconNews size={24} />,
+      title: 'Newsletter',
+      description: 'Subscribe to updates',
+      show: visibility ? visibility.show_newsletter : true,
+      color: 'orange',
+    },
+    {
+      url: `/store/${slug}/about`,
+      icon: <IconHome size={24} />,
+      title: 'About',
+      description: 'Learn more about us',
+      show: visibility ? visibility.show_about : true,
+      color: 'teal',
+    },
+  ].filter(link => link.show);
 
   return (
     <div>
@@ -98,7 +151,6 @@ export default async function StorePage({
               {store?.title || store?.SEO?.metaTitle}
             </Title>
 
-            <StoreHeaderButtons store={store} />
 
             {store?.Description ? (
               <Markdown content={store.Description} />
@@ -108,8 +160,56 @@ export default async function StorePage({
               </Text>
             )}
           </div>
+
+          {/* Beautiful Section Links */}
+          {sectionLinks.length > 0 && (
+            <div>
+              <Title order={2} className="mb-6">Explore</Title>
+              <Grid gutter="md">
+                {sectionLinks.map((link) => (
+                  <GridCol span={{ base: 12, sm: 6, md: 4 }} key={link.url}>
+                    <Card
+                      shadow="sm"
+                      padding="lg"
+                      radius="md"
+                      withBorder
+                      component="a"
+                      href={link.url}
+                      className="transition-all hover:shadow-md hover:-translate-y-1"
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <Group gap="md" mb="xs">
+                        <Box style={{ color: `var(--mantine-color-${link.color}-6)` }}>
+                          {link.icon}
+                        </Box>
+                        <div>
+                          <Text fw={600} size="lg">
+                            {link.title}
+                          </Text>
+                          <Text size="sm" c="dimmed">
+                            {link.description}
+                          </Text>
+                        </div>
+                      </Group>
+                      <Button
+                        variant="light"
+                        color={link.color}
+                        fullWidth
+                        mt="md"
+                        radius="md"
+                      >
+                        Visit {link.title}
+                      </Button>
+                    </Card>
+                  </GridCol>
+                ))}
+              </Grid>
+            </div>
+          )}
+
           <StoreTabs urls={store?.URLS} />
-          <Title>{homePage?.Title}</Title>
+
+          {homePage?.Title && <Title order={2}>{homePage.Title}</Title>}
           <PageContent params={{ page: homePage }} />
           <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
         </Stack>
