@@ -66,10 +66,112 @@ export async function POST(request: NextRequest) {
   // ...business logic abstracted from UI
 }
 ```
+## 7. Thoughtful User Experience
+
+- **Thoughtful about user experience** and design aesthetics
+- **Consistent** as much as possible on margin, padding, centering dynamics
+- **Readable** easy to navigate and understand without bloat
+- **Clean** and elegant, for an enjoyable user experience
 
 ---
 
-## 7. Summary
+## 8. Design System & Color Palette
+
+Markketplace uses a sophisticated color system inspired by Latin American vibrancy meets Scandinavian/Japanese minimalism. All colors are defined in `markket/colors.config.ts` and should be imported consistently across the codebase.
+
+### Primary Colors
+- **Mexican Rosa** (#E4007C): Hero color for CTAs, newsletter sections, and primary actions
+- **Cyan** (#00BCD4): Shop/products section
+- **Magenta** (#E91E63): Blog/articles section
+- **Green** (#4CAF50): Events/calendar section
+
+### Neutrals (Scandinavian/Japanese inspired)
+- White (#FFFFFF), Off-White (#FAFAFA), Light Gray (#F5F5F5)
+- Medium Gray (#9E9E9E), Dark Gray (#616161), Charcoal (#424242)
+
+### Section Colors (for navigation & headers)
+```typescript
+sections: {
+  shop: { main: '#00BCD4', light: '#E0F7FA' },      // Cyan
+  blog: { main: '#E91E63', light: '#FCE4EC' },      // Magenta
+  events: { main: '#4CAF50', light: '#E8F5E9' },    // Green
+  newsletter: { main: '#E4007C', light: '#FFE5F1' }, // Rosa
+  about: { main: '#00BCD4', light: '#E0F7FA' },     // Cyan
+}
+```
+
+### Gradients
+- **Hero**: Rosa → Magenta (for newsletter CTAs and primary cards)
+- **Fresh**: Cyan → Rosa
+- **Sunset**: Rosa → Coral
+- **Elegant**: Subtle neutral gradients for backgrounds
+
+### Usage Guidelines
+- Import colors: `import { markketColors } from '@/markket/colors.config'`
+- Use section colors for navigation icons and buttons
+- Apply subtle hover effects: scale-[1.02], opacity-90
+- Maintain minimal shadows: 0 2px 8px rgba(0, 0, 0, 0.08)
+- Use border-radius: xl (16px) for cards, lg (12px) for buttons
+
+---
+
+## 9. SEO & Metadata Best Practices
+
+All pages must have rich, descriptive metadata for discoverability. Use `generateSEOMetadata` from `markket/metadata.ts` with dynamic content.
+
+### Title Structure
+- **Format**: `{Page Title} | {Store Name}`
+- **Examples**:
+  - "Shop | Artisan Collective"
+  - "Summer Workshop 2025 | Creative Studio"
+  - "Blog | Tech Hub"
+- **Length**: 50-60 characters optimal
+
+### Description Guidelines
+- **Include counts**: "Browse 24 products" or "Join us for 3 upcoming events"
+- **Include names**: First 3-5 product/article/event names
+- **Call to action**: "Discover", "Join us", "Explore"
+- **Length**: 150-160 characters optimal
+- **Example**: "Browse 24 products including Handmade Pottery, Vintage Textiles, Organic Soaps and more."
+
+### Keywords Strategy
+```typescript
+generateSEOMetadata({
+  slug,
+  entity: { SEO, title, url },
+  defaultTitle: 'Shop',
+  defaultDescription: 'Browse 24 products...',
+  keywords: ['products', 'shop', 'buy', ...productNames.slice(0, 5)],
+})
+```
+
+- **Base keywords**: Content type (products, articles, events)
+- **Dynamic keywords**: Entity names (first 5)
+- **Store keywords**: From database `metaKeywords` field
+- **Avoid duplication**: Filter unique values
+
+### OpenGraph & Social
+
+- Always include store logo or social image
+- Alt text format: `{Title} - {Description}`
+- Image dimensions: 1200x630px optimal
+- Card type: `summary_large_image`
+
+### Canonical URLs
+
+- Use clean paths: `/{slug}` not `/store/{slug}`
+- Always absolute URLs with `metadataBase`
+- No trailing slashes
+
+### robots.txt
+
+- Respect `excludeFromSearch` from database
+- Default: `index: true, follow: true`
+- Test pages: `index: false, follow: false`
+
+---
+
+## 10. Summary
 
 By following these best practices and architectural patterns, Markketplace agents remain secure, maintainable, and scalable. All integrations with Strapi, Stripe, SendGrid, and Zoom are abstracted behind server API routes, ensuring a clean separation of concerns and a high-quality developer experience.
 

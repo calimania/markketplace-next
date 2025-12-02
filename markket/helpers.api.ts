@@ -137,7 +137,7 @@ export async function countContentTypeItems(plural: string, limit: number, store
         limit: 1
       }
     });
-    console.log("!!!!", { response });
+
     return response.meta?.pagination?.total || 0;
   } catch (error) {
     console.error(`Error counting ${plural} items:`, error);

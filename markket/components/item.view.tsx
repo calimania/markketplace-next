@@ -50,15 +50,15 @@ const prefixMap: Record<string, string> = {
 const seoUrl = (preview_url: string | undefined, store: Store, item: ContentItem, prefix?: string) => {
   if (preview_url) return preview_url;
 
-  if (prefix == 'store') return `/store/${item.slug}`;
+  if (prefix == 'store') return `/${item.slug}`;
 
-  if (prefix == 'album') return `/store/${store?.slug}/${item.slug}`;
+  if (prefix == 'album') return `/${store?.slug}/${item.slug}`;
 
-  if (prefix == 'about' && item.slug == 'home') return `/store/${store?.slug}`;
+  if (prefix == 'about' && item.slug == 'home') return `/${store?.slug}`;
 
-  if (prefix == 'about' && ['products', 'about', 'blog'].includes(item.slug)) return `/store/${store?.slug}/${item.slug}`
+  if (prefix == 'about' && ['products', 'about', 'blog'].includes(item.slug)) return `/${store?.slug}/${item.slug}`
 
-  return `/store/${store?.slug}/${prefix}/${item.slug}`;
+  return `/${store?.slug}/${prefix}/${item.slug}`;
 }
 
 export type ViewItemProps = {

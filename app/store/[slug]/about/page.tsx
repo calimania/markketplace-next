@@ -1,13 +1,14 @@
-import { Container, Title, Text, LoadingOverlay } from '@mantine/core';
+import { Container, LoadingOverlay, Stack } from '@mantine/core';
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { PageList } from '@/app/components/ui/pages.list';
-import PageContent from '@/app/components/ui/page.content';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
-import StoreHeaderButtons from '@/app/components/ui/store.header.buttons';
+import StorePageHeader from '@/app/components/ui/store.page.header';
+import PageContent from '@/app/components/ui/page.content';
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
@@ -24,8 +25,10 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
     entity: {
       url: `/${slug}`,
       SEO: page?.SEO,
+      title: page?.Title,
     },
     type: 'article',
+    defaultTitle: 'About',
   });
 };
 
@@ -42,36 +45,33 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const aboutPage = aboutPageResponse?.data?.[0];
 
   const pagesResponse = await strapiClient.getPages(slug);
-  const pages = pagesResponse?.data?.sort((a, b) =>
-    a.Title.localeCompare(b.Title)
-  ) || [];
+
+  const systemPages = ['home', 'about', 'blog', 'products', 'events'];
+
+  const customPages = pagesResponse?.data
+    ?.filter(p => !systemPages.includes(p.slug))
+    .sort((a, b) => a.Title.localeCompare(b.Title)) || [];
 
   const image = aboutPage?.SEO?.socialImage || store?.SEO?.socialImage;
 
-
   return (
     <Container size="lg" py="xl">
-      <div className="text-center mb-12">
-        <Title className="mb-4">{aboutPage?.Title || `About ${store.SEO?.metaTitle || store?.title}`}</Title>
-      </div>
-      <StoreHeaderButtons store={store} />
-      <div className="mb-6">
-        {aboutPage?.Content ?
-          (<PageContent params={{ page: aboutPage }} />) :
-          (
-            <Text c="dimmed" size="lg">
-              {aboutPage?.SEO?.metaDescription || store.SEO?.metaDescription}
-            </Text>
-          )}
-      </div>
-      <Suspense fallback={<LoadingOverlay visible />}>
-        <PageList pages={pages.filter(p => !(p.slug == 'about')).sort((a, b) => a.Title.localeCompare(b.Title))} storeSlug={slug} />
-        <div className='mt-10 mb-4'>
-          {image && (
-            <img src={image.url} alt={aboutPage?.SEO?.metaTitle || store?.SEO?.metaTitle} />
-          )}
-        </div>
-      </Suspense>
+      <StorePageHeader
+        icon={<IconInfoCircle size={48} />}
+        title={aboutPage?.Title || `About ${store.SEO?.metaTitle || store?.title}`}
+        description={aboutPage?.SEO?.metaDescription || store.SEO?.metaDescription}
+        page={aboutPage}
+        backgroundImage={image?.url || store?.Cover?.url}
+        iconColor="var(--mantine-color-teal-6)"
+      />
+
+      <Stack gap="xl">
+        <PageContent params={{ page: aboutPage }} />
+
+        <Suspense fallback={<LoadingOverlay visible />}>
+          <PageList pages={customPages} storeSlug={slug} />
+        </Suspense>
+      </Stack>
     </Container>
   );
 };

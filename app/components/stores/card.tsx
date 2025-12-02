@@ -6,10 +6,12 @@ import "../docs/card.css";
 
 export interface StoreCardProps {
   store: Store;
+  idx: number;
 }
 
-export function StoreCard({ store }: StoreCardProps) {
-  const logoUrl = store.Logo?.url || 'https://placehold.co/800x400';
+export function StoreCard({ store, idx }: StoreCardProps) {
+  const index = (idx > 9) ? Math.floor(idx) % 10 : idx;
+  const logoUrl = store.Logo?.url || `https://placecats.com/60${index}/40${index}`;
 
   return (
     <Card
@@ -40,7 +42,7 @@ export function StoreCard({ store }: StoreCardProps) {
       <Button
         component={Link}
         href={
-          `store/${store.slug}`}
+          `/${store.slug}`}
         color="blue"
         fullWidth
         mt="md"

@@ -67,7 +67,7 @@ const PreviewSEO = ({ SEO, previewUrl }: PreviewSEOProps) => {
                 {!previewUrl && <IconWorld size={16} style={{ color: 'var(--mantine-color-green-7)' }} />}
                 {previewUrl && <IconPacman size={16} style={{ color: 'var(--mantine-color-green-7)' }} />}
                 <Text size="xs" c="dimmed" truncate>
-                  {SEO.metaUrl || previewUrl || 'de.markket.place'}
+                  {SEO.metaUrl || previewUrl || 'markket.place'}
                 </Text>
               </Group>
               <Text size="sm" lineClamp={2} c="dark.6">

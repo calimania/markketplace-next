@@ -1,7 +1,6 @@
 import { Product } from "@/markket/product.d";
 import { strapiClient } from "@/markket/api.strapi";
 import { notFound } from "next/navigation";
-import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
 import Markdown from "@/app/components/ui/page.markdown";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
@@ -11,14 +10,16 @@ import {
   Container,
   Title,
   Text,
-  Group,
   Paper,
   SimpleGrid,
   Box,
   Divider,
+  Stack,
+  Button,
 } from "@mantine/core";
-import { IconShoppingBag } from '@tabler/icons-react';
-import PageContent from "@/app/components/ui/page.content";
+import { IconShoppingBag, IconMail } from '@tabler/icons-react';
+import StorePageHeader from "@/app/components/ui/store.page.header";
+import { markketColors } from '@/markket/colors.config';
 import './product-list.css';
 import './product-page-effects.css';
 
@@ -28,7 +29,9 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
+
   const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+  const { data: products } = await strapiClient.getProducts({ page: 1, pageSize: 100 }, { filter: '', sort: '' }, slug);
 
   let page = StoreProductPage;
   if (!page) {
@@ -36,18 +39,23 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     page = data?.[0];
   }
 
+  const productCount = products?.length || 0;
+  const productNames = (products as Product[])?.slice(0, 5).map(p => p.Name).filter(Boolean) || [];
+
   return generateSEOMetadata({
-    slug: `store/${slug}/products`,
+    slug,
     entity: {
-      url: `/store/${slug}/products`,
+      url: `/${slug}/products`,
       SEO: page?.SEO,
       id: page?.id?.toString(),
     },
-    defaultTitle: `Products`,
+    defaultTitle: `Shop`,
+    defaultDescription: productCount > 0
+      ? `Browse ${productCount} products. ${productNames.slice(0, 3).join(', ')}${productNames.length > 3 ? ' and more' : ''}.`
+      : `Discover our curated collection of quality products.`,
+    keywords: ['products', 'shop', 'buy', 'ecommerce', ...productNames.slice(0, 5)],
   });
-};
-
-export default async function ProductPage({ params }: ProductPageProps) {
+}; export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
@@ -74,40 +82,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const title = StoreProductPage?.Title || `${store?.title} Products`;
 
   return (
-    <Container size="xl" py="xl">
-      <Paper
-        radius="md"
-        p={40}
-        mb={40}
-        className="product-hero-paper"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.95)), url(${page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <Group justify="center" mb="xl">
-          <IconShoppingBag size={48} color="var(--mantine-color-blue-6)" />
-        </Group>
-
-        <Title order={1} ta="center" mb="sm">
-          {title}
-        </Title>
-
-        {page?.Content ? (
-          <Box maw={600} mx="auto">
-            <PageContent params={{ page }} />
-          </Box>
-        ) : (
-          <Text c="dimmed" size="lg" ta="center" maw={600} mx="auto">
-            Discover our curated collection of products. Each item is carefully selected to ensure quality and satisfaction.
-          </Text>
-        )}
-
-        <Group justify="center" mt="xl">
-          <StoreHeaderButtons store={store} />
-        </Group>
-      </Paper>
+    <Container size="lg" py="xl">
+      <StorePageHeader
+        icon={<IconShoppingBag size={48} />}
+        title={title}
+        description="Discover our curated collection of products. Each item is carefully selected to ensure quality and satisfaction."
+        page={page}
+        backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
+        iconColor={markketColors.sections.shop.main}
+      />
 
       {!!products.length && (<Title order={2} size="h3" mb={40}>
         Product Catalog
@@ -166,6 +149,54 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </Paper>
         </>
       )}
+
+      {/* Newsletter CTA */}
+      <Divider my="xl" />
+      <Paper
+        p="xl"
+        radius="md"
+        style={{
+          background: markketColors.neutral.offWhite,
+          borderWidth: '1px',
+          borderColor: markketColors.neutral.gray,
+        }}
+      >
+        <Stack align="center" gap="md">
+          <Box
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '8px',
+              background: markketColors.rosa.light,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <IconMail size={28} color={markketColors.rosa.main} stroke={1.5} />
+          </Box>
+          <Title order={3} ta="center" fw={500} style={{ color: markketColors.neutral.charcoal }}>
+            Stay in the Loop
+          </Title>
+          <Text size="sm" ta="center" maw={500} style={{ color: markketColors.neutral.mediumGray, lineHeight: 1.5 }}>
+            Get notified when we add new products and special offers.
+          </Text>
+          <Button
+            component="a"
+            href={`/${slug}/about/newsletter`}
+            size="md"
+            radius="md"
+            style={{
+              background: markketColors.rosa.main,
+              color: 'white',
+              fontWeight: 500,
+            }}
+            leftSection={<IconMail size={18} />}
+          >
+            Subscribe Now
+          </Button>
+        </Stack>
+      </Paper>
     </Container>
   );
 };

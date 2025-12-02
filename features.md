@@ -1,6 +1,6 @@
 # Features
 
-## Planned
+## Upcoming
 
 - [ ] inbox widget in receipt page
 - [ ] links not working in tiptapp - articles
@@ -51,8 +51,6 @@
 - [ ] image.modal canvas generation images with text
 - [ ] better image modal unsplash (open libraries) integration
 - [ ] item form, display error when save create (store.slug)
-- [ ] display events in /store/slug/events
-- [ ] event details & RSVP in /store/slug/events/id
 - [ ] crm.orders endpoint
 - [ ] bootstrap initial content (startup|landing_page|community|magazine|store|crowdfund)
 - [ ] Events send calendar invite after RSVP
@@ -61,17 +59,61 @@
 - [ ] SKU and price ids for events
 - [ ] add DATEs to event, forms
 - [ ] react dev template
-- [ ] improvements to client, store display
 - [ ] better debugging (console.log audits)
 - [ ] sendgrid templates & strapi?
 - [ ] 2FA for admin
 - [ ] soc2 plugin compliance
 - [ ] audit log
 - [ ] pagination and additional results
-- [ ] dynamically restrict content limits for subscriptions
+- [ ] dynamically restrict content limits
 - [ ] postgres backups
 
 ## 2025
+
+- [ ] store bootstrap content : after create, (pages, blog, products)
+- [ ] tiptap, local storage prevent error , or prevent close tab
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] enable payouts in sweden
+- [ ] auth/magic button to dashboard if logged in
+- [ ] SEO editor in same preview component, item.view
+- [ ] remove edit price in edit view, and disclaimer in create
+- [ ] edit one price at a time
+- [ ] prettier newsletter page
+- [ ] display orders in dashboard
+- [ ] dashboard design improvements
+- [ ] headers#anchor links in parsing Content
+- [ ] mattermost link
+- [ ] mercury ach/ stripe bypass (farmday)
+- [ ] custom next.CSS for custom themes
+- [ ] ignore hidden price[]
+- [ ] ignore sold out price[]
+- [ ] edit additional price attributes
+- [ ] better onboarding checklist
+- [ ] better action.waiting page, remove
+- [ ] better afterSave action.helpers (stripe_sync, default_SEO)
+
+### December
+
+- [ ] new onboarding: create 1st store & info
+- [ ] use SEO endpoints to generate, skip asking
+- [ ] better dashboard create,edit
+- [ ] tiptap bugs, formatting errors
+- [ ] bug: image manager
+- [ ] enable paid RSVP to events
+- [ ] pexels search
+- [ ] unsplash search
+- [ ] past list of events for some reason
+
+### November
+
+- [x] <title> in products and store sections
+- [x] meta in store sections
+- [x] not showing page list in /about
+- [x] use new store.dashboard endpoints
+- [x] /blog/about/products/events needs to be more consistent
+- [x] display events in /store/slug/events
+- [x] event details & RSVP in /store/slug/events/id
 
 ### September
 
@@ -80,14 +122,6 @@
 - [x] edit Stripe product picture on save
 - [x] product.PRICES editor
 - [x] code verification fixes
-- [ ] better image manager
-- [ ] hide content from noindex, [SEO]
-- [ ] retrieve display orders
-- [ ] price hidden attribute
-- [ ] price inventory, reduce number after sales
-- [ ] price inventory, restrict sales
-- [ ] Generate initial SEO on save
-- [ ] SEO.edit in item view page (preview component)
 - [x] when saving Product, get usd_price of PRICES
 
 ### August

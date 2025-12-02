@@ -1,4 +1,4 @@
-import { Container, Title, Text, Stack, SimpleGrid } from "@mantine/core";
+import { Container, Text, Stack, SimpleGrid } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
 import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
@@ -7,8 +7,9 @@ import { Article } from "@/markket/article";
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
-import PageContent from "@/app/components/ui/page.content";
-import StoreHeaderButtons from "@/app/components/ui/store.header.buttons";
+import { IconArticle } from '@tabler/icons-react';
+import StorePageHeader from "@/app/components/ui/store.page.header";
+import PageContent from '@/app/components/ui/page.content';
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -28,11 +29,14 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     slug,
     entity: {
       SEO: page?.SEO,
-      title: page?.Title || `${slug} Blog`,
+      title: page?.Title,
       id: page?.id?.toString(),
-      url: `/store/${slug}/blog`,
+      url: `/${slug}/blog`,
     },
     type: 'website',
+    defaultTitle: 'Blog',
+    defaultDescription: 'Discover our latest stories, insights, and updates.',
+    keywords: ['blog', 'articles', 'stories', 'news', 'insights'],
   });
 };
 
@@ -60,17 +64,17 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   const description = page?.SEO?.metaDescription || `Blog posts for ${store?.title || store?.SEO?.metaTitle}`;
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="lg" py="xl">
       <Stack gap="xl">
-        <div className="text-center">
-          <Title order={1}>
-            {page?.Title || `${store?.title} Blog`}
-          </Title>
-          <StoreHeaderButtons store={store} />
-          <Text c="dimmed" size="lg">
-            {description}
-          </Text>
-        </div>
+        <StorePageHeader
+          icon={<IconArticle size={48} />}
+          title={page?.Title || `${store?.title} Blog`}
+          description={description}
+          page={page}
+          backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
+          iconColor="var(--mantine-color-violet-6)"
+        />
+
         {posts.length > 0 ? (
           <SimpleGrid cols={{ base: 1, md: 2 }}>
             {posts.map((post) => (

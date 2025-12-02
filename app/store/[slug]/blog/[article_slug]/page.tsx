@@ -23,16 +23,26 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
 
   const post = response?.data?.[0] as Article;
 
+  const articleTitle = post?.Title || 'Blog Post';
+  const description = post?.SEO?.metaDescription;
+
   return generateSEOMetadata({
     slug,
     entity: {
       SEO: post?.SEO,
-      title: post?.Title || 'Blog Post',
+      Title: post?.Title,  // Pass real value, not fallback
+      Description: description,
       id: post?.id?.toString(),
-      url: `/store/${slug}/blog/${article_slug}`,
+      url: `/${slug}/blog/${article_slug}`,
     },
     type: 'article',
-    defaultTitle: `Blog - ${post?.Title || 'Post'}`
+    defaultTitle: 'Blog Post',
+    keywords: [
+      'blog',
+      'article',
+      articleTitle,
+      ...(post?.Tags?.map(t => t.Label) || []),
+    ],
   });
 };
 

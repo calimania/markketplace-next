@@ -7,6 +7,9 @@ export { strapiClient } from './api.strapi';
 // Export utilities
 export { verifyToken } from './helpers.api';
 
+// Export design system
+export { markketColors, createGradient, hexToRgba } from './colors.config';
+
 // Export all types
 export * from './index.d';
 

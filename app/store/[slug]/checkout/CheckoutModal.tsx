@@ -38,7 +38,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
 
   const isValidOrder = selectedPriceId && total > 0;
 
-  const url = new URL(`/store/receipt/${store?.slug}`, (typeof window !== 'undefined' ? window?.location?.origin : 'https://de.markket.place')).origin;
+  const url = new URL(`/${store?.slug}/receipt`, (typeof window !== 'undefined' ? window?.location?.origin : 'https://markket.place')).origin;
 
   const [options, setOptions] = useState({
     totalPrice: 0,
@@ -117,7 +117,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         // @TODO: control delivery country options at store level (name convention SHIPPING_US_CO_X, defaul US only)
         includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
-        redirect_to_url: new URL(`/store/${store?.slug}/receipt`, markketplace.markket_url).toString(),
+        redirect_to_url: new URL(`/${store?.slug}/receipt`, markketplace.markket_url).toString(),
       });
 
     } catch (error) {

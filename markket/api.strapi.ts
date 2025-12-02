@@ -335,6 +335,27 @@ export class StrapiClient {
     });
   }
 
+  async getStoreVisibility(storeId: string | number) {
+
+    try {
+      const response = await fetch(new URL(`api/stores/${storeId}/visibility`, this.baseUrl), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch store visibility: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching store visibility:', error);
+      return null;
+    }
+  }
+
 
   /**
    * Returns a page by its slug
@@ -346,9 +367,9 @@ export class StrapiClient {
     return this.fetch<Page>({
       contentType: `pages`,
       filters: {
-        Active: {
-          $eq: true
-        },
+        // Active: {
+        // $eq: true
+        // },
         store: {
           slug: {
             $eq: store_slug
