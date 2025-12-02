@@ -67,6 +67,7 @@
 - [ ] pagination and additional results
 - [ ] dynamically restrict content limits
 - [ ] postgres backups
+- [ ] trigger github actions build, via endpoint using store.extensions.credentials
 
 ## 2025
 
