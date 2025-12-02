@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: EventsPageProps) {
       Name: event?.Name,  // Pass real value, not fallback
       Description: description,
       id: event?.id?.toString(),
-      url: `/store/${slug}/events/${event_slug}`,
+      url: `/${slug}/events/${event_slug}`,
     },
     type: "article",
     defaultTitle: 'Event',

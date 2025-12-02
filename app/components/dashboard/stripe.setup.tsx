@@ -143,7 +143,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
                 <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located.</Text>
                 <Text size="xs">
                   Contact us [ email@markket.place ] or via
-                  <a href="https://de.markket.place/store/next/blog/discord" target="_blank">
+                  <a href="https://markket.place/next/blog/discord" target="_blank">
                     [ / discord ]
                   </a> with questions or help requests.
                 </Text>

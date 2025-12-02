@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: NewsletterPageProps): Promise
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/store/${slug}/about/newsletter`,
+      url: `/${slug}/about/newsletter`,
       SEO: page?.SEO,
       Title: page?.Title,
     },

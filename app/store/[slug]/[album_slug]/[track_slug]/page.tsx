@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps) {
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/store/${slug}/${album_slug}/${track_slug}`,
+      url: `/${slug}/${album_slug}/${track_slug}`,
       SEO: track?.SEO|| collection?.SEO,
     },
     type: 'article',

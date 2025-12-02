@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: EventsPageProps) {
       SEO: page?.SEO || store?.SEO,
       Title: page?.Title,  // Add page title if exists
       id: store?.id?.toString(),
-      url: `/store/${slug}/events`,
+      url: `/${slug}/events`,
     },
     type: "website",
     defaultTitle: 'Events',
@@ -89,7 +89,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               return (
                 <Link
                   key={event.id}
-                  href={`/store/${slug}/events/${event.slug}`}
+                  href={`/${slug}/events/${event.slug}`}
                   style={{ textDecoration: 'none' }}
                 >
                   <Paper

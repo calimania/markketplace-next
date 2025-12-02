@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api.strapi';
 
-const BASE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://de.markket.place';
+const BASE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://markket.place';
 
 interface SEOProps {
   url?: string;
@@ -88,7 +88,7 @@ export async function generateSEOMetadata({
 
   const keywords = keywordsList.join(', ');
 
-  const canonical = entity?.url || `/store/${slug}`;
+  const canonical = entity?.url || `/${slug}`;
 
   return {
     title,

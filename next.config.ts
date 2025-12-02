@@ -17,24 +17,38 @@ const nextConfig = {
       },
     ];
   },
-  //       // Considering ways to Rewrite /:slug to /store/:slug ONLY if no file/page exists at /:slug
-  //       // This allows cleaner URLs like /horns instead of /store/horns
-  //       // while preserving /home, /docs, /stores, /dashboard, /api, etc.
-  //       // curently app/[slug]/page displays stores|docs pages
-  // async rewrites() {
-  //   return {
-  //     afterFiles: [
-  //       {
-  //         source: '/:slug',
-  //         destination: '/store/:slug',
-  //       },
-  //       {
-  //         source: '/:slug/:path*',
-  //         destination: '/store/:slug/:path*',
-  //       },
-  //     ],
-  //   };
-  // },
+  // Rewrite clean URLs (/:slug) to internal file structure (/store/:slug)
+  // This allows cleaner URLs like /horns instead of /store/horns
+  // Excludes: dashboard, api, docs, stores, auth, chisme, newsletter, _next
+  async rewrites() {
+    return {
+      afterFiles: [
+        {
+          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next).*)',
+          destination: '/store/:slug',
+        },
+        {
+          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next).*)/:path*',
+          destination: '/store/:slug/:path*',
+        },
+      ],
+    };
+  },
+  // Redirect old /store/:slug URLs to clean /:slug URLs
+  async redirects() {
+    return [
+      {
+        source: '/store/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+      {
+        source: '/store/:slug/:path*',
+        destination: '/:slug/:path*',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

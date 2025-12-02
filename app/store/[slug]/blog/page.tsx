@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       SEO: page?.SEO,
       title: page?.Title,
       id: page?.id?.toString(),
-      url: `/store/${slug}/blog`,
+      url: `/${slug}/blog`,
     },
     type: 'website',
     defaultTitle: 'Blog',

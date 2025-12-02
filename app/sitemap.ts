@@ -1,5 +1,5 @@
 import { strapiClient } from "@/markket/api.strapi";
-const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://de.markket.place';
+const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || 'https://markket.place';
 import { Store } from "@/markket/store";
 
 import type { MetadataRoute } from 'next'
@@ -13,28 +13,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap[]> {
 
   stores?.data?.map((store: Store) => (
     list.push({
-      url: buildUrl(`store/${store.slug}`, MARKKETPLACE_URL),
+      url: buildUrl(`${store.slug}`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
      } ,{
-      url: buildUrl(`store/${store.slug}/blog`, MARKKETPLACE_URL),
+      url: buildUrl(`${store.slug}/blog`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },{
-      url: buildUrl(`store/${store.slug}/products`, MARKKETPLACE_URL),
+      url: buildUrl(`${store.slug}/products`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },{
-      url: buildUrl(`store/${store.slug}/about/newsletter`, MARKKETPLACE_URL),
+      url: buildUrl(`${store.slug}/about/newsletter`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: buildUrl(`store/${store.slug}/about`, MARKKETPLACE_URL),
+      url: buildUrl(`${store.slug}/about`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -52,12 +52,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap[]> {
       url: buildUrl(`docs`, MARKKETPLACE_URL),
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.5,
-    },
-    {
-      url: buildUrl(`chisme`, MARKKETPLACE_URL),
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
       priority: 0.5,
     },
     {

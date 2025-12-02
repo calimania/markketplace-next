@@ -55,7 +55,7 @@ export default async function StorePage({
   const visibility = visibilityResponse?.data;
   const sectionLinks = [
     {
-      url: `/store/${slug}/products`,
+      url: `/${slug}/products`,
       icon: <IconShoppingCart size={24} />,
       title: 'Shop',
       description: `Browse ${visibility?.content_summary?.products_count || 0} products`,
@@ -64,7 +64,7 @@ export default async function StorePage({
       bgColor: markketColors.sections.shop.light,
     },
     {
-      url: `/store/${slug}/blog`,
+      url: `/${slug}/blog`,
       icon: <IconArticle size={24} />,
       title: 'Blog',
       description: `Read ${visibility?.content_summary?.articles_count || 0} articles`,
@@ -73,7 +73,7 @@ export default async function StorePage({
       bgColor: markketColors.sections.blog.light,
     },
     {
-      url: `/store/${slug}/events`,
+      url: `/${slug}/events`,
       icon: <IconCalendar size={24} />,
       title: 'Events',
       description: visibility?.has_upcoming_events
@@ -84,7 +84,7 @@ export default async function StorePage({
       bgColor: markketColors.sections.events.light,
     },
     {
-      url: `/store/${slug}/about`,
+      url: `/${slug}/about`,
       icon: <IconHome size={24} />,
       title: 'About',
       description: 'Learn more about us',
@@ -93,7 +93,7 @@ export default async function StorePage({
       bgColor: markketColors.sections.about.light,
     },
     {
-      url: `/store/${slug}/about/newsletter`,
+      url: `/${slug}/about/newsletter`,
       icon: <IconNews size={24} />,
       title: 'Newsletter',
       description: 'Subscribe to updates',
@@ -262,7 +262,7 @@ export default async function StorePage({
                   </Text>
                   <Button
                     component="a"
-                    href={`/store/${slug}/about/newsletter`}
+                    href={`/${slug}/about/newsletter`}
                     size="md"
                     radius="md"
                     style={{

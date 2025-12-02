@@ -12,31 +12,31 @@ type StoreHeaderButtonsProps = {
 const StoreHeaderButtons = ({ store, visibility }: StoreHeaderButtonsProps) => {
   const buttons = [
     {
-      href: `/store/${store.slug}`,
+      href: `/${store.slug}`,
       icon: <IconOctahedronPlus size={20} />,
       label: 'Home',
-      show: true, // Always show home
+      show: true,
     },
     {
-      href: `/store/${store.slug}/blog`,
+      href: `/${store.slug}/blog`,
       icon: <IconNews size={20} />,
       label: 'Blog',
       show: visibility ? visibility.show_blog : true,
     },
     {
-      href: `/store/${store.slug}/products`,
+      href: `/${store.slug}/products`,
       icon: <IconShoppingBag size={20} />,
       label: 'Shop',
       show: visibility ? visibility.show_shop : true,
     },
     {
-      href: `/store/${store.slug}/events`,
+      href: `/${store.slug}/events`,
       icon: <IconCalendar size={20} />,
       label: 'Events',
       show: visibility ? visibility.show_events : true,
     },
     {
-      href: `/store/${store.slug}/about`,
+      href: `/${store.slug}/about`,
       icon: <IconFiles size={20} />,
       label: 'About',
       show: visibility ? visibility.show_about : true,

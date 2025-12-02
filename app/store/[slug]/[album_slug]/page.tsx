@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: any) {
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/store/${slug}/${album_slug}`,
+      url: `/${slug}/${album_slug}`,
       SEO: collection?.SEO,
     },
     type: 'article',

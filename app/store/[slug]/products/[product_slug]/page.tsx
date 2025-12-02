@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
   const { data } = await strapiClient.getProduct(product_slug, slug);
   const product = data?.[0] as Product;
   const productName = product?.Name || 'Product';
-  const price = product?.price ? `$${product.price}` : '';
+  const price = product?.usd_price ? `$${product.usd_price}` : '';
   const description = product?.Description
     ? product.Description.substring(0, 150).replace(/<[^>]*>/g, '')
     : `${productName}${price ? ' - ' + price : ''}. Available now.`;
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/store/${slug}/products/${product_slug}`,
+      url: `/${slug}/products/${product_slug}`,
       SEO: product?.SEO,
       id: product?.id?.toString(),
       Name: product?.Name,  // Pass real value, not fallback

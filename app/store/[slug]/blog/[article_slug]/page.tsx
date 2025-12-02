@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       Title: post?.Title,  // Pass real value, not fallback
       Description: description,
       id: post?.id?.toString(),
-      url: `/store/${slug}/blog/${article_slug}`,
+      url: `/${slug}/blog/${article_slug}`,
     },
     type: 'article',
     defaultTitle: 'Blog Post',
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       'blog',
       'article',
       articleTitle,
-      ...(post?.tags?.map(t => t.name) || []),
+      ...(post?.Tags?.map(t => t.Label) || []),
     ],
   });
 };

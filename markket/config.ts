@@ -20,8 +20,8 @@ export const markketplace = {
   blank_cover_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/c2491ef7c413165be47c9882a08d7ffd.png",
   /** NEXT_PUBLIC_MARKKET_API : markket-strapi api url || api.markket.place */
   api: process.env.NEXT_PUBLIC_MARKKET_API || "https://api.markket.place",
-  /** NEXT_PUBLIC_MARKKET_URL : markket-next base url || de.markket.place */
-  markket_url: process.env.NEXT_PUBLIC_MARKKET_URL || "https://de.markket.place",
+  /** NEXT_PUBLIC_MARKKET_URL : markket-next base url || markket.place */
+  markket_url: process.env.NEXT_PUBLIC_MARKKET_URL || "https://markket.place",
   /** MARKKET_API_KEY : used to wrap API requests */
   admin_token: process.env.MARKKET_API_KEY as string,
   /** NEXT_PUBLIC_MARKKET_STORE_SLUG */

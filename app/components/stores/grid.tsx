@@ -12,8 +12,8 @@ export function StoreGrid({ stores }: StoreGridProps) {
       spacing="lg"
       verticalSpacing="xl"
     >
-      {stores.map((store) => (
-        <StoreCard key={store.id} store={store} />
+      {stores.map((store, index) => (
+        <StoreCard key={store.id} store={store} idx={index} />
       ))}
     </SimpleGrid>
   );

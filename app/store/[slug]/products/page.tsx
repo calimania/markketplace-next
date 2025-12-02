@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return generateSEOMetadata({
     slug,
     entity: {
-      url: `/store/${slug}/products`,
+      url: `/${slug}/products`,
       SEO: page?.SEO,
       id: page?.id?.toString(),
     },
@@ -183,7 +183,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           </Text>
           <Button
             component="a"
-            href={`/store/${slug}/about/newsletter`}
+            href={`/${slug}/about/newsletter`}
             size="md"
             radius="md"
             style={{
