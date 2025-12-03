@@ -93,6 +93,8 @@
 - [ ] better onboarding checklist
 - [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
+- [ ] read pages in english spanish
+- [ ] create/edit pages in english spanish
 
 ### December
 
@@ -106,6 +108,9 @@
 - [ ] unsplash search in image modal
 - [ ] list of previous events
 - [ ] enable storybook and chromatic
+- [ ] multiple products in cart
+- [ ] custom stripe components payment
+- [ ] custom stripe components dashboard
 - [x] nextjs 16
 - [x] new homepage design
 

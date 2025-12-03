@@ -39,10 +39,10 @@ const features = [
 ];
 
 const benefits = [
-  "No monthly fees, just pay per sale",
-  "Custom branding & domain",
-  "Blog, events & newsletter built-in",
-  "Stripe payments & payouts",
+  "Free & easy quickstart",
+  "Blog, events & subscribers built-in",
+  "Growing extensibility",
+  "Simplified dashboards",
 ];
 
 type HomePageProps = {
@@ -60,7 +60,6 @@ const HomePage = ({ store, page }: HomePageProps) => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Clean, trustworthy design */}
       <Box
         style={{
           background: 'white',
@@ -208,8 +207,8 @@ const HomePage = ({ store, page }: HomePageProps) => {
           />
         </Box>
 
-        <Container size="lg" py={120}>
-          <Stack gap="xl" align="center" style={{ position: 'relative', zIndex: 1 }}>
+        <Container size="lg" py={80}>
+          <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>
             <Badge
               size="lg"
               radius="md"
@@ -227,6 +226,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
             <Title
               order={1}
               ta="center"
+              mb={32}
               style={{
                 fontSize: rem(64),
                 fontWeight: 900,
@@ -251,7 +251,8 @@ const HomePage = ({ store, page }: HomePageProps) => {
             <Text
               size="xl"
               ta="center"
-              maw={600}
+              maw={700}
+              mx="auto"
               style={{
                 color: markketColors.neutral.darkGray,
                 lineHeight: 1.6,
@@ -262,7 +263,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
             </Text>
 
-            <Group gap="lg" mt="xl">
+            <Group gap={24} mt={32}>
               <Button
                 component="a"
                 href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
@@ -327,7 +328,6 @@ const HomePage = ({ store, page }: HomePageProps) => {
         </Container>
       </Box>
 
-      {/* Add CSS animations */}
       <style jsx>{`
         @keyframes slide-diagonal {
           0% {
@@ -366,32 +366,31 @@ const HomePage = ({ store, page }: HomePageProps) => {
             left: 100%;
           }
         }
-      `}</style>      {/* Features Section */}
+      `}</style>
       <Container size="lg" py={80}>
-        <Stack gap={60}>
-          <div>
-            <Title order={2} ta="center" size={rem(42)} mb="md" style={{ color: markketColors.neutral.charcoal }}>
-              Everything You Need to Sell
+        <Stack gap={48}>
+          <div style={{ marginBottom: rem(48) }}>
+            <Title order={2} ta="center" size={rem(42)} mb={24} style={{ color: markketColors.neutral.charcoal }}>
+              {page?.SEO?.metaTitle || page?.Title || 'Simple design, powerful results'}
             </Title>
             <Text size="lg" ta="center" c="dimmed" maw={700} mx="auto">
-              A complete platform for creators and small businesses
+              {page?.SEO?.metaDescription || 'A complete web publishing and ecommerce platform for creators and small businesses'}
             </Text>
           </div>
 
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={40}>
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
             {features.map((feature, index) => (
               <Paper
                 key={index}
                 radius="lg"
-                p="xl"
+                p={32}
                 style={{
                   border: `1px solid ${markketColors.neutral.lightGray}`,
                   transition: 'all 0.2s ease',
                   cursor: 'default',
                 }}
-                className="hover:shadow-lg"
               >
-                <Stack gap="md">
+                <Stack gap={20}>
                   <Box
                     style={{
                       width: 60,
@@ -418,11 +417,10 @@ const HomePage = ({ store, page }: HomePageProps) => {
         </Stack>
       </Container>
 
-      {/* Benefits CTA Section */}
       <Box py={80} style={{ background: markketColors.neutral.offWhite }}>
         <Container size="lg">
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={60}>
-            <Stack gap="xl" justify="center">
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={48}>
+            <Stack gap={32} justify="center">
               <Badge
                 size="lg"
                 radius="md"
@@ -438,7 +436,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
               </Badge>
 
               <Title order={2} size={rem(38)} style={{ color: markketColors.neutral.charcoal, lineHeight: 1.2 }}>
-                Grow your audience and sales
+                {page?.Title || 'Grow your audience and sales'}
               </Title>
 
               <Stack gap="md">
@@ -521,9 +519,9 @@ const HomePage = ({ store, page }: HomePageProps) => {
 
       {page?.albums && page.albums.length > 0 && (
         <Container size="lg" py={80}>
-          <Stack gap="xl">
-            <div>
-              <Title order={2} ta="center" size={rem(42)} mb="md" style={{ color: markketColors.neutral.charcoal }}>
+          <Stack gap={48}>
+            <div style={{ marginBottom: rem(48) }}>
+              <Title order={2} ta="center" size={rem(42)} mb={24} style={{ color: markketColors.neutral.charcoal }}>
                 Featured Collections
               </Title>
               <Text size="lg" ta="center" c="dimmed" maw={700} mx="auto">
@@ -535,17 +533,15 @@ const HomePage = ({ store, page }: HomePageProps) => {
         </Container>
       )}
 
-      {/* Custom Page Content */}
       {page?.Content && (
-        <Container size="lg" py={60}>
+        <Container size="lg" py={80}>
           <PageContent params={{ page }} />
         </Container>
       )}
 
-      {/* Powered By Section */}
       <Box py={60} style={{ background: markketColors.neutral.offWhite, borderTop: `1px solid ${markketColors.neutral.lightGray}` }}>
         <Container size="lg">
-          <Stack gap="xl" align="center">
+          <Stack gap={32} align="center">
             <Text size="sm" c="dimmed" ta="center" fw={500} style={{ letterSpacing: '0.05em', textTransform: 'uppercase' }}>
               Powered By
             </Text>
@@ -563,7 +559,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 <Text size="xl" fw={600} c="dimmed">SendGrid</Text>
               </Box>
               <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">Next.js</Text>
+                <Text size="xl" fw={600} c="dimmed">Vim</Text>
               </Box>
             </Group>
           </Stack>
@@ -578,7 +574,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
         }}
       >
         <Container size="md">
-          <Stack gap="xl" align="center">
+          <Stack gap={32} align="center">
             <Title
               order={2}
               ta="center"
