@@ -105,9 +105,11 @@
 - [ ] pexels search
 - [ ] unsplash search
 - [ ] past list of events for some reason
+- [x] new homepage design
 
 ### November
 
+- [x] remove nextjs favicon
 - [x] <title> in products and store sections
 - [x] meta in store sections
 - [x] not showing page list in /about
