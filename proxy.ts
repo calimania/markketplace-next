@@ -17,7 +17,7 @@ const PROTECTED_ROUTES: string[] = [
  * @param request
  * @returns
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 
   if (request.headers.get('x-middleware-subrequest')) {
     return NextResponse.json(

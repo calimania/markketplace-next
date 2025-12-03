@@ -320,7 +320,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 }}
                 className="transform hover:scale-105 transition-transform"
               >
-                Explore Stores
+                Explore
               </Button>
             </Group>
           </Stack>

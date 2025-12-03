@@ -100,11 +100,13 @@
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
 - [ ] tiptap bugs, formatting errors
-- [ ] bug: image manager
+- [ ] bug: image manager in ios
 - [ ] enable paid RSVP to events
-- [ ] pexels search
-- [ ] unsplash search
-- [ ] past list of events for some reason
+- [ ] pexels search in image modal
+- [ ] unsplash search in image modal
+- [ ] list of previous events
+- [ ] enable storybook and chromatic
+- [x] nextjs 16
 - [x] new homepage design
 
 ### November
