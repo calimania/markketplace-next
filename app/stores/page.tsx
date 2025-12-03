@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function StoresPage() {
   const storeResponse = await strapiClient.getStore();
-  const store = storeResponse.data[0];
+  const store = storeResponse.data?.[0];
 
   const response = await strapiClient.getStores(
     { page: 1, pageSize: 30 },

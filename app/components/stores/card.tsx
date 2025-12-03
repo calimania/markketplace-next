@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBuilding, IconCannabisFilled } from '@tabler/icons-react';
 import Link from 'next/link';

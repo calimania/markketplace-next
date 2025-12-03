@@ -67,6 +67,7 @@
 - [ ] pagination and additional results
 - [ ] dynamically restrict content limits
 - [ ] postgres backups
+- [ ] trigger github actions build, via endpoint using store.extensions.credentials
 
 ## 2025
 
@@ -92,6 +93,8 @@
 - [ ] better onboarding checklist
 - [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
+- [ ] read pages in english spanish
+- [ ] create/edit pages in english spanish
 
 ### December
 
@@ -99,14 +102,21 @@
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
 - [ ] tiptap bugs, formatting errors
-- [ ] bug: image manager
+- [ ] bug: image manager in ios
 - [ ] enable paid RSVP to events
-- [ ] pexels search
-- [ ] unsplash search
-- [ ] past list of events for some reason
+- [ ] pexels search in image modal
+- [ ] unsplash search in image modal
+- [ ] list of previous events
+- [ ] enable storybook and chromatic
+- [ ] multiple products in cart
+- [ ] custom stripe components payment
+- [ ] custom stripe components dashboard
+- [x] nextjs 16
+- [x] new homepage design
 
 ### November
 
+- [x] remove nextjs favicon
 - [x] <title> in products and store sections
 - [x] meta in store sections
 - [x] not showing page list in /about

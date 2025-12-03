@@ -16,6 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const store = storeData?.data?.[0] as Store;
   const seo = store?.SEO;
   const favicon = store?.Favicon?.formats?.thumbnail?.url || markketplace.blank_favicon_url;
+  const currentDate = new Date().toISOString();
+  const baseUrl = markketplace.markket_url;
 
   return {
     title: {
@@ -23,17 +25,55 @@ export async function generateMetadata(): Promise<Metadata> {
       template: "%s"
     },
     description: seo?.metaDescription || "Dashboard for Markkët storefronts",
-    keywords: seo?.metaKeywords,
+    keywords: seo?.metaKeywords || "ecommerce, web publishing, cms, headless cms, pages",
     authors: seo?.metaAuthor ? [{ name: seo.metaAuthor }] : undefined,
+    creator: seo?.metaAuthor || "Markketplace",
+    publisher: store?.title || "Markketplace",
+    alternates: {
+      canonical: seo?.metaUrl || baseUrl
+    },
     openGraph: {
+      type: 'website',
+      locale: 'en_US',
+      url: seo?.metaUrl || baseUrl,
+      siteName: store?.title || seo?.metaTitle || "Markketplace",
       title: seo?.metaTitle,
       description: seo?.metaDescription,
-      images: [seo?.socialImage?.url as string],
+      images: seo?.socialImage?.url ? [{
+        url: seo.socialImage.url,
+        width: 1200,
+        height: 630,
+        alt: seo.metaTitle || 'Markketplace',
+      }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seo?.metaTitle,
+      description: seo?.metaDescription,
+      images: seo?.socialImage?.url ? [seo.socialImage.url] : [],
+      creator: seo?.metaAuthor ? `@${seo.metaAuthor}` : undefined,
+    },
+    robots: {
+      index: !seo?.excludeFromSearch || true,
+      follow: !seo?.excludeFromSearch || true,
+      googleBot: {
+        index: !seo?.excludeFromSearch || true,
+        follow: !seo?.excludeFromSearch || true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     icons: {
       icon: favicon,
       shortcut: favicon,
       apple: favicon,
+    },
+    metadataBase: new URL(baseUrl),
+    other: {
+      'revisit-after': '7 days',
+      'date': currentDate,
+      'last-modified': currentDate,
     },
   };
 };
