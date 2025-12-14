@@ -253,18 +253,6 @@ export const actionsMap: Record<string, ActionComponent> = {
           commonSections.tagsField('Tag'),
         ]
       },
-      {
-        title: 'Pricing',
-        description: 'Set up pricing options for your product',
-        fields: [
-          {
-            name: 'PRICES',
-            label: 'Prices',
-            type: 'prices',
-            description: 'Define pricing options for this product'
-          }
-        ]
-      },
       commonSections.seo
     ]
   },
