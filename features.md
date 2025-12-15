@@ -76,10 +76,6 @@
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
 - [ ] enable payouts in sweden
-- [ ] auth/magic button to dashboard if logged in
-- [ ] SEO editor in same preview component, item.view
-- [ ] remove edit price in edit view, and disclaimer in create
-- [ ] edit one price at a time
 - [ ] prettier newsletter page
 - [ ] display orders in dashboard
 - [ ] dashboard design improvements
@@ -87,9 +83,6 @@
 - [ ] mattermost link
 - [ ] mercury ach/ stripe bypass (farmday)
 - [ ] custom next.CSS for custom themes
-- [ ] ignore hidden price[]
-- [ ] ignore sold out price[]
-- [ ] edit additional price attributes
 - [ ] better onboarding checklist
 - [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
@@ -101,16 +94,31 @@
 - [ ] new onboarding: create 1st store & info
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
-- [ ] tiptap bugs, formatting errors
+- [ ] tiptap bugs, formatting errors, include images
 - [ ] bug: image manager in ios
 - [ ] enable paid RSVP to events
 - [ ] pexels search in image modal
 - [ ] unsplash search in image modal
-- [ ] list of previous events
 - [ ] enable storybook and chromatic
 - [ ] multiple products in cart
 - [ ] custom stripe components payment
 - [ ] custom stripe components dashboard
+- [ ] adding dates to event
+- [ ] auth/magic button to dashboard if logged in
+- [ ] list of previous events
+- [ ] remove or hide an item[product,page,blog,] (unpublish, deactivate)
+- [ ] create albums with tracks
+- [ ] display albums with tracks better
+- [ ] store[homepage] & layout css balance fixes
+- [ ] SEO editor in same preview component, item.view
+- [ ] edit one price at a time
+- [ ] shopping cart per store
+- [x] disable price option when inventory is 0
+- [x] remove edit price in edit view, and disclaimer in create
+- [x] considers product.extras extensions
+- [x] ignore hidden price[]
+- [x] ignore sold out price[]
+- [x] edit additional price attributes
 - [x] nextjs 16
 - [x] new homepage design
 

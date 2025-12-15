@@ -187,8 +187,9 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                 placeholder="Available options..."
                 value={selectedPriceId || ''}
                 onChange={handlePriceSelect}
-                data={prices.map((price) => ({
+                data={prices.filter(p => !(p.hidden == true)).map((price) => ({
                   value: price.STRIPE_ID || '',
+                  disabled: (price.inventory !== null && price.inventory == 0),
                   label: `${price.Name.replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
                 }))}
                 required
@@ -204,15 +205,17 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                 required
               />
 
-              <NumberInput
-                label="Ñapa || Tillägg"
-                description="Support the creator with an additional amount, for particular agreements"
-                value={tip}
-                onChange={(value) => setTip(Number(value))}
-                min={0}
-                placeholder="0"
-                prefix="$"
-              />
+              {(product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled && (
+                <NumberInput
+                  label="Ñapa"
+                  description="Support the creator with an additional amount"
+                  value={tip}
+                  onChange={(value) => setTip(Number(value))}
+                  min={0}
+                  placeholder="0"
+                  prefix="$"
+                />
+              )}
 
               {selectedPrice?.Description && (
                 <Text size="sm" c="dimmed">
