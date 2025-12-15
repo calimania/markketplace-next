@@ -4,6 +4,7 @@ import ProductDisplay from '@/app/components/ui/product.display';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
+import { notFound } from "next/navigation";
 
 interface ProductSlugPageProps {
   params: Promise<{ slug: string; product_slug: string }>;
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
 export default async function ProductSlugPage({ params }: ProductSlugPageProps) {
   const { slug, product_slug } = await params;
 
-  const { data: [product] } = await strapiClient.getProduct(product_slug, slug);
+  const { data: [product] } = (await strapiClient.getProduct(product_slug, slug) || {});
 
   const { data: [mainPage] } = await strapiClient.getPage('product',);
   const { data: [page] } = await strapiClient.getPage('product', slug);
@@ -51,7 +52,7 @@ export default async function ProductSlugPage({ params }: ProductSlugPageProps) 
   const { data: [store] } = await strapiClient.getStore(slug);
 
   if (!(product as Product)?.id) {
-    return <div>Product not found</div>;
+    return notFound();
   }
 
   return <ProductDisplay product={product as Product} page={(page || mainPage) as Page} store={store} />;

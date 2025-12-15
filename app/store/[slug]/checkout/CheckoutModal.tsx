@@ -14,16 +14,16 @@ import {
   Paper,
   Container,
 } from '@mantine/core';
-import { IconShoppingBagHeart, IconX } from "@tabler/icons-react";
+import { IconShoppingBagHeart, IconShoppingBagPlus, IconX } from "@tabler/icons-react";
 import { createPaymentLink, type PaymentLinkOptions } from "../../../scripts/payment";
-import { Price } from "@/markket/product";
 import { notifications } from '@mantine/notifications';
-import { Store } from "@/markket";
+import { type Store, type Price, type Product } from "@/markket";
+import { strapiClient } from '@/markket/api.strapi';
 import { markketplace } from "@/markket/config";
 
 interface Props {
   prices: Price[];
-  product: any;
+  product: Product;
   store?: Store;
 }
 
@@ -35,9 +35,10 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   const [total, setTotal] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState({} as Price);
   const [attempts, setAttempts] = useState(0)
+  const [loading, setLoading] = useState(false);
+  const [disabledStripeIds, setDisabledStripeIds] = useState<string[]>([]);
 
   const isValidOrder = selectedPriceId && total > 0;
-
   const url = new URL(`/${store?.slug}/receipt`, (typeof window !== 'undefined' ? window?.location?.origin : 'https://markket.place')).origin;
 
   const [options, setOptions] = useState({
@@ -52,8 +53,8 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   useEffect(() => {
     if (attempts >= 3) {
       notifications.show({
-        title: 'Warning',
-        message: 'Struggling to redirect; Would you mind trying a different browser?',
+        title: 'Having trouble opening the payment page?',
+        message: 'We had trouble opening the payment page — try a different browser or copy the link from your network inspector.',
         color: 'orange',
       })
     }
@@ -98,6 +99,19 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     setSelectedPrice(price || ({} as Price));
   }, [selectedPriceId, quantity, tip, prices, product.SKU]);
 
+  // If a selected price has limited inventory, ensure quantity stays within bounds
+  useEffect(() => {
+    const inv = (selectedPrice as any)?.inventory;
+    if (typeof inv === 'number' && quantity > inv) {
+      setQuantity(inv);
+      notifications.show({
+        title: 'Quantity adjusted',
+        message: `We reduced your quantity to the available stock (${inv}).`,
+        color: 'yellow',
+      });
+    }
+  }, [selectedPrice?.inventory]);
+
   const redirectToPaymentLink = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -110,23 +124,111 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
       return;
     }
 
+    setLoading(true);
+
     try {
+      // @TODO: improve shipping options extra data
       await createPaymentLink({
         ...options,
         stripe_test: !!product?.Name?.toLowerCase()?.includes('test'),
-        // @TODO: control delivery country options at store level (name convention SHIPPING_US_CO_X, defaul US only)
         includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
         redirect_to_url: new URL(`/${store?.slug}/receipt`, markketplace.markket_url).toString(),
+        countries: selectedPrice?.ships_to?.filter(p => typeof p == 'string'),
       });
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment link error:', error);
+
+      const msg = (error && (error.message || error?.toString?.())) || String(error || '');
+
+      // Detect inventory-exceeded error messages coming from backend/stripe webhook
+      // Product/price "Medianito " requested quantity (50) exceeds available inventory:[(3)]
+      if (msg && /requested quantity/i.test(msg) && /inventory/i.test(msg)) {
+        const nameMatch = msg.match(/Product\/?price\s*"([^"]+)"/i);
+        const numbers = msg.match(/\d+/g) || [];
+        const available = numbers.length > 1 ? Number(numbers[numbers.length - 1]) : null;
+        const priceName = nameMatch ? nameMatch[1].trim() : undefined;
+        let matchedPrice: Price | undefined = undefined;
+
+        if (priceName) {
+          matchedPrice = prices.find(p => (p.Name || '').trim() === priceName || (p.Name || '').includes(priceName));
+        }
+
+        if (!matchedPrice && selectedPrice?.Name) {
+          matchedPrice = selectedPrice as Price;
+        }
+
+        if (matchedPrice && typeof available === 'number') {
+          try {
+            const productSlug = product?.slug || product?.SKU || product?.documentId || '';
+            const storeSlug = store?.slug || '';
+            const { data: freshData } = (await strapiClient.getProduct(productSlug, storeSlug)) as { data: Product[] };
+            const freshProduct = Array.isArray(freshData) ? freshData[0] : freshData;
+            const freshPrices = (freshProduct?.PRICES || []) as any[];
+
+            const freshMatched = freshPrices.find((p) => {
+              return String(p?.STRIPE_ID) === String(matchedPrice.STRIPE_ID)
+                || String(p?.id) === String((matchedPrice as any).id)
+                || (p?.Name || '').trim() === (matchedPrice?.Name || '').trim();
+            });
+
+            const canonicalAvailable = typeof freshMatched?.inventory === 'number' ? freshMatched.inventory : available;
+
+            const newQty = Math.min(quantity, canonicalAvailable || quantity);
+            setQuantity(newQty);
+            setSelectedPrice((prev: any) => ({ ...prev, inventory: canonicalAvailable }));
+
+            if (canonicalAvailable <= 0) {
+              const stripeId = (matchedPrice as any).STRIPE_ID || String((matchedPrice as any).id);
+              setDisabledStripeIds((prev) => Array.from(new Set([...prev, stripeId])));
+              if (selectedPriceId === stripeId || String((matchedPrice as any).id) === String(selectedPriceId)) {
+                setSelectedPriceId('');
+                setSelectedPrice({} as Price);
+              }
+              notifications.show({
+                title: 'Sold out',
+                message: `The option "${(matchedPrice as any).Name || ''}" is no longer available and has been disabled. Please choose another option.`,
+                color: 'red',
+              });
+              setIsModalOpen(false);
+            } else {
+              notifications.show({
+                title: 'Quantity adjusted',
+                message: `Requested quantity exceeded stock. Available: ${canonicalAvailable}. We've adjusted your quantity to ${newQty}.`,
+                color: 'red',
+              });
+            }
+
+          } catch (fetchError) {
+            console.error('Failed to refresh product inventory from Strapi:', fetchError);
+            const newQty = Math.min(quantity, available || quantity);
+            setQuantity(newQty);
+            setSelectedPrice((prev: any) => ({ ...prev, inventory: available }));
+            notifications.show({
+              title: "Couldn't refresh availability",
+              message: 'We couldn\'t refresh stock info right now. Please reduce the quantity and try again, or try again later.',
+              color: 'red',
+            });
+          }
+
+        } else {
+          notifications.show({
+            title: 'Availability issue',
+            message: 'Requested quantity exceeds available stock. Please reduce quantity and try again.',
+            color: 'red',
+          });
+        }
+
+        return;
+      }
+
       notifications.show({
-        title: 'Payment Error',
-        message: 'Could not create payment link. Please try again.',
+        title: "Couldn't create payment",
+        message: 'Something went wrong while creating the payment. Please try again.',
         color: 'red',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,6 +239,23 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     }
     setSelectedPriceId(value || '');
   };
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    if (selectedPriceId) return;
+
+    const availableOptions = prices.filter(p => {
+      return (
+        (!(p.hidden === true) && !disabledStripeIds.includes(p.STRIPE_ID || '')
+          && !(typeof p.inventory == 'number' && p.inventory == 0))
+      )
+    });
+
+    if (availableOptions.length === 1) {
+      setSelectedPriceId(availableOptions[0].STRIPE_ID || '');
+    }
+
+  }, [isModalOpen, prices, selectedPriceId, disabledStripeIds]);
 
   return (
     <>
@@ -151,17 +270,13 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
       >
         Purchase Options
       </Button>
-
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={
-          <>
-            Purchase Options
-            <Text size="sm" c="dimmed" mt={4}>
-              Review the options and click below to continue
-            </Text>
-          </>
+          <Group>
+            <IconShoppingBagPlus size={27} color={'#E4007C'} />
+          </Group>
         }
         closeButtonProps={{
           icon: <IconX size={20} />,
@@ -182,45 +297,44 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
           }}>
             <Stack gap="md">
               <Select
-                label="Select Product Option"
-                description="Choose the option that best fits your needs"
-                placeholder="Available options..."
+                label="Choose an option"
+                description="Pick the variant you'd like to buy"
+                placeholder="Pick a variant..."
                 value={selectedPriceId || ''}
                 onChange={handlePriceSelect}
-                data={prices.map((price) => ({
+                data={prices.filter(p => !(p.hidden == true)).map((price) => ({
                   value: price.STRIPE_ID || '',
-                  label: `${price.Name.replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
+                  disabled: ((price as any).inventory !== null && (price as any).inventory == 0) || disabledStripeIds.includes(price.STRIPE_ID || ''),
+                  label: `${(price.Name || '').replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
                 }))}
                 required
                 clearable={false}
                 searchable={false}
+                disabled={loading}
               />
               <NumberInput
                 label="Quantity"
                 value={quantity}
-                onChange={(value) => setQuantity(Number(value))}
+                onChange={(value) => setQuantity(Number(value || 1))}
                 min={1}
-                max={99}
+                max={selectedPrice?.inventory ?? 99}
                 required
+                disabled={loading || !selectedPriceId}
               />
-
-              <NumberInput
-                label="Ñapa || Tillägg"
-                description="Support the creator with an additional amount, for particular agreements"
-                value={tip}
-                onChange={(value) => setTip(Number(value))}
-                min={0}
-                placeholder="0"
-                prefix="$"
-              />
-
-              {selectedPrice?.Description && (
-                <Text size="sm" c="dimmed">
-                  {selectedPrice.Description}
-                </Text>
+              {typeof (selectedPrice as any)?.inventory === 'number' && (selectedPrice.inventory < 10) && (
+                <Text size="sm" c="dimmed">Only {(selectedPrice as any).inventory} {selectedPrice.inventory > 1 && 'more'} available</Text>
               )}
-
-              {/* Order Summary */}
+              {(product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled && (
+                <NumberInput
+                  label="Tip (optional)"
+                  description="Support the creator with an additional amount"
+                  value={tip}
+                  onChange={(value) => setTip(Number(value))}
+                  min={0}
+                  placeholder="0"
+                  prefix="$"
+                />
+              )}
               <Paper
                 withBorder
                 p="md"
@@ -231,53 +345,49 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                   opacity: total > 0 ? 1 : 0.7,
                 }}
               >
-                <Stack gap="xs">
+                <Stack gap="xs" c={!selectedPrice?.Name ? 'dimmed' : ''}>
                   <Title order={4}>Order Summary</Title>
                   <Divider />
-
                   <Group justify="space-between">
-                    <Text>Base Price:</Text>
+                    <Text>{selectedPrice.Name}</Text>
                     <Text fw={500}>
                       ${selectedPrice?.Price || 0}
                     </Text>
                   </Group>
-
-                  {quantity > 1 && (
-                    <Group justify="space-between">
-                      <Text>Quantity:</Text>
-                      <Text fw={500}>× {quantity}</Text>
-                    </Group>
+                  {selectedPrice?.Description && (
+                    <Text size="sm" c="dimmed">
+                      {selectedPrice.Description}
+                    </Text>
+                  )}
+                  {quantity > 0 && (
+                    <>
+                      <Group justify="space-between">
+                        <Text>Quantity:</Text>
+                        <Text fw={500}>× {quantity}</Text>
+                      </Group>
+                    </>
                   )}
 
                   {tip > 0 && (
-                    <Group justify="space-between">
-                      <Text>Tip:</Text>
-                      <Text fw={500}>+ ${tip}</Text>
-                    </Group>
+                    <>
+                      <Group justify="space-between">
+                        <Text>Tip:</Text>
+                        <Text fw={500}>+ ${tip}</Text>
+                      </Group>
+                      <Divider />
+                    </>
                   )}
-
-                  <Divider />
-
-                  <Group justify="space-between">
-                    <Text fw={700}>Total:</Text>
-                    <Text size="xl" fw={700} c="blue">
-                      ${total}
-                    </Text>
-                  </Group>
                 </Stack>
               </Paper>
-
               <Button
                 type="submit"
-                disabled={!isValidOrder}
+                loading={loading}
+                disabled={!isValidOrder || loading}
                 fullWidth
                 size="lg"
                 color="blue"
               >
-                {isValidOrder
-                  ? `Checkout ($${total})`
-                  : 'Select an option'
-                }
+                {isValidOrder ? `Proceed to Checkout  $${total}` : 'Select an option'}
               </Button>
             </Stack>
           </form>

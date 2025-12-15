@@ -273,7 +273,7 @@ export class StrapiClient {
           $eq: product_slug
         }
       },
-      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores'
+      populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores,extras'
     });
   }
 

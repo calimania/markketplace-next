@@ -9,6 +9,7 @@ export type PaymentLinkOptions = {
   stripe_test: boolean;
   store_id?: string;
   redirect_to_url?: string;
+  countries?: string[];
 };
 
 export const createPaymentLink = async (
@@ -28,6 +29,7 @@ export const createPaymentLink = async (
     stripe_test: options.stripe_test,
     store_id: options.store_id,
     redirect_to_url: options?.redirect_to_url || '',
+    countries: (options?.countries || []).length > 0 ? options.countries : null,
   };
 
   const request = await fetch(new URL('/api/markket', markketplace.api), {
