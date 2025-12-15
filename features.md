@@ -100,7 +100,6 @@
 - [ ] pexels search in image modal
 - [ ] unsplash search in image modal
 - [ ] enable storybook and chromatic
-- [ ] multiple products in cart
 - [ ] custom stripe components payment
 - [ ] custom stripe components dashboard
 - [ ] adding dates to event
@@ -112,7 +111,8 @@
 - [ ] store[homepage] & layout css balance fixes
 - [ ] SEO editor in same preview component, item.view
 - [ ] edit one price at a time
-- [ ] shopping cart per store
+- [ ] shopping cart per store, with multiple products toggle with [store.extensions]
+- [x] critical react vulnerabilities [next@16.0.10]
 - [x] disable price option when inventory is 0
 - [x] remove edit price in edit view, and disclaimer in create
 - [x] considers product.extras extensions
