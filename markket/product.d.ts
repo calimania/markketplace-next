@@ -12,7 +12,8 @@ interface Price {
   inventory: number;
   Name: string;
   hidden: boolean;
-  extra: any;
+  ships_to: string[];
+  extras: [],
 }
 
 interface ImageFormat {

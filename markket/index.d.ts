@@ -7,7 +7,7 @@ export { type Store, type URL, type Media } from './store';
 export { type StripeAccount } from './stripe';
 export { type SEO } from './seo';
 export { type Page } from './page';
-export { type Product } from './product';
+export { type Product, type Price } from './product';
 export { type Event } from './event';
 export { type Album, type AlbumTrack } from './album';
 export { type InboxMessage } from './inbox';
