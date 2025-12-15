@@ -134,9 +134,8 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
         redirect_to_url: new URL(`/${store?.slug}/receipt`, markketplace.markket_url).toString(),
-        countries: selectedPrice?.ships_to?.filter(p => typeof p == 'string') || null,
+        countries: selectedPrice?.ships_to?.filter(p => typeof p == 'string'),
       });
-
     } catch (error: any) {
       console.error('Payment link error:', error);
 
@@ -163,7 +162,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
           try {
             const productSlug = product?.slug || product?.SKU || product?.documentId || '';
             const storeSlug = store?.slug || '';
-            const { data: freshData } = await strapiClient.getProduct(productSlug, storeSlug);
+            const { data: freshData } = (await strapiClient.getProduct(productSlug, storeSlug)) as { data: Product[] };
             const freshProduct = Array.isArray(freshData) ? freshData[0] : freshData;
             const freshPrices = (freshProduct?.PRICES || []) as any[];
 

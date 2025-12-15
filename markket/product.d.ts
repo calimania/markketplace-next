@@ -2,6 +2,12 @@ import { Store } from "./store";
 import { SEO } from "./seo";
 import { Tag } from "./tag";
 
+interface Extras {
+  key: string;
+  content: Record<string, any>;
+  meta: Record<string, any>;
+  active: boolean;
+}
 
 interface Price {
   id: number;
@@ -12,8 +18,8 @@ interface Price {
   inventory: number;
   Name: string;
   hidden: boolean;
-  ships_to: string[];
-  extras: [],
+  ships_to?: string[];
+  extensions?: [];
 }
 
 interface ImageFormat {
@@ -80,6 +86,7 @@ export interface Product {
   Thumbnail?: ImageFormat;
   stores?: Store[];
   Tag: Tag[];
+  extras: Extras[];
 }
 
 export interface ProductResponse {
