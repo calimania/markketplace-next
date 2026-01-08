@@ -127,6 +127,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     setLoading(true);
 
     try {
+      const ships_to = selectedPrice?.ships_to;
       // @TODO: improve shipping options extra data
       await createPaymentLink({
         ...options,
@@ -134,7 +135,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
         includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
         store_id: store?.documentId,
         redirect_to_url: new URL(`/${store?.slug}/receipt`, markketplace.markket_url).toString(),
-        countries: selectedPrice?.ships_to?.filter(p => typeof p == 'string'),
+        countries: Array.isArray(ships_to) ? ships_to?.filter(p => typeof p == 'string') : ['US'],
       });
     } catch (error: any) {
       console.error('Payment link error:', error);
