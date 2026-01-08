@@ -68,30 +68,12 @@
 - [ ] dynamically restrict content limits
 - [ ] postgres backups
 - [ ] trigger github actions build, via endpoint using store.extensions.credentials
-
-## 2025
-
-- [ ] store bootstrap content : after create, (pages, blog, products)
-- [ ] tiptap, local storage prevent error , or prevent close tab
-- [ ] markket: newsletter sendgrid sync (add, remove)
-- [ ] markket: price|product settings, digital, ships_to
-- [ ] enable payouts in sweden
-- [ ] prettier newsletter page
-- [ ] display orders in dashboard
-- [ ] dashboard design improvements
-- [ ] headers#anchor links in parsing Content
-- [ ] mattermost link
-- [ ] mercury ach/ stripe bypass (farmday)
-- [ ] custom next.CSS for custom themes
-- [ ] better onboarding checklist
-- [ ] better action.waiting page, remove
-- [ ] better afterSave action.helpers (stripe_sync, default_SEO)
-- [ ] read pages in english spanish
-- [ ] create/edit pages in english spanish
-
-### December
-
 - [ ] new onboarding: create 1st store & info
+
+## 2026
+
+## January
+
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
 - [ ] tiptap bugs, formatting errors, include images
@@ -112,6 +94,30 @@
 - [ ] SEO editor in same preview component, item.view
 - [ ] edit one price at a time
 - [ ] shopping cart per store, with multiple products toggle with [store.extensions]
+- [ ] albums can include any content types
+- [ ] shopping cart per store
+- [ ] store bootstrap content : after create, (pages, blog, products)
+- [ ] tiptap, local storage prevent error , or prevent close tab
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] enable payouts in sweden
+- [ ] prettier newsletter page
+- [ ] display orders in dashboard
+- [ ] dashboard design improvements
+- [ ] headers#anchor links in parsing Content
+- [ ] mattermost link
+- [ ] mercury ach/ stripe bypass (farmday)
+- [ ] custom next.CSS for custom themes
+- [ ] better onboarding checklist
+- [ ] better action.waiting page, remove
+- [ ] better afterSave action.helpers (stripe_sync, default_SEO)
+- [ ] read pages in english spanish
+- [ ] create/edit pages in english spanish
+
+## 2025
+
+### December
+
 - [x] critical react vulnerabilities [next@16.0.10]
 - [x] disable price option when inventory is 0
 - [x] remove edit price in edit view, and disclaimer in create
