@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
 import { TextInput, Button, Text, Modal } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
-import { Store } from '@/markket/store.d';
+import { type Store } from '@/markket/store.d';
+import { markketplace } from '@/markket/config';
 
 interface SubscribeFormProps {
   store: Store;
@@ -31,8 +31,7 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
   });
 
   const handleSubmit = async (values: { email: string }) => {
-    const MARKKET_URL = process.env.NEXT_PUBLIC_MARKKET_URL || 'https://api.markket.place';
-    const url = new URL('api/subscribers', MARKKET_URL);
+    const url = new URL('api/subscribers/subscribe', markketplace.api);
 
     try {
       const res = await fetch(url.toString(), {
