@@ -24,6 +24,7 @@ const PricesInput = ({ value, onChange }: PricesInputProps) => {
         hidden: false,
         extra: {},
         inventory: 0,
+        count: 0,
       },
     ];
     setPrices(newPrices);
@@ -84,7 +85,7 @@ const PricesInput = ({ value, onChange }: PricesInputProps) => {
                     <NumberInput value={p.Price} min={0} onChange={val => handleChange(i, 'Price', val as number)} />
                   </td>
                   <td className="p-2 border">
-                    <NumberInput value={p.inventory ?? 0} min={0} onChange={val => handleChange(i, 'inventory', val)} />
+                    <NumberInput value={p.count ?? 0} min={-1} onChange={val => handleChange(i, 'count', val)} />
                   </td>
                   <td className="p-2 border text-center">
                     <Button size="xs" variant={p.hidden ? 'filled' : 'outline'} color={p.hidden ? 'gray' : 'blue'} onClick={() => handleChange(i, 'hidden', !p.hidden)}>
@@ -115,7 +116,7 @@ const PricesInput = ({ value, onChange }: PricesInputProps) => {
                 <TextInput label="Name" value={p.Name} onChange={e => handleChange(i, 'Name', e.target.value)} mb={4} style={{ minWidth: 180 }} />
                 <TextInput label="Description" value={p.Description} onChange={e => handleChange(i, 'Description', e.target.value)} mb={4} />
                 <NumberInput label="Price" value={p.Price} min={0} onChange={val => handleChange(i, 'Price', val as number)} mb={4} />
-                <NumberInput label="Inventory" value={p.inventory ?? 0} min={0} onChange={val => handleChange(i, 'inventory', val)} mb={4} />
+                <NumberInput label="Inventory" value={p.count ?? 0} min={-1} onChange={val => handleChange(i, 'count', val)} mb={4} />
                 <Button size="xs" variant={p.hidden ? 'filled' : 'outline'} color={p.hidden ? 'gray' : 'blue'} onClick={() => handleChange(i, 'hidden', !p.hidden)} mb={4}>
                   {p.hidden ? 'Hidden' : 'Visible'}
                 </Button>

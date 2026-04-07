@@ -169,7 +169,7 @@ export default async function StorePage({
           {sectionLinks.length > 0 && (
             <div>
               <Title order={2} className="mb-6" ta="center">Explore</Title>
-              <Grid gutter="md">
+              <Grid gap="md">
                 {sectionLinks.map((link) => (
                   <GridCol span={{ base: 12, sm: 6, md: 4 }} key={link.url}>
                     <Card

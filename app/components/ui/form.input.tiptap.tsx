@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
-import { useEditor, BubbleMenu } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
@@ -28,6 +29,10 @@ interface ContentEditorProps {
   error?: string;
   format?: 'markdown' | 'blocks';
 }
+
+const getEditorMarkdown = (editor: any): string => {
+  return editor?.storage?.markdown?.getMarkdown?.() ?? '';
+};
 
 /**
  * Tiptap editor compatible with Mantine, Strapi and Markkët
@@ -137,7 +142,7 @@ const ContentEditor = ({
     // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
     onBlur: ({ editor }) => {
       if (format == 'markdown') {
-        const markdown = editor.storage.markdown.getMarkdown();
+        const markdown = getEditorMarkdown(editor);
         onChange(markdown);
       }
 
@@ -148,7 +153,7 @@ const ContentEditor = ({
     },
     onCreate: ({ editor }) => {
       if (format == 'markdown') {
-        const markdown = editor.storage.markdown.getMarkdown();
+        const markdown = getEditorMarkdown(editor);
         onChange(markdown);
       }
 
@@ -173,7 +178,7 @@ const ContentEditor = ({
       return;
     }
 
-    const currentContent = editor.storage.markdown.getMarkdown();
+    const currentContent = getEditorMarkdown(editor);
 
     if (currentContent !== value) {
       editor.commands.setContent(value);
@@ -336,7 +341,7 @@ const ContentEditor = ({
 
           <Tabs.Panel value="markdown" style={{ minHeight }}>
             <pre className="px-4 py-6 font-mono text-sm whitespace-pre-wrap">
-              {editor.storage.markdown.getMarkdown()}
+              {getEditorMarkdown(editor)}
             </pre>
           </Tabs.Panel>
         </Tabs>

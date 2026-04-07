@@ -38,7 +38,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   const [loading, setLoading] = useState(false);
   const [disabledStripeIds, setDisabledStripeIds] = useState<string[]>([]);
 
-  const isValidOrder = selectedPriceId && total > 0;
+  const isValidOrder = selectedPriceId && total > 0 && quantity > 0;
   const url = new URL(`/${store?.slug}/receipt`, (typeof window !== 'undefined' ? window?.location?.origin : 'https://markket.place')).origin;
 
   const [options, setOptions] = useState({
@@ -101,14 +101,24 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
 
   // If a selected price has limited inventory, ensure quantity stays within bounds
   useEffect(() => {
-    const inv = (selectedPrice as any)?.inventory;
-    if (typeof inv === 'number' && quantity > inv) {
-      setQuantity(inv);
-      notifications.show({
-        title: 'Quantity adjusted',
-        message: `We reduced your quantity to the available stock (${inv}).`,
-        color: 'yellow',
-      });
+    const invRaw = (selectedPrice as any)?.inventory;
+    const invNum = typeof invRaw !== 'undefined' && invRaw !== null ? Number(invRaw) : undefined;
+    // Treat `-1` as unlimited inventory; only enforce bounds when inventory is a non-negative number
+    if (typeof invNum === 'number' && !isNaN(invNum) && invNum >= 0 && quantity > invNum) {
+      setQuantity(invNum);
+      if (invNum === 0) {
+        notifications.show({
+          title: 'Out of stock',
+          message: `This item is currently out of stock.`,
+          color: 'red',
+        });
+      } else {
+        notifications.show({
+          title: 'Quantity adjusted',
+          message: `We reduced your quantity to the available stock (${invNum}).`,
+          color: 'yellow',
+        });
+      }
     }
   }, [selectedPrice?.inventory]);
 
@@ -238,7 +248,20 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     if (!value && selectedPriceId) {
       return;
     }
-    setSelectedPriceId(value || '');
+    // Prevent selecting options that are explicitly disabled (inventory 0 or flagged)
+    const selId = value || '';
+    const matched = prices.find(p => String(p.STRIPE_ID) === String(selId) || String((p as any).id) === String(selId));
+    const inv = matched ? Number((matched as any).inventory) : undefined;
+    if (matched && (inv === 0 || disabledStripeIds.includes(matched.STRIPE_ID || ''))) {
+      notifications.show({
+        title: 'Unavailable option',
+        message: 'This option is out of stock and cannot be selected.',
+        color: 'red',
+      });
+      return;
+    }
+
+    setSelectedPriceId(selId);
   };
 
   useEffect(() => {
@@ -246,17 +269,49 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
     if (selectedPriceId) return;
 
     const availableOptions = prices.filter(p => {
+      const inv = (p as any).inventory;
+      const invNum = typeof inv !== 'undefined' && inv !== null ? Number(inv) : undefined;
       return (
         (!(p.hidden === true) && !disabledStripeIds.includes(p.STRIPE_ID || '')
-          && !(typeof p.inventory == 'number' && p.inventory == 0))
+          && !(typeof invNum === 'number' && invNum === 0))
       )
     });
 
+    const visibleOptions = prices.filter(p => !(p.hidden === true) && !disabledStripeIds.includes(p.STRIPE_ID || ''));
+
     if (availableOptions.length === 1) {
       setSelectedPriceId(availableOptions[0].STRIPE_ID || '');
+    } else if (availableOptions.length === 0 && visibleOptions.length > 0) {
+      // All visible options appear to be out-of-stock. If there's exactly one visible option,
+      // select it and set quantity to 0 so the UI clearly shows it's out-of-stock and checkout is disabled.
+      if (visibleOptions.length === 1) {
+        const only = visibleOptions[0] as Price & any;
+        const onlyInv = typeof only.inventory !== 'undefined' && only.inventory !== null ? Number(only.inventory) : undefined;
+        if (typeof onlyInv === 'number' && onlyInv === 0) {
+          setSelectedPriceId(only.STRIPE_ID || '');
+          setSelectedPrice(only as Price);
+          setQuantity(0);
+        } else {
+          setQuantity(0);
+        }
+      } else {
+        setQuantity(0);
+      }
     }
 
   }, [isModalOpen, prices, selectedPriceId, disabledStripeIds]);
+
+  // Visible / available option helpers for rendering
+  const visibleOptions = prices.filter(p => !(p.hidden === true) && !disabledStripeIds.includes(p.STRIPE_ID || ''));
+  const availableSelectOptions = prices.filter(p => {
+    const inv = (p as any).inventory;
+    const invNum = typeof inv !== 'undefined' && inv !== null ? Number(inv) : undefined;
+    return (!(p.hidden === true) && !disabledStripeIds.includes(p.STRIPE_ID || '') && !(typeof invNum === 'number' && invNum === 0));
+  });
+
+  const selectedInv = (selectedPrice as any)?.inventory;
+  const selectedInvNum = typeof selectedInv !== 'undefined' && selectedInv !== null ? Number(selectedInv) : undefined;
+  const isSelectedOutOfStock = typeof selectedInvNum === 'number' && selectedInvNum === 0;
 
   return (
     <>
@@ -297,33 +352,61 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
             redirectToPaymentLink(e);
           }}>
             <Stack gap="md">
-              <Select
-                label="Choose an option"
-                description="Pick the variant you'd like to buy"
-                placeholder="Pick a variant..."
-                value={selectedPriceId || ''}
-                onChange={handlePriceSelect}
-                data={prices.filter(p => !(p.hidden == true)).map((price) => ({
-                  value: price.STRIPE_ID || '',
-                  disabled: ((price as any).inventory !== null && (price as any).inventory == 0) || disabledStripeIds.includes(price.STRIPE_ID || ''),
-                  label: `${(price.Name || '').replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
-                }))}
-                required
-                clearable={false}
-                searchable={false}
-                disabled={loading}
-              />
+              {availableSelectOptions.length === 0 ? (
+                <Paper withBorder p="md" radius="md">
+                  <Stack gap="xs">
+                    <Title order={5}>Sold out</Title>
+                    <Text>This product or its variants are currently sold out.</Text>
+                    <Text size="sm" c="dimmed">Get notified when it restocks or browse other products from this store.</Text>
+                    <Group>
+                      <Button component="a" href={`/${store?.slug}/about/newsletter`} variant="outline">Get notified</Button>
+                      <Button component="a" href={`/${store?.slug}/products`} variant="subtle">Browse products</Button>
+                    </Group>
+                  </Stack>
+                </Paper>
+              ) : (
+                  <Select
+                    label="Choose an option"
+                    description="Pick the variant you'd like to buy"
+                    placeholder="Pick a variant..."
+                    value={selectedPriceId || ''}
+                    onChange={handlePriceSelect}
+                    data={prices.filter(p => !(p.hidden == true)).map((price) => ({
+                      value: price.STRIPE_ID || '',
+                      disabled: (typeof (price as any).inventory !== 'undefined' && (Number((price as any).inventory) === 0)) || disabledStripeIds.includes(price.STRIPE_ID || ''),
+                      label: `${(price.Name || '').replace(/_/gi, " ")} - $${price.Price} ${price.Currency}`,
+                    }))}
+                    required
+                    clearable={false}
+                    searchable={false}
+                    disabled={loading}
+                  />
+              )}
               <NumberInput
                 label="Quantity"
                 value={quantity}
-                onChange={(value) => setQuantity(Number(value || 1))}
-                min={1}
-                max={selectedPrice?.inventory ?? 99}
+                onChange={(value) => setQuantity(Number(value ?? 0))}
+                min={0}
+                max={typeof selectedInvNum === 'number' && selectedInvNum > -1 ? selectedInvNum : 99}
                 required
-                disabled={loading || !selectedPriceId}
+                disabled={loading || !selectedPriceId || isSelectedOutOfStock}
+                styles={(theme) => ({
+                  input: {
+                    ...(isSelectedOutOfStock
+                      ? {
+                        opacity: 0.5,
+                        cursor: 'not-allowed',
+                        backgroundColor: theme.colors.gray[1],
+                      }
+                      : {}),
+                  },
+                })}
               />
-              {typeof (selectedPrice as any)?.inventory === 'number' && (selectedPrice.inventory < 10) && (
-                <Text size="sm" c="dimmed">Only {(selectedPrice as any).inventory} {selectedPrice.inventory > 1 && 'more'} available</Text>
+              {selectedInvNum === 0 && (
+                <Text size="sm" c="red" fw={500}>Out of stock</Text>
+              )}
+              {typeof selectedInvNum === 'number' && selectedInvNum > 0 && selectedInvNum < 10 && (
+                <Text size="sm" c="dimmed">Only {selectedInvNum} {selectedInvNum > 1 && 'more'} available</Text>
               )}
               {(product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled && (
                 <NumberInput
@@ -360,6 +443,9 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                       {selectedPrice.Description}
                     </Text>
                   )}
+                  {typeof selectedInvNum === 'number' && selectedInvNum === -1 && (
+                    <Text size="sm" c="dimmed">Unlimited stock</Text>
+                  )}
                   {quantity > 0 && (
                     <>
                       <Group justify="space-between">
@@ -388,7 +474,7 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
                 size="lg"
                 color="blue"
               >
-                {isValidOrder ? `Proceed to Checkout  $${total}` : 'Select an option'}
+                {quantity === 0 ? 'Out of Stock' : isValidOrder ? `Proceed to Checkout  $${total}` : 'Select an option'}
               </Button>
             </Stack>
           </form>

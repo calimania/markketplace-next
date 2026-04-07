@@ -159,7 +159,7 @@ const AuthUnconfirmed = () => {
           >
             {showLoginForm ? "Cancel" : "Enter Password"}
           </Button>
-          <Collapse in={showLoginForm}>
+          <Collapse expanded={showLoginForm}>
             <Stack>
               <PasswordInput
                 placeholder="Your password"

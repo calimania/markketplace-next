@@ -200,7 +200,7 @@ const ViewItem = ({ item, store, singular, previewUrl, imageManager, refresh }: 
                 <IconLinkPlus size={16} />
                 <Button onClick={() => toggleUrls()}> {showUrls ? 'Hide URLs' : 'Show URLs'} [{urls.length}]</Button>
               </Group>
-              <Collapse in={showUrls}>
+              <Collapse expanded={showUrls}>
                 {urls.map((url: URL, index: number) => {
                   return (
                     <Text key={index} mb="xs" mt="xl">

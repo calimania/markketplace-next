@@ -69,7 +69,7 @@ export default function AnyDashboardPage({slug}: {slug: string}) {
         Dashboard
       </Title>
       <Text mb="xs" fw={500}>Navigation</Text>
-      <Grid gutter="md">
+      <Grid gap="md">
         {dashboardLinks.map((link) => (
           <Grid.Col span={6} key={link.url}>
             <Button leftSection={link.icon} fullWidth variant="light" component="a" href={link.url}>
