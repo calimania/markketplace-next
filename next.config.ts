@@ -7,6 +7,45 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/.well-known/apple-app-site-association',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
+          },
+        ],
+      },
+      {
+        source: '/apple-app-site-association',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
+          },
+        ],
+      },
+      {
+        source: '/.well-known/assetlinks.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
+          },
+        ],
+      },
+      {
         source: '/loaderio-59f9e32c73cd0e393774d04dd5f263f1.txt',
         headers: [
           {
@@ -24,11 +63,11 @@ const nextConfig = {
     return {
       afterFiles: [
         {
-          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next).*)',
+          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next|\.well-known|apple-app-site-association).*)',
           destination: '/store/:slug',
         },
         {
-          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next).*)/:path*',
+          source: '/:slug((?!dashboard|api|docs|stores|auth|newsletter|_next|\.well-known|apple-app-site-association).*)/:path*',
           destination: '/store/:slug/:path*',
         },
       ],

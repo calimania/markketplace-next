@@ -77,6 +77,18 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Mobile Domain Association
+
+This repo ships public mobile domain association files for the production domain:
+
+- `public/.well-known/apple-app-site-association`
+- `public/apple-app-site-association`
+- `public/.well-known/assetlinks.json`
+
+These files are intentionally public and are not secrets. They must match the exact deployed domain, iOS app ID, Android package name, and Android signing certificate fingerprint.
+
+If you fork or redeploy this project on a different domain, update these files for your own app identifiers and certificates before enabling Universal Links or Android App Links.
+
 ## API
 
 API routes live in the `app/api`

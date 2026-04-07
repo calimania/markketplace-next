@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.calimania.markket",
+      "sha256_cert_fingerprints": [
+        "ED:74:AB:54:E7:C7:BC:8D:D4:FA:FF:2B:18:0D:10:13:83:F9:8A:EE:20:15:3B:38:D5:47:92:F7:F4:FC:83:89"
+      ]
+    }
+  }
+]
