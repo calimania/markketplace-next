@@ -15,7 +15,8 @@ interface Price {
   Currency: string;
   STRIPE_ID: string;
   Description: string;
-  inventory: number;
+  inventory?: number;
+  count: number;
   Name: string;
   hidden: boolean;
   ships_to?: string[];

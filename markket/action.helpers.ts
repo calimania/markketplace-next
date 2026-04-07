@@ -96,7 +96,10 @@ export const updateContentAction = (contentType: contentTypes) =>
 
     const response = await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
-        [contentType]: body,
+        [contentType]: {
+          status: 'published',
+          ...body,
+        },
       },
     });
 
@@ -106,8 +109,10 @@ export const updateContentAction = (contentType: contentTypes) =>
 
     // event and products, and other afterSave calls managed here - third party sync usually
     if (contentType == 'product') {
-      const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
-      console.log({ x })
+      // setTimeout(async () => {
+      //   const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
+      //   console.log({ x });
+      // }, 1000);
     }
 
     return response;

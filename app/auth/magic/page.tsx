@@ -39,11 +39,13 @@ function MagicPage() {
           localStorage.setItem('markket.auth', JSON.stringify({
             jwt, id: user.id, username: user.username, email: user.email
           }));
-
-          setTimeout(() => {
-            router.push('/dashboard/store');
-          }, 33);
+          setStatus('success');
+          setMessage('You are logged in. Continue in the app, or open dashboard if you are a seller.');
+          return;
         }
+
+        setStatus('error');
+        setMessage('Login did not return a valid session. Please try again.');
 
       } catch (err) {
         setStatus('error');
@@ -81,6 +83,16 @@ function MagicPage() {
           <Button fullWidth mt="md" onClick={() => router.push('/auth/login')}>
             Try again
           </Button>
+        )}
+        {status === 'success' && (
+          <Group grow mt="md">
+            <Button variant="default" onClick={() => router.push('/')}>
+              Continue Browsing
+            </Button>
+            <Button onClick={() => router.push('/dashboard/store')}>
+              Open Dashboard
+            </Button>
+          </Group>
         )}
       </Paper>
     </Container>
