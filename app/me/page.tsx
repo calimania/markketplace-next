@@ -264,7 +264,7 @@ export default function MeHomePage() {
                   <Button
                     size="xs"
                     component={Link}
-                    href={`/tienda/${store.slug}/store`}
+                    href={`/tienda/${store.slug}`}
                   >
                     Open
                   </Button>
