@@ -56,6 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [stores, setStores] = useState<Store[]>([]);
 
+  const shouldPrefetchStores = useCallback((path: string) => {
+    return path.includes('/dashboard') || path.includes('/me') || path.includes('/tienda');
+  }, []);
+
 
   const clearLocalStorage = (next: string) => {
     localStorage.removeItem('markket.auth');
@@ -122,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   useEffect(() => {
-    if (user?.id && pathname.includes('dashboard')) {
+    if (user?.id && shouldPrefetchStores(pathname)) {
       fetchStores();
     }
 
@@ -133,14 +137,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
-  }, [fetchStores, pathname, user?.id, verifyAndRefreshUser]);
+  }, [fetchStores, pathname, shouldPrefetchStores, user?.id, verifyAndRefreshUser]);
 
   useEffect(() => {
-    if (user?.id && pathname.includes('dashboard')) {
+    if (user?.id && shouldPrefetchStores(pathname)) {
       fetchStores();
     }
 
-  }, [user?.id, fetchStores, pathname]);
+  }, [fetchStores, pathname, shouldPrefetchStores, user?.id]);
 
   const refreshUser = async () => {
     await verifyAndRefreshUser();

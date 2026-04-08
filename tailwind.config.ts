@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { markketTailwindColors } from './markket/colors.tokens.mjs';
 
 export default {
   content: [
@@ -11,12 +12,7 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        markket: {
-          yellow: "#FFD700",
-          blue: "#0000FF",
-          pink: "#FFC0CB",
-          cyan: "#00FFFF",
-        }
+        ...markketTailwindColors,
       },
     },
   },

@@ -80,7 +80,28 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import '@mantine/core/styles.css';
 
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  createTheme,
+  mantineHtmlProps,
+  type MantineColorsTuple,
+} from '@mantine/core';
+import { markketMantineColors } from '@/markket/colors.config';
+
+const toMantineTuple = (colors: readonly string[]) => colors as MantineColorsTuple;
+
+const theme = createTheme({
+  colors: {
+    rosa: toMantineTuple(markketMantineColors.rosa),
+    cyan: toMantineTuple(markketMantineColors.cyan),
+    magenta: toMantineTuple(markketMantineColors.magenta),
+    sand: toMantineTuple(markketMantineColors.sand),
+    charcoal: toMantineTuple(markketMantineColors.charcoal),
+  },
+  primaryColor: 'rosa',
+  defaultRadius: 'md',
+});
 
 export default function RootLayout({
   children,
@@ -95,7 +116,7 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           <PostHogProvider>
-            <MantineProvider>
+            <MantineProvider theme={theme}>
               <Notifications position="top-right" zIndex={1000} />
               <GlobalBanner />
               {children}

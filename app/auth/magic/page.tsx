@@ -40,7 +40,7 @@ function MagicPage() {
             jwt, id: user.id, username: user.username, email: user.email
           }));
           setStatus('success');
-          setMessage('You are logged in. Continue in the app, or open dashboard if you are a seller.');
+          setMessage('You are logged in. Open your profile hub to browse stores or create a new one.');
           return;
         }
 
@@ -86,11 +86,11 @@ function MagicPage() {
         )}
         {status === 'success' && (
           <Group grow mt="md">
-            <Button variant="default" onClick={() => router.push('/')}>
-              Continue Browsing
+            <Button variant="default" onClick={() => router.push('/me')}>
+              Open Profile
             </Button>
-            <Button onClick={() => router.push('/dashboard/store')}>
-              Open Dashboard
+            <Button onClick={() => router.push('/me/stores')}>
+              Manage Stores
             </Button>
           </Group>
         )}

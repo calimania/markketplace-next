@@ -26,6 +26,8 @@ export const markketplace = {
   admin_token: process.env.MARKKET_API_KEY as string,
   /** NEXT_PUBLIC_MARKKET_STORE_SLUG */
   slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
+  /** NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG */
+  design_system_demo_slug: process.env.NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG || 'dev',
   /** MARKKET_API_KEY */
   markket_api_key: process.env.MARKKET_API_KEY || '',
   /** CISION_CREDENTIALS */
