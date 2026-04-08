@@ -51,7 +51,7 @@ export default function MeStoresPage() {
                 <Title order={4}>{store.title}</Title>
                 <Text c="dimmed" size="sm">{store.slug}</Text>
               </div>
-              <Button component={Link} href={`/tienda/${store.documentId}/store`}>
+              <Button component={Link} href={`/tienda/${store.slug}/store`}>
                 Open
               </Button>
             </Group>

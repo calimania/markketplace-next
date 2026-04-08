@@ -7,6 +7,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
 import { StoreVisibility } from '@/markket/store.visibility.d';
 import { markketColors } from '@/markket/colors.config';
+import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 import './store-navbar.css';
 
 function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visibility?: StoreVisibility | null; onNavigate?: () => void }) {
@@ -109,6 +110,7 @@ export function ClientLayout({
   visibility,
 }: ClientLayoutProps) {
   const [opened, { toggle, close }] = useDisclosure();
+  const embedded = useEmbeddedMode();
 
   const handleNavigation = () => {
     close();
@@ -155,17 +157,18 @@ export function ClientLayout({
 
   return (
     <AppShell
-      header={{ height: 60, }}
+      header={embedded ? undefined : { height: 60 }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
         collapsed: {
-          desktop: !opened,
-          mobile: !opened,
+          desktop: embedded ? true : !opened,
+          mobile: embedded ? true : !opened,
         }
       }}
     >
-      <AppShell.Header>
+      {!embedded && (
+        <AppShell.Header>
         <Container size="lg">
           <Group justify="space-between" h="60px">
             <Group gap="md">
@@ -207,9 +210,11 @@ export function ClientLayout({
             </Group>
           </Group>
         </Container>
-      </AppShell.Header>
+        </AppShell.Header>
+      )}
 
-      <AppShell.Navbar p="md">
+      {!embedded && (
+        <AppShell.Navbar p="md">
         <Stack h="100%" gap="md">
           {/* Store Branding */}
           <Box>
@@ -239,7 +244,8 @@ export function ClientLayout({
             onNavigate={handleNavigation}
           />
         </Stack>
-      </AppShell.Navbar>
+        </AppShell.Navbar>
+      )}
 
       <AppShell.Main p="xs" className="store-page">
         {children}

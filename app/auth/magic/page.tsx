@@ -39,8 +39,14 @@ function MagicPage() {
           localStorage.setItem('markket.auth', JSON.stringify({
             jwt, id: user.id, username: user.username, email: user.email
           }));
+
+          const storesResponse = await markket.fetch('/api/markket/store', { cache: 'no-store' });
+          const hasStores = Array.isArray(storesResponse?.data) && storesResponse.data.length > 0;
+
           setStatus('success');
-          setMessage('You are logged in. Open your profile hub to browse stores or create a new one.');
+          setMessage('You are logged in. Taking you to your workspace...');
+
+          router.replace(hasStores ? '/me' : '/tienda/new');
           return;
         }
 
@@ -89,8 +95,8 @@ function MagicPage() {
             <Button variant="default" onClick={() => router.push('/me')}>
               Open Profile
             </Button>
-            <Button onClick={() => router.push('/me/stores')}>
-              Manage Stores
+            <Button onClick={() => router.push('/tienda/new')}>
+              Create Store
             </Button>
           </Group>
         )}
