@@ -36,7 +36,7 @@ const FormItem = (props: ItemFormProps) => {
       setTimeout(async () => {
         await fetchStores();
         const storeId = encodeURIComponent(data?.item?.documentId || '');
-        return router.push(`/dashboard/store/?store=${storeId}`);
+        return router.push(`/me/?store=${storeId}`);
       }, (1000));
       return;
     }

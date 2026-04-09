@@ -40,7 +40,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
       <Container size="lg">
         <Group justify="space-between">
           <Group>
-            <Link href={isMaybe ? '/dashboard/store' : '/'}>
+            <Link href={isMaybe ? '/me' : '/'}>
               <ActionIcon
                 variant="subtle"
                 size="md"

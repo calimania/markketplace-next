@@ -145,7 +145,7 @@ const FormItem = ({
         let redirect_to = '';
         if (contentType === 'stores') {
           await fetchStores();
-          redirect_to = `/dashboard/store?store=${documentId}`;
+          redirect_to = '/me';
         } else {
           redirect_to = `/dashboard/${contentType}/view/${documentId}?store=${store.documentId}`
         }

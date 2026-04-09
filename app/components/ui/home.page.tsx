@@ -70,7 +70,8 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
           borderBottom: `1px solid ${markketColors.neutral.lightGray}`,
         }}
       >
-        {/* Geometric background - caleño style */}
+        {/* Geometric background - client only to prevent hydration mismatch */}
+        {mounted && (
         <Box
           style={{
             position: 'absolute',
@@ -208,6 +209,7 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
             }}
           />
         </Box>
+        )}
 
         <Container size="lg" py={80}>
           <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>

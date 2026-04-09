@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 //
 // Slug mapping reference (for migration tracking):
 //   settings  → /me/account
-//   store     → /tienda
+//   store     → /me
 //   stores    → /tienda
 //   products  → /tienda  (pick store first, then /tienda/[slug]/products)
 //   articles  → /tienda
@@ -25,11 +25,11 @@ export default async function DashboardPage({ params }: AnyDashboardPageProps) {
   const { slug } = await params;
 
   if (slug === 'settings') {
-    redirect('/me/account');
+    return redirect('/me/account');
   }
 
-  if (slug === 'onboarding') {
-    redirect('/me');
+  if (['onboarding', 'store', 'stores'].includes(slug)) {
+    return redirect('/me');
   }
 
   redirect('/tienda');

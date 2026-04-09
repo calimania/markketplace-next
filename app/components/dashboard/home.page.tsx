@@ -22,7 +22,7 @@ import { IconShoppingCart, IconArticle, IconSettings, IconBuildingStore, IconAlb
 const dashboardLinks = [
   { url: '/dashboard/products', icon: <IconShoppingCart size={20} />, title: 'Products' },
   { url: '/dashboard/articles', icon: <IconArticle size={20} />, title: 'Articles' },
-  { url: '/dashboard/store', icon: <IconBuildingStore size={20} />, title: 'Store' },
+  { url: '/me', icon: <IconBuildingStore size={20} />, title: 'Workspace' },
   { url: '/dashboard/settings', icon: <IconSettings size={20} />, title: 'Settings' },
   { url: '/dashboard/albums', icon: <IconAlbum size={20} />, title: 'Albums' },
   { url: '/dashboard/events', icon: <IconCalendar size={20} />, title: 'Events' },
