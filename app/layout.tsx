@@ -5,6 +5,7 @@ import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth.provider';
 import { PostHogProvider } from '@/app/providers/posthog.provider';
 import { GlobalBanner } from '@/app/components/global.banner';
+import EmbedQueryPropagator from '@/app/components/embed.query.propagator';
 import '@mantine/code-highlight/styles.css';
 import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
@@ -108,16 +109,54 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const embedBootstrapScript = `
+    (function () {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var display = (params.get('display') || '').toLowerCase();
+        var navbar = (params.get('navbar') || '').toLowerCase();
+        var footer = (params.get('footer') || '').toLowerCase();
+        var breadcrumbs = (params.get('breadcrumbs') || params.get('crumbs') || '').toLowerCase();
+
+        var embedFromQuery =
+          display.indexOf('embed') === 0 ||
+          navbar === 'hide' ||
+          footer === 'hide';
+
+        if (embedFromQuery) {
+          document.documentElement.setAttribute('data-display-mode', 'embed');
+        } else {
+          document.documentElement.removeAttribute('data-display-mode');
+        }
+
+        if (breadcrumbs === 'hide') {
+          document.documentElement.setAttribute('data-breadcrumbs', 'hide');
+        } else {
+          document.documentElement.removeAttribute('data-breadcrumbs');
+        }
+
+        var raw = localStorage.getItem('markket.injected');
+        if (!raw) return;
+        var parsed = JSON.parse(raw || '{}');
+        if (parsed && parsed.embedded) {
+          document.documentElement.setAttribute('data-display-mode', 'embed');
+        }
+      } catch (_) {}
+    })();
+  `;
+
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
+        <script dangerouslySetInnerHTML={{ __html: embedBootstrapScript }} />
       </head>
       <body className="antialiased">
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider theme={theme}>
               <Notifications position="top-right" zIndex={1000} />
+              <EmbedQueryPropagator />
               <GlobalBanner />
               {children}
             </MantineProvider>

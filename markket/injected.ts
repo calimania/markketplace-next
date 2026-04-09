@@ -40,7 +40,36 @@ export function patchInjectedContext(patch: MarkketInjectedContext) {
   writeInjectedContext({ ...current, ...patch });
 }
 
+function readEmbedModeFromLocation(): boolean | undefined {
+  if (typeof window === 'undefined') return undefined;
+
+  const params = new URLSearchParams(window.location.search);
+  const display = (params.get('display') || '').trim().toLowerCase();
+  const navbar = (params.get('navbar') || '').trim().toLowerCase();
+  const footer = (params.get('footer') || '').trim().toLowerCase();
+
+  // Examples supported:
+  // ?display=embed
+  // ?display=embed:mobile
+  // ?display=full
+  if (display) {
+    if (display.startsWith('embed')) return true;
+    if (display === 'full' || display === 'default' || display === 'web' || display === 'show') return false;
+  }
+
+  // Examples supported:
+  // ?navbar=hide
+  // ?footer=hide
+  if (navbar === 'hide' || footer === 'hide') return true;
+  if (navbar === 'show' && footer === 'show') return false;
+
+  return undefined;
+}
+
 export function isEmbeddedMode() {
+  const fromUrl = readEmbedModeFromLocation();
+  if (typeof fromUrl === 'boolean') return fromUrl;
+
   return !!readInjectedContext()?.embedded;
 }
 

@@ -2,6 +2,7 @@
 
 ## Upcoming
 
+
 - [ ] inbox widget in receipt page
 - [ ] links not working in tiptapp - articles
 - [ ] slug for article starts with YEAR-
@@ -72,7 +73,6 @@
 
 ## 2026
 
-## January
 
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] better dashboard create,edit
@@ -81,38 +81,44 @@
 - [ ] enable paid RSVP to events
 - [ ] pexels search in image modal
 - [ ] unsplash search in image modal
-- [ ] enable storybook and chromatic
 - [ ] custom stripe components payment
 - [ ] custom stripe components dashboard
 - [ ] adding dates to event
-- [ ] auth/magic button to dashboard if logged in
 - [ ] list of previous events
 - [ ] remove or hide an item[product,page,blog,] (unpublish, deactivate)
 - [ ] create albums with tracks
 - [ ] display albums with tracks better
-- [ ] store[homepage] & layout css balance fixes
-- [ ] SEO editor in same preview component, item.view
 - [ ] edit one price at a time
 - [ ] shopping cart per store, with multiple products toggle with [store.extensions]
 - [ ] albums can include any content types
-- [ ] shopping cart per store
 - [ ] store bootstrap content : after create, (pages, blog, products)
 - [ ] tiptap, local storage prevent error , or prevent close tab
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
-- [ ] enable payouts in sweden
 - [ ] prettier newsletter page
 - [ ] display orders in dashboard
-- [ ] dashboard design improvements
+- [ ] display subscribers in dashboard
+- [ ] create newsletter editions in dashboard
 - [ ] headers#anchor links in parsing Content
 - [ ] mattermost link
 - [ ] mercury ach/ stripe bypass (farmday)
 - [ ] custom next.CSS for custom themes
-- [ ] better onboarding checklist
-- [ ] better action.waiting page, remove
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
 - [ ] read pages in english spanish
 - [ ] create/edit pages in english spanish
+
+
+## April
+
+- [x] New design systems
+- [x] Mantine v9
+- [x] New profile auth path /me
+- [x] New store dashboard homepage /tienda
+- [x] New store preview page /tienda/storeSlug
+- [x] New article|page|event|product list
+- [x] New article|page|event|product individual page
+- [x] New edit profile, avatar page
+- [x] Design implementation review
 
 ## 2025
 

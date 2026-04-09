@@ -27,6 +27,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
 
   return (
     <Paper
+      className="global-banner"
       py="xs"
       style={{
         borderBottom: '1px solid var(--mantine-color-gray-2)',

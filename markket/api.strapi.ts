@@ -127,7 +127,7 @@ export class StrapiClient {
       return null;
     }
 
-    const url = new URL(`api/users/${id}?populate=avatar`, this.baseUrl);
+    const url = new URL(`api/users/${id}?populate[]=avatar&populate[]=stores`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {

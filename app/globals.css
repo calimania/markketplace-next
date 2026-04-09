@@ -156,3 +156,161 @@ textarea:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Compact navigable table rows with a quick pre-navigation swoosh */
+.ui-nav-table {
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--mantine-color-white);
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 170ms ease, opacity 170ms ease;
+}
+
+.ui-nav-table.is-exiting {
+  transform: translateY(-8px) scale(0.996);
+  opacity: 0.72;
+}
+
+.ui-nav-row {
+  position: relative;
+  display: block;
+  padding: 10px 12px;
+  border-top: 1px solid var(--mantine-color-gray-2);
+  overflow: hidden;
+  opacity: 1 !important;
+  transition: transform 120ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ui-nav-row:first-child {
+  border-top: 0;
+}
+
+.ui-nav-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: -180px;
+  width: 180px;
+  background: linear-gradient(100deg,
+      rgba(228, 0, 124, 0),
+      rgba(228, 0, 124, 0.14),
+      rgba(228, 0, 124, 0));
+  pointer-events: none;
+}
+
+.ui-nav-row:hover,
+.ui-nav-row:focus-visible {
+  background-color: #fff8fc;
+}
+
+.ui-nav-row.is-pressed {
+  background-color: #fff2f9;
+  box-shadow: inset 3px 0 0 #E4007C;
+}
+
+.ui-nav-row:hover::before,
+.ui-nav-row:focus-visible::before,
+.ui-nav-row:active::before {
+  animation: navRowSwoosh 360ms ease-out;
+}
+
+.ui-nav-row:active {
+  transform: scale(0.992);
+}
+
+.ui-nav-row-cta {
+  color: var(--mantine-color-dark-3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--mantine-color-gray-3);
+}
+
+@media (min-width: 768px) {
+
+  .ui-nav-row:hover,
+  .ui-nav-row:focus-visible,
+  .ui-nav-row.is-pressed {
+    box-shadow: inset 3px 0 0 #E4007C;
+    transform: translateX(1px);
+  }
+}
+
+@keyframes navRowSwoosh {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(calc(100vw + 220px));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-nav-row {
+    transition: none;
+  }
+
+  .ui-nav-table,
+  .ui-nav-table.is-exiting {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .ui-nav-row:hover::before,
+  .ui-nav-row:focus-visible::before,
+  .ui-nav-row:active::before {
+    animation: none;
+  }
+}
+
+/* Accent text utilities for /me and /tienda pages */
+.accent-blue {
+  color: #00BCD4;
+  font-family: ui-monospace, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
+  font-size: 0.85em;
+  letter-spacing: 0.01em;
+}
+
+.accent-yellow {
+  color: #FFA500;
+  font-weight: 600;
+}
+
+.accent-hint {
+  color: #4CAF50;
+  font-size: 0.9em;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* Subtle section dividers with accent */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00BCD4 20%, #FFA500 50%, #00BCD4 80%, transparent);
+  margin: 1.5rem 0;
+}
+
+/* Early embed mode visual guard: prevents header/nav flicker before hydration */
+html[data-display-mode='embed'] .global-banner,
+html[data-display-mode='embed'] .mantine-AppShell-header,
+html[data-display-mode='embed'] .mantine-AppShell-navbar {
+  display: none !important;
+}
+
+html[data-breadcrumbs='hide'] .tiny-breadcrumbs {
+  display: none !important;
+}
+
+html[data-display-mode='embed'] .mantine-AppShell-main {
+  padding-top: var(--mantine-spacing-xs) !important;
+}

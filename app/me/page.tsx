@@ -124,7 +124,7 @@ export default function MeHomePage() {
             <IconUserCircle size={28} />
             <Title order={1}>Me</Title>
           </Group>
-          <Text c="dimmed">Quick profile edits and fast access to your stores.</Text>
+          <Text c="dimmed">Quick profile edits and fast access to your stores.<br /><span className="accent-hint">Everything you manage lives here.</span></Text>
         </Stack>
 
         <Group>
@@ -241,8 +241,10 @@ export default function MeHomePage() {
 
           <Group justify="space-between" align="end" mb="sm" style={{ paddingRight: 124 }}>
             <div>
-              <Title order={3}>Stores</Title>
-              <Text mt="xs" c="dimmed">Your first stores right here.</Text>
+              <Title order={3}>
+                <span className="accent-yellow">Your</span> Stores
+              </Title>
+              <Text mt="xs" c="dimmed">Click to manage. Create store to add more.</Text>
             </div>
             <Badge variant="light">{stores.length}</Badge>
           </Group>
@@ -275,7 +277,7 @@ export default function MeHomePage() {
             <Button
               variant="default"
               component={Link}
-              href="/me/stores"
+              href="/tienda"
               leftSection={<IconBuildingStore size={16} />}
             >
               See All Stores

@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
-import { Container, Paper, Stack, Title, Text, Group, Button, Badge } from '@mantine/core';
-import { IconPalette, IconEdit } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
-import Markdown from '@/app/components/ui/page.markdown';
+import StoreOverview from './store.overview';
 import type { Store } from '@/markket/store';
+import type { Article } from '@/markket/article';
+import type { Page } from '@/markket/page';
+import type { Product } from '@/markket/product';
+import type { Event } from '@/markket/event';
 
 type TiendaStorePageProps = {
   params: Promise<{ storeSlug: string }>;
@@ -11,56 +13,42 @@ type TiendaStorePageProps = {
 
 export default async function TiendaStorePage({ params }: TiendaStorePageProps) {
   const { storeSlug } = await params;
-  const storeResponse = await strapiClient.getStore(storeSlug);
+
+  const [storeResponse, postsResponse, pagesResponse, productsResponse, eventsResponse] = await Promise.all([
+    strapiClient.getStore(storeSlug),
+    strapiClient.getPosts({ page: 1, pageSize: 3 }, { sort: 'createdAt:desc' }, storeSlug),
+    strapiClient.getPages(storeSlug),
+    strapiClient.getProducts({ page: 1, pageSize: 50 }, { filter: '', sort: 'updatedAt:desc' }, storeSlug),
+    strapiClient.getEvents(storeSlug),
+  ]);
+
   const store = storeResponse?.data?.[0] as Store | undefined;
 
   if (!store) {
     notFound();
   }
 
-  const title = store.title || store.slug;
-  const description = store.Description || store?.SEO?.metaDescription || '';
+  const latestPosts = ((postsResponse?.data || []) as Article[]).slice(0, 5);
+  const allPages = (pagesResponse?.data || []) as Page[];
+  const latestPages = allPages
+    .filter((page) => page.slug !== 'home')
+    .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+    .slice(0, 5);
+
+  const allProducts = ((productsResponse?.data || []) as Product[]).slice(0, 5);
+  const upcomingThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const upcomingEvents = ((eventsResponse?.data || []) as Event[])
+    .filter((event) => new Date(event.startDate) >= upcomingThreshold)
+    .sort((a, b) => +new Date(a.startDate) - +new Date(b.startDate))
+    .slice(0, 5);
 
   return (
-    <Container size="md" py="xl">
-      <Stack gap="md">
-        <Group justify="space-between" align="flex-start">
-          <div>
-            <Title order={1}>{title}</Title>
-            <Text c="dimmed" mt={4}>/tienda/{store.slug}</Text>
-          </div>
-          <Badge variant="light">Read only</Badge>
-        </Group>
-
-        <Paper withBorder radius="md" p="lg">
-          <Stack gap="sm">
-            <Text fw={600}>Store Description</Text>
-            {description ? (
-              <Markdown content={description} />
-            ) : (
-              <Text c="dimmed">No description yet for this store.</Text>
-            )}
-          </Stack>
-        </Paper>
-
-        <Group>
-          <Button
-            component="a"
-            href={`/tienda/${store.slug}/design-system`}
-            leftSection={<IconPalette size={16} />}
-          >
-            Open Design System
-          </Button>
-          <Button
-            component="a"
-            variant="default"
-            href={`/tienda/${store.slug}/store`}
-            leftSection={<IconEdit size={16} />}
-          >
-            Open Store Editor
-          </Button>
-        </Group>
-      </Stack>
-    </Container>
+    <StoreOverview
+      store={store}
+      latestPosts={latestPosts}
+      latestPages={latestPages}
+      allProducts={allProducts}
+      upcomingEvents={upcomingEvents}
+    />
   );
 }

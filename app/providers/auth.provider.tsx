@@ -158,6 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedAuth = localStorage.getItem('markket.auth');
         const { jwt } = JSON.parse(storedAuth || '{}');
         setUser({ ...userData, jwt });
+
+        // Set stores from user data if available
+        // Handle both direct stores and nested data.stores from API
+        const storesArray = userData.stores || userData.data?.stores || [];
+        if (storesArray.length > 0) {
+          setStores(storesArray);
+        }
       }
     } catch (error) {
       console.error('Auth verification failed:', error);
