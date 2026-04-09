@@ -1,6 +1,7 @@
 'use client';
 
 import DashboardCMS from '@/app/components/dashboard/cms';
+// @deprecated - Used by old /dashboard/articles route. Replaced by /tienda/[storeSlug]/articles
 import { Article } from '@/markket/';
 import { useContext } from 'react';
 import { DashboardContext } from '@/app/providers/dashboard.provider';

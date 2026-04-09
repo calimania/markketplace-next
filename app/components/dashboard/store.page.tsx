@@ -1,6 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
+// @deprecated - Used by old /dashboard/store route. Replaced by /tienda/[storeSlug]/store
 import { DashboardContext } from '@/app/providers/dashboard.provider';
 import ViewItem from '@/markket/components/item.view';
 import { Skeleton, Container, Stack, Group, Button, } from '@mantine/core';

@@ -25,6 +25,21 @@ function readEmbedFromQuery(): boolean | undefined {
 const LOCATION_CHANGE_EVENT = 'markket:location-change';
 const INJECTED_UPDATE_EVENT = 'markket:injected-update';
 
+function dispatchWindowEventAsync(eventName: string) {
+  if (typeof window === 'undefined') return;
+
+  const dispatch = () => {
+    window.dispatchEvent(new Event(eventName));
+  };
+
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(dispatch);
+    return;
+  }
+
+  window.setTimeout(dispatch, 0);
+}
+
 function ensureHistoryEventsPatched() {
   if (typeof window === 'undefined') return;
 
@@ -36,13 +51,13 @@ function ensureHistoryEventsPatched() {
 
   window.history.pushState = function pushState(...args) {
     const result = originalPushState(...args);
-    window.dispatchEvent(new Event(LOCATION_CHANGE_EVENT));
+    dispatchWindowEventAsync(LOCATION_CHANGE_EVENT);
     return result;
   };
 
   window.history.replaceState = function replaceState(...args) {
     const result = originalReplaceState(...args);
-    window.dispatchEvent(new Event(LOCATION_CHANGE_EVENT));
+    dispatchWindowEventAsync(LOCATION_CHANGE_EVENT);
     return result;
   };
 
@@ -61,14 +76,14 @@ function ensureInjectedStorageEventsPatched() {
   window.localStorage.setItem = function setItem(key: string, value: string) {
     originalSetItem(key, value);
     if (key === INJECTED_STORAGE_KEY) {
-      window.dispatchEvent(new Event(INJECTED_UPDATE_EVENT));
+      dispatchWindowEventAsync(INJECTED_UPDATE_EVENT);
     }
   };
 
   window.localStorage.removeItem = function removeItem(key: string) {
     originalRemoveItem(key);
     if (key === INJECTED_STORAGE_KEY) {
-      window.dispatchEvent(new Event(INJECTED_UPDATE_EVENT));
+      dispatchWindowEventAsync(INJECTED_UPDATE_EVENT);
     }
   };
 

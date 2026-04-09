@@ -1,6 +1,8 @@
 'use client';
 
 import StoreDashboardPage from '@/app/components/dashboard/store.page';
+// @deprecated - This component drove /dashboard/[slug] routing.
+// Routes now redirect to /tienda/[storeSlug] and /me. Safe to remove once tienda covers all content types.
 import SettingsDashboardPage from '@/app/components/dashboard/settings.page';
 import StripeDashboardPage from '@/app/components/dashboard/stripe.page';
 import ArticlesDashboardPage from '@/app/components/dashboard/article.page';

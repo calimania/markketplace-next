@@ -1,6 +1,7 @@
 'use client';
 
 import { useContext, ElementType } from "react";
+// @deprecated - Used by old /dashboard/[slug]/[action]/[id] route. Replaced by /tienda/[storeSlug]/[contentType]/[itemId]
 import { DashboardContext } from "@/app/providers/dashboard.provider";
 import { useCMSItem, type ContentType } from "@/app/hooks/dashboard.item.hook";
 import { Article, Page, Product, Store } from '@/markket/index.d';
