@@ -16,12 +16,12 @@ import {
   IconUpload, IconLink, IconX, IconCheck, IconFileUpload
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
-import { blocksToHtml } from '@/markket/helpers.blocks';
+import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { RichTextValue, TiptapDoc } from '@/markket/richtext';
 
 interface ContentEditorProps {
   value?: RichTextValue;
-  onChange: (value: string) => void;
+  onChange: (value: RichTextValue) => void;
   label?: string;
   description?: string;
   placeholder?: string;
@@ -32,6 +32,10 @@ interface ContentEditorProps {
 
 const getEditorMarkdown = (editor: any): string => {
   return editor?.storage?.markdown?.getMarkdown?.() ?? '';
+};
+
+const getBlocksValue = (editor: any) => {
+  return JSONDocToBlocks(editor.getJSON());
 };
 
 /**
@@ -151,8 +155,7 @@ const ContentEditor = ({
       }
 
       if (format == 'blocks') {
-        const html = editor.getJSON();
-        onChange(html as any);
+        onChange(getBlocksValue(editor));
       }
     },
     onUpdate: ({ editor }) => {
@@ -171,14 +174,18 @@ const ContentEditor = ({
       }
 
       if (format == 'blocks') {
-        const html = editor.getJSON();
-        onChange(html as any);
+        onChange(getBlocksValue(editor));
       }
     }
   });
 
   useEffect(() => {
-    if (!editor || !value) return;
+    if (!editor) return;
+
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      editor.commands.clearContent();
+      return;
+    }
 
     if (format == 'html') {
       const currentContent = editor.getHTML();

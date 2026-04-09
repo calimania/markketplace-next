@@ -1,9 +1,8 @@
 'use client';
 
-import { Paper, Stack, Title, Text, Group, Button, Badge } from '@mantine/core';
-import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink } from '@tabler/icons-react';
+import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon } from '@mantine/core';
+import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
-import RichTextContent from '@/app/components/ui/richtext.content';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import NavTable from '@/app/components/ui/nav.table';
 import EmptyStateCTA from '@/app/components/ui/empty.state.cta';
@@ -12,6 +11,7 @@ import type { Article } from '@/markket/article';
 import type { Page } from '@/markket/page';
 import type { Product } from '@/markket/product';
 import type { Event } from '@/markket/event';
+import { richTextToPlainText } from '@/markket/richtext.utils';
 
 type StoreOverviewProps = {
   store: Store;
@@ -32,6 +32,20 @@ export default function StoreOverview({
   const isAuthorized = confirmed() && stores.some((s) => s.slug === store.slug);
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
+  const descriptionText = richTextToPlainText(store.Description);
+  const latestUpdatedAt = [
+    store.updatedAt,
+    latestPosts[0]?.updatedAt,
+    latestPages[0]?.updatedAt,
+    allProducts[0]?.updatedAt,
+    upcomingEvents[0]?.updatedAt,
+  ].filter(Boolean).sort().reverse()[0];
+  const overviewStats = [
+    { label: 'Articles', value: latestPosts.length, icon: IconNews },
+    { label: 'Pages', value: latestPages.length, icon: IconFileText },
+    { label: 'Products', value: allProducts.length, icon: IconShoppingCart },
+    { label: 'Events', value: upcomingEvents.length, icon: IconCalendarEvent },
+  ];
 
   return (
     <Stack gap="md">
@@ -52,19 +66,46 @@ export default function StoreOverview({
               A clean storefront view for visitors. Browse content exactly as your audience sees it, while owner tools stay available when authorized.
             </Text>
           </div>
+        <Stack gap="xs" align="flex-end">
           <Badge variant="light" color="cyan">
             {isAuthorized ? 'Tendero' : 'Tienda'}
           </Badge>
+          {latestUpdatedAt && (
+            <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
+          )}
+        </Stack>
         </Group>
 
         <Paper withBorder radius="md" p="md">
           <Stack gap="sm">
-            <Text fw={600}>Store Description</Text>
-            {store.Description ? (
-              <RichTextContent content={store.Description} />
+          <Group justify="space-between" align="center">
+            <Text fw={600}>Store Snapshot</Text>
+            <Badge variant="light" color="yellow" leftSection={<IconSparkles size={12} />}>
+              Overview
+            </Badge>
+          </Group>
+          {descriptionText ? (
+            <Text c="dimmed" size="sm" lh={1.6} lineClamp={4}>
+              {descriptionText}
+            </Text>
             ) : (
               <Text c="dimmed">No description yet for this store.</Text>
             )}
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+            {overviewStats.map((stat) => (
+              <Paper key={stat.label} withBorder radius="md" p="sm" bg="gray.0">
+                <Group gap="xs" wrap="nowrap">
+                  <ThemeIcon variant="light" radius="xl" color="gray">
+                    <stat.icon size={14} />
+                  </ThemeIcon>
+                  <div>
+                    <Text fw={700} size="sm">{stat.value}</Text>
+                    <Text size="xs" c="dimmed">{stat.label}</Text>
+                  </div>
+                </Group>
+              </Paper>
+            ))}
+          </SimpleGrid>
           </Stack>
         </Paper>
 

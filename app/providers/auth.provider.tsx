@@ -74,10 +74,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return path.includes('/dashboard') || path.includes('/me') || path.includes('/tienda');
   }, []);
 
+  const clearDraftStorage = useCallback(() => {
+    const storage = getStorage();
+    if (!storage) return;
+
+    const keysToRemove: string[] = [];
+
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (!key) continue;
+      if (key.startsWith('markket.store-draft.')) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => storage.removeItem(key));
+  }, [getStorage]);
+
 
   const clearLocalStorage = (next: string) => {
     const storage = getStorage();
     storage?.removeItem('markket.auth');
+    clearDraftStorage();
     router.push(`/auth?next=${next}`);
   }
 
@@ -155,8 +173,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     const storage = getStorage();
     storage?.removeItem('markket.auth');
+    clearDraftStorage();
     router.push('/auth/');
-  }, [getStorage, router]);
+  }, [clearDraftStorage, getStorage, router]);
 
   const verifyAndRefreshUser = useCallback(async () => {
     try {
