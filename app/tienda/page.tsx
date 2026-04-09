@@ -12,6 +12,13 @@ export default function MeStoresPage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
 
+  const uniqueStores = stores.filter((store, index, array) => {
+    const identity = store.documentId || store.slug;
+    if (!identity) return true;
+
+    return array.findIndex((candidate) => (candidate.documentId || candidate.slug) === identity) === index;
+  });
+
   useEffect(() => {
     if (!confirmed()) {
       router.replace('/auth');
@@ -52,13 +59,13 @@ export default function MeStoresPage() {
 
       <Stack>
         {isLoading && <Text c="dimmed">Loading stores...</Text>}
-        {!isLoading && stores.length === 0 && (
+        {!isLoading && uniqueStores.length === 0 && (
           <Paper withBorder p="lg" radius="md">
             <Text c="dimmed">No stores found yet.</Text>
           </Paper>
         )}
-        {!isLoading && stores.map((store) => (
-          <Paper key={store.documentId} withBorder p="md" radius="md">
+        {!isLoading && uniqueStores.map((store, index) => (
+          <Paper key={store.documentId || `${store.slug || 'store'}-${index}`} withBorder p="md" radius="md">
             <Group justify="space-between">
               <div>
                 <Title order={4}>{store.title}</Title>

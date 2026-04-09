@@ -70,9 +70,9 @@ export default function NavTable({ items, emptyText = 'No items yet.' }: NavTabl
 
   return (
     <Stack gap={0} className={`ui-nav-table${isNavigating ? ' is-exiting' : ''}`}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Link
-          key={item.key}
+          key={`${item.key}-${index}`}
           href={item.href}
           className={`ui-nav-row${pressedKey === item.key ? ' is-pressed' : ''}`}
           onPointerDown={() => setPressedKey(item.key)}
