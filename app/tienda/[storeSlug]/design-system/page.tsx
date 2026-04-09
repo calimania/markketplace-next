@@ -9,7 +9,6 @@ import type { Article } from '@/markket/article';
 import type { Page } from '@/markket/page';
 import HeroSection from '@/app/components/design-system/hero-section';
 import ColorsSection from '@/app/components/design-system/colors-section';
-import DashboardSection from '@/app/components/design-system/dashboard-section';
 import EditorialGallerySection from '@/app/components/design-system/editorial-gallery-section';
 import FooterSection from '@/app/components/design-system/footer-section';
 import TypographySection from '@/app/components/design-system/typography-section';
@@ -78,10 +77,13 @@ const rootClassName = `${sans.variable} ${label.variable} ${serif.variable} ${mo
 
 const shellStyle: CSSProperties = {
   minHeight: '100vh',
+  width: '100%',
+  overflowX: 'auto',
   color: '#1e1b4b',
   backgroundColor: '#ffffff',
   backgroundImage:
     'radial-gradient(at 0% 0%, rgba(219, 39, 119, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(250, 204, 21, 0.05) 0px, transparent 50%)',
+  WebkitOverflowScrolling: 'touch',
 };
 
 const ctaCardStyle: CSSProperties = {
@@ -120,7 +122,7 @@ export default async function StoreDesignSystemPage({ params }: PageProps) {
 
   return (
     <main className={rootClassName} style={shellStyle}>
-      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '34px 24px 72px' }}>
+      <div style={{ maxWidth: 1440, width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: 'clamp(18px, 3vw, 34px) clamp(12px, 3vw, 24px) clamp(48px, 6vw, 72px)' }}>
         <HeroSection
           slug={demoSlug}
           storeTitle={storeTitle}
@@ -132,7 +134,6 @@ export default async function StoreDesignSystemPage({ params }: PageProps) {
         <ColorsSection />
         <TypographySection />
         <InteractionsSection />
-        <DashboardSection slug={demoSlug} />
 
         <section style={{ ...ctaCardStyle, marginTop: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>

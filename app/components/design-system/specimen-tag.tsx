@@ -12,6 +12,10 @@ export default function SpecimenTag({ children, color = '#64748b' }: SpecimenTag
     letterSpacing: '0.15em',
     textTransform: 'uppercase',
     color,
+    whiteSpace: 'normal',
+    overflowWrap: 'anywhere',
+    wordBreak: 'break-word',
+    lineHeight: 1.4,
   };
 
   return <span style={style}>{children}</span>;
