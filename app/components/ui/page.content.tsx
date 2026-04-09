@@ -4,6 +4,7 @@ import { Page, ContentBlock } from "@/markket/page.d";
 import { Album, AlbumTrack } from '@/markket/album';
 import { Article } from '@/markket/article';
 import { CodeHighlight } from '@mantine/code-highlight';
+import type { StrapiBlockLinkChild, StrapiBlockTextChild } from '@/markket/richtext';
 
 interface PageContentProps {
   params: {
@@ -28,14 +29,39 @@ export default function PageContent({ params, }: PageContentProps) {
     return null;
   }
 
-  const renderImage = (node: ContentBlock['children'][0], key: number) => {
+  const isLinkChild = (node: StrapiBlockTextChild | StrapiBlockLinkChild): node is StrapiBlockLinkChild => {
+    return node.type === 'link';
+  };
+
+  const isTextChild = (node: StrapiBlockTextChild | StrapiBlockLinkChild): node is StrapiBlockTextChild => {
+    return node.type === 'text';
+  };
+
+  const getBlockType = (block: ContentBlock) => {
+    if (block.type === 'bullet-list') return 'list-unordered';
+    if (block.type === 'ordered-list') return 'list-ordered';
+    if (block.type === 'blockquote') return 'quote';
+    if (block.type === 'codeBlock') return 'code';
+    if (block.type === 'list') return block.format === 'ordered' ? 'list-ordered' : 'list-unordered';
+    return block.type;
+  };
+
+  const getLinkLabel = (node: StrapiBlockLinkChild) => {
+    return node.children?.map((child) => child.text).join('') || '';
+  };
+
+  const renderImage = (node: StrapiBlockLinkChild, key: number) => {
     if (!node.url || renderedImages.has(node.url)) {
       return null;
     }
 
-    if (!node.children?.[0]?.text) {
+    const label = getLinkLabel(node);
+
+    if (!label) {
       return null;
     }
+
+    renderedImages.add(node.url);
 
     return (
       <figure key={key} className="image-container">
@@ -44,19 +70,19 @@ export default function PageContent({ params, }: PageContentProps) {
           target="_blank"
           rel="noopener noreferrer"
           className="block"
-          title={node.children?.[0]?.text || ''}
+          title={label}
         >
           <div className="rounded-xl">
             <img
               src={node.url}
-              alt={node.children?.[0]?.text || ''}
+              alt={label}
               className="max-w-sm"
               loading="lazy"
             />
           </div>
-          {node.children?.[0]?.text && (
+          {label && (
             <figcaption>
-              {node.children[0].text}
+              {label}
             </figcaption>
           )}
         </a>
@@ -64,8 +90,8 @@ export default function PageContent({ params, }: PageContentProps) {
     );
   };
 
-  const renderInline = (node: ContentBlock['children'][0], key: number) => {
-    if (node.code) {
+  const renderInline = (node: StrapiBlockTextChild | StrapiBlockLinkChild, key: number) => {
+    if (isTextChild(node) && node.code) {
       return (
         <code key={key} className="inline-code">
           {node.text}
@@ -73,11 +99,10 @@ export default function PageContent({ params, }: PageContentProps) {
       );
     }
 
-    if (node.type === 'link') {
+    if (isLinkChild(node)) {
       const isImage = node.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
       if (isImage && renderedImages.has(node.url as string)) {
-        renderedImages.add(node.url as string);
         return null;
       }
 
@@ -89,13 +114,17 @@ export default function PageContent({ params, }: PageContentProps) {
           rel="noopener noreferrer"
           className="text-markket-blue hover:text-markket-pink transition-colors"
         >
-          {node.children?.[0]?.text}
+          {getLinkLabel(node)}
         </a>
       );
     }
 
     if (node.bold) {
       return <strong key={key}>{node.text}</strong>
+    }
+
+    if (node.italic) {
+      return <em key={key}>{node.text}</em>;
     }
 
     return <span key={key}>{node.text}</span>;
@@ -107,12 +136,21 @@ export default function PageContent({ params, }: PageContentProps) {
    * @param key
    * @returns
    */
-  const renderListItem = (node: ContentBlock['children'][0], key: number) => {
+  const renderListItem = (node: any, key: number) => {
     if (node.type !== 'list-item') return null;
+
+    const paragraphs = Array.isArray(node.children) ? node.children : [];
 
     return (
       <li key={key} className="list-item">
-        {node.children?.map((child, i) => renderInline(child, i))}
+        {paragraphs.map((paragraph: any, paragraphIndex: number) => {
+          const inlineChildren = Array.isArray(paragraph?.children) ? paragraph.children : [];
+          return (
+            <span key={paragraphIndex}>
+              {inlineChildren.map((child: StrapiBlockTextChild | StrapiBlockLinkChild, i: number) => renderInline(child, i))}
+            </span>
+          );
+        })}
       </li>
     );
   };
@@ -142,16 +180,18 @@ export default function PageContent({ params, }: PageContentProps) {
   };
 
   const renderBlock = (block: ContentBlock) => {
-    if (block.type === 'paragraph') {
-      const imageNodes = block.children.filter(
-        child => child.type === 'link' &&
-          child.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) &&
+    const blockType = getBlockType(block);
+    const children = block.children || [];
+
+    if (blockType === 'paragraph') {
+      const imageNodes = children.filter(
+        (child): child is StrapiBlockLinkChild => isLinkChild(child) &&
+          !!child.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) &&
           !renderedImages.has(child.url)
       );
 
-      const textNodes = block.children.filter(
-        child => !(child.type === 'link' &&
-          child.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+      const textNodes = children.filter(
+        (child) => !(isLinkChild(child) && child.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i))
       );
 
       return (
@@ -172,11 +212,11 @@ export default function PageContent({ params, }: PageContentProps) {
       );
     }
 
-    switch (block.type) {
+    switch (blockType) {
       case 'heading':
         return (
           <Title order={(block.level || 1) as 1 | 2 | 3 | 4 | 5 | 6} className="heading">
-            {block.children.map((child, i) => renderInline(child, i))}
+            {children.map((child, i) => renderInline(child, i))}
           </Title>
         );
 
@@ -184,38 +224,40 @@ export default function PageContent({ params, }: PageContentProps) {
         return (
           <div className="code-block-wrapper">
             <CodeHighlight
-              code={block.children
-                .map(child => child.code ? child.text : '')
+              code={children
+                .map((child) => isTextChild(child) ? child.text : '')
                 .filter(Boolean)
                 .join('\n')}
-              language="tsx"
+              language={typeof block.language === 'string' ? block.language : 'tsx'}
               copyLabel="Copy code"
               withCopyButton
             />
           </div>
         );
 
-      case 'list':
+      case 'list-unordered':
         return (
           <ul className="list-container">
-            {block.children
-              .filter(child => child.type === 'list-item')
+            {(children as any[])
+              .filter((child) => child.type === 'list-item')
               .map((child, i) => renderListItem(child, i))}
           </ul>
+        );
+
+      case 'list-ordered':
+        return (
+          <ol className="list-container">
+            {(children as any[])
+              .filter((child) => child.type === 'list-item')
+              .map((child, i) => renderListItem(child, i))}
+          </ol>
         );
 
       case 'quote':
         return (
           <blockquote className="border-l-4 border-markket-blue pl-4 my-4 italic text-gray-700">
-            {block.children.map((child, i) => renderInline(child, i))}
+            {children.map((child, i) => renderInline(child, i))}
           </blockquote>
-        );
-
-      case 'code':
-        return (
-          <Code block className="my-4 p-4" style={{ whiteSpace: 'pre' }}>
-            {block.children.map(child => child.text).join('\n')}
-          </Code>
         );
 
       case 'image':

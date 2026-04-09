@@ -22,7 +22,7 @@ const StoreSettingsListPage = ({stores}: StoreSettingsListPageProps) => {
             <Button
               variant="light"
               component='a'
-              href={`/dashboard/stores/new/?store=new`}
+              href="/tienda/new"
               leftSection={<IconBrandAppleArcade size={18} />}
               className="border-2 border-black bg-yellow-100 text-fuchsia-700 font-bold hover:bg-fuchsia-200 hover:text-fuchsia-900 transition-all shadow-md rounded-xl px-6 py-2"
             >

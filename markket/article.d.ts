@@ -1,5 +1,7 @@
 import { type SEO } from './seo.d';
 import { type Tag } from './tag.d';
+import type { ContentBlock } from './page.d';
+import type { Store } from './store';
 
 export interface Article {
   id: number;
@@ -10,7 +12,8 @@ export interface Article {
   updatedAt: string;
   publishedAt: string;
   Tags?: Tag[];
-  Content: any[];
+  Content: ContentBlock[];
+  store?: Store;
   SEO: SEO,
   cover: {
     url: string;

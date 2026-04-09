@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Tabs, rem } from '@mantine/core';
 import { IconMessageChatbot, IconClipboardPlus, IconMoodEdit, IconShoppingBagEdit, IconInfoCircle, } from '@tabler/icons-react';
+// @deprecated - Used by old /dashboard/crm route. Needs a /tienda/[storeSlug]/crm equivalent
 
 import InboxDashboardPage from '@/app/components/dashboard/inbox.page';
 import FormsDashboardPage from '@/app/components/dashboard/form.page';

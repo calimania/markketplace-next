@@ -40,13 +40,10 @@ function MagicPage() {
             jwt, id: user.id, username: user.username, email: user.email
           }));
 
-          const storesResponse = await markket.fetch('/api/markket/store', { cache: 'no-store' });
-          const hasStores = Array.isArray(storesResponse?.data) && storesResponse.data.length > 0;
-
           setStatus('success');
           setMessage('You are logged in. Taking you to your workspace...');
 
-          router.replace(hasStores ? '/me' : '/tienda/new');
+          router.replace('/me');
           return;
         }
 

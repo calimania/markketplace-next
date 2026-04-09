@@ -32,12 +32,21 @@ export default function MeHomePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const previewStores = stores.slice(0, 2);
 
   useEffect(() => {
-    setDisplayName(user?.displayName || user?.username || '');
-    setBio(user?.bio || '');
-  }, [user?.displayName, user?.username, user?.bio]);
+    if (isLoading) return;
+    const name = user?.displayName || user?.username || '';
+    const userBio = user?.bio || '';
+    setDisplayName(name);
+    setBio(userBio);
+    setProfileLoaded(true);
+    // auto-open edit mode for new users with no profile info
+    if (!name && !userBio) {
+      setIsEditingProfile(true);
+    }
+  }, [user?.displayName, user?.username, user?.bio, isLoading]);
 
   useEffect(() => {
     if (!confirmed()) {
@@ -144,11 +153,31 @@ export default function MeHomePage() {
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Paper withBorder p="lg" radius="md" className="me-card me-card-enter">
+          {(isLoading || !profileLoaded) ? (
+            <Stack gap="md">
+              <Group justify="space-between" align="flex-start">
+                <Stack gap="xs" style={{ flex: 1 }}>
+                  <Skeleton height={22} width={80} radius="sm" />
+                  <Skeleton height={16} width={200} radius="sm" />
+                </Stack>
+                <Skeleton height={72} width={72} radius="xl" />
+              </Group>
+              <Skeleton height={16} width={120} radius="sm" />
+              <Skeleton height={20} width={180} radius="sm" />
+              <Skeleton height={16} width={100} radius="sm" />
+              <Skeleton height={20} width={160} radius="sm" />
+              <Skeleton height={16} width={80} radius="sm" />
+              <Skeleton height={40} width={160} radius="sm" />
+            </Stack>
+          ) : (
+            <>
           <Group justify="space-between" align="flex-start" mb="md">
             <div>
               <Title order={3}>Profile</Title>
               <Text mt="xs" c="dimmed">
-                {isEditingProfile ? 'Editing mode. Save when done.' : 'Tap edit to update name, bio, and avatar.'}
+                      {isEditingProfile
+                        ? (!displayName ? 'Welcome! Fill in your name and a short bio to get started.' : 'Editing mode. Save when done.')
+                        : 'Tap edit to update name, bio, and avatar.'}
               </Text>
             </div>
             <div style={{ position: 'relative' }}>
@@ -230,14 +259,18 @@ export default function MeHomePage() {
                 onChange={(event) => setBio(event.currentTarget.value)}
               />
               <Group justify="flex-end">
-                <Button variant="default" onClick={() => setIsEditingProfile(false)} radius="xl">
-                  Cancel
-                </Button>
+                        {(!(!displayName && !bio)) && (
+                          <Button variant="default" onClick={() => setIsEditingProfile(false)} radius="xl">
+                            Cancel
+                          </Button>
+                        )}
                 <Button onClick={onSaveQuickProfile} loading={isSaving} radius="xl">
                   Save Profile
                 </Button>
               </Group>
             </Stack>
+          )}
+            </>
           )}
         </Paper>
 

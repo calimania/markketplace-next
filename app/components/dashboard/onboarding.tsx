@@ -68,7 +68,7 @@ const OnboardingComponent = ({ }: { slug?: string }) => {
                 rightSection={<IconArrowRight size={16} />}
                 mt="md"
                 component="a"
-                href="/dashboard/stores/new"
+                href="/tienda/new"
               >
                 Start Creating
               </Button>)}

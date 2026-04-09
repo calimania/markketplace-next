@@ -1,6 +1,8 @@
 'use client';
 
 import StoreDashboardPage from '@/app/components/dashboard/store.page';
+// @deprecated - This component drove /dashboard/[slug] routing.
+// Routes now redirect to /tienda/[storeSlug] and /me. Safe to remove once tienda covers all content types.
 import SettingsDashboardPage from '@/app/components/dashboard/settings.page';
 import StripeDashboardPage from '@/app/components/dashboard/stripe.page';
 import ArticlesDashboardPage from '@/app/components/dashboard/article.page';
@@ -20,7 +22,7 @@ import { IconShoppingCart, IconArticle, IconSettings, IconBuildingStore, IconAlb
 const dashboardLinks = [
   { url: '/dashboard/products', icon: <IconShoppingCart size={20} />, title: 'Products' },
   { url: '/dashboard/articles', icon: <IconArticle size={20} />, title: 'Articles' },
-  { url: '/dashboard/store', icon: <IconBuildingStore size={20} />, title: 'Store' },
+  { url: '/me', icon: <IconBuildingStore size={20} />, title: 'Workspace' },
   { url: '/dashboard/settings', icon: <IconSettings size={20} />, title: 'Settings' },
   { url: '/dashboard/albums', icon: <IconAlbum size={20} />, title: 'Albums' },
   { url: '/dashboard/events', icon: <IconCalendar size={20} />, title: 'Events' },

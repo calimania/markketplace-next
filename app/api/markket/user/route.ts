@@ -147,37 +147,21 @@ export async function PUT(
       );
     }
 
-    const upstreamToken = ADMIN_TOKEN || userToken;
+    const useAdminToken = !!ADMIN_TOKEN;
+    const payload = useAdminToken
+      ? { username: body?.username, email: body?.email, displayName: body?.displayName, bio: body?.bio }
+      : { displayName: body?.displayName, bio: body?.bio };
 
-    if (!upstreamToken) {
-      return NextResponse.json(
-        { error: 'No token provided' },
-        { status: 401 }
-      );
-    }
-
-    const payload = ADMIN_TOKEN
-      ? {
-        username: body?.username,
-        email: body?.email,
-        displayName: body?.displayName,
-        bio: body?.bio,
-      }
-      : {
-        displayName: body?.displayName,
-        bio: body?.bio,
-      };
-
-    const url = ADMIN_TOKEN
+    const url = useAdminToken
       ? new URL(`/api/users/${body.id}`, MARKKET_API)
-      : new URL('/api/user/me', MARKKET_API);
+      : new URL('/api/users/me', MARKKET_API);
 
-    console.log('User update:', { url: url.toString(), payload, hasAdminToken: !!ADMIN_TOKEN });
+    console.log('User update:', { url: url.toString(), payload, useAdminToken });
 
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${upstreamToken}`,
+        'Authorization': `Bearer ${useAdminToken ? ADMIN_TOKEN : userToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),

@@ -31,12 +31,19 @@ export default async function StoresPage() {
 
   const response = await strapiClient.getStores(
     { page: 1, pageSize: 30 },
-    { filter: '', sort: 'title' }
+    { filter: '', sort: 'active:desc,updatedAt:desc' }
   );
 
-  const stores = response?.data?.sort((a, b) =>
-    a.title.localeCompare(b.title)
-  ) as Store[] || [];
+  const stores = ((response?.data || []) as Array<Store & { active?: boolean }>).sort((a, b) => {
+    const activeDiff = Number(Boolean(b.active)) - Number(Boolean(a.active));
+    if (activeDiff !== 0) return activeDiff;
+
+    const updatedA = new Date(a.updatedAt || 0).getTime();
+    const updatedB = new Date(b.updatedAt || 0).getTime();
+    if (updatedB !== updatedA) return updatedB - updatedA;
+
+    return a.title.localeCompare(b.title);
+  }) as Store[];
 
   const pageResponse = await strapiClient.getPage('stores');
   const page = pageResponse?.data?.[0] as Page;

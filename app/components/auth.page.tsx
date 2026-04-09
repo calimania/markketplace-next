@@ -73,21 +73,11 @@ export default function AuthPage() {
       title: 'Dashboard',
       description: 'Content Management',
       icon: IconDashboard,
-      action: () => router.push('/dashboard/store'),
+      action: () => router.push('/me'),
       variant: 'filled',
       action_txt: 'Open dashboard',
       color: '#06b6d4',
       bg: 'linear-gradient(135deg, #e0f2fe 0%, #06b6d4 100%)',
-    },
-    {
-      title: 'Onboarding Wizard',
-      description: 'Ideas to get started',
-      icon: IconGhost,
-      action: () => router.push('/dashboard/onboarding'),
-      variant: 'filled',
-      action_txt: 'Onboarding',
-      color: '#d946ef',
-      bg: 'linear-gradient(135deg, #e0f2fe 0%, #d946ef 100%)',
     },
     {
       title: 'Homepage',
@@ -186,9 +176,13 @@ export default function AuthPage() {
 
               <Stack gap="xs" style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
-                  <a href="javascript:void(0)" onClick={!option.disabled ? option.action : () => { }}>
+                  <button
+                    type="button"
+                    onClick={!option.disabled ? option.action : undefined}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: option.disabled ? 'default' : 'pointer', font: 'inherit', color: 'inherit' }}
+                  >
                     {option.title}
-                  </a>
+                  </button>
                 </Text>
                 <Text size="sm" c="dimmed">
                   {option.description}
