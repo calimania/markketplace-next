@@ -8,6 +8,7 @@ import { GlobalBanner } from '@/app/components/global.banner';
 import EmbedQueryPropagator from '@/app/components/embed.query.propagator';
 import '@mantine/code-highlight/styles.css';
 import '@mantine/notifications/styles.css';
+import '@mantine/tiptap/styles.css';
 import { Notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
 import { markketplace } from "@/markket/config";

@@ -5,7 +5,7 @@ import { Container, Title, Text, Stack, Paper, Box, Overlay, Grid, Card, Button,
 import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
-import Markdown from '@/app/components/ui/page.markdown';
+import RichTextContent from '@/app/components/ui/richtext.content';
 import { markketColors } from '@/markket/colors.config';
 import Albums from '@/app/components/ui/albums.grid';
 import { generateSEOMetadata } from '@/markket/metadata';
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     entity: {
       url: `/${slug}`,
       SEO: store?.SEO,
-      Description: store?.Description,
+      Description: store?.Description || undefined,
       Logo: store?.Logo,
       id: store?.id?.toString(),
     },
@@ -159,7 +159,7 @@ export default async function StorePage({
 
 
             {store?.Description ? (
-              <Markdown content={store.Description} />
+              <RichTextContent content={store.Description} />
             ) : (
               <Text size="xl" c="dimmed" className="mx-auto mb-8">
                 {store?.SEO?.metaDescription}

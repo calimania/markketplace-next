@@ -10,10 +10,7 @@
     "dev": "next dev --port 4020",
     "build": "next build",
     "start": "next start",
-    "build-storybook": "sb build",
-    "storybook": "sb dev -p 6006",
     "check-types": "tsc --noEmit",
-    "chromatic": "npx chromatic --project-token=chpt_8fc520326071d33",
     "rollup": "rollup -c --bundleConfigAsCjs"
   },
   "exports": {

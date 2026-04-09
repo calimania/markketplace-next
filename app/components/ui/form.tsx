@@ -46,6 +46,7 @@ export type FieldType =
   | 'urls'
   | 'tags'
   | 'markdown'
+  | 'html'
   | 'blocks'
   | 'prices'
   | 'password';
@@ -283,6 +284,7 @@ const FormItem = ({
           />
         );
       case 'markdown':
+      case 'html':
       case 'blocks':
         return (
           <ContentEditor
@@ -293,7 +295,7 @@ const FormItem = ({
             value={inputProps.value || ''}
             onChange={inputProps.onChange}
             error={inputProps.error}
-            format={field.type}
+            format={field.type as 'markdown' | 'html' | 'blocks'}
           />
         );
       case 'urls':

@@ -1,9 +1,9 @@
 'use client';
 
 import { Paper, Stack, Title, Text, Group, Button, Badge } from '@mantine/core';
-import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus } from '@tabler/icons-react';
+import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
-import Markdown from '@/app/components/ui/page.markdown';
+import RichTextContent from '@/app/components/ui/richtext.content';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import NavTable from '@/app/components/ui/nav.table';
 import EmptyStateCTA from '@/app/components/ui/empty.state.cta';
@@ -61,32 +61,48 @@ export default function StoreOverview({
           <Stack gap="sm">
             <Text fw={600}>Store Description</Text>
             {store.Description ? (
-              <Markdown content={store.Description} />
+              <RichTextContent content={store.Description} />
             ) : (
               <Text c="dimmed">No description yet for this store.</Text>
             )}
           </Stack>
         </Paper>
 
-        {isAuthorized && (
-          <Group>
+        <Group>
+          <Button
+            component="a"
+            href={`/${store.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            leftSection={<IconExternalLink size={16} />}
+            variant="light"
+            color="cyan"
+          >
+            Open in Markket
+          </Button>
+          {isAuthorized && (
+            <>
             <Button
               component="a"
               href={`/tienda/${store.slug}/design-system`}
+              target="_blank"
+              rel="noopener noreferrer"
               leftSection={<IconPalette size={16} />}
             >
               Open Design System
             </Button>
             <Button
               component="a"
-              variant="default"
+              variant="light"
+              color="rosa"
               href={`/tienda/${store.slug}/store`}
               leftSection={<IconEdit size={16} />}
             >
               Open Store Editor
             </Button>
-          </Group>
-        )}
+            </>
+          )}
+        </Group>
 
         <Paper withBorder radius="md" p="md">
           <Stack gap="sm">

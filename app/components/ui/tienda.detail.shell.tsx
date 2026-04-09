@@ -31,10 +31,10 @@ export default function TiendaDetailShell({
       <Group justify="space-between" align="end">
         <div>
           <Title order={1}>{title}</Title>
-          <Text c="dimmed">{helperText}</Text>
-          <Text c="dimmed" mt={4}>
+          <Text c="dimmed" mt={2}>
             <span className="accent-blue">{routePath}</span>
           </Text>
+          <Text size="xs" c="dimmed" mt={4}>{helperText}</Text>
         </div>
         {!!actions && <Group>{actions}</Group>}
       </Group>

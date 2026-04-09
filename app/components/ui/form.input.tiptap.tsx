@@ -17,17 +17,17 @@ import {
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml } from '@/markket/helpers.blocks';
+import { RichTextValue, TiptapDoc } from '@/markket/richtext';
 
-type tiptapDoc = { type: string, content: any[] }
 interface ContentEditorProps {
-  value?: string | any[] | tiptapDoc;
+  value?: RichTextValue;
   onChange: (value: string) => void;
   label?: string;
   description?: string;
   placeholder?: string;
   minHeight?: number;
   error?: string;
-  format?: 'markdown' | 'blocks';
+  format?: 'markdown' | 'blocks' | 'html';
 }
 
 const getEditorMarkdown = (editor: any): string => {
@@ -146,15 +146,28 @@ const ContentEditor = ({
         onChange(markdown);
       }
 
+      if (format == 'html') {
+        onChange(editor.getHTML());
+      }
+
       if (format == 'blocks') {
         const html = editor.getJSON();
         onChange(html as any);
+      }
+    },
+    onUpdate: ({ editor }) => {
+      if (format == 'html') {
+        onChange(editor.getHTML());
       }
     },
     onCreate: ({ editor }) => {
       if (format == 'markdown') {
         const markdown = getEditorMarkdown(editor);
         onChange(markdown);
+      }
+
+      if (format == 'html') {
+        onChange(editor.getHTML());
       }
 
       if (format == 'blocks') {
@@ -167,8 +180,16 @@ const ContentEditor = ({
   useEffect(() => {
     if (!editor || !value) return;
 
+    if (format == 'html') {
+      const currentContent = editor.getHTML();
+      if (currentContent !== value) {
+        editor.commands.setContent(value as string);
+      }
+      return;
+    }
+
     if (format == 'blocks') {
-      if ((value as tiptapDoc)?.type !== 'doc') {
+      if ((value as TiptapDoc)?.type !== 'doc') {
         const parsed = blocksToHtml(value as any[]);
         editor.commands.setContent(parsed);
         return;

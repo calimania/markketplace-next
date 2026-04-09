@@ -15,6 +15,7 @@ export { type Form } from './form';
 export { type Subscriber } from './newsletter';
 export { type Order } from './order';
 export { type Tag } from './tag';
+export { type RichTextValue, type StoredRichText, type TiptapDoc, type StrapiBlock } from './richtext';
 
 type EventRecord = Event;
 
