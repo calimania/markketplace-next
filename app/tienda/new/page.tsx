@@ -24,6 +24,7 @@ import { markketClient } from '@/markket/api';
 
 type CreateStoreForm = {
   title: string;
+  slug: string;
   description: string;
 };
 
@@ -47,21 +48,54 @@ function slugifyStoreTitle(title: string) {
   return `${base}-shop`;
 }
 
+function normalizeSlugInput(value: string) {
+  const normalized = value
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  if (!normalized) return '';
+  return normalized;
+}
+
 export default function TiendaNewPage() {
   const router = useRouter();
   const { confirmed, isLoading, fetchStores } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSlugTouched, setIsSlugTouched] = useState(false);
 
   const form = useForm<CreateStoreForm>({
     initialValues: {
       title: '',
+      slug: '',
       description: '',
     },
     validate: {
       title: (value) => (value.trim().length < 3 ? 'Title should be at least 3 characters.' : null),
+      slug: (value) => {
+        const normalized = normalizeSlugInput(value);
+        if (!normalized) return 'Slug is required.';
+        if (normalized.length < 5) return 'Slug must be at least 5 characters.';
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized)) {
+          return 'Slug can only contain lowercase letters, numbers, and dashes.';
+        }
+        return null;
+      },
       description: (value) => (value.trim().length < 12 ? 'Add a short description so the store has a clear starting point.' : null),
     },
   });
+
+  useEffect(() => {
+    if (isSlugTouched) return;
+    const suggested = slugifyStoreTitle(form.values.title);
+    if (form.values.slug !== suggested) {
+      form.setFieldValue('slug', suggested);
+    }
+  }, [form.values.title, form.values.slug, form, isSlugTouched]);
 
   useEffect(() => {
     if (isLoading) {
@@ -78,7 +112,7 @@ export default function TiendaNewPage() {
 
     const title = values.title.trim();
     const description = values.description.trim();
-    const slug = slugifyStoreTitle(title);
+    const slug = normalizeSlugInput(values.slug || slugifyStoreTitle(title));
     const metaDescription = description.replace(/\s+/g, ' ').slice(0, 160);
 
     try {
@@ -179,6 +213,23 @@ export default function TiendaNewPage() {
                   description="This also seeds SEO.metaTitle and the first slug."
                   disabled={isSubmitting}
                   {...form.getInputProps('title')}
+                />
+
+                <TextInput
+                  label="Slug"
+                  placeholder="casa-caliman"
+                  description="At least 5 chars. Lowercase letters, numbers, and dashes."
+                  disabled={isSubmitting}
+                  value={form.values.slug}
+                  onChange={(event) => {
+                    setIsSlugTouched(true);
+                    form.setFieldValue('slug', normalizeSlugInput(event.currentTarget.value));
+                  }}
+                  onBlur={() => {
+                    const normalized = normalizeSlugInput(form.values.slug);
+                    form.setFieldValue('slug', normalized);
+                  }}
+                  error={form.errors.slug}
                 />
 
                 <Textarea

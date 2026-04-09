@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
 import { IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconSparkles } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
@@ -15,13 +15,20 @@ type StoreEditorSkeletonProps = {
   isEditing: boolean;
   isSaving: boolean;
   saveError: string | null;
+  editorNotice: string | null;
   draftTitle: string;
+  draftSlug: string;
   draftDescription: string;
+  draftSeoTitle: string;
+  draftSeoDescription: string;
   onStartEditing: () => void;
   onCancelEditing: () => void;
   onSave: () => void;
   onTitleChange: (value: string) => void;
+  onSlugChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onSeoTitleChange: (value: string) => void;
+  onSeoDescriptionChange: (value: string) => void;
 };
 
 export default function StoreEditorSkeleton({
@@ -29,15 +36,23 @@ export default function StoreEditorSkeleton({
   isEditing,
   isSaving,
   saveError,
+  editorNotice,
   draftTitle,
+  draftSlug,
   draftDescription,
+  draftSeoTitle,
+  draftSeoDescription,
   onStartEditing,
   onCancelEditing,
   onSave,
   onTitleChange,
+  onSlugChange,
   onDescriptionChange,
+  onSeoTitleChange,
+  onSeoDescriptionChange,
 }: StoreEditorSkeletonProps) {
-  const publicHref = `/${store.slug}`;
+  const activeSlug = isEditing ? (draftSlug || store.slug) : store.slug;
+  const publicHref = `/${activeSlug}`;
   const mediaPreview = useMemo(() => buildEditorMediaPreview(draftDescription), [draftDescription]);
   const hasMediaPreview =
     !!mediaPreview.excerpt ||
@@ -57,12 +72,12 @@ export default function StoreEditorSkeleton({
 
       <Group justify="space-between" align="flex-start">
         <div>
-          <Title order={1}>Store Editor</Title>
+          <Title order={1}>Store Details</Title>
           <Text c="dimmed" mt={2}>
             <span className="accent-blue">/tienda/{store.slug}/store</span>
           </Text>
           <Text size="xs" c="dimmed" mt={4}>
-            A dedicated workspace for store identity, storefront controls, and the shared URL people will actually visit.
+            Manage store identity, storefront metadata, and the public URL people will actually visit.
           </Text>
         </div>
         <Badge variant="light" color="cyan">Tendero</Badge>
@@ -80,21 +95,17 @@ export default function StoreEditorSkeleton({
             Edit
           </Button>
         )}
-        {isEditing && (
-          <>
-            <Button variant="default" onClick={onCancelEditing} leftSection={<IconPencilX size={16} />}>
-              Discard
-            </Button>
-            <Button onClick={onSave} loading={isSaving} leftSection={<IconDeviceFloppy size={16} />}>
-              Save
-            </Button>
-          </>
-        )}
       </Group>
 
       {saveError && (
         <Paper withBorder radius="md" p="md">
           <Text size="sm" c="red">{saveError}</Text>
+        </Paper>
+      )}
+
+      {editorNotice && (
+        <Paper withBorder radius="md" p="md" bg="blue.0">
+          <Text size="sm" c="blue.8">{editorNotice}</Text>
         </Paper>
       )}
 
@@ -105,6 +116,65 @@ export default function StoreEditorSkeleton({
             This is the storefront link you can preview and share publicly.
           </Text>
           <TextInput value={publicHref} readOnly type="url" />
+          {!isEditing && (
+            <Text size="xs" c="dimmed">Tip: use the Edit button or double-click any preview section below.</Text>
+          )}
+        </Stack>
+      </Paper>
+
+      <Paper
+        withBorder
+        radius="md"
+        p="md"
+        role={!isEditing ? 'button' : undefined}
+        tabIndex={!isEditing ? 0 : undefined}
+        onDoubleClick={!isEditing ? onStartEditing : undefined}
+        onKeyDown={!isEditing ? ((event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onStartEditing();
+          }
+        }) : undefined}
+        style={!isEditing ? { cursor: 'pointer' } : undefined}
+        aria-label={!isEditing ? 'Open edit mode from SEO section' : undefined}
+        title={!isEditing ? 'Double-click to edit' : undefined}
+      >
+        <Stack gap="sm">
+          <Group justify="space-between" align="center">
+            <Text fw={600}>SEO</Text>
+            <Badge variant="light" color="grape">Simple fields</Badge>
+          </Group>
+          <Text c="dimmed" size="sm">
+            These are the first metadata controls for the storefront. Keep them short, descriptive, and aligned with what people should find.
+          </Text>
+
+          <TextInput
+            label="SEO Title"
+            value={draftSeoTitle}
+            onChange={(event) => onSeoTitleChange(event.currentTarget.value)}
+            readOnly={!isEditing}
+          />
+
+          <Textarea
+            label="SEO Description"
+            value={draftSeoDescription}
+            onChange={(event) => onSeoDescriptionChange(event.currentTarget.value)}
+            minRows={3}
+            autosize
+            readOnly={!isEditing}
+            description={`${draftSeoDescription.length}/160 characters`}
+          />
+
+          <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
+            <Stack gap={4}>
+              <Text size="sm" fw={600}>Search Preview</Text>
+              <Text size="sm" c="blue" fw={500}>{draftSeoTitle || draftTitle || store.title}</Text>
+              <Text size="xs" c="green">{publicHref}</Text>
+              <Text size="sm" c="dimmed">
+                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social previews.'}
+              </Text>
+            </Stack>
+          </Paper>
         </Stack>
       </Paper>
 
@@ -123,7 +193,24 @@ export default function StoreEditorSkeleton({
             onChange={(event) => onTitleChange(event.currentTarget.value)}
             readOnly={!isEditing}
           />
-          <TextInput label="Slug" value={store.slug || ''} readOnly />
+          <TextInput
+            label="Slug"
+            value={draftSlug}
+            onChange={(event) => onSlugChange(event.currentTarget.value)}
+            readOnly={!isEditing}
+            description="Lowercase letters, numbers, and dashes only."
+          />
+
+          {isEditing && (
+            <Group justify="flex-end">
+              <Button variant="default" onClick={onCancelEditing} leftSection={<IconPencilX size={16} />}>
+                Discard
+              </Button>
+              <Button onClick={onSave} loading={isSaving} leftSection={<IconDeviceFloppy size={16} />}>
+                Save
+              </Button>
+            </Group>
+          )}
 
           {isEditing ? (
             <Stack gap="sm">
@@ -132,7 +219,7 @@ export default function StoreEditorSkeleton({
                 description="Rich text (Strapi richtext) powered by Tiptap."
                 placeholder="Tell people what this store is about."
                 value={draftDescription}
-                onChange={onDescriptionChange}
+                onChange={(value) => onDescriptionChange(typeof value === 'string' ? value : '')}
                 format="html"
               />
 
@@ -184,13 +271,27 @@ export default function StoreEditorSkeleton({
               )}
             </Stack>
           ) : (
-            <div>
+              <div
+                role="button"
+                tabIndex={0}
+                onDoubleClick={onStartEditing}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onStartEditing();
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+                aria-label="Open edit mode"
+                title="Double-click to edit"
+              >
               <Text size="sm" fw={500} mb={6}>Description</Text>
               {draftDescription?.trim() ? (
                 <RichTextContent content={draftDescription} />
               ) : (
                 <Text c="dimmed" size="sm">No description yet.</Text>
               )}
+                <Text size="xs" c="dimmed" mt={8}>Double-click this section to edit.</Text>
             </div>
           )}
         </Stack>
@@ -212,6 +313,34 @@ export default function StoreEditorSkeleton({
           <Skeleton height={42} radius="md" />
         </Stack>
       </Paper>
+
+      {isEditing && (
+        <Paper
+          withBorder
+          radius="xl"
+          p="sm"
+          style={{
+            position: 'sticky',
+            bottom: 12,
+            zIndex: 30,
+            background: 'rgba(255, 255, 255, 0.96)',
+            backdropFilter: 'blur(6px)',
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          <Group justify="space-between" align="center">
+            <Text size="sm" c="dimmed">Editing in progress</Text>
+            <Group>
+              <Button variant="default" onClick={onCancelEditing} leftSection={<IconPencilX size={16} />}>
+                Discard
+              </Button>
+              <Button onClick={onSave} loading={isSaving} leftSection={<IconDeviceFloppy size={16} />}>
+                Save
+              </Button>
+            </Group>
+          </Group>
+        </Paper>
+      )}
     </Stack>
   );
 }

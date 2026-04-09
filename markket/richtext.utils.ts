@@ -35,3 +35,26 @@ export const richTextToHtml = (value: RichTextValue | StoredRichText): string =>
 
   return '';
 };
+
+export const richTextToPlainText = (value: RichTextValue | StoredRichText): string => {
+  const html = richTextToHtml(value);
+
+  if (!html) {
+    return '';
+  }
+
+  return html
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<\/h[1-6]>/gi, ' ')
+    .replace(/<\/li>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+};

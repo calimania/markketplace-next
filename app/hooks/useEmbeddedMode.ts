@@ -91,14 +91,8 @@ function ensureInjectedStorageEventsPatched() {
 }
 
 export function useEmbeddedMode() {
-  const [embedded, setEmbedded] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-
-    const fromQuery = readEmbedFromQuery();
-    if (typeof fromQuery === 'boolean') return fromQuery;
-
-    return isEmbeddedMode();
-  });
+  // Keep first client render equal to SSR to avoid hydration mismatches.
+  const [embedded, setEmbedded] = useState<boolean>(false);
 
   useEffect(() => {
     ensureHistoryEventsPatched();

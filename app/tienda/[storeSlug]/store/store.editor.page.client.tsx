@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Group, Paper, Skeleton, Stack, Text, Title } from '@mantine/core';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth.provider';
+import { markketClient } from '@/markket/api';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 import StoreEditorSkeleton from './store.editor.skeleton';
@@ -12,6 +14,17 @@ import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 type StoreEditorClientPageProps = {
   storeSlug: string;
 };
+
+type StoreDraft = {
+  title: string;
+  slug: string;
+  description: string;
+  seoTitle: string;
+  seoDescription: string;
+  updatedAt: string;
+};
+
+const buildDraftKey = (store: Store) => `markket.store-draft.${store.documentId || store.slug || store.id}`;
 
 function StoreEditorLoadingScaffold() {
   return (
@@ -63,6 +76,7 @@ function StoreEditorLoadingScaffold() {
 }
 
 export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPageProps) {
+  const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
   const [store, setStore] = useState<Store | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
@@ -70,13 +84,18 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editorNotice, setEditorNotice] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
+  const [draftSlug, setDraftSlug] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
+  const [draftSeoTitle, setDraftSeoTitle] = useState('');
+  const [draftSeoDescription, setDraftSeoDescription] = useState('');
+  const hasLoadedLocalDraftRef = useRef(false);
 
   const isConfirmed = confirmed();
   const ownerStore = useMemo(() => stores.find((candidate) => candidate.slug === storeSlug), [stores, storeSlug]);
   const canAuthorize = !isLoading && isConfirmed;
-  const isAuthorized = !!ownerStore;
+  const isAuthorized = !!ownerStore || (!!store && stores.some((candidate) => candidate.documentId === store.documentId));
   const ownershipLoading = isConfirmed && stores.length === 0;
 
   useEffect(() => {
@@ -94,14 +113,6 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     let active = true;
     const run = async () => {
       if (!canAuthorize) {
-        return;
-      }
-
-      if (!isAuthorized) {
-        if (active) {
-          setStore(null);
-          setStoreLoading(false);
-        }
         return;
       }
 
@@ -127,37 +138,148 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     return () => {
       active = false;
     };
-  }, [canAuthorize, isAuthorized, storeSlug]);
+  }, [canAuthorize, storeSlug]);
 
   useEffect(() => {
     if (!store) return;
     setDraftTitle(store.title || '');
+    setDraftSlug(store.slug || '');
     setDraftDescription(richTextToHtml(store.Description));
+    setDraftSeoTitle(store.SEO?.metaTitle || store.title || '');
+    setDraftSeoDescription(store.SEO?.metaDescription || '');
+    hasLoadedLocalDraftRef.current = false;
+  }, [store]);
+
+  useEffect(() => {
+    if (!store || hasLoadedLocalDraftRef.current) return;
+
+    hasLoadedLocalDraftRef.current = true;
+
+    try {
+      const key = buildDraftKey(store);
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw) as Partial<StoreDraft>;
+      const recoveredTitle = typeof parsed.title === 'string' ? parsed.title : '';
+      const recoveredSlug = typeof parsed.slug === 'string' ? parsed.slug : '';
+      const recoveredDescription = typeof parsed.description === 'string' ? parsed.description : '';
+      const recoveredSeoTitle = typeof parsed.seoTitle === 'string' ? parsed.seoTitle : '';
+      const recoveredSeoDescription = typeof parsed.seoDescription === 'string' ? parsed.seoDescription : '';
+
+      const hasRecoveredValues = [
+        recoveredTitle,
+        recoveredSlug,
+        recoveredDescription,
+        recoveredSeoTitle,
+        recoveredSeoDescription,
+      ].some((value) => value.length > 0);
+
+      if (!hasRecoveredValues) {
+        return;
+      }
+
+      setDraftTitle(recoveredTitle || store.title || '');
+      setDraftSlug(recoveredSlug || store.slug || '');
+      setDraftDescription(recoveredDescription || richTextToHtml(store.Description));
+      setDraftSeoTitle(recoveredSeoTitle || store.SEO?.metaTitle || store.title || '');
+      setDraftSeoDescription(recoveredSeoDescription || store.SEO?.metaDescription || '');
+      setIsEditing(true);
+      setEditorNotice('Recovered an unsaved draft from this device. Save to keep it or Discard to revert.');
+    } catch (error) {
+      console.warn('store.editor.draft.restore.failed', error);
+    }
   }, [store]);
 
   const handleDiscard = () => {
     if (!store) return;
     setDraftTitle(store.title || '');
+    setDraftSlug(store.slug || '');
     setDraftDescription(richTextToHtml(store.Description));
+    setDraftSeoTitle(store.SEO?.metaTitle || store.title || '');
+    setDraftSeoDescription(store.SEO?.metaDescription || '');
     setSaveError(null);
+    setEditorNotice(null);
     setIsEditing(false);
+
+    try {
+      localStorage.removeItem(buildDraftKey(store));
+    } catch (error) {
+      console.warn('store.editor.draft.remove.failed', error);
+    }
   };
+
+  useEffect(() => {
+    if (!store || !isEditing) return;
+
+    const normalize = (value: string) => value.trim();
+    const baselineTitle = normalize(store.title || '');
+    const baselineSlug = normalize(store.slug || '');
+    const baselineDescription = normalize(richTextToHtml(store.Description));
+    const baselineSeoTitle = normalize(store.SEO?.metaTitle || store.title || '');
+    const baselineSeoDescription = normalize(store.SEO?.metaDescription || '');
+
+    const nextTitle = normalize(draftTitle);
+    const nextSlug = normalize(draftSlug);
+    const nextDescription = normalize(draftDescription);
+    const nextSeoTitle = normalize(draftSeoTitle);
+    const nextSeoDescription = normalize(draftSeoDescription);
+
+    const hasChanges =
+      nextTitle !== baselineTitle ||
+      nextSlug !== baselineSlug ||
+      nextDescription !== baselineDescription ||
+      nextSeoTitle !== baselineSeoTitle ||
+      nextSeoDescription !== baselineSeoDescription;
+
+    const key = buildDraftKey(store);
+
+    if (!hasChanges) {
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.warn('store.editor.draft.remove.failed', error);
+      }
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const payload: StoreDraft = {
+        title: draftTitle,
+        slug: draftSlug,
+        description: draftDescription,
+        seoTitle: draftSeoTitle,
+        seoDescription: draftSeoDescription,
+        updatedAt: new Date().toISOString(),
+      };
+
+      try {
+        localStorage.setItem(key, JSON.stringify(payload));
+      } catch (error) {
+        console.warn('store.editor.draft.save.failed', error);
+      }
+    }, 450);
+
+    return () => window.clearTimeout(timeout);
+  }, [store, isEditing, draftTitle, draftSlug, draftDescription, draftSeoTitle, draftSeoDescription]);
 
   const handleSave = async () => {
     if (!store) return;
 
     const title = draftTitle.trim();
+    const nextSlug = draftSlug.trim().toLowerCase();
     if (!title) {
       setSaveError('Title is required.');
       return;
     }
 
-    const authString = localStorage.getItem('markket.auth');
-    const auth = authString ? JSON.parse(authString) : {};
-    const jwt = auth?.jwt as string | undefined;
+    if (!nextSlug) {
+      setSaveError('Slug is required.');
+      return;
+    }
 
-    if (!jwt) {
-      setSaveError('Your session expired. Please sign in again.');
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(nextSlug) || nextSlug.length < 5) {
+      setSaveError('Slug must be at least 5 chars and use only lowercase letters, numbers, and dashes.');
       return;
     }
 
@@ -166,25 +288,61 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
 
     try {
       const payload = {
-        title,
-        Description: draftDescription,
+        store: {
+          ...store,
+          title,
+          Description: draftDescription,
+          slug: nextSlug,
+          URLS: store.URLS || [],
+          SEO: {
+            ...store.SEO,
+            metaTitle: draftSeoTitle.trim() || title,
+            metaDescription: draftSeoDescription.trim(),
+          },
+          Favicon: store.Favicon,
+          Cover: store.Cover,
+          Slides: store.Slides,
+          Logo: store.Logo,
+        },
       };
 
-      const updated = await strapiClient.update('stores', String(store.documentId || store.id), {
-        headers: { Authorization: `Bearer ${jwt}` },
-        data: payload,
+      const client = new markketClient();
+      const updated = await client.put(`/api/markket/store?id=${store.documentId}`, {
+        body: payload,
       });
 
+      if (updated?.error) {
+        throw new Error(updated?.details?.message || updated?.error || 'Unable to save changes right now.');
+      }
+
       const next = (updated?.data || {}) as Partial<Store>;
+      const finalSlug = (next.slug as string) || nextSlug;
       setStore((current) => {
         if (!current) return current;
         return {
           ...current,
           ...next,
-          ...payload,
+          ...payload.store,
+          SEO: {
+            ...current.SEO,
+            ...payload.store.SEO,
+            ...(next.SEO || {}),
+          },
         };
       });
       setIsEditing(false);
+      await fetchStores();
+
+      try {
+        localStorage.removeItem(buildDraftKey(store));
+      } catch (error) {
+        console.warn('store.editor.draft.remove.failed', error);
+      }
+      setEditorNotice(null);
+
+      if (finalSlug !== storeSlug) {
+        router.replace(`/tienda/${finalSlug}/store`);
+      }
     } catch (error) {
       console.error('store.editor.save.error', error);
       setSaveError('Unable to save changes right now.');
@@ -237,8 +395,12 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       isEditing={isEditing}
       isSaving={isSaving}
       saveError={saveError}
+      editorNotice={editorNotice}
       draftTitle={draftTitle}
+      draftSlug={draftSlug}
       draftDescription={draftDescription}
+      draftSeoTitle={draftSeoTitle}
+      draftSeoDescription={draftSeoDescription}
       onStartEditing={() => {
         setSaveError(null);
         setIsEditing(true);
@@ -246,7 +408,10 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       onCancelEditing={handleDiscard}
       onSave={handleSave}
       onTitleChange={setDraftTitle}
+      onSlugChange={setDraftSlug}
       onDescriptionChange={setDraftDescription}
+      onSeoTitleChange={setDraftSeoTitle}
+      onSeoDescriptionChange={setDraftSeoDescription}
     />
   );
 }
