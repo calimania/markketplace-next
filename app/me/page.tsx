@@ -17,6 +17,7 @@ import {
   TextInput,
   Textarea,
   Divider,
+  Skeleton,
 } from '@mantine/core';
 import { IconBuildingStore, IconPlus, IconUserCircle, IconCamera, IconPencil } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -31,6 +32,7 @@ export default function MeHomePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const previewStores = stores.slice(0, 2);
 
   useEffect(() => {
     setDisplayName(user?.displayName || user?.username || '');
@@ -123,25 +125,25 @@ export default function MeHomePage() {
   };
 
   return (
-    <Container size="lg" py="xl">
-      <Group justify="space-between" align="end" mb="lg">
+    <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface">
+      <Group justify="space-between" align="end" mb="xl">
         <Stack gap={2}>
           <Group gap="xs">
             <IconUserCircle size={28} />
             <Title order={1}>Me</Title>
           </Group>
-          <Text c="dimmed">Quick profile edits and fast access to your stores.<br /><span className="accent-hint">Everything you manage lives here.</span></Text>
+          <Text c="dimmed">Quick profile edits and fast access to your stores.<br /><span className="accent-blue-note">Everything you manage lives here.</span></Text>
         </Stack>
 
         <Group>
-          <Button variant="default" component={Link} href="/me/account">
+          <Button variant="default" component={Link} href="/me/account" radius="xl">
             Account Tabs
           </Button>
         </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-        <Paper withBorder p="lg" radius="md">
+        <Paper withBorder p="lg" radius="md" className="me-card me-card-enter">
           <Group justify="space-between" align="flex-start" mb="md">
             <div>
               <Title order={3}>Profile</Title>
@@ -200,7 +202,11 @@ export default function MeHomePage() {
                 <Text>{bio || 'No bio yet. Add a short intro.'}</Text>
               </div>
               <Group justify="flex-end">
-                <Button leftSection={<IconPencil size={15} />} onClick={() => setIsEditingProfile(true)}>
+                <Button
+                  leftSection={<IconPencil size={15} />}
+                  onClick={() => setIsEditingProfile(true)}
+                  radius="xl"
+                >
                   Edit Profile
                 </Button>
               </Group>
@@ -224,10 +230,10 @@ export default function MeHomePage() {
                 onChange={(event) => setBio(event.currentTarget.value)}
               />
               <Group justify="flex-end">
-                <Button variant="default" onClick={() => setIsEditingProfile(false)}>
+                <Button variant="default" onClick={() => setIsEditingProfile(false)} radius="xl">
                   Cancel
                 </Button>
-                <Button onClick={onSaveQuickProfile} loading={isSaving}>
+                <Button onClick={onSaveQuickProfile} loading={isSaving} radius="xl">
                   Save Profile
                 </Button>
               </Group>
@@ -235,56 +241,70 @@ export default function MeHomePage() {
           )}
         </Paper>
 
-        <Paper withBorder p="lg" radius="md" style={{ position: 'relative', minHeight: 360 }}>
-          <Button
-            component={Link}
-            href="/me/store/new"
-            leftSection={<IconPlus size={16} />}
-            style={{ position: 'absolute', right: 16, top: 16 }}
-          >
-            Create Store
-          </Button>
-
-          <Group justify="space-between" align="end" mb="sm" style={{ paddingRight: 124 }}>
-            <div>
-              <Title order={3}>
-                <span className="accent-yellow">Your</span> Stores
-              </Title>
+        <Paper withBorder p="lg" radius="md" className="me-card me-card-enter" style={{ minHeight: 360 }}>
+          <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
+            <Stack gap={2} style={{ minWidth: 0 }}>
+              <Group gap="xs" align="center" wrap="wrap">
+                <Title order={3}>
+                  <span className="accent-blue">Your</span> Stores
+                </Title>
+                <Badge variant="light" className="me-store-count">{stores.length}</Badge>
+              </Group>
               <Text mt="xs" c="dimmed">Click to manage. Create store to add more.</Text>
-            </div>
-            <Badge variant="light">{stores.length}</Badge>
+            </Stack>
+
+            <Button
+              component={Link}
+              href="/me/store/new"
+              leftSection={<IconPlus size={16} />}
+              radius="xl"
+            >
+              Create Store
+            </Button>
           </Group>
 
           <Divider mb="sm" />
 
           <Stack>
-            {isLoading && <Text c="dimmed">Loading stores...</Text>}
+            {isLoading && (
+              <Stack gap="xs" className="me-loading-enter">
+                <Skeleton height={58} radius="md" />
+                <Skeleton height={58} radius="md" />
+                <Text size="sm" c="dimmed">Loading stores...</Text>
+              </Stack>
+            )}
             {!isLoading && stores.length === 0 && (
               <Text c="dimmed">No stores yet. Hit Create Store to launch your first one.</Text>
             )}
-            {!isLoading && stores.slice(0, 2).map((store) => (
-              <Paper key={store.documentId} withBorder p="sm" radius="sm">
-                <Group justify="space-between" align="center">
-                  <div>
-                    <Text fw={700}>{store.title}</Text>
-                    <Text size="sm" c="dimmed">/{store.slug}</Text>
-                  </div>
-                  <Button
-                    size="xs"
-                    component={Link}
-                    href={`/tienda/${store.slug}`}
-                  >
-                    Open
-                  </Button>
-                </Group>
-              </Paper>
-            ))}
+            {!isLoading && previewStores.map((store, index) => {
+              const storeKey = `${store.documentId || store.slug || store.id || 'store'}-${index}`;
+
+              return (
+                <Paper key={storeKey} withBorder p="sm" radius="sm" className="me-store-card">
+                  <Group justify="space-between" align="center">
+                    <div>
+                      <Text fw={700}>{store.title}</Text>
+                      <Text size="sm" c="dimmed">/{store.slug}</Text>
+                    </div>
+                    <Button
+                      size="xs"
+                      component={Link}
+                      href={`/tienda/${store.slug}`}
+                      radius="xl"
+                    >
+                      Open
+                    </Button>
+                  </Group>
+                </Paper>
+              );
+            })}
 
             <Button
               variant="default"
               component={Link}
               href="/tienda"
               leftSection={<IconBuildingStore size={16} />}
+              radius="xl"
             >
               See All Stores
             </Button>
