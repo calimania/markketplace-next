@@ -3,6 +3,7 @@ import { strapiClient } from '@/markket/api.strapi';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Metadata } from "next";
 import HomePageComponent from '@/app/components/ui/home.page';
+import type { Article } from '@/markket/article';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data: [page] } = await strapiClient.getPage('home');
@@ -25,8 +26,13 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns {JSX.Element}
  */
 export default async function Home() {
-  const { data: [store] } = await strapiClient.getStore();
-  const { data: [page] } = await strapiClient.getPage('home');
+  const [{ data: [store] }, { data: [page] }, communityPostsResponse] = await Promise.all([
+    strapiClient.getStore(),
+    strapiClient.getPage('home'),
+    strapiClient.getCommunityPosts({ page: 1, pageSize: 6 }, { sort: 'publishedAt:desc' }),
+  ]);
 
-  return <HomePageComponent store={store} page={page} />;
+  const communityPosts = (communityPostsResponse?.data || []) as Article[];
+
+  return <HomePageComponent store={store} page={page} communityPosts={communityPosts} />;
 };

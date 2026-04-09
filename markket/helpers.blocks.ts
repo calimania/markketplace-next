@@ -1,48 +1,99 @@
-export const blocksToHtml = (blocks: any[]): string => {
+import type { StrapiBlock, StrapiBlockLinkChild, StrapiBlockTextChild } from '@/markket/richtext';
+
+const escapeHtml = (value: string): string => {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const renderInlineText = (child: StrapiBlockTextChild): string => {
+  let text = escapeHtml(child.text || '');
+
+  if (child.code) text = `<code>${text}</code>`;
+  if (child.bold) text = `<strong>${text}</strong>`;
+  if (child.italic) text = `<em>${text}</em>`;
+
+  return text;
+};
+
+const renderInlineChild = (child: StrapiBlockTextChild | StrapiBlockLinkChild): string => {
+  if (child.type === 'link') {
+    const label = (child.children || []).map(renderInlineText).join('');
+    const href = escapeHtml(child.url || '');
+    return `<a href="${href}">${label}</a>`;
+  }
+
+  return renderInlineText(child);
+};
+
+const renderBlockChildren = (children?: Array<StrapiBlockTextChild | StrapiBlockLinkChild>): string => {
+  return (children || []).map(renderInlineChild).join('');
+};
+
+const renderListItem = (item: any): string => {
+  const paragraphs = Array.isArray(item?.children) ? item.children : [];
+  const content = paragraphs
+    .map((paragraph: any) => renderBlockChildren(paragraph?.children || []))
+    .filter(Boolean)
+    .join('');
+
+  return `<li>${content}</li>`;
+};
+
+const getNormalizedBlockType = (block: StrapiBlock): string => {
+  if (block.type === 'bullet-list') return 'list-unordered';
+  if (block.type === 'ordered-list') return 'list-ordered';
+  if (block.type === 'blockquote') return 'quote';
+  if (block.type === 'codeBlock') return 'code';
+  if (block.type === 'list') {
+    return block.format === 'ordered' ? 'list-ordered' : 'list-unordered';
+  }
+
+  return block.type;
+};
+
+export const blocksToHtml = (blocks: StrapiBlock[]): string => {
   if (!blocks || !Array.isArray(blocks)) return '';
 
   try {
     return blocks.map(block => {
-      if (block.type === 'paragraph') {
-        return `<p>${block.children.map((child: any) =>
-          child.text || (child.type === 'link' ?
-            `<a href="${child.url}">${child.children?.[0]?.text || ''}</a>` : '')
-        ).join('')}</p>`;
+      const normalizedType = getNormalizedBlockType(block);
+
+      if (normalizedType === 'paragraph') {
+        return `<p>${renderBlockChildren(block.children)}</p>`;
       }
 
-      if (block.type === 'heading') {
+      if (normalizedType === 'heading') {
         const level = block.level || 1;
-        return `<h${level}>${block.children.map((child: any) =>
-          child.url ?
-            `<a href="${child.url}">${child.children?.[0]?.text || child.text || ''}</a>` :
-            child.text
-        ).join('')}</h${level}>`;
+        return `<h${level}>${renderBlockChildren(block.children)}</h${level}>`;
       }
 
-      if (block.type === 'code') {
-        return `<pre><code>${block.children.map((child: any) => child.text).join('\n')}</code></pre>`;
+      if (normalizedType === 'code') {
+        const code = (block.children || [])
+          .map((child) => ('text' in child ? child.text || '' : ''))
+          .join('\n');
+        return `<pre><code>${escapeHtml(code)}</code></pre>`;
       }
 
-      if (block.type === 'blockquote') {
-        return `<blockquote>${block.children.map((child: any) => child.text).join('\n')}</blockquote>`;
+      if (normalizedType === 'quote') {
+        return `<blockquote>${renderBlockChildren(block.children)}</blockquote>`;
       }
 
-      if (block.type === 'bullet-list') {
-        return `<ul>${block.children.map((item: any) =>
-          `<li>${item.children.map((c: any) => c.text).join('')}</li>`
-        ).join('')}</ul>`;
+      if (normalizedType === 'list-unordered') {
+        return `<ul>${(block.children as any[] || []).map(renderListItem).join('')}</ul>`;
       }
 
-      if (block.type === 'ordered-list') {
-        return `<ol>${block.children.map((item: any) =>
-          `<li>${item.children.map((c: any) => c.text).join('')}</li>`
-        ).join('')}</ol>`;
+      if (normalizedType === 'list-ordered') {
+        return `<ol>${(block.children as any[] || []).map(renderListItem).join('')}</ol>`;
       }
 
-      if (block.type === 'image') {
+      if (normalizedType === 'image') {
         const src = block.image?.url || block.url || '';
         const alt = block.image?.alternativeText || block.alt || '';
-        return `<img src="${src}" alt="${alt}" />`;
+        return `<img src="${escapeHtml(src)}" alt="${escapeHtml(String(alt))}" />`;
       }
 
       return '';
@@ -54,7 +105,7 @@ export const blocksToHtml = (blocks: any[]): string => {
 };
 
 
-export const JSONDocToBlocks = (doc: any): any[] => {
+export const JSONDocToBlocks = (doc: any): StrapiBlock[] => {
   if (!doc || !doc.content) return [];
 
   return doc.content.map((node: any) => {
@@ -171,6 +222,7 @@ export const JSONDocToBlocks = (doc: any): any[] => {
         };
 
       case 'code':
+      case 'codeBlock':
         return {
           type: 'code',
           language: node.attrs?.language || 'plaintext',

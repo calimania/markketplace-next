@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
-import { Container, Stack } from '@mantine/core';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 import { StoreProvider } from './store.provider';
+import StoreLayoutClient from '@/app/components/tienda/store-layout-client';
 
 type StoreLayoutProps = {
   children: React.ReactNode;
@@ -19,11 +19,9 @@ export default async function StoreLayout({ children, params }: StoreLayoutProps
 
   return (
     <StoreProvider store={store}>
-      <Container size="md" py="xl">
-        <Stack gap="md">
-          {children}
-        </Stack>
-      </Container>
+      <StoreLayoutClient store={store}>
+        {children}
+      </StoreLayoutClient>
     </StoreProvider>
   );
 }

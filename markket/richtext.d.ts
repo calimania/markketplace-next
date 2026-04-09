@@ -98,9 +98,38 @@ export interface StrapiBlockLinkChild {
   children: StrapiBlockTextChild[];
 }
 
+export type RichTextBlockType =
+  | 'paragraph'
+  | 'heading'
+  | 'list'
+  | 'list-item'
+  | 'image'
+  | 'link'
+  | 'quote'
+  | 'blockquote'
+  | 'code'
+  | 'codeBlock'
+  | 'bullet-list'
+  | 'ordered-list';
+
 export interface StrapiBlock {
-  type: string;
+  type: RichTextBlockType;
   level?: number;
+  format?: 'ordered' | 'unordered';
+  url?: string;
+  image?: {
+    url?: string;
+    alternativeText?: string;
+    width?: number;
+    height?: number;
+    name?: string;
+    formats?: {
+      thumbnail?: { url: string };
+      small?: { url: string };
+      medium?: { url: string };
+      large?: { url: string };
+    };
+  };
   children?: Array<StrapiBlockTextChild | StrapiBlockLinkChild>;
   [key: string]: unknown;
 }

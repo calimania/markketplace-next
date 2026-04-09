@@ -8,12 +8,11 @@ import {
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
-  Paper, Box, rem, Badge
+  Paper, Box, rem, Badge, Card, CardSection
 } from "@mantine/core";
-import { Store, Page, Album } from "@/markket";
+import { Store, Page, Article } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
-import Albums from '@/app/components/ui/albums.grid';
 import { markketColors } from "@/markket/colors.config";
 import Link from "next/link";
 
@@ -48,9 +47,10 @@ const benefits = [
 type HomePageProps = {
   store?: Store;
   page?: Page;
+  communityPosts?: Article[];
 };
 
-const HomePage = ({ store, page }: HomePageProps) => {
+const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
   const { maybe } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -268,13 +268,13 @@ const HomePage = ({ store, page }: HomePageProps) => {
             <Group gap={24} mt={32}>
               <Button
                 component="a"
-                href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
+                href={mounted && isLoggedIn ? '/me' : '/auth/magic'}
                 size="xl"
                 radius="md"
                 suppressHydrationWarning
                 leftSection={<IconSparkles size={24} />}
                 style={{
-                  background: isLoggedIn
+                  background: mounted && isLoggedIn
                     ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
                     : markketColors.rosa.main,
                   color: 'white',
@@ -303,7 +303,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                   />
                 )}
                 <span style={{ position: 'relative', zIndex: 1 }}>
-                  {!isLoggedIn ? 'Create Your Store' : 'Go to Dashboard'}
+                  {mounted && isLoggedIn ? 'Open Workspace' : 'Create Your Store'}
                 </span>
               </Button>
 
@@ -379,6 +379,18 @@ const HomePage = ({ store, page }: HomePageProps) => {
             <Text size="lg" ta="center" c="dimmed" maw={700} mx="auto">
               {page?.SEO?.metaDescription || 'A complete web publishing and ecommerce platform for creators and small businesses'}
             </Text>
+            {mounted && !isLoggedIn && (
+              <>
+                <Text size="sm" ta="center" c="dimmed" maw={700} mx="auto">
+                  Prefer passwordless login? Use a magic link and land directly in your workspace.
+                </Text>
+                <Group justify="center">
+                  <Button component="a" href="/auth/magic" variant="subtle" leftSection={<IconSparkles size={16} />}>
+                    Magic Link Login
+                  </Button>
+                </Group>
+              </>
+            )}
           </div>
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
@@ -468,7 +480,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
               <Group mt="md">
                 <Button
                   component="a"
-                  href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
+                  href={!isLoggedIn ? '/auth/magic' : '/me'}
                   size="lg"
                   radius="md"
                   suppressHydrationWarning
@@ -478,7 +490,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                     color: 'white',
                   }}
                 >
-                  {!isLoggedIn ? 'Get Started Free' : 'Dashboard'}
+                  {!isLoggedIn ? 'Get Started Free' : 'Open Workspace'}
                 </Button>
 
                 <Button
@@ -521,18 +533,163 @@ const HomePage = ({ store, page }: HomePageProps) => {
         </Container>
       </Box>
 
-      {page?.albums && page.albums.length > 0 && (
+      {communityPosts.length > 0 && (
         <Container size="lg" py={80}>
-          <Stack gap={48}>
-            <div style={{ marginBottom: rem(48) }}>
-              <Title order={2} ta="center" size={rem(42)} mb={24} style={{ color: markketColors.neutral.charcoal }}>
-                Featured Collections
-              </Title>
-              <Text size="lg" ta="center" c="dimmed" maw={700} mx="auto">
-                Discover curated collections from our community
-              </Text>
-            </div>
-            <Albums albums={page.albums as Album[]} store_slug={store?.slug as ''} />
+          <Stack gap={32}>
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Badge
+                  size="lg"
+                  radius="md"
+                  variant="light"
+                  style={{
+                    background: markketColors.sections.blog.light,
+                    color: markketColors.sections.blog.main,
+                    marginBottom: rem(12),
+                  }}
+                >
+                  Community Feed
+                </Badge>
+                <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
+                  Latest Blog Posts
+                </Title>
+                <Text c="dimmed">Fresh writing from creators across the community.</Text>
+              </div>
+              <Button component="a" href="/stores" variant="outline" rightSection={<IconArrowRight size={16} />}>
+                Explore Stores
+              </Button>
+            </Group>
+
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {communityPosts.slice(0, 6).map((post) => {
+                const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url;
+                const storeSlug = post?.store?.slug;
+                const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
+
+                return (
+                  <Card
+                    key={post.documentId || post.id}
+                    withBorder
+                    radius="lg"
+                    padding={0}
+                    style={{
+                      overflow: 'hidden',
+                      borderColor: markketColors.neutral.lightGray,
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                    }}
+                  >
+                    <CardSection>
+                      {coverUrl ? (
+                        <img
+                          src={coverUrl}
+                          alt={post.Title}
+                          style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Box
+                          style={{
+                            height: rem(190),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: markketColors.neutral.lightGray,
+                            color: markketColors.neutral.darkGray,
+                          }}
+                        >
+                          No Cover Image
+                        </Box>
+                      )}
+                    </CardSection>
+
+                    <Stack gap="sm" p="md">
+                      <Group gap="xs">
+                        <Badge variant="outline" color="pink">Blog</Badge>
+                        {post?.store?.title && (
+                          <Text size="xs" c="dimmed">{post.store.title}</Text>
+                        )}
+                      </Group>
+
+                      <Title order={4} style={{ lineHeight: 1.25 }}>{post.Title}</Title>
+                      <Text size="sm" c="dimmed" lineClamp={3}>
+                        {post?.SEO?.metaDescription || 'Read the latest update from the community.'}
+                      </Text>
+
+                      <Button
+                        component="a"
+                        href={href}
+                        variant="light"
+                        rightSection={<IconArrowRight size={16} />}
+                        style={{ alignSelf: 'flex-start' }}
+                      >
+                        Read Post
+                      </Button>
+                    </Stack>
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
+          </Stack>
+        </Container>
+      )}
+
+      {communityPosts.length > 2 && (
+        <Container size="lg" py={80}>
+          <Stack gap={32}>
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Badge
+                  size="lg"
+                  radius="md"
+                  variant="light"
+                  style={{
+                    background: markketColors.sections.shop.light,
+                    color: markketColors.sections.shop.main,
+                    marginBottom: rem(12),
+                  }}
+                >
+                  Highlights
+                </Badge>
+                <Title order={2} size={rem(34)} style={{ color: markketColors.neutral.charcoal }}>
+                  Editor Picks
+                </Title>
+                <Text c="dimmed">A curated mix of stories worth reading right now.</Text>
+              </div>
+              <Button component="a" href="/docs" variant="outline" rightSection={<IconArrowRight size={16} />}>
+                Read More
+              </Button>
+            </Group>
+
+            <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
+              {communityPosts.slice(0, 3).map((post) => {
+                const storeSlug = post?.store?.slug;
+                const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
+
+                return (
+                  <Paper
+                    key={`highlight-${post.documentId || post.id}`}
+                    withBorder
+                    radius="lg"
+                    p="lg"
+                    style={{
+                      borderColor: markketColors.neutral.lightGray,
+                      background: 'white',
+                    }}
+                  >
+                    <Stack gap="xs">
+                      <Text size="xs" fw={700} tt="uppercase" c="dimmed">{post?.store?.title || 'Community'}</Text>
+                      <Title order={4} style={{ lineHeight: 1.25 }}>{post.Title}</Title>
+                      <Text size="sm" c="dimmed" lineClamp={4}>
+                        {post?.SEO?.metaDescription || 'Read this story from the Markket community.'}
+                      </Text>
+                      <Button component="a" href={href} variant="subtle" rightSection={<IconArrowRight size={14} />}>
+                        Open Article
+                      </Button>
+                    </Stack>
+                  </Paper>
+                );
+              })}
+            </SimpleGrid>
           </Stack>
         </Container>
       )}
@@ -599,7 +756,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
             </Text>
             <Button
               component="a"
-              href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
+              href={!isLoggedIn ? '/auth/magic' : '/me'}
               size="xl"
               radius="md"
               suppressHydrationWarning
@@ -614,7 +771,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 paddingRight: rem(40),
               }}
             >
-              {!isLoggedIn ? 'Start Your Free Store' : 'Open Dashboard'}
+              {!isLoggedIn ? 'Start Your Free Store' : 'Open Workspace'}
             </Button>
 
             <Group gap="lg" mt="md">

@@ -524,6 +524,18 @@ export class StrapiClient {
     });
   }
 
+  async getCommunityPosts(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'articles',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO.socialImage,Tags,cover,store,store.Logo',
+    });
+  }
+
   async getPost(article_slug: string, store_slug?: string) {
 
     return await this.fetch({
