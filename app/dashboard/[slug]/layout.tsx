@@ -21,6 +21,7 @@ import ProtectedRoute from '@/app/components/protectedRoute';
 import { DashboardProvider } from '@/app/providers/dashboard.provider';
 import { useState, useCallback, useEffect, } from 'react';
 import { MainLink } from '@/app/components/dashboard/ui.menu';
+import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 
 const mainLinks = [
   { label: 'Store', icon: IconHomeStar, href: '/dashboard/store', visible: true, },
@@ -53,6 +54,7 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
   const { user, stores, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const embedded = useEmbeddedMode();
 
   const filteredLinks = mainLinks.filter(link => {
     if (searchQuery.toLowerCase()) {
@@ -136,22 +138,26 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AppShell
-      header={{ height: 'auto' }}
+      header={embedded ? undefined : { height: 'auto' }}
       navbar={{
         width: 320,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened }
+        collapsed: {
+          mobile: embedded ? true : !opened,
+          desktop: embedded ? true : false,
+        }
       }}
       padding="xs"
       styles={{
         main: {
-          paddingTop: 'calc(var(--mantine-spacing-md) + 60px)',
+          paddingTop: embedded ? 'var(--mantine-spacing-xs)' : 'calc(var(--mantine-spacing-md) + 60px)',
           background: 'linear-gradient(135deg, #fdf6fd 0%, #e0f2fe 100%)',
           minHeight: '100vh',
         },
       }}
     >
-      <AppShell.Header p="md" className="border-b-4 border-fuchsia-200 bg-white/90 shadow-md">
+      {!embedded && (
+        <AppShell.Header p="md" className="border-b-4 border-fuchsia-200 bg-white/90 shadow-md">
         <Group justify="space-between" h="100%">
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" className="border-2 border-fuchsia-200" />
@@ -232,8 +238,10 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             </HoverCard.Dropdown>
           </HoverCard>
         </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md" mt="lg" zIndex={1} className="border-r-4 border-fuchsia-200 bg-white/90 rounded-tr-2xl">
+        </AppShell.Header>
+      )}
+      {!embedded && (
+        <AppShell.Navbar p="md" mt="lg" zIndex={1} className="border-r-4 border-fuchsia-200 bg-white/90 rounded-tr-2xl">
         <Stack h="100%" gap={0}>
           <div>
             <Group mb="md">
@@ -293,7 +301,8 @@ export default function AnyDashboardLayout({ children }: DashboardLayoutProps) {
             </Button>
           </div>
         </Stack>
-      </AppShell.Navbar>
+        </AppShell.Navbar>
+      )}
       <AppShell.Main py="sm" className='!min-h-[90vh]'>
         <ProtectedRoute>
           <DashboardProvider store={selectedStore as Store}>

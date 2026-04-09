@@ -5,6 +5,7 @@ import { IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/auth.provider';
 import { useEffect, useState } from 'react';
+import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 
 interface GlobalBannerProps {
   extraActions?: React.ReactNode;
@@ -13,14 +14,20 @@ interface GlobalBannerProps {
 export function GlobalBanner({ extraActions }: GlobalBannerProps) {
   const { maybe } = useAuth();
   const [isMaybe, setIsMaybe] = useState(false);
+  const embedded = useEmbeddedMode();
 
   useEffect(() => {
     const ismaybe = maybe();
     setIsMaybe(ismaybe);
   }, [maybe]);
 
+  if (embedded) {
+    return null;
+  }
+
   return (
     <Paper
+      className="global-banner"
       py="xs"
       style={{
         borderBottom: '1px solid var(--mantine-color-gray-2)',

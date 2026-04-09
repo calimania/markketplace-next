@@ -5,7 +5,6 @@ import { useAuth } from '@/app/providers/auth.provider';
 import { useRouter } from 'next/navigation';
 
 import '@/app/styles/dashboard.scss';
-import '@mantine/tiptap/styles.css';
 
 export default function DashboardLayout({
   children,

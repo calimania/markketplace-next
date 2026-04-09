@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { strapiClient, markketClient } from '@/markket/api';
 import { Store } from '@/markket/store'
@@ -55,6 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [stores, setStores] = useState<Store[]>([]);
+  const storesRequestInFlightRef = useRef<Promise<void> | null>(null);
+  const lastStoresFetchAtRef = useRef(0);
+
+  const shouldPrefetchStores = useCallback((path: string) => {
+    return path.includes('/dashboard') || path.includes('/me') || path.includes('/tienda');
+  }, []);
 
 
   const clearLocalStorage = (next: string) => {
@@ -78,20 +84,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const maybe = useCallback(() => {
+    if (typeof localStorage == 'undefined') {
+      return false;
+    }
+
+    const _string = localStorage.getItem('markket.auth');
+
+    return !!_string;
+  }, []);
+
+  const confirmed = useCallback(() => {
+    if (typeof localStorage == 'undefined') {
+      return false;
+    }
+
+    const _string = localStorage.getItem('markket.auth');
+
+    const _json = JSON.parse(_string || '{}');
+
+    return !!_json?.jwt;
+  }, []);
+
   const fetchStores = useCallback(async () => {
     if (!maybe()) return;
 
-    try {
-      const client = new markketClient();
-      const response = await client.fetch('/api/markket/store', {
-        cache: 'no-store'
-      });
+    const now = Date.now();
+    // Prevent rapid duplicate calls from StrictMode and multiple consumers.
+    if (now - lastStoresFetchAtRef.current < 10_000) return;
 
-      setStores(response?.data || []);
-    } catch (error) {
-      console.error('Failed to fetch stores:', error);
+    if (storesRequestInFlightRef.current) {
+      return storesRequestInFlightRef.current;
     }
-  }, []);
+
+    const run = async () => {
+      try {
+        const client = new markketClient();
+        const response = await client.fetch('/api/markket/store', {
+          cache: 'no-store'
+        });
+
+        setStores(response?.data || []);
+        lastStoresFetchAtRef.current = Date.now();
+      } catch (error) {
+        console.error('Failed to fetch stores:', error);
+      } finally {
+        storesRequestInFlightRef.current = null;
+      }
+    };
+
+    storesRequestInFlightRef.current = run();
+    return storesRequestInFlightRef.current;
+  }, [maybe]);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -114,6 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedAuth = localStorage.getItem('markket.auth');
         const { jwt } = JSON.parse(storedAuth || '{}');
         setUser({ ...userData, jwt });
+
+        // Set stores from user data if available
+        // Handle both direct stores and nested data.stores from API
+        const storesArray = userData.stores || userData.data?.stores || [];
+        if (storesArray.length > 0) {
+          setStores(storesArray);
+        }
       }
     } catch (error) {
       console.error('Auth verification failed:', error);
@@ -122,58 +173,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   useEffect(() => {
-    if (user?.id && pathname.includes('dashboard')) {
-      fetchStores();
-    }
-
     const initAuth = async () => {
       await verifyAndRefreshUser();
-
       setIsLoading(false);
     };
 
     initAuth();
-  }, [fetchStores, pathname, user?.id, verifyAndRefreshUser]);
+  }, [verifyAndRefreshUser]);
 
   useEffect(() => {
-    if (user?.id && pathname.includes('dashboard')) {
-      fetchStores();
-    }
+    if (!user?.id) return;
+    if (!shouldPrefetchStores(pathname)) return;
 
-  }, [user?.id, fetchStores, pathname]);
+    fetchStores();
+  }, [fetchStores, pathname, shouldPrefetchStores, user?.id]);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     await verifyAndRefreshUser();
-  };
+  }, [verifyAndRefreshUser]);
 
-  const login = (userData: User) => {
+  const login = useCallback((userData: User) => {
     setUser(userData);
     localStorage.setItem('markket.auth', JSON.stringify(userData));
-  };
+  }, []);
 
-  const maybe = () => {
-    if (typeof localStorage == 'undefined') {
-      return false;
-    }
-
-    const _string = localStorage.getItem('markket.auth');
-
-    return !!_string;
-  };
-
-  const confirmed = () => {
-    if (typeof localStorage == 'undefined') {
-      return false;
-    }
-
-    const _string = localStorage.getItem('markket.auth');
-
-    const _json = JSON.parse(_string || '{}');
-
-    return !!_json?.jwt;
-  };
-
-  const value = {
+  const value = useMemo(() => ({
     user,
     login,
     maybe,
@@ -183,7 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser,
     stores,
     fetchStores,
-  };
+  }), [user, login, maybe, logout, confirmed, isLoading, refreshUser, stores, fetchStores]);
 
   return (
     <AuthContext.Provider value={value}>

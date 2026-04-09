@@ -42,10 +42,6 @@ yarn.lock
 *.tsbuildinfo
 next-env.d.ts
 
-# storybook
-build-storybook.log
-storybook-static
-
 # Draft
 *.draft*
 

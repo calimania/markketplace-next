@@ -71,7 +71,7 @@ const TrackPage = ({ store, track }: { store: Store; track: AlbumTrack }) => {
             />
 
             <Container size="lg" py={80} pos="relative" style={{ zIndex: 2 }}>
-              <Grid align="center" gutter={40}>
+              <Grid align="center" gap={40}>
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}

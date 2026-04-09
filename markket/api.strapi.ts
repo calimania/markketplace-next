@@ -31,6 +31,21 @@ type UploadImage = {
   id?: string | number;
 }
 
+const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+const AVATAR_ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+type UpdateMePayload = {
+  displayName?: string;
+  bio?: string;
+  username?: string;
+  email?: string;
+};
+
+type AuthSession = {
+  jwt: string;
+  id: string | number;
+};
+
 export class StrapiClient {
   private baseUrl: string;
   private storeSlug: string;
@@ -51,6 +66,23 @@ export class StrapiClient {
     const _json = _string ? JSON.parse(_string) : {};
     const { jwt } = _json;
     return jwt;
+  };
+
+  private _authSession = (): AuthSession | null => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    const raw = localStorage.getItem('markket.auth');
+    const parsed = raw ? JSON.parse(raw) : {};
+    const jwt = parsed?.jwt;
+    const id = parsed?.id;
+
+    if (!jwt || !id) {
+      return null;
+    }
+
+    return { jwt, id };
   };
 
   public update = async (endpoint: string, id: string, options: any) => {
@@ -127,7 +159,7 @@ export class StrapiClient {
       return null;
     }
 
-    const url = new URL(`api/users/${id}?populate=avatar`, this.baseUrl);
+    const url = new URL(`api/users/${id}?populate[]=avatar&populate[]=stores`, this.baseUrl);
 
     const response = await fetch(url.toString(), {
       headers: {
@@ -174,7 +206,7 @@ export class StrapiClient {
     if (!localStorage) return null;
 
     try {
-      const url = new URL('api/user/me', this.baseUrl);
+      const url = new URL('api/users/me', this.baseUrl);
 
       return await this.authenticatedFetch(url.toString(), {
         method: 'PUT',
@@ -184,6 +216,55 @@ export class StrapiClient {
       console.error('Failed to update profile:', error);
       throw error;
     }
+  }
+
+  async updateMe(data: UpdateMePayload) {
+    if (typeof window === 'undefined') {
+      throw new Error('updateMe is client-only');
+    }
+
+    const session = this._authSession();
+
+    if (!session?.jwt) {
+      throw new Error('No token provided');
+    }
+
+    // Only send editable profile fields for non-admin JWT updates.
+    const payload: UpdateMePayload = {
+      displayName: data?.displayName,
+      bio: data?.bio,
+    };
+
+    const path = `api/users/${session.id}`;
+    const response = await fetch(new URL(path, this.baseUrl), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.jwt}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+    let json: any = null;
+
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = null;
+    }
+
+    if (!response.ok) {
+      const message =
+        json?.error?.message ||
+        json?.error ||
+        text ||
+        `HTTP ${response.status}`;
+
+      throw new Error(`Failed to update profile via ${path}: ${message}`);
+    }
+
+    return json ?? {};
   }
 
   private buildFilterString(filters: any): string {
@@ -509,6 +590,14 @@ export class StrapiClient {
    * @returns
    */
   public uploadAvatar = async (file: File, { id, model, field }: uploadAvatarOptions) => {
+    if (!AVATAR_ALLOWED_TYPES.has(file.type)) {
+      throw new Error('Unsupported image format. Use JPG, PNG, or WEBP.');
+    }
+
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      throw new Error('Avatar is too large. Maximum size is 2MB.');
+    }
+
     const token = this._token();
     const formData = new FormData();
     formData.append('files', file);

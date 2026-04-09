@@ -40,10 +40,18 @@ function MagicPage() {
             jwt, id: user.id, username: user.username, email: user.email
           }));
 
-          setTimeout(() => {
-            router.push('/dashboard/store');
-          }, 33);
+          const storesResponse = await markket.fetch('/api/markket/store', { cache: 'no-store' });
+          const hasStores = Array.isArray(storesResponse?.data) && storesResponse.data.length > 0;
+
+          setStatus('success');
+          setMessage('You are logged in. Taking you to your workspace...');
+
+          router.replace(hasStores ? '/me' : '/tienda/new');
+          return;
         }
+
+        setStatus('error');
+        setMessage('Login did not return a valid session. Please try again.');
 
       } catch (err) {
         setStatus('error');
@@ -81,6 +89,16 @@ function MagicPage() {
           <Button fullWidth mt="md" onClick={() => router.push('/auth/login')}>
             Try again
           </Button>
+        )}
+        {status === 'success' && (
+          <Group grow mt="md">
+            <Button variant="default" onClick={() => router.push('/me')}>
+              Open Profile
+            </Button>
+            <Button onClick={() => router.push('/tienda/new')}>
+              Create Store
+            </Button>
+          </Group>
         )}
       </Paper>
     </Container>

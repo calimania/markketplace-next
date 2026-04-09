@@ -1,8 +1,8 @@
 import { Page, Article, Album, type Tag, ContentTypes, Values, contentTypes } from './index.d';
 import { markketClient } from '@/markket/api';
-import { JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { getTagColorName } from '@/markket/tag.helpers';
 import { ImageConfig } from './item.image.config';
+import { normalizeRichTextFieldsForContentType } from '@/markket/richtext.strategy';
 
 const client = new markketClient();
 
@@ -42,20 +42,7 @@ export function normalizeImages(body: any, contentType: string) {
 // Basic cleanup to ensure the client formats data as expected by the API
 const transformBody = (values: Values, contentType: contentTypes) => {
 
-  let body = values;
-
-
-  if (['page', 'article'].includes(contentType)) {
-    body = body as Page;
-    body.Content = JSONDocToBlocks(body.Content);
-  }
-
-  if (['album', 'track'].includes(contentType)) {
-    return {
-      ...body,
-      content: JSONDocToBlocks((body as Album).content),
-    } as Album;
-  }
+  let body = normalizeRichTextFieldsForContentType(contentType, values as Record<string, unknown>) as Values;
 
   if (['article'].includes(contentType)) {
     body = body as Article;
@@ -96,7 +83,10 @@ export const updateContentAction = (contentType: contentTypes) =>
 
     const response = await client.put(`/api/markket/cms?contentType=${contentType}&storeId=${storeId}&id=${id}`, {
       body: {
-        [contentType]: body,
+        [contentType]: {
+          status: 'published',
+          ...body,
+        },
       },
     });
 
@@ -106,8 +96,10 @@ export const updateContentAction = (contentType: contentTypes) =>
 
     // event and products, and other afterSave calls managed here - third party sync usually
     if (contentType == 'product') {
-      const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
-      console.log({ x })
+      // setTimeout(async () => {
+      //   const x = await client.post(`/api/markket?path=api/products/${id}/stripe_sync`, {});
+      //   console.log({ x });
+      // }, 1000);
     }
 
     return response;

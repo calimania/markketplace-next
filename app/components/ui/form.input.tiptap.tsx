@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
-import { useEditor, BubbleMenu } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
@@ -16,18 +17,22 @@ import {
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml } from '@/markket/helpers.blocks';
+import { RichTextValue, TiptapDoc } from '@/markket/richtext';
 
-type tiptapDoc = { type: string, content: any[] }
 interface ContentEditorProps {
-  value?: string | any[] | tiptapDoc;
+  value?: RichTextValue;
   onChange: (value: string) => void;
   label?: string;
   description?: string;
   placeholder?: string;
   minHeight?: number;
   error?: string;
-  format?: 'markdown' | 'blocks';
+  format?: 'markdown' | 'blocks' | 'html';
 }
+
+const getEditorMarkdown = (editor: any): string => {
+  return editor?.storage?.markdown?.getMarkdown?.() ?? '';
+};
 
 /**
  * Tiptap editor compatible with Mantine, Strapi and Markkët
@@ -137,8 +142,12 @@ const ContentEditor = ({
     // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
     onBlur: ({ editor }) => {
       if (format == 'markdown') {
-        const markdown = editor.storage.markdown.getMarkdown();
+        const markdown = getEditorMarkdown(editor);
         onChange(markdown);
+      }
+
+      if (format == 'html') {
+        onChange(editor.getHTML());
       }
 
       if (format == 'blocks') {
@@ -146,10 +155,19 @@ const ContentEditor = ({
         onChange(html as any);
       }
     },
+    onUpdate: ({ editor }) => {
+      if (format == 'html') {
+        onChange(editor.getHTML());
+      }
+    },
     onCreate: ({ editor }) => {
       if (format == 'markdown') {
-        const markdown = editor.storage.markdown.getMarkdown();
+        const markdown = getEditorMarkdown(editor);
         onChange(markdown);
+      }
+
+      if (format == 'html') {
+        onChange(editor.getHTML());
       }
 
       if (format == 'blocks') {
@@ -162,8 +180,16 @@ const ContentEditor = ({
   useEffect(() => {
     if (!editor || !value) return;
 
+    if (format == 'html') {
+      const currentContent = editor.getHTML();
+      if (currentContent !== value) {
+        editor.commands.setContent(value as string);
+      }
+      return;
+    }
+
     if (format == 'blocks') {
-      if ((value as tiptapDoc)?.type !== 'doc') {
+      if ((value as TiptapDoc)?.type !== 'doc') {
         const parsed = blocksToHtml(value as any[]);
         editor.commands.setContent(parsed);
         return;
@@ -173,7 +199,7 @@ const ContentEditor = ({
       return;
     }
 
-    const currentContent = editor.storage.markdown.getMarkdown();
+    const currentContent = getEditorMarkdown(editor);
 
     if (currentContent !== value) {
       editor.commands.setContent(value);
@@ -336,7 +362,7 @@ const ContentEditor = ({
 
           <Tabs.Panel value="markdown" style={{ minHeight }}>
             <pre className="px-4 py-6 font-mono text-sm whitespace-pre-wrap">
-              {editor.storage.markdown.getMarkdown()}
+              {getEditorMarkdown(editor)}
             </pre>
           </Tabs.Panel>
         </Tabs>

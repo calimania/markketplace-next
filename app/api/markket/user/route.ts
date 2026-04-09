@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markketplace } from '@/markket/config';
-import { validateUserAndToken } from '@/markket/helpers.api';
+import { verifyToken } from '@/markket/helpers.api';
+import { headers } from 'next/headers';
 
 const MARKKET_API = markketplace.api;
 const ADMIN_TOKEN = markketplace.admin_token;
@@ -110,7 +111,7 @@ const ADMIN_TOKEN = markketplace.admin_token;
 export async function PUT(
   request: NextRequest,
 ) {
-  if (!MARKKET_API || !ADMIN_TOKEN) {
+  if (!MARKKET_API) {
     return NextResponse.json(
       { error: 'API configuration missing' },
       { status: 400 }
@@ -118,7 +119,17 @@ export async function PUT(
   }
 
   try {
-    const userData = await validateUserAndToken();
+    const headersList = await headers();
+    const userToken = headersList.get('authorization')?.split('Bearer ')[1] || '';
+
+    if (!userToken) {
+      return NextResponse.json(
+        { error: 'No token provided' },
+        { status: 401 }
+      );
+    }
+
+    const userData = await verifyToken(userToken);
 
     if (!userData) {
       return NextResponse.json(
@@ -136,16 +147,40 @@ export async function PUT(
       );
     }
 
-    const url = new URL(`/api/users/${body.id}`, MARKKET_API);
-    console.log('User update:', { url: url.toString(), body });
+    const upstreamToken = ADMIN_TOKEN || userToken;
+
+    if (!upstreamToken) {
+      return NextResponse.json(
+        { error: 'No token provided' },
+        { status: 401 }
+      );
+    }
+
+    const payload = ADMIN_TOKEN
+      ? {
+        username: body?.username,
+        email: body?.email,
+        displayName: body?.displayName,
+        bio: body?.bio,
+      }
+      : {
+        displayName: body?.displayName,
+        bio: body?.bio,
+      };
+
+    const url = ADMIN_TOKEN
+      ? new URL(`/api/users/${body.id}`, MARKKET_API)
+      : new URL('/api/user/me', MARKKET_API);
+
+    console.log('User update:', { url: url.toString(), payload, hasAdminToken: !!ADMIN_TOKEN });
 
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+        'Authorization': `Bearer ${upstreamToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -155,7 +190,7 @@ export async function PUT(
 
     const data = await response.text();
     console.error('User update failed:', data);
-    return NextResponse.json({ error: 'Failed to update user' , data }, { status: response.status });
+    return NextResponse.json({ error: 'Failed to update user', data }, { status: response.status });
   } catch (error) {
     console.error('User update error:', error);
 

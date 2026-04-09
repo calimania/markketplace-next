@@ -3,6 +3,47 @@ import { markketplace } from '@/markket/config';
 import { verifyToken } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
 
+type ProxyRule = {
+  methods: string[];
+  requiresAuth: boolean;
+  match: RegExp;
+};
+
+const PROXY_RULES: ProxyRule[] = [
+  // Public auth endpoints used by login/register/reset/magic request flows.
+  { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth\/local$/ },
+  { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth\/local\/register$/ },
+  { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth\/forgot-password$/ },
+  { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth\/reset-password$/ },
+  { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth-magic\/request$/ },
+
+  // Protected uploads and dashboard read-by-id endpoints.
+  { methods: ['POST'], requiresAuth: true, match: /^\/api\/upload$/ },
+  {
+    methods: ['GET'],
+    requiresAuth: true,
+    match: /^\/api\/(articles|pages|products|albums|tracks|events|subscribers|inboxes|forms|orders|stores)\/[^/?#]+$/,
+  },
+];
+
+function normalizePath(path: string | null) {
+  if (!path) return '';
+
+  if (path.startsWith('/api/')) {
+    return path;
+  }
+
+  if (path.startsWith('api/')) {
+    return `/${path}`;
+  }
+
+  return `/api/${path.replace(/^\/+/, '')}`;
+}
+
+function findRule(method: string, path: string) {
+  return PROXY_RULES.find((rule) => rule.methods.includes(method) && rule.match.test(path));
+}
+
 /**
  * @swagger
  * components:
@@ -143,12 +184,22 @@ import { headers } from 'next/headers';
  */
 async function handler(req: NextRequest) {
   const requestUrl = new URL(req.url);
-  const path = requestUrl.searchParams.get('path');
+  const rawPath = requestUrl.searchParams.get('path');
+  const path = normalizePath(rawPath);
 
   if (!path) {
     return NextResponse.json(
       { error: 'Path parameter is required' },
       { status: 400 }
+    );
+  }
+
+  const rule = findRule(req.method, path);
+
+  if (!rule) {
+    return NextResponse.json(
+      { error: 'Path or method is not allowed for proxy access' },
+      { status: 403 }
     );
   }
 
@@ -160,14 +211,21 @@ async function handler(req: NextRequest) {
   console.log(`Proxie:${req.method}:${targetUrl.toString()}`);
 
   const headersList = await headers();
-  const token = headersList.get('authorization')?.split('Bearer ')[1];
+  const token = headersList.get('authorization')?.split('Bearer ')[1] || '';
 
-  if (token) {
+  if (rule.requiresAuth) {
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Authorization required for this endpoint' },
+        { status: 401 }
+      );
+    }
+
     const user = await verifyToken(token);
 
     if (!user?.id || user.blocked) {
       return NextResponse.json(
-        { error: 'Unauthorized Token' },
+        { error: 'Unauthorized token' },
         { status: 401 }
       );
     }

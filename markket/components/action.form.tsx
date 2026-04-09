@@ -6,6 +6,18 @@ import { useAuth } from '@/app/providers/auth.provider';
 import { useState } from 'react';
 import ActionWaiting from './actions.waiting';
 
+const allowedPluralRoutes = new Set([
+  'articles',
+  'products',
+  'pages',
+  'events',
+  'albums',
+  'tracks',
+  'store',
+  'crm',
+  'stores',
+]);
+
 const FormItem = (props: ItemFormProps) => {
   const [waiting, setWaiting] = useState(false);
   const { singular,action , plural,  item  } = props;
@@ -16,20 +28,25 @@ const FormItem = (props: ItemFormProps) => {
   // after updating a store, refresh the store list in nav
   const onSubmit = (data: FormValues) => {
     const params = new URLSearchParams(window.location.search);
-    const currentStoreId = params.get('store');
+    const currentStoreId = params.get('store') || '';
 
     setWaiting(true);
 
     if (singular == 'store') {
       setTimeout(async () => {
         await fetchStores();
-        return router.push(`/dashboard/store/?store=${data?.item?.documentId || ''}`);
+        const storeId = encodeURIComponent(data?.item?.documentId || '');
+        return router.push(`/dashboard/store/?store=${storeId}`);
       }, (1000));
       return;
     }
 
     setTimeout(async () => {
-      return router.push(`/dashboard/${plural}/view/${item?.documentId || data?.item?.documentId || ''}?store=${currentStoreId}`);
+      const pluralRoute = plural || 'store';
+      const safePlural = allowedPluralRoutes.has(pluralRoute) ? pluralRoute : 'store';
+      const itemId = encodeURIComponent(item?.documentId || data?.item?.documentId || '');
+      const storeId = encodeURIComponent(currentStoreId);
+      return router.push(`/dashboard/${safePlural}/view/${itemId}?store=${storeId}`);
     }, ((0.8) * 1000));
   }
 

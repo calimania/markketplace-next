@@ -1,4 +1,5 @@
 import { SEO, ImageData } from './seo';
+import { StoredRichText } from './richtext';
 
 interface MediaFormats {
   large: ImageFormat;
@@ -38,10 +39,9 @@ export type URL = {
 export interface Store {
   id: number;
   title: string;
-  Description: string;
   slug: string;
   documentId: string;
-  Description: string;
+  Description?: StoredRichText;
   createdAt: string;
   updatedAt: string;
   publishedAt: string;

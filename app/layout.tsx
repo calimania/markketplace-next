@@ -5,8 +5,10 @@ import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth.provider';
 import { PostHogProvider } from '@/app/providers/posthog.provider';
 import { GlobalBanner } from '@/app/components/global.banner';
+import EmbedQueryPropagator from '@/app/components/embed.query.propagator';
 import '@mantine/code-highlight/styles.css';
 import '@mantine/notifications/styles.css';
+import '@mantine/tiptap/styles.css';
 import { Notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
 import { markketplace } from "@/markket/config";
@@ -80,23 +82,82 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import '@mantine/core/styles.css';
 
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  createTheme,
+  mantineHtmlProps,
+  type MantineColorsTuple,
+} from '@mantine/core';
+import { markketMantineColors } from '@/markket/colors.config';
+
+const toMantineTuple = (colors: readonly string[]) => colors as MantineColorsTuple;
+
+const theme = createTheme({
+  colors: {
+    rosa: toMantineTuple(markketMantineColors.rosa),
+    cyan: toMantineTuple(markketMantineColors.cyan),
+    magenta: toMantineTuple(markketMantineColors.magenta),
+    sand: toMantineTuple(markketMantineColors.sand),
+    charcoal: toMantineTuple(markketMantineColors.charcoal),
+  },
+  primaryColor: 'rosa',
+  defaultRadius: 'md',
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const embedBootstrapScript = `
+    (function () {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var display = (params.get('display') || '').toLowerCase();
+        var navbar = (params.get('navbar') || '').toLowerCase();
+        var footer = (params.get('footer') || '').toLowerCase();
+        var breadcrumbs = (params.get('breadcrumbs') || params.get('crumbs') || '').toLowerCase();
+
+        var embedFromQuery =
+          display.indexOf('embed') === 0 ||
+          navbar === 'hide' ||
+          footer === 'hide';
+
+        if (embedFromQuery) {
+          document.documentElement.setAttribute('data-display-mode', 'embed');
+        } else {
+          document.documentElement.removeAttribute('data-display-mode');
+        }
+
+        if (breadcrumbs === 'hide') {
+          document.documentElement.setAttribute('data-breadcrumbs', 'hide');
+        } else {
+          document.documentElement.removeAttribute('data-breadcrumbs');
+        }
+
+        var raw = localStorage.getItem('markket.injected');
+        if (!raw) return;
+        var parsed = JSON.parse(raw || '{}');
+        if (parsed && parsed.embedded) {
+          document.documentElement.setAttribute('data-display-mode', 'embed');
+        }
+      } catch (_) {}
+    })();
+  `;
+
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
+        <script dangerouslySetInnerHTML={{ __html: embedBootstrapScript }} />
       </head>
       <body className="antialiased">
         <AuthProvider>
           <PostHogProvider>
-            <MantineProvider>
+            <MantineProvider theme={theme}>
               <Notifications position="top-right" zIndex={1000} />
+              <EmbedQueryPropagator />
               <GlobalBanner />
               {children}
             </MantineProvider>

@@ -311,7 +311,7 @@ export const actionsMap: Record<string, ActionComponent> = {
           {
             name: 'Description',
             label: 'Description',
-            type: 'markdown',
+            type: 'html',
             placeholder: 'Tell us about your store...\nUse the editor to add styles & images',
             required: true
           },
