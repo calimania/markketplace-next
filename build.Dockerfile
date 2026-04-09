@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:25-alpine3.23
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY package*.json ./
 
 # Ensure turbo is available globally
 RUN npm install --global turbo
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
 # To read values from build ENV
 ARG NEXT_PUBLIC_MARKKET_STORE_SLUG
