@@ -9,6 +9,11 @@ type ProxyRule = {
   match: RegExp;
 };
 
+type VerifiedUser = {
+  id?: number | string;
+  blocked?: boolean;
+};
+
 const PROXY_RULES: ProxyRule[] = [
   // Public auth endpoints used by login/register/reset/magic request flows.
   { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth\/local$/ },
@@ -24,6 +29,11 @@ const PROXY_RULES: ProxyRule[] = [
     requiresAuth: true,
     match: /^\/api\/(articles|pages|products|albums|tracks|events|subscribers|inboxes|forms|orders|stores)\/[^/?#]+$/,
   },
+  {
+    methods: ['GET'],
+    requiresAuth: true,
+    match: /^\/api\/(articles|pages|products|albums|tracks|events|subscribers|inboxes|forms|orders|stores)(\?.*)?$/,
+  }
 ];
 
 function normalizePath(path: string | null) {
@@ -42,6 +52,74 @@ function normalizePath(path: string | null) {
 
 function findRule(method: string, path: string) {
   return PROXY_RULES.find((rule) => rule.methods.includes(method) && rule.match.test(path));
+}
+
+function getContentType(path: string): string {
+  const match = path.match(/^\/api\/([^/?#]+)/);
+  return match?.[1] || '';
+}
+
+function isCollectionPath(path: string): boolean {
+  return /^\/api\/[a-z-]+$/.test(path);
+}
+
+function getRequestedStoreSlug(searchParams: URLSearchParams): string | null {
+  const keys = [
+    'filters[store][slug][$eq]',
+    'filters[store][slug]',
+    'filters[stores][slug][$eq]',
+    'filters[stores][slug]',
+    'filters[slug][$eq]',
+    'filters[slug]',
+  ];
+
+  for (const key of keys) {
+    const value = searchParams.get(key);
+    if (value) return value;
+  }
+
+  return null;
+}
+
+async function fetchAuthorizedStoreSlugs(userId: number | string) {
+  const storeUrl = new URL('/api/stores', markketplace.api);
+  storeUrl.searchParams.set('filters[users][id][$eq]', String(userId));
+  storeUrl.searchParams.set('pagination[pageSize]', '100');
+  storeUrl.searchParams.set('fields[0]', 'slug');
+
+  const response = await fetch(storeUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${markketplace.admin_token}`,
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch authorized stores: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const slugs = ((data?.data || []) as Array<{ slug?: string }>)
+    .map((store) => store.slug)
+    .filter((slug): slug is string => !!slug);
+
+  return new Set(slugs);
+}
+
+function applyAffiliationFilters(targetUrl: URL, contentType: string, storeSlugs: string[], userId: number | string) {
+  if (contentType === 'stores') {
+    targetUrl.searchParams.set('filters[users][id][$eq]', String(userId));
+    return;
+  }
+
+  const usesManyStoresRelation = new Set(['products', 'events', 'subscribers', 'inboxes', 'forms', 'orders']);
+  const relation = usesManyStoresRelation.has(contentType) ? 'stores' : 'store';
+
+  storeSlugs.forEach((slug, index) => {
+    targetUrl.searchParams.set(`filters[${relation}][slug][$in][${index}]`, slug);
+  });
 }
 
 /**
@@ -208,6 +286,9 @@ async function handler(req: NextRequest) {
     markketplace.api,
   );
 
+  requestUrl.searchParams.delete('path');
+  targetUrl.search = requestUrl.searchParams.toString();
+
   console.log(`Proxie:${req.method}:${targetUrl.toString()}`);
 
   const headersList = await headers();
@@ -221,7 +302,7 @@ async function handler(req: NextRequest) {
       );
     }
 
-    const user = await verifyToken(token);
+    const user = await verifyToken(token) as VerifiedUser | null;
 
     if (!user?.id || user.blocked) {
       return NextResponse.json(
@@ -229,12 +310,38 @@ async function handler(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    const contentType = getContentType(path);
+    const canScopeByAffiliation = req.method === 'GET' && isCollectionPath(path) &&
+      ['articles', 'pages', 'products', 'albums', 'tracks', 'events', 'subscribers', 'inboxes', 'forms', 'orders', 'stores'].includes(contentType);
+
+    if (canScopeByAffiliation) {
+      try {
+        const authorizedStoreSlugs = await fetchAuthorizedStoreSlugs(user.id);
+        const allowedSlugs = Array.from(authorizedStoreSlugs);
+
+        if (contentType !== 'stores' && allowedSlugs.length === 0) {
+          return NextResponse.json({ data: [], meta: { pagination: { page: 1, pageSize: 0, pageCount: 0, total: 0 } } }, { status: 200 });
+        }
+
+        const requestedStoreSlug = getRequestedStoreSlug(requestUrl.searchParams);
+        if (requestedStoreSlug && contentType !== 'stores' && !authorizedStoreSlugs.has(requestedStoreSlug)) {
+          return NextResponse.json(
+            { error: 'Unauthorized store affiliation' },
+            { status: 403 }
+          );
+        }
+
+        applyAffiliationFilters(targetUrl, contentType, allowedSlugs, user.id);
+      } catch (error) {
+        console.error('Affiliation filter error:', error);
+        return NextResponse.json(
+          { error: 'Failed to validate store affiliation' },
+          { status: 500 }
+        );
+      }
+    }
   }
-
-
-  requestUrl.searchParams.delete('path');
-  targetUrl.search = requestUrl.searchParams.toString();
-
   try {
     // Handle multipart form data differently than JSON to allow binary uploads
     const contentType = req.headers.get('content-type') || '';

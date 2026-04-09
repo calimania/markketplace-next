@@ -16,9 +16,9 @@ export default async function TiendaStorePage({ params }: TiendaStorePageProps) 
 
   const [storeResponse, postsResponse, pagesResponse, productsResponse, eventsResponse] = await Promise.all([
     strapiClient.getStore(storeSlug),
-    strapiClient.getPosts({ page: 1, pageSize: 3 }, { sort: 'createdAt:desc' }, storeSlug),
+    strapiClient.getPosts({ page: 1, pageSize: 5 }, { sort: 'createdAt:desc' }, storeSlug),
     strapiClient.getPages(storeSlug),
-    strapiClient.getProducts({ page: 1, pageSize: 50 }, { filter: '', sort: 'updatedAt:desc' }, storeSlug),
+    strapiClient.getProducts({ page: 1, pageSize: 5 }, { filter: '', sort: 'updatedAt:desc' }, storeSlug),
     strapiClient.getEvents(storeSlug),
   ]);
 

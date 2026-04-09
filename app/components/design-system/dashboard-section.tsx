@@ -26,7 +26,7 @@ export default function DashboardSection({ slug }: DashboardSectionProps) {
         </h2>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 320px) minmax(0, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 16 }}>
         <aside style={{ ...card, padding: 16, borderRight: '4px solid #db2777' }}>
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontWeight: 900, textTransform: 'uppercase' }}>markket</div>
@@ -79,7 +79,7 @@ export default function DashboardSection({ slug }: DashboardSectionProps) {
             </div>
           </article>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(210px, 100%), 1fr))', gap: 16 }}>
             {views.map((view) => (
               <article key={view.title} style={{ ...card, padding: 16 }}>
                 <SpecimenTag color={view.accent}>View</SpecimenTag>
@@ -93,6 +93,7 @@ export default function DashboardSection({ slug }: DashboardSectionProps) {
           </div>
         </div>
       </div>
+
     </section>
   );
 }

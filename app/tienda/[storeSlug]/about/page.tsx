@@ -1,9 +1,7 @@
-import { notFound } from 'next/navigation';
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Page } from '@/markket/page';
-import type { Store } from '@/markket/store';
 import NavTable from '@/app/components/ui/nav.table';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 
@@ -14,13 +12,7 @@ type TiendaAboutPageProps = {
 export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) {
   const { storeSlug } = await params;
 
-  const [storeResponse, pagesResponse] = await Promise.all([
-    strapiClient.getStore(storeSlug),
-    strapiClient.getPages(storeSlug),
-  ]);
-
-  const store = storeResponse?.data?.[0] as Store | undefined;
-  if (!store) notFound();
+  const pagesResponse = await strapiClient.getPages(storeSlug);
 
   const pages = (pagesResponse?.data || []) as Page[];
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
@@ -29,24 +21,24 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
     <TiendaListShell
       breadcrumbs={[
         { label: 'Tienda', href: '/tienda' },
-        { label: store.slug, href: `/tienda/${store.slug}` },
+        { label: storeSlug, href: `/tienda/${storeSlug}` },
         { label: 'Pages' },
       ]}
       title="Pages"
-      subtitle={`About/content pages for ${store.title}`}
-      routePath={`/tienda/${store.slug}/about`}
+      subtitle={`About/content pages for ${storeSlug}`}
+      routePath={`/tienda/${storeSlug}/about`}
       sectionTitle="Pages"
       actions={
         <>
             <Button
               component="a"
-              href={`/tienda/${store.slug}/pages`}
+              href={`/tienda/${storeSlug}/pages`}
               variant="default"
               leftSection={<IconListSearch size={16} />}
             >
               Open Editor
             </Button>
-            <Button component="a" href={`/tienda/${store.slug}/pages/new`} leftSection={<IconPlus size={16} />}>
+            <Button component="a" href={`/tienda/${storeSlug}/pages/new`} leftSection={<IconPlus size={16} />}>
               New Page
             </Button>
         </>
@@ -58,7 +50,7 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
           key: page.documentId || page.slug,
           title: page.Title || 'Untitled page',
           subtitle: `${formatDate(page.createdAt)} · ${page.slug}`,
-          href: `/tienda/${store.slug}/about/${page.documentId || page.slug}`,
+          href: `/tienda/${storeSlug}/about/${page.documentId || page.slug}`,
           icon: 'page',
         }))}
       />

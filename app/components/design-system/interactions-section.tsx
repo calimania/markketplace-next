@@ -34,7 +34,7 @@ export default function InteractionsSection() {
       <div style={{ marginBottom: 12 }}>
         <SpecimenTag>Specimen UX-002 / Inline Edit + SEO Assist</SpecimenTag>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 16 }}>
         <article style={{ ...card, padding: 18 }}>
           <SpecimenTag color="#9f0051">Inline editable title</SpecimenTag>
           <div style={{ marginTop: 8, borderRadius: 12, border: '1px solid #e2e8f0', background: '#fff', padding: '12px 14px' }}>

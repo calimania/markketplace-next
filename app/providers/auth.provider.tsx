@@ -58,18 +58,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const storesRequestInFlightRef = useRef<Promise<void> | null>(null);
   const lastStoresFetchAtRef = useRef(0);
 
+  const getStorage = useCallback((): Storage | null => {
+    if (typeof window === 'undefined') return null;
+
+    const storage = window.localStorage as Storage | undefined;
+    if (!storage) return null;
+    if (typeof storage.getItem !== 'function') return null;
+    if (typeof storage.setItem !== 'function') return null;
+    if (typeof storage.removeItem !== 'function') return null;
+
+    return storage;
+  }, []);
+
   const shouldPrefetchStores = useCallback((path: string) => {
     return path.includes('/dashboard') || path.includes('/me') || path.includes('/tienda');
   }, []);
 
 
   const clearLocalStorage = (next: string) => {
-    localStorage.removeItem('markket.auth');
+    const storage = getStorage();
+    storage?.removeItem('markket.auth');
     router.push(`/auth?next=${next}`);
   }
 
   const readLocalStorage = () => {
-    const storedAuth = localStorage.getItem('markket.auth');
+    const storage = getStorage();
+    if (!storage) return null;
+
+    const storedAuth = storage.getItem('markket.auth');
 
     if (storedAuth) {
       try {
@@ -78,33 +94,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return parsedAuth;
       } catch (error) {
         console.error('Failed to parse stored auth data:', error);
-        localStorage.removeItem('markket.auth');
+        storage.removeItem('markket.auth');
       }
     }
     return null;
   }
 
   const maybe = useCallback(() => {
-    if (typeof localStorage == 'undefined') {
-      return false;
-    }
+    const storage = getStorage();
+    if (!storage) return false;
 
-    const _string = localStorage.getItem('markket.auth');
+    const _string = storage.getItem('markket.auth');
 
     return !!_string;
-  }, []);
+  }, [getStorage]);
 
   const confirmed = useCallback(() => {
-    if (typeof localStorage == 'undefined') {
-      return false;
-    }
+    const storage = getStorage();
+    if (!storage) return false;
 
-    const _string = localStorage.getItem('markket.auth');
+    const _string = storage.getItem('markket.auth');
 
     const _json = JSON.parse(_string || '{}');
 
     return !!_json?.jwt;
-  }, []);
+  }, [getStorage]);
 
   const fetchStores = useCallback(async () => {
     if (!maybe()) return;
@@ -139,9 +153,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('markket.auth');
+    const storage = getStorage();
+    storage?.removeItem('markket.auth');
     router.push('/auth/');
-  }, [router]);
+  }, [getStorage, router]);
 
   const verifyAndRefreshUser = useCallback(async () => {
     try {
@@ -155,7 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (userData) {
-        const storedAuth = localStorage.getItem('markket.auth');
+        const storage = getStorage();
+        const storedAuth = storage?.getItem('markket.auth');
         const { jwt } = JSON.parse(storedAuth || '{}');
         setUser({ ...userData, jwt });
 
@@ -170,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Auth verification failed:', error);
       logout();
     }
-  }, [logout]);
+  }, [getStorage, logout]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -194,8 +210,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback((userData: User) => {
     setUser(userData);
-    localStorage.setItem('markket.auth', JSON.stringify(userData));
-  }, []);
+    const storage = getStorage();
+    storage?.setItem('markket.auth', JSON.stringify(userData));
+  }, [getStorage]);
 
   const value = useMemo(() => ({
     user,

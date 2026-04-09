@@ -110,6 +110,8 @@
 
 ## April
 
+- [x] Security upgrade nextjs
+- [x] Fixed rules with markket?proxie
 - [x] New design systems
 - [x] Mantine v9
 - [x] New profile auth path /me

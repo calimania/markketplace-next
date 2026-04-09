@@ -53,9 +53,11 @@ type HomePageProps = {
 const HomePage = ({ store, page }: HomePageProps) => {
   const { maybe } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setIsLoggedIn(maybe());
+    setMounted(true);
   }, [maybe]);
 
   return (
@@ -269,6 +271,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
                 size="xl"
                 radius="md"
+                suppressHydrationWarning
                 leftSection={<IconSparkles size={24} />}
                 style={{
                   background: isLoggedIn
@@ -286,7 +289,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                 }}
                 className="transform hover:scale-105 transition-transform"
               >
-                {isLoggedIn && (
+                {mounted && isLoggedIn && (
                   <Box
                     style={{
                       position: 'absolute',
@@ -468,6 +471,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                   href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
                   size="lg"
                   radius="md"
+                  suppressHydrationWarning
                   leftSection={<IconArrowRight size={20} />}
                   style={{
                     background: markketColors.rosa.main,
@@ -567,6 +571,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
       </Box>
       <Box
         py={80}
+        suppressHydrationWarning
         style={{
           background: isLoggedIn
             ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
@@ -597,6 +602,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
               href={!isLoggedIn ? '/auth/magic' : '/dashboard/store'}
               size="xl"
               radius="md"
+              suppressHydrationWarning
               leftSection={<IconSparkles size={24} />}
               style={{
                 background: 'white',
@@ -617,7 +623,7 @@ const HomePage = ({ store, page }: HomePageProps) => {
                   Browse Stores
                 </Text>
               </Link>
-              {!isLoggedIn && (
+              {mounted && !isLoggedIn && (
                 <Link href="/docs" style={{ textDecoration: 'none' }}>
                   <Text size="lg" style={{ color: 'white', textDecoration: 'underline' }}>
                     Documentation
