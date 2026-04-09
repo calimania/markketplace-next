@@ -1,9 +1,7 @@
-import { notFound } from 'next/navigation';
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Event } from '@/markket/event';
-import type { Store } from '@/markket/store';
 import EventsTabs from './events.tabs';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 
@@ -14,13 +12,7 @@ type TiendaEventsPageProps = {
 export default async function TiendaEventsPage({ params }: TiendaEventsPageProps) {
   const { storeSlug } = await params;
 
-  const [storeResponse, eventsResponse] = await Promise.all([
-    strapiClient.getStore(storeSlug),
-    strapiClient.getEvents(storeSlug),
-  ]);
-
-  const store = storeResponse?.data?.[0] as Store | undefined;
-  if (!store) notFound();
+  const eventsResponse = await strapiClient.getEvents(storeSlug);
 
   const upcomingThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const allEvents = ((eventsResponse?.data || []) as Event[])
@@ -42,30 +34,30 @@ export default async function TiendaEventsPage({ params }: TiendaEventsPageProps
     <TiendaListShell
       breadcrumbs={[
         { label: 'Tienda', href: '/tienda' },
-        { label: store.slug, href: `/tienda/${store.slug}` },
+        { label: storeSlug, href: `/tienda/${storeSlug}` },
         { label: 'Events' },
       ]}
       title="Events"
-      subtitle={`Upcoming and past events for ${store.title}`}
-      routePath={`/tienda/${store.slug}/events`}
+      subtitle={`Upcoming and past events for ${storeSlug}`}
+      routePath={`/tienda/${storeSlug}/events`}
       sectionTitle="Events"
       actions={
         <>
           <Button
             component="a"
-            href={`/dashboard/events?store=${encodeURIComponent(store.slug)}`}
+            href={`/dashboard/events?store=${encodeURIComponent(storeSlug)}`}
             variant="default"
             leftSection={<IconListSearch size={16} />}
           >
             Open Editor
           </Button>
-          <Button component="a" href={`/tienda/${store.slug}/events/new`} leftSection={<IconPlus size={16} />}>
+          <Button component="a" href={`/tienda/${storeSlug}/events/new`} leftSection={<IconPlus size={16} />}>
             New Event
           </Button>
         </>
       }
     >
-      <EventsTabs storeSlug={store.slug} upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
+      <EventsTabs storeSlug={storeSlug} upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
     </TiendaListShell>
   );
 }

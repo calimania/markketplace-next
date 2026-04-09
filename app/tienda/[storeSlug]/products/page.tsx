@@ -1,9 +1,7 @@
-import { notFound } from 'next/navigation';
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Product } from '@/markket/product';
-import type { Store } from '@/markket/store';
 import NavTable from '@/app/components/ui/nav.table';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 
@@ -14,13 +12,7 @@ type TiendaProductsPageProps = {
 export default async function TiendaProductsPage({ params }: TiendaProductsPageProps) {
   const { storeSlug } = await params;
 
-  const [storeResponse, productsResponse] = await Promise.all([
-    strapiClient.getStore(storeSlug),
-    strapiClient.getProducts({ page: 1, pageSize: 100 }, { filter: '', sort: 'updatedAt:desc' }, storeSlug),
-  ]);
-
-  const store = storeResponse?.data?.[0] as Store | undefined;
-  if (!store) notFound();
+  const productsResponse = await strapiClient.getProducts({ page: 1, pageSize: 100 }, { filter: '', sort: 'updatedAt:desc' }, storeSlug);
 
   const products = (productsResponse?.data || []) as Product[];
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
@@ -29,24 +21,24 @@ export default async function TiendaProductsPage({ params }: TiendaProductsPageP
     <TiendaListShell
       breadcrumbs={[
         { label: 'Tienda', href: '/tienda' },
-        { label: store.slug, href: `/tienda/${store.slug}` },
+        { label: storeSlug, href: `/tienda/${storeSlug}` },
         { label: 'Products' },
       ]}
       title="Products"
-      subtitle={`Catalog for ${store.title}`}
-      routePath={`/tienda/${store.slug}/products`}
+      subtitle={`Catalog for ${storeSlug}`}
+      routePath={`/tienda/${storeSlug}/products`}
       sectionTitle="Products"
       actions={
         <>
           <Button
             component="a"
-            href={`/dashboard/products?store=${encodeURIComponent(store.slug)}`}
+            href={`/dashboard/products?store=${encodeURIComponent(storeSlug)}`}
             variant="default"
             leftSection={<IconListSearch size={16} />}
           >
             Open Editor
           </Button>
-          <Button component="a" href={`/tienda/${store.slug}/products/new`} leftSection={<IconPlus size={16} />}>
+          <Button component="a" href={`/tienda/${storeSlug}/products/new`} leftSection={<IconPlus size={16} />}>
             New Product
           </Button>
         </>
@@ -58,7 +50,7 @@ export default async function TiendaProductsPage({ params }: TiendaProductsPageP
           key: product.documentId || product.slug,
           title: product.Name || 'Untitled product',
           subtitle: `${formatDate(product.updatedAt)} · ${product.slug}`,
-          href: `/tienda/${store.slug}/products/${product.documentId || product.slug}`,
+          href: `/tienda/${storeSlug}/products/${product.documentId || product.slug}`,
           icon: 'product',
         }))}
       />
