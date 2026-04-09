@@ -67,16 +67,17 @@ export default function ProfileForm() {
     setLoading(true);
 
     try {
-      const response = markket.put(`/api/markket/user`, {
+      const response = await markket.put(`/api/markket/user`, {
         body: {
           id: user?.id,
           ...values,
         },
       });
 
-      // if (!response.ok) {
-      //   throw new Error('Failed to update profile');
-      // }
+      if (response?.error) {
+        throw new Error(response?.data || response.error);
+      }
+
       console.log('Profile updated:', response);
 
       showNotification({
@@ -118,10 +119,11 @@ export default function ProfileForm() {
       await refreshUser();
     } catch (error) {
       console.error('Avatar upload failed:', error);
+      const message = error instanceof Error ? error.message : 'Failed to upload avatar';
 
       showNotification({
         title: 'Error',
-        message: 'Failed to upload avatar',
+        message,
         color: 'red',
       });
     } finally {

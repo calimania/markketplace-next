@@ -52,7 +52,7 @@ export default function MeHomePage() {
     setIsSaving(true);
     try {
       const markket = new markketClient();
-      await markket.put('/api/markket/user', {
+      const response = await markket.put('/api/markket/user', {
         body: {
           id: user.id,
           username: user.username,
@@ -61,6 +61,10 @@ export default function MeHomePage() {
           bio,
         },
       });
+
+      if (response?.error) {
+        throw new Error(response?.data || response.error);
+      }
 
       await refreshUser();
       setIsEditingProfile(false);
@@ -71,9 +75,10 @@ export default function MeHomePage() {
       });
     } catch (error) {
       console.error('Profile save failed:', error);
+      const message = error instanceof Error ? error.message : 'Could not save profile.';
       notifications.show({
         title: 'Error',
-        message: 'Could not save profile.',
+        message,
         color: 'red',
       });
     } finally {
@@ -105,9 +110,10 @@ export default function MeHomePage() {
       }
     } catch (error) {
       console.error('Avatar upload failed:', error);
+      const message = error instanceof Error ? error.message : 'Could not upload avatar.';
       notifications.show({
         title: 'Upload failed',
-        message: 'Could not upload avatar.',
+        message,
         color: 'red',
       });
     } finally {
