@@ -1,4 +1,4 @@
-import { Paper, Title, Text, Stack, Box } from '@mantine/core';
+import { Title, Text, Stack, Box, Paper, Group } from '@mantine/core';
 import { ReactNode } from 'react';
 import { Page } from '@/markket/page';
 import { markketColors } from '@/markket/colors.config';
@@ -19,46 +19,74 @@ export default function StorePageHeader({
   backgroundImage,
   iconColor = markketColors.sections.shop.main,
 }: StorePageHeaderProps) {
+  const hasCover = !!backgroundImage;
+
   return (
     <Paper
-      radius="md"
-      p={40}
+      radius="xl"
+      p={{ base: 'lg', md: 40 }}
       mb={32}
       style={{
-        backgroundImage: backgroundImage
-          ? `linear-gradient(to right, ${markketColors.neutral.white}f8, ${markketColors.neutral.white}), url(${backgroundImage})`
-          : markketColors.neutral.offWhite,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        borderWidth: '1px',
-        borderColor: markketColors.neutral.gray,
+        position: 'relative',
+        overflow: 'hidden',
+        background: hasCover
+          ? `linear-gradient(135deg, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.28) 100%), url(${backgroundImage}) center/cover no-repeat`
+          : markketColors.gradients.hero,
+        border: 'none',
       }}
     >
-      <Stack align="center" gap="md">
+      {/* Decorative blob */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: -50,
+          right: -50,
+          width: 200,
+          height: 200,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.07)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Stack align="center" gap="sm" style={{ position: 'relative', zIndex: 1 }}>
         <Box
           style={{
             width: 56,
             height: 56,
-            borderRadius: '8px',
-            background: `${iconColor}10`,
+            borderRadius: 14,
+            background: hasCover ? 'rgba(255,255,255,0.18)' : `${iconColor}25`,
+            backdropFilter: hasCover ? 'blur(8px)' : undefined,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: iconColor,
+            color: 'white',
           }}
         >
           {icon}
         </Box>
 
-        <Title order={1} ta="center" style={{ fontSize: '1.75rem', fontWeight: 500, color: markketColors.neutral.charcoal }}>
+        <Title
+          order={1}
+          ta="center"
+          c="white"
+          style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', fontWeight: 700, lineHeight: 1.2 }}
+        >
           {title}
         </Title>
 
-        {description ? (
-          <Text size="sm" ta="center" maw={600} mx="auto" style={{ lineHeight: 1.6, color: markketColors.neutral.mediumGray }}>
+        {description && (
+          <Text
+            size="sm"
+            ta="center"
+            maw={560}
+            mx="auto"
+            c="rgba(255,255,255,0.85)"
+            style={{ lineHeight: 1.6 }}
+          >
             {description}
           </Text>
-        ) : null}
+        )}
       </Stack>
     </Paper>
   );

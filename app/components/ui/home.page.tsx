@@ -3,18 +3,19 @@
 import { useEffect, useState } from "react";
 import {
   IconRocket, IconBuildingStore, IconShoppingCart,
-  IconFileTypeDoc, IconSparkles, IconArrowRight,
+  IconArticle, IconSparkles, IconArrowRight,
   IconCheck, IconStars,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
-  Paper, Box, rem, Badge, Card, CardSection
+  Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
 import { Store, Page, Article } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
 import { markketColors } from "@/markket/colors.config";
 import Link from "next/link";
+import { StoreCard } from "@/app/components/stores/card";
 
 const features = [
   {
@@ -48,9 +49,10 @@ type HomePageProps = {
   store?: Store;
   page?: Page;
   communityPosts?: Article[];
+  featuredStores?: Store[];
 };
 
-const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
+const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: HomePageProps) => {
   const { maybe } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -232,7 +234,7 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
               ta="center"
               mb={32}
               style={{
-                fontSize: rem(64),
+                fontSize: 'clamp(2rem, 8vw, 4rem)',
                 fontWeight: 900,
                 background: `linear-gradient(135deg, ${markketColors.neutral.charcoal} 0%, ${markketColors.neutral.darkGray} 100%)`,
                 WebkitBackgroundClip: 'text',
@@ -260,31 +262,27 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
               style={{
                 color: markketColors.neutral.darkGray,
                 lineHeight: 1.6,
-                fontSize: rem(20),
+                fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               }}
             >
               {store?.SEO?.metaDescription ||
                 'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
             </Text>
 
-            <Group gap={24} mt={32}>
+            <Group gap={16} mt={32} justify="center" wrap="wrap">
               <Button
                 component="a"
                 href={mounted && isLoggedIn ? '/me' : '/auth/magic'}
-                size="xl"
+                size="lg"
                 radius="md"
                 suppressHydrationWarning
-                leftSection={<IconSparkles size={24} />}
+                leftSection={<IconSparkles size={20} />}
                 style={{
                   background: mounted && isLoggedIn
                     ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
                     : markketColors.rosa.main,
                   color: 'white',
                   fontWeight: 600,
-                  fontSize: rem(18),
-                  height: rem(60),
-                  paddingLeft: rem(32),
-                  paddingRight: rem(32),
                   boxShadow: `0 4px 14px ${markketColors.rosa.main}30`,
                   position: 'relative',
                   overflow: 'hidden',
@@ -312,21 +310,17 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
               <Button
                 component="a"
                 href="/stores"
-                size="xl"
+                size="lg"
                 radius="md"
                 variant="outline"
-                leftSection={<IconShoppingCart size={24} />}
+                leftSection={<IconShoppingCart size={20} />}
                 style={{
                   color: markketColors.neutral.charcoal,
                   borderColor: markketColors.neutral.mediumGray,
-                  fontSize: rem(18),
-                  height: rem(60),
-                  paddingLeft: rem(32),
-                  paddingRight: rem(32),
                 }}
                 className="transform hover:scale-105 transition-transform"
               >
-                Explore
+                Explore Stores
               </Button>
             </Group>
           </Stack>
@@ -372,6 +366,63 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
           }
         }
       `}</style>
+
+      {/* Featured stores */}
+      {featuredStores.length > 0 && (
+        <Container size="lg" py={60}>
+          <Stack gap={32}>
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Badge
+                  size="lg"
+                  radius="md"
+                  variant="light"
+                  leftSection={<IconBuildingStore size={14} />}
+                  style={{ background: markketColors.sections.shop.light, color: markketColors.sections.shop.main, marginBottom: rem(8) }}
+                >
+                  Active Stores
+                </Badge>
+                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
+                  Discover Creators
+                </Title>
+              </div>
+              <Button component="a" href="/stores" variant="outline" size="sm" radius="xl" rightSection={<IconArrowRight size={14} />}>
+                All stores
+              </Button>
+            </Group>
+
+            {/* First two featured, larger */}
+            {featuredStores.length >= 2 && (
+              <Grid gap="lg">
+                {featuredStores.slice(0, 2).map((s, i) => (
+                  <GridCol key={s.id} span={{ base: 12, sm: 6 }}>
+                    <StoreCard store={s} idx={i} featured />
+                  </GridCol>
+                ))}
+              </Grid>
+            )}
+
+            {/* Remaining stores smaller */}
+            {featuredStores.length > 2 && (
+              <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
+                {featuredStores.slice(2).map((s, i) => (
+                  <StoreCard key={s.id} store={s} idx={i + 2} />
+                ))}
+              </SimpleGrid>
+            )}
+
+            {/* Edge case: only one store */}
+            {featuredStores.length === 1 && (
+              <Grid gap="lg">
+                <GridCol span={{ base: 12, sm: 6 }}>
+                  <StoreCard store={featuredStores[0]} idx={0} featured />
+                </GridCol>
+              </Grid>
+            )}
+          </Stack>
+        </Container>
+      )}
+
       <Container size="lg" py={80}>
         <Stack gap={48}>
           <div style={{ marginBottom: rem(48) }}>
@@ -497,16 +548,16 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
 
                 <Button
                   component="a"
-                  href="/docs"
+                  href="/blog"
                   size="lg"
                   radius="md"
                   variant="subtle"
-                  leftSection={<IconFileTypeDoc size={20} />}
+                  leftSection={<IconArticle size={20} />}
                   style={{
                     color: markketColors.neutral.darkGray,
                   }}
                 >
-                  Read Docs
+                  Discover Stories
                 </Button>
               </Group>
             </Stack>
@@ -557,8 +608,8 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
                 </Title>
                 <Text c="dimmed">Fresh writing from creators across the community.</Text>
               </div>
-              <Button component="a" href="/stores" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                Explore Stores
+              <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
+                See All Posts
               </Button>
             </Group>
 
@@ -657,7 +708,7 @@ const HomePage = ({ store, page, communityPosts = [] }: HomePageProps) => {
                 </Title>
                 <Text c="dimmed">A curated mix of stories worth reading right now.</Text>
               </div>
-              <Button component="a" href="/docs" variant="outline" rightSection={<IconArrowRight size={16} />}>
+              <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
                 Read More
               </Button>
             </Group>

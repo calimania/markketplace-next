@@ -6,6 +6,8 @@ import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, T
 import { IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconSparkles } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
+import URLsInput from '@/app/components/ui/form.input.urls';
+import type { URLItem } from '@/app/components/ui/form.input.urls';
 import RichTextContent from '@/app/components/ui/richtext.content';
 import { buildEditorMediaPreview } from '@/markket/richtext.smart';
 import type { Store } from '@/markket/store';
@@ -19,6 +21,7 @@ type StoreEditorSkeletonProps = {
   draftTitle: string;
   draftSlug: string;
   draftDescription: string;
+  draftUrls: URLItem[];
   draftSeoTitle: string;
   draftSeoDescription: string;
   onStartEditing: () => void;
@@ -27,6 +30,7 @@ type StoreEditorSkeletonProps = {
   onTitleChange: (value: string) => void;
   onSlugChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onUrlsChange: (value: URLItem[]) => void;
   onSeoTitleChange: (value: string) => void;
   onSeoDescriptionChange: (value: string) => void;
 };
@@ -40,6 +44,7 @@ export default function StoreEditorSkeleton({
   draftTitle,
   draftSlug,
   draftDescription,
+  draftUrls,
   draftSeoTitle,
   draftSeoDescription,
   onStartEditing,
@@ -48,6 +53,7 @@ export default function StoreEditorSkeleton({
   onTitleChange,
   onSlugChange,
   onDescriptionChange,
+  onUrlsChange,
   onSeoTitleChange,
   onSeoDescriptionChange,
 }: StoreEditorSkeletonProps) {
@@ -293,6 +299,37 @@ export default function StoreEditorSkeleton({
               )}
                 <Text size="xs" c="dimmed" mt={8}>Double-click this section to edit.</Text>
             </div>
+          )}
+        </Stack>
+      </Paper>
+
+      <Paper withBorder radius="md" p="md">
+        <Stack gap="sm">
+          <Group justify="space-between" align="center">
+            <Text fw={600}>Links</Text>
+            <Badge variant="light" color="cyan">Store URLs</Badge>
+          </Group>
+          <Text c="dimmed" size="sm">
+            Add website and social links that show on the public store page.
+          </Text>
+
+          {isEditing ? (
+            <URLsInput
+              label="Store Links"
+              description="Website, Instagram, X, YouTube, and any other links you want to feature."
+              value={draftUrls}
+              onChange={onUrlsChange}
+            />
+          ) : draftUrls.length > 0 ? (
+            <URLsInput
+              label="Store Links"
+              description="Public links currently shown on the storefront."
+              value={draftUrls}
+              onChange={() => undefined}
+              readOnly
+            />
+          ) : (
+            <Text c="dimmed" size="sm">No public links yet.</Text>
           )}
         </Stack>
       </Paper>

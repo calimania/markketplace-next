@@ -91,8 +91,13 @@ function ensureInjectedStorageEventsPatched() {
 }
 
 export function useEmbeddedMode() {
-  // Keep first client render equal to SSR to avoid hydration mismatches.
-  const [embedded, setEmbedded] = useState<boolean>(false);
+  const [embedded, setEmbedded] = useState<boolean>(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.getAttribute('data-display-mode') === 'embed';
+    }
+
+    return false;
+  });
 
   useEffect(() => {
     ensureHistoryEventsPatched();
@@ -103,11 +108,23 @@ export function useEmbeddedMode() {
 
       if (typeof fromQuery === 'boolean') {
         patchInjectedContext({ embedded: fromQuery });
+        if (fromQuery) {
+          document.documentElement.setAttribute('data-display-mode', 'embed');
+        } else {
+          document.documentElement.removeAttribute('data-display-mode');
+        }
         setEmbedded(fromQuery);
         return;
       }
 
-      setEmbedded(isEmbeddedMode());
+      const nextEmbedded = isEmbeddedMode();
+      if (nextEmbedded) {
+        document.documentElement.setAttribute('data-display-mode', 'embed');
+      } else {
+        document.documentElement.removeAttribute('data-display-mode');
+      }
+
+      setEmbedded(nextEmbedded);
     };
 
     syncEmbedded();

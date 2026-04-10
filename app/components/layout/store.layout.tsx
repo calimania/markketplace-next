@@ -3,6 +3,7 @@
 import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box } from "@mantine/core";
 import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft, IconCalendar, IconNews } from "@tabler/icons-react";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
 import { StoreVisibility } from '@/markket/store.visibility.d';
@@ -11,12 +12,13 @@ import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 import './store-navbar.css';
 
 function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visibility?: StoreVisibility | null; onNavigate?: () => void }) {
+  const pathname = usePathname();
   const navLinks = [
     {
       href: `/${slug}`,
       icon: <IconHome size={18} />,
-      label: 'Store Home',
-      show: true, // Always show home
+      label: 'Home',
+      show: true,
       color: markketColors.neutral.charcoal,
     },
     {
@@ -29,7 +31,7 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
     {
       href: `/${slug}/blog`,
       icon: <IconArticle size={18} />,
-      label: 'Articles',
+      label: 'Blog',
       show: visibility ? visibility.show_blog : true,
       color: markketColors.sections.blog.main,
     },
@@ -64,11 +66,12 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
           <Link key={link.href} href={link.href} onClick={onNavigate}>
             <Button
               variant="subtle"
-              leftSection={<Box style={{ color: markketColors.neutral.mediumGray }}>{link.icon}</Box>}
+              leftSection={<Box style={{ color: link.color }}>{link.icon}</Box>}
               fullWidth
               justify="flex-start"
               className="store-nav-btn"
-              style={{ color: markketColors.neutral.charcoal, fontWeight: 400 }}
+              data-active={pathname === link.href ? 'true' : undefined}
+              style={{ color: markketColors.neutral.charcoal, fontWeight: 600 }}
             >
               {link.label}
             </Button>
@@ -83,13 +86,13 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
           <Link href="/" onClick={onNavigate}>
             <Button
               variant="light"
-              color="gray"
               leftSection={<IconArrowLeft size={18} />}
               fullWidth
               justify="flex-start"
               size="sm"
+              className="store-nav-home"
             >
-              Markkët Home
+              Back to Markkët
             </Button>
           </Link>
         </Stack>
@@ -111,6 +114,7 @@ export function ClientLayout({
 }: ClientLayoutProps) {
   const [opened, { toggle, close }] = useDisclosure();
   const embedded = useEmbeddedMode();
+  const pathname = usePathname();
 
   const handleNavigation = () => {
     close();
@@ -168,7 +172,7 @@ export function ClientLayout({
       }}
     >
       {!embedded && (
-        <AppShell.Header>
+        <AppShell.Header className="store-shell-header">
         <Container size="lg">
           <Group justify="space-between" h="60px">
             <Group gap="md">
@@ -201,8 +205,10 @@ export function ClientLayout({
                   href={link.href}
                   variant="subtle"
                   size="sm"
-                  leftSection={<Box style={{ color: markketColors.neutral.mediumGray }}>{link.icon}</Box>}
-                  style={{ color: markketColors.neutral.charcoal, fontWeight: 400 }}
+                  leftSection={<Box style={{ color: link.color }}>{link.icon}</Box>}
+                  className="store-header-link"
+                  data-active={pathname === link.href ? 'true' : undefined}
+                  style={{ color: markketColors.neutral.charcoal, fontWeight: 600 }}
                 >
                   {link.label}
                 </Button>
@@ -214,7 +220,7 @@ export function ClientLayout({
       )}
 
       {!embedded && (
-        <AppShell.Navbar p="md">
+        <AppShell.Navbar p="md" className="store-shell-navbar">
         <Stack h="100%" gap="md">
           {/* Store Branding */}
           <Box>
@@ -227,11 +233,11 @@ export function ClientLayout({
                 />
               )}
               <Box style={{ flex: 1, minWidth: 0 }}>
-                <Text size="sm" fw={600} truncate>
+                  <Text size="sm" fw={700} truncate>
                   {store?.title || store?.SEO?.metaTitle}
                 </Text>
-                <Text size="xs" c="dimmed" fw={500} tt="uppercase" lts="0.05em">
-                  Navigation
+                  <Text size="xs" c="dimmed" fw={600} tt="uppercase" lts="0.08em">
+                    Explore Store
                 </Text>
               </Box>
             </Group>

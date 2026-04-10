@@ -1,10 +1,11 @@
 
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
-import { Container, Title, Text, Stack, Paper, Box, Overlay, Grid, Card, Button, GridCol, Divider } from "@mantine/core";
-import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail } from '@tabler/icons-react';
+import { Container, Title, Text, Stack, Paper, Box, Overlay, Button, Divider, Group, Badge } from "@mantine/core";
+import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail, IconArrowRight, IconSparkles } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
+import { StoreSectionLinks } from '@/app/components/ui/store.section.links';
 import RichTextContent from '@/app/components/ui/richtext.content';
 import { markketColors } from '@/markket/colors.config';
 import Albums from '@/app/components/ui/albums.grid';
@@ -13,6 +14,7 @@ import { Store } from "@/markket/store.d";
 import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
+import { richTextToPlainText } from '@/markket/richtext.utils';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -53,31 +55,34 @@ export default async function StorePage({
 
   const visibilityResponse: StoreVisibilityResponse | null = await strapiClient.getStoreVisibility(store.documentId);
   const visibility = visibilityResponse?.data;
+
+  const descriptionText = richTextToPlainText(store.Description);
+
   const sectionLinks = [
     {
       url: `/${slug}/products`,
-      icon: <IconShoppingCart size={24} />,
+      icon: <IconShoppingCart size={26} stroke={1.5} />,
       title: 'Shop',
-      description: `Browse ${visibility?.content_summary?.products_count || 0} products`,
+      description: `${visibility?.content_summary?.products_count || 0} products`,
       show: visibility ? visibility.show_shop : true,
       color: markketColors.sections.shop.main,
       bgColor: markketColors.sections.shop.light,
     },
     {
       url: `/${slug}/blog`,
-      icon: <IconArticle size={24} />,
+      icon: <IconArticle size={26} stroke={1.5} />,
       title: 'Blog',
-      description: `Read ${visibility?.content_summary?.articles_count || 0} articles`,
+      description: `${visibility?.content_summary?.articles_count || 0} articles`,
       show: visibility ? visibility.show_blog : true,
       color: markketColors.sections.blog.main,
       bgColor: markketColors.sections.blog.light,
     },
     {
       url: `/${slug}/events`,
-      icon: <IconCalendar size={24} />,
+      icon: <IconCalendar size={26} stroke={1.5} />,
       title: 'Events',
       description: visibility?.has_upcoming_events
-        ? `${visibility?.content_summary?.upcoming_events_count} upcoming events`
+        ? `${visibility?.content_summary?.upcoming_events_count} upcoming`
         : `${visibility?.content_summary?.events_count || 0} events`,
       show: visibility ? visibility.show_events : true,
       color: markketColors.sections.events.main,
@@ -85,7 +90,7 @@ export default async function StorePage({
     },
     {
       url: `/${slug}/about`,
-      icon: <IconHome size={24} />,
+      icon: <IconHome size={26} stroke={1.5} />,
       title: 'About',
       description: 'Learn more about us',
       show: visibility ? visibility.show_about : true,
@@ -94,7 +99,7 @@ export default async function StorePage({
     },
     {
       url: `/${slug}/about/newsletter`,
-      icon: <IconNews size={24} />,
+      icon: <IconNews size={26} stroke={1.5} />,
       title: 'Newsletter',
       description: 'Subscribe to updates',
       show: visibility ? visibility.show_newsletter : true,
@@ -105,124 +110,124 @@ export default async function StorePage({
 
   return (
     <div>
-      <Box pos="relative" h={350} mb={60}>
+      {/* Hero */}
+      <Box pos="relative" h={380} mb={80}>
         <Box
           style={{
-            backgroundImage: `url(${store.Cover?.url || store?.SEO?.socialImage?.url || ''})`,
+            backgroundImage: store.Cover?.url || store?.SEO?.socialImage?.url
+              ? `url(${store.Cover?.url || store?.SEO?.socialImage?.url})`
+              : markketColors.gradients.hero,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             height: '100%',
             width: '100%',
-            filter: 'brightness(0.95)',
           }}
-        >
-          <Overlay
-            gradient="linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%)"
-            opacity={0.7}
-            zIndex={1}
-          />
-        </Box>
+        />
+        <Overlay
+          gradient={markketColors.gradients.overlay}
+          opacity={store.Cover?.url ? 0.55 : 0.15}
+          zIndex={1}
+        />
 
+        {/* Floating logo card */}
         <Paper
           pos="absolute"
           left="50%"
-          style={{ transform: 'translate(-50%, 50%)' }}
+          style={{ transform: 'translate(-50%, 50%)', zIndex: 10 }}
           bottom={0}
           shadow="xl"
-          p="lg"
+          p="md"
           withBorder
-          radius="lg"
+          radius="xl"
           bg="white"
-          className="z-10"
         >
-          {store?.Logo?.url && (
+          {store?.Logo?.url ? (
             <img
               src={store.Logo.url}
-              alt={store.SEO?.metaTitle}
-              width={150}
-              height={150}
-              className="rounded-lg object-contain"
+              alt={store.SEO?.metaTitle || store.title}
+              width={120}
+              height={120}
               style={{
-                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))',
+                display: 'block',
+                borderRadius: '12px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))',
               }}
             />
+          ) : (
+              <Box
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 12,
+                  background: markketColors.gradients.hero,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  fontWeight: 700,
+                  color: 'white',
+                  letterSpacing: '-1px',
+                }}
+              >
+                {(store.title || store.slug).charAt(0).toUpperCase()}
+              </Box>
           )}
         </Paper>
       </Box>
 
-      <Container size="lg" className="pb-20">
+      <Container size="lg" pb="xl">
         <Stack gap="xl">
-          <div className="text-center pt-12">
-            <Title className="text-4xl md:text-5xl mb-4">
+          {/* Store identity */}
+          <Stack align="center" gap="sm" pt={16}>
+            <Title order={1} ta="center" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.5px' }}>
               {store?.title || store?.SEO?.metaTitle}
             </Title>
 
-
-            {store?.Description ? (
-              <RichTextContent content={store.Description} />
-            ) : (
-              <Text size="xl" c="dimmed" className="mx-auto mb-8">
-                {store?.SEO?.metaDescription}
-              </Text>
+            {store?.URLS?.length > 0 && (
+              <StoreTabs urls={store.URLS} basePath={`/${slug}`} />
             )}
-          </div>
-          {sectionLinks.length > 0 && (
-            <div>
-              <Title order={2} className="mb-6" ta="center">Explore</Title>
-              <Grid gap="md">
-                {sectionLinks.map((link) => (
-                  <GridCol span={{ base: 12, sm: 6, md: 4 }} key={link.url}>
-                    <Card
-                      shadow="none"
-                      padding="lg"
-                      radius="md"
-                      component="a"
-                      href={link.url}
-                      style={{
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        background: markketColors.neutral.white,
-                        borderWidth: '1px',
-                        borderColor: markketColors.neutral.gray,
-                      }}
-                      className="hover:shadow-sm"
-                    >
-                      <Stack gap="md" align="center">
-                        <Box
-                          style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: '8px',
-                            background: markketColors.neutral.offWhite,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background 0.2s ease',
-                          }}
-                        >
-                          <Box style={{ color: link.color }}>
-                            {link.icon}
-                          </Box>
-                        </Box>
 
-                        <div style={{ textAlign: 'center' }}>
-                          <Text fw={500} size="md" mb={4} style={{ color: markketColors.neutral.charcoal }}>
-                            {link.title}
-                          </Text>
-                          <Text size="xs" style={{ color: markketColors.neutral.mediumGray }}>
-                            {link.description}
-                          </Text>
-                        </div>
-                      </Stack>
-                    </Card>
-                  </GridCol>
-                ))}
-              </Grid>
-            </div>
+            {descriptionText ? (
+              <Text
+                size="md"
+                c="dimmed"
+                ta="center"
+                maw={600}
+                lh={1.7}
+                lineClamp={4}
+                style={{ fontSize: '1.05rem' }}
+              >
+                {descriptionText}
+              </Text>
+            ) : store?.SEO?.metaDescription ? (
+              <Text size="md" c="dimmed" ta="center" maw={600} lh={1.7}>
+                {store.SEO.metaDescription}
+              </Text>
+            ) : null}
+          </Stack>
+
+          {/* Home page rich content (if set) */}
+          {!homePage?.Title && store?.Description && (
+            <Box maw={720} mx="auto" w="100%">
+              <RichTextContent content={store.Description} />
+            </Box>
           )}
 
-          <StoreTabs urls={store?.URLS} />
+          {/* Section navigation */}
+          {sectionLinks.length > 0 && (
+            <Stack gap="md">
+              <Group justify="center" gap="xs">
+                <IconSparkles size={18} color={markketColors.rosa.main} />
+                <Text fw={600} ta="center" size="sm" tt="uppercase" style={{ letterSpacing: '0.08em', color: markketColors.neutral.mediumGray }}>
+                  Explore
+                </Text>
+              </Group>
+              <StoreSectionLinks links={sectionLinks} borderColor={markketColors.neutral.gray} />
+            </Stack>
+          )}
 
+          {/* Home page content */}
           {homePage?.Title && <Title order={2}>{homePage.Title}</Title>}
           <PageContent params={{ page: homePage }} />
           <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
@@ -230,49 +235,66 @@ export default async function StorePage({
           {/* Newsletter CTA */}
           {(visibility ? visibility.show_newsletter : true) && (
             <>
-              <Divider my="xl" />
+              <Divider />
               <Paper
                 p="xl"
-                radius="md"
+                radius="xl"
                 style={{
-                  background: markketColors.neutral.offWhite,
-                  borderWidth: '1px',
-                  borderColor: markketColors.neutral.gray,
+                  background: markketColors.gradients.hero,
+                  border: 'none',
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}
               >
-                <Stack align="center" gap="md">
+                {/* Decorative blob */}
+                <Box
+                  style={{
+                    position: 'absolute',
+                    top: -40,
+                    right: -40,
+                    width: 200,
+                    height: 200,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.06)',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <Stack align="center" gap="md" style={{ position: 'relative', zIndex: 1 }}>
                   <Box
                     style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: '8px',
-                      background: markketColors.rosa.light,
+                      width: 52,
+                      height: 52,
+                      borderRadius: '14px',
+                      background: 'rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <IconMail size={28} color={markketColors.rosa.main} stroke={1.5} />
+                    <IconMail size={26} color="white" stroke={1.5} />
                   </Box>
-                  <Title order={3} ta="center" fw={500} style={{ color: markketColors.neutral.charcoal }}>
-                    Stay Updated
+                  <Title order={3} ta="center" fw={600} c="white">
+                    Stay in the loop
                   </Title>
-                  <Text size="sm" ta="center" maw={500} style={{ color: markketColors.neutral.mediumGray, lineHeight: 1.5 }}>
-                    Subscribe to our newsletter and be the first to know about new products, events, and exclusive offers.
+                  <Text size="sm" ta="center" maw={460} c="rgba(255,255,255,0.85)" lh={1.6}>
+                    Subscribe and be the first to hear about new drops, events, and exclusive offers.
                   </Text>
                   <Button
                     component="a"
                     href={`/${slug}/about/newsletter`}
                     size="md"
-                    radius="md"
+                    radius="xl"
+                    rightSection={<IconArrowRight size={16} />}
                     style={{
-                      background: markketColors.rosa.main,
-                      color: 'white',
-                      fontWeight: 500,
+                      background: 'white',
+                      color: markketColors.rosa.main,
+                      fontWeight: 600,
+                      border: 'none',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                     }}
-                    leftSection={<IconMail size={18} />}
                   >
-                    Subscribe to Newsletter
+                    Subscribe
                   </Button>
                 </Stack>
               </Paper>

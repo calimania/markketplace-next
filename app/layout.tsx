@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { Viewport } from 'next';
+import localFont from 'next/font/local';
 import { strapiClient } from '@/markket/api.strapi';
 import "./globals.css";
 import '@/app/styles/main.scss';
@@ -12,6 +14,25 @@ import '@mantine/tiptap/styles.css';
 import { Notifications } from '@mantine/notifications';
 import { Store } from "@/markket";
 import { markketplace } from "@/markket/config";
+
+const manrope = localFont({
+  src: './fonts/Manrope/Manrope-VariableFont_wght.ttf',
+  variable: '--font-body',
+  display: 'swap',
+});
+
+const spaceGrotesk = localFont({
+  src: './fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf',
+  variable: '--font-display',
+  display: 'swap',
+});
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'overlays-content',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const storeData = await strapiClient.getStore();
@@ -152,7 +173,7 @@ export default function RootLayout({
         <ColorSchemeScript />
         <script dangerouslySetInnerHTML={{ __html: embedBootstrapScript }} />
       </head>
-      <body className="antialiased">
+      <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
         <AuthProvider>
           <PostHogProvider>
             <MantineProvider theme={theme}>
