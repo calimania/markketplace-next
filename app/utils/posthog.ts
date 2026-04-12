@@ -1,12 +1,13 @@
 import { PostHog } from 'posthog-node'
+import { markketplace } from '@/markket/config';
 
 export default function PostHogClient() {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+  if (!markketplace.extensions.posthog.api_key) {
     return null;
   }
 
-  const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://i.posthog.com',
+  const posthogClient = new PostHog(markketplace.extensions.posthog.api_key, {
+    host: markketplace.extensions.posthog.host,
     flushAt: 1,
     flushInterval: 0
   })

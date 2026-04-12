@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -33,6 +33,7 @@ export default function MeHomePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const storesRetryCountRef = useRef(0);
   const previewStores = stores.slice(0, 2);
 
   useEffect(() => {
@@ -54,11 +55,31 @@ export default function MeHomePage() {
       return;
     }
 
-    fetchStores();
+    fetchStores({ force: true });
   }, [confirmed, fetchStores, router]);
+
+  useEffect(() => {
+    if (!confirmed() || isLoading) return;
+    if (stores.length > 0) {
+      storesRetryCountRef.current = 0;
+      return;
+    }
+
+    if (storesRetryCountRef.current >= 2) return;
+
+    const timer = window.setTimeout(() => {
+      storesRetryCountRef.current += 1;
+      fetchStores({ force: true });
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [confirmed, fetchStores, isLoading, stores.length]);
 
   const onSaveQuickProfile = async () => {
     if (!user?.id) return;
+
+    const normalizedDisplayName = displayName.trim();
+    const normalizedBio = bio.trim();
 
     setIsSaving(true);
     try {
@@ -68,8 +89,8 @@ export default function MeHomePage() {
           id: user.id,
           username: user.username,
           email: user.email,
-          displayName,
-          bio,
+          displayName: normalizedDisplayName,
+          bio: normalizedBio,
         },
       });
 
@@ -78,6 +99,8 @@ export default function MeHomePage() {
       }
 
       await refreshUser();
+      setDisplayName(normalizedDisplayName);
+      setBio(normalizedBio);
       setIsEditingProfile(false);
       notifications.show({
         title: 'Saved',

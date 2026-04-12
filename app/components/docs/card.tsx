@@ -1,104 +1,116 @@
-import { Card, CardSection, Image, Text, Badge, Group, Button, rem } from '@mantine/core';
-import { IconCalendar, IconTag, IconLink } from '@tabler/icons-react';
+'use client';
+
+import { Card, CardSection, Text, Badge, Group, Anchor, Box, Stack } from '@mantine/core';
+import { IconCalendar, IconArrowRight } from '@tabler/icons-react';
 import { Article } from '@/markket/article';
-import "./card.css"
+import { markketColors } from '@/markket/colors.config';
 
 export interface BlogPostCardProps {
   post: Article;
   prefix?: string;
+  showStore?: boolean;
 };
 
-export function BlogPostCard({ post, prefix }: BlogPostCardProps) {
+export function BlogPostCard({ post, prefix, showStore }: BlogPostCardProps) {
   const slug = post.slug;
-  const imageHeight = 180;
   const linkHref = `/${prefix || 'docs'}/${slug}`;
+  const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url;
+  const storeTitle = (post as Article & { store?: { title?: string } })?.store?.title;
 
   return (
     <Card
-      className="blog-card"
-      shadow="lg"
-      padding="lg"
-      radius="md"
+      shadow="none"
+      padding={0}
+      radius="xl"
       withBorder
       style={{
-        borderWidth: 3,
-        borderColor: '#222',
-        borderStyle: 'solid',
-        boxShadow: '6px 6px 0 #222',
-        background: '#fffbe6',
-        minHeight: 400,
+        borderColor: markketColors.neutral.gray,
+        overflow: 'hidden',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        position: 'relative',
-        transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s, background 0.2s',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.transform = 'translateY(-3px)';
+        el.style.boxShadow = `0 10px 28px ${markketColors.sections.blog.main}22`;
+        el.style.borderColor = `${markketColors.sections.blog.main}50`;
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.transform = '';
+        el.style.boxShadow = '';
+        el.style.borderColor = markketColors.neutral.gray;
       }}
     >
-      <CardSection style={{ height: imageHeight, background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderBottom: '3px solid #222', padding: 0 }}>
-        {post?.cover?.url ? (
-          <Image
-            src={post.cover.url}
+      <CardSection style={{ height: 180, overflow: 'hidden', flexShrink: 0 }}>
+        {coverUrl ? (
+          <img
+            src={coverUrl}
             alt={post?.Title}
-            style={{ objectFit: 'cover', objectPosition: 'top', width: '100%', height: '100%', borderRadius: 0, display: 'block', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)' }}
-            radius={0}
-            className="blog-card-img"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s ease' }}
+            loading="lazy"
           />
         ) : (
-          <Text c="dimmed" style={{ fontWeight: 700, fontSize: rem(18), letterSpacing: 1, width: '100%', height: '100%', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Image</Text>
+            <Box
+              style={{
+                height: '100%',
+                background: markketColors.sections.blog.light,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text size="sm" c="dimmed" fw={500}>No cover</Text>
+            </Box>
         )}
       </CardSection>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <Group justify="space-between" mt="md" mb="xs">
-          <Text fw={700} size="lg" lineClamp={2} className="blog-card-title" style={{ textTransform: 'uppercase', letterSpacing: 1, width: '100%' }}>
-            <a href={linkHref} style={{ color: '#222', textDecoration: 'none', borderBottom: '2px solid #222', transition: 'border 0.2s, color 0.2s' }}>
-              {post.Title}
-            </a>
+      <Stack gap="xs" p="md" style={{ flex: 1 }}>
+        <Group gap="xs">
+          <Badge
+            variant="light"
+            radius="xl"
+            size="xs"
+            style={{ background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}
+          >
+            Blog
+          </Badge>
+          {showStore && storeTitle && (
+            <Text size="xs" c="dimmed" lineClamp={1}>{storeTitle}</Text>
+          )}
+        </Group>
+
+        <Anchor href={linkHref} underline="never" style={{ color: 'inherit' }}>
+          <Text fw={700} size="sm" lineClamp={2} style={{ lineHeight: 1.4, color: markketColors.neutral.charcoal }}>
+            {post.Title}
           </Text>
-          <Group gap="xs">
-            <IconCalendar size={16} stroke={2} />
-            <Text size="sm" c="dimmed">
-              {new Date(post.publishedAt).toLocaleDateString()}
+        </Anchor>
+
+        {post?.SEO?.metaDescription && (
+          <Text size="xs" c="dimmed" lineClamp={3} style={{ lineHeight: 1.6, flex: 1 }}>
+            {post.SEO.metaDescription}
+          </Text>
+        )}
+
+        <Group justify="space-between" align="center" mt="auto" pt="xs">
+          <Group gap={4}>
+            <IconCalendar size={12} color={markketColors.neutral.mediumGray} />
+            <Text size="xs" c="dimmed">
+              {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </Text>
           </Group>
+          <Anchor
+            href={linkHref}
+            size="xs"
+            fw={600}
+            style={{ color: markketColors.sections.blog.main, display: 'flex', alignItems: 'center', gap: 2 }}
+          >
+            Read <IconArrowRight size={12} />
+          </Anchor>
         </Group>
-
-        <Text size="sm" mb="md" lineClamp={3} style={{ fontWeight: 600, fontFamily: 'monospace', background: '#181818', color: '#fff', padding: '0.7em', borderRadius: 6, border: '2px dashed #222', letterSpacing: 0.2 }}>
-          {post?.SEO?.metaDescription}
-        </Text>
-
-        <Group gap="xs" mt="auto" mb="md">
-          {post.Tags?.map((tag, index) => (
-            <Badge key={index} variant="outline" color="dark" size="sm" style={{ borderWidth: 2, borderColor: '#222', background: '#fff', color: '#222', fontWeight: 700, fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: 2 }}>
-              <IconTag size={14} style={{ marginRight: 4 }} />
-              {tag.Label}
-            </Badge>
-          ))}
-        </Group>
-
-        <Button
-          component="a"
-          href={linkHref}
-          target="_self"
-          variant="outline"
-          radius="md"
-          size="md"
-          className="blog-card-learn"
-          leftSection={<IconLink size={18} />}
-          style={{
-            fontWeight: 700,
-            letterSpacing: 1,
-            borderWidth: 2,
-            borderColor: '#222',
-            color: '#222',
-            background: '#fff',
-            marginTop: 'auto',
-            transition: 'background 0.2s, color 0.2s, border-color 0.2s',
-          }}
-        >
-          Learn more
-        </Button>
-      </div>
+      </Stack>
     </Card>
   );
 };

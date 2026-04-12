@@ -1,4 +1,4 @@
-FROM node:25-alpine3.23
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY package*.json ./
 
 # Ensure turbo is available globally
 RUN npm install --global turbo
-RUN npm ci --no-audit --no-fund
+RUN yarn
 
 # To read values from build ENV
 ARG NEXT_PUBLIC_MARKKET_STORE_SLUG
@@ -38,4 +38,4 @@ RUN turbo build
 EXPOSE 3000
 EXPOSE 8080
 
-CMD ["npm", "start"]
+CMD ["yarn", "start"]

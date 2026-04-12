@@ -75,24 +75,17 @@
 
 
 - [ ] use SEO endpoints to generate, skip asking
-- [ ] better dashboard create,edit
-- [ ] tiptap bugs, formatting errors, include images
-- [ ] bug: image manager in ios
 - [ ] enable paid RSVP to events
 - [ ] pexels search in image modal
-- [ ] unsplash search in image modal
 - [ ] custom stripe components payment
 - [ ] custom stripe components dashboard
 - [ ] adding dates to event
 - [ ] list of previous events
 - [ ] remove or hide an item[product,page,blog,] (unpublish, deactivate)
 - [ ] create albums with tracks
-- [ ] display albums with tracks better
-- [ ] edit one price at a time
 - [ ] shopping cart per store, with multiple products toggle with [store.extensions]
 - [ ] albums can include any content types
 - [ ] store bootstrap content : after create, (pages, blog, products)
-- [ ] tiptap, local storage prevent error , or prevent close tab
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
 - [ ] prettier newsletter page
@@ -110,6 +103,11 @@
 
 ## April
 
+- [x] save store basics, via proxy
+- [x] embed mode to load on webview
+- [x] new storefront design
+- [x] new homepage design
+- [x] new rich text utilities
 - [x] Security upgrade nextjs
 - [x] Fixed rules with markket?proxie
 - [x] New design systems

@@ -26,6 +26,11 @@ export async function POST(request: Request) {
 
   const headersList = await headers();
   const user_id: string | number = headersList.get('markket-user-id') || '';
+  const token = headersList.get('authorization')?.replace('Bearer ', '') || '';
+
+  if (!token) {
+    return errorResponses.noToken();
+  }
 
   try {
     const stores = await fetchUserStores();
@@ -62,7 +67,7 @@ export async function POST(request: Request) {
 
     const response = await strapiClient.create('stores', {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer ${token}`,
       },
       data
     });
@@ -94,6 +99,13 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
+    const headersList = await headers();
+    const token = headersList.get('authorization')?.replace('Bearer ', '') || '';
+
+    if (!token) {
+      return errorResponses.noToken();
+    }
+
     const id = request.nextUrl?.searchParams.get('id')
 
     const stores = await fetchUserStores();
@@ -134,12 +146,12 @@ export async function PUT(request: NextRequest) {
 
     const response = await strapiClient.update('stores', store.documentId, {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer ${token}`,
       },
       data,
     });
 
-    return NextResponse.json(response, { status: response?.error?.status || '200' });
+    return NextResponse.json(response, { status: response?.error?.status || 200 });
   } catch (error) {
     console.error('Store update error:', error);
 

@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         contentType as string,
         config.propLimit as number,
         storeId,
-        markketplace.markket_api_key,
+        '',
       );
 
       console.log({ limit, config });
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const response = await strapiClient.create(contentTypePlural, {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer `,
       },
       data: transformedData
     });
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
     const response = await strapiClient.update(contentTypePlural, id, {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer `,
       },
       data: transformedData
     });
@@ -221,7 +221,7 @@ export async function DELETE(request: NextRequest) {
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
     const response = await strapiClient.delete(contentTypePlural, id, {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer `,
       }
     });
 

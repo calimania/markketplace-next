@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Group, Paper, Skeleton, Stack, Text, Title } from '@mantine/core';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient } from '@/markket/api';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
+import type { URLItem } from '@/app/components/ui/form.input.urls';
 import StoreEditorSkeleton from './store.editor.skeleton';
 import { richTextToHtml } from '@/markket/richtext.utils';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
@@ -19,6 +20,7 @@ type StoreDraft = {
   title: string;
   slug: string;
   description: string;
+  urls: URLItem[];
   seoTitle: string;
   seoDescription: string;
   updatedAt: string;
@@ -77,20 +79,24 @@ function StoreEditorLoadingScaffold() {
 
 export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
   const [store, setStore] = useState<Store | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
   const [minSkeletonElapsed, setMinSkeletonElapsed] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editorNotice, setEditorNotice] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftSlug, setDraftSlug] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
+  const [draftUrls, setDraftUrls] = useState<URLItem[]>([]);
   const [draftSeoTitle, setDraftSeoTitle] = useState('');
   const [draftSeoDescription, setDraftSeoDescription] = useState('');
   const hasLoadedLocalDraftRef = useRef(false);
+  const startInEditMode = ['1', 'true', 'yes'].includes((searchParams.get('edit') || '').toLowerCase());
+  const returnTo = searchParams.get('returnTo') || '';
 
   const isConfirmed = confirmed();
   const ownerStore = useMemo(() => stores.find((candidate) => candidate.slug === storeSlug), [stores, storeSlug]);
@@ -145,10 +151,17 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     setDraftTitle(store.title || '');
     setDraftSlug(store.slug || '');
     setDraftDescription(richTextToHtml(store.Description));
+    setDraftUrls(store.URLS || []);
     setDraftSeoTitle(store.SEO?.metaTitle || store.title || '');
     setDraftSeoDescription(store.SEO?.metaDescription || '');
     hasLoadedLocalDraftRef.current = false;
   }, [store]);
+
+  useEffect(() => {
+    if (store && !startInEditMode) {
+    // keep edit mode on by default; only override if explicitly set to false
+    }
+  }, [store, startInEditMode]);
 
   useEffect(() => {
     if (!store || hasLoadedLocalDraftRef.current) return;
@@ -164,6 +177,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       const recoveredTitle = typeof parsed.title === 'string' ? parsed.title : '';
       const recoveredSlug = typeof parsed.slug === 'string' ? parsed.slug : '';
       const recoveredDescription = typeof parsed.description === 'string' ? parsed.description : '';
+      const recoveredUrls = Array.isArray(parsed.urls) ? parsed.urls as URLItem[] : [];
       const recoveredSeoTitle = typeof parsed.seoTitle === 'string' ? parsed.seoTitle : '';
       const recoveredSeoDescription = typeof parsed.seoDescription === 'string' ? parsed.seoDescription : '';
 
@@ -171,6 +185,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
         recoveredTitle,
         recoveredSlug,
         recoveredDescription,
+        recoveredUrls.length ? 'urls' : '',
         recoveredSeoTitle,
         recoveredSeoDescription,
       ].some((value) => value.length > 0);
@@ -182,6 +197,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       setDraftTitle(recoveredTitle || store.title || '');
       setDraftSlug(recoveredSlug || store.slug || '');
       setDraftDescription(recoveredDescription || richTextToHtml(store.Description));
+      setDraftUrls(recoveredUrls.length ? recoveredUrls : (store.URLS || []));
       setDraftSeoTitle(recoveredSeoTitle || store.SEO?.metaTitle || store.title || '');
       setDraftSeoDescription(recoveredSeoDescription || store.SEO?.metaDescription || '');
       setIsEditing(true);
@@ -196,6 +212,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     setDraftTitle(store.title || '');
     setDraftSlug(store.slug || '');
     setDraftDescription(richTextToHtml(store.Description));
+    setDraftUrls(store.URLS || []);
     setDraftSeoTitle(store.SEO?.metaTitle || store.title || '');
     setDraftSeoDescription(store.SEO?.metaDescription || '');
     setSaveError(null);
@@ -216,12 +233,14 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     const baselineTitle = normalize(store.title || '');
     const baselineSlug = normalize(store.slug || '');
     const baselineDescription = normalize(richTextToHtml(store.Description));
+    const baselineUrls = JSON.stringify(store.URLS || []);
     const baselineSeoTitle = normalize(store.SEO?.metaTitle || store.title || '');
     const baselineSeoDescription = normalize(store.SEO?.metaDescription || '');
 
     const nextTitle = normalize(draftTitle);
     const nextSlug = normalize(draftSlug);
     const nextDescription = normalize(draftDescription);
+    const nextUrls = JSON.stringify(draftUrls || []);
     const nextSeoTitle = normalize(draftSeoTitle);
     const nextSeoDescription = normalize(draftSeoDescription);
 
@@ -229,6 +248,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       nextTitle !== baselineTitle ||
       nextSlug !== baselineSlug ||
       nextDescription !== baselineDescription ||
+      nextUrls !== baselineUrls ||
       nextSeoTitle !== baselineSeoTitle ||
       nextSeoDescription !== baselineSeoDescription;
 
@@ -248,6 +268,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
         title: draftTitle,
         slug: draftSlug,
         description: draftDescription,
+        urls: draftUrls,
         seoTitle: draftSeoTitle,
         seoDescription: draftSeoDescription,
         updatedAt: new Date().toISOString(),
@@ -261,7 +282,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     }, 450);
 
     return () => window.clearTimeout(timeout);
-  }, [store, isEditing, draftTitle, draftSlug, draftDescription, draftSeoTitle, draftSeoDescription]);
+  }, [store, isEditing, draftTitle, draftSlug, draftDescription, draftUrls, draftSeoTitle, draftSeoDescription]);
 
   const handleSave = async () => {
     if (!store) return;
@@ -287,13 +308,18 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
     setSaveError(null);
 
     try {
+      const normalizedUrls: Store['URLS'] = (draftUrls || []).map((item, index) => ({
+        ...item,
+        id: item.id ?? store.URLS?.[index]?.id ?? index + 1,
+      }));
+
       const payload = {
         store: {
           ...store,
           title,
           Description: draftDescription,
           slug: nextSlug,
-          URLS: store.URLS || [],
+          URLS: normalizedUrls,
           SEO: {
             ...store.SEO,
             metaTitle: draftSeoTitle.trim() || title,
@@ -339,6 +365,11 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
         console.warn('store.editor.draft.remove.failed', error);
       }
       setEditorNotice(null);
+
+      if (returnTo) {
+        router.replace(returnTo);
+        return;
+      }
 
       if (finalSlug !== storeSlug) {
         router.replace(`/tienda/${finalSlug}/store`);
@@ -399,6 +430,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       draftTitle={draftTitle}
       draftSlug={draftSlug}
       draftDescription={draftDescription}
+      draftUrls={draftUrls}
       draftSeoTitle={draftSeoTitle}
       draftSeoDescription={draftSeoDescription}
       onStartEditing={() => {
@@ -410,6 +442,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       onTitleChange={setDraftTitle}
       onSlugChange={setDraftSlug}
       onDescriptionChange={setDraftDescription}
+      onUrlsChange={setDraftUrls}
       onSeoTitleChange={setDraftSeoTitle}
       onSeoDescriptionChange={setDraftSeoDescription}
     />

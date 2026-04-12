@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest) {
         const storeResponse = await fetch(url,
           {
             headers: {
-              'Authorization': `Bearer ${markketplace.admin_token}`,
+              'Authorization': `Bearer ${request.headers.get('Authorization')}`,
             },
           }
         );

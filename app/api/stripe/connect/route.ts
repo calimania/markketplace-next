@@ -62,13 +62,13 @@ export async function POST(req: NextRequest) {
         console.log('stripe:connect:account:', { account: account?.id, store });
 
         if (account?.id) {
-          const updateStore = await fetch(new URL(`/api/stores/${store}`, markketplace.api), {
+          const updateStore = await fetch(new URL(`/api/markket/store?id=${store}`, markketplace.api), {
             method: 'PUT',
             body: JSON.stringify({
               data: { STRIPE_CUSTOMER_ID: account?.id, }
             }),
             headers: {
-              Authorization: `Bearer ${markketplace.admin_token}`,
+              Authorization: `Bearer ${req?.headers?.get('Authorization')}`,
               "Content-Type": "application/json",
             }
           });

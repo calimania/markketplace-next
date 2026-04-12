@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markketplace } from '@/markket/config';
-import { verifyToken } from '@/markket/helpers.api';
 import { headers } from 'next/headers';
-
-const MARKKET_API = markketplace.api;
-const ADMIN_TOKEN = markketplace.admin_token;
 
 /**
  * @swagger
@@ -111,57 +107,20 @@ const ADMIN_TOKEN = markketplace.admin_token;
 export async function PUT(
   request: NextRequest,
 ) {
-  if (!MARKKET_API) {
-    return NextResponse.json(
-      { error: 'API configuration missing' },
-      { status: 400 }
-    );
-  }
 
   try {
     const headersList = await headers();
     const userToken = headersList.get('authorization')?.split('Bearer ')[1] || '';
-
-    if (!userToken) {
-      return NextResponse.json(
-        { error: 'No token provided' },
-        { status: 401 }
-      );
-    }
-
-    const userData = await verifyToken(userToken);
-
-    if (!userData) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
 
-    if (userData?.id !== body?.id) {
-      return NextResponse.json(
-        { error: 'Invalid user contacting the FBI' },
-        { status: 401 }
-      );
-    }
+    const payload = { username: body?.username, displayName: body?.displayName, bio: body?.bio };
 
-    const useAdminToken = !!ADMIN_TOKEN;
-    const payload = useAdminToken
-      ? { username: body?.username, email: body?.email, displayName: body?.displayName, bio: body?.bio }
-      : { displayName: body?.displayName, bio: body?.bio };
-
-    const url = useAdminToken
-      ? new URL(`/api/users/${body.id}`, MARKKET_API)
-      : new URL('/api/users/me', MARKKET_API);
-
-    console.log('User update:', { url: url.toString(), payload, useAdminToken });
+    const url = new URL('/api/markket/user', markketplace.api);
 
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${useAdminToken ? ADMIN_TOKEN : userToken}`,
+        'Authorization': `Bearer ${userToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),

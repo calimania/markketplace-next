@@ -1,28 +1,67 @@
-/* Neobrutalist Store Navigation Buttons */
-.store-nav-btn {
-  border: 3px solid #222 !important;
-  box-shadow: 4px 4px 0 #222;
-  background: #fffbe6 !important;
-  color: #222 !important;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  transition: box-shadow 0.18s, border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s;
-}
-.store-nav-btn:hover, .store-nav-btn:focus {
-  box-shadow: 8px 8px 0 #222, 0 4px 16px #0ea5e9aa;
-  border-color: #0ea5e9;
-  background: #e0f2fe !important;
-  color: #0ea5e9 !important;
-  transform: translateY(-2px) scale(1.03);
+.store-shell-header {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(224, 224, 224, 0.9);
 }
 
-/* For light variant (secondary) */
-.store-nav-btn-light {
-  background: #fff !important;
-  color: #222 !important;
+@keyframes markket-glow-breathe {
+  0% {
+    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.06);
+  }
+
+  50% {
+    box-shadow: 0 10px 26px rgba(0, 188, 212, 0.12);
+  }
+
+  100% {
+    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.06);
+  }
 }
-.store-nav-btn-light:hover, .store-nav-btn-light:focus {
-  background: #e0f2fe !important;
-  color: #0ea5e9 !important;
-  border-color: #0ea5e9;
+
+.store-shell-navbar {
+  background:
+    radial-gradient(circle at top right, rgba(228, 0, 124, 0.08), transparent 30%),
+    linear-gradient(180deg, #fff 0%, #fafafa 100%);
+  border-right: 1px solid rgba(224, 224, 224, 0.9);
+}
+
+.store-nav-btn,
+.store-header-link {
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease !important;
+}
+.store-nav-btn {
+  background: rgba(255, 255, 255, 0.86) !important;
+    color: #424242 !important;
+  }
+  
+  .store-nav-btn:hover,
+  .store-nav-btn:focus-visible,
+  .store-header-link:hover,
+  .store-header-link:focus-visible {
+    background: #fff !important;
+    border-color: rgba(228, 0, 124, 0.16) !important;
+    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.08);
+    transform: translateY(-1px);
+  }
+  
+  .store-nav-btn[data-active='true'],
+  .store-header-link[data-active='true'] {
+    background: linear-gradient(135deg, rgba(228, 0, 124, 0.12), rgba(0, 188, 212, 0.08)) !important;
+    border-color: rgba(228, 0, 124, 0.2) !important;
+    box-shadow: 0 10px 26px rgba(228, 0, 124, 0.08);
+    animation: markket-glow-breathe 3.2s ease-in-out infinite;
+}
+.store-nav-home {
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  color: #616161 !important;
+  border: 1px solid rgba(224, 224, 224, 0.9) !important;
+}
+
+.store-nav-home:hover,
+.store-nav-home:focus-visible {
+  background: #fff !important;
+  border-color: rgba(0, 188, 212, 0.2) !important;
 }
