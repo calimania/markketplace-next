@@ -27,7 +27,7 @@ export async function verifyToken(token: string) {
 }
 
 export async function validateUserAndToken() {
-  if (!markketplace.api || !markketplace.markket_api_key) {
+  if (!markketplace.api) {
     throw new Error('Server configuration missing');
   }
 

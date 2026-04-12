@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
     const contentTypePlural = actionsMap[`${contentType}s`]?.plural || `${contentType}s`;
     const response = await strapiClient.update(contentTypePlural, id, {
       headers: {
-        'Authorization': `Bearer ${markketplace.markket_api_key}`,
+        'Authorization': `Bearer `,
       },
       data: transformedData
     });

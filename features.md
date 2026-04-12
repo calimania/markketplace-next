@@ -103,6 +103,7 @@
 
 ## April
 
+- [x] save store basics, via proxy
 - [x] embed mode to load on webview
 - [x] new storefront design
 - [x] new homepage design

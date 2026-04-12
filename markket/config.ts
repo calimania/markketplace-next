@@ -22,8 +22,6 @@ export const markketplace = {
   api: process.env.NEXT_PUBLIC_MARKKET_API || "https://api.markket.place",
   /** NEXT_PUBLIC_MARKKET_URL : markket-next base url || markket.place */
   markket_url: process.env.NEXT_PUBLIC_MARKKET_URL || "https://markket.place",
-  /** MARKKET_API_KEY : used to wrap API requests */
-  admin_token: process.env.MARKKET_API_KEY as string,
   /** NEXT_PUBLIC_MARKKET_STORE_SLUG */
   slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
   /** NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG */

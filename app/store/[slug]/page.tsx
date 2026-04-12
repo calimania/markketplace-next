@@ -1,7 +1,8 @@
 
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
-import { Container, Title, Text, Stack, Paper, Box, Overlay, Button, Divider, Group, Badge } from "@mantine/core";
+import Link from 'next/link';
+import { Container, Title, Text, Stack, Paper, Box, Overlay, Button, Divider, Group, Badge, SimpleGrid } from "@mantine/core";
 import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail, IconArrowRight, IconSparkles } from '@tabler/icons-react';
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
@@ -15,9 +16,35 @@ import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
 import { richTextToPlainText } from '@/markket/richtext.utils';
+import type { Product } from '@/markket/product';
+import type { Article } from '@/markket/article';
+import type { Event } from '@/markket/event';
+import type { Page } from '@/markket/page';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+type SectionPreviewCard = {
+  key: string;
+  title: string;
+  href: string;
+  color: string;
+  bg: string;
+  countLabel: string;
+  headline: string;
+  description: string;
+  imageUrl?: string;
+};
+
+function compact(value?: string | null, max = 96) {
+  if (!value) return '';
+  const clean = value.trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}...` : clean;
+}
+
+function imageOrFallback(...candidates: Array<string | undefined | null>): string | undefined {
+  return candidates.find((item): item is string => typeof item === 'string' && item.length > 0);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -44,8 +71,15 @@ export default async function StorePage({
   params
 }: PageProps) {
   const { slug } = await params;
-  const response = await strapiClient.getStore(slug);
-  const pageQuery = await strapiClient.getPage('home', slug);
+
+  if (slug === 'favicon.ico') {
+    notFound();
+  }
+
+  const [response, pageQuery] = await Promise.all([
+    strapiClient.getStore(slug),
+    strapiClient.getPage('home', slug),
+  ]);
   const homePage = pageQuery?.data?.[0];
   const store = response?.data?.[0];
 
@@ -53,10 +87,96 @@ export default async function StorePage({
     notFound();
   }
 
-  const visibilityResponse: StoreVisibilityResponse | null = await strapiClient.getStoreVisibility(store.documentId);
+  const [visibilityResponse, productsResponse, postsResponse, eventsResponse, pagesResponse] = await Promise.all([
+    strapiClient.getStoreVisibility(store.documentId),
+    strapiClient.getProducts({ page: 1, pageSize: 6 }, { filter: '', sort: 'updatedAt:desc' }, slug),
+    strapiClient.getPosts({ page: 1, pageSize: 6 }, { sort: 'updatedAt:desc' }, slug),
+    strapiClient.getEvents(slug),
+    strapiClient.getPages(slug),
+  ]);
+
   const visibility = visibilityResponse?.data;
+  const products = (productsResponse?.data || []) as Product[];
+  const posts = (postsResponse?.data || []) as Article[];
+  const events = (eventsResponse?.data || []) as Event[];
+  const pages = (pagesResponse?.data || []) as Page[];
 
   const descriptionText = richTextToPlainText(store.Description);
+
+  const aboutPages = pages.filter((page) => !['home', 'about', 'blog', 'products', 'events'].includes(page.slug || ''));
+
+  const featuredProduct = products[0];
+  const featuredPost = posts[0];
+  const featuredEvent = [...events]
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .find((event) => new Date(event.startDate).getTime() >= Date.now()) || events[0];
+  const featuredAbout = aboutPages[0];
+
+  const previewCards: SectionPreviewCard[] = [
+    {
+      key: 'shop',
+      title: 'Shop',
+      href: `/${slug}/products`,
+      color: markketColors.sections.shop.main,
+      bg: markketColors.sections.shop.light,
+      countLabel: `${products.length} products`,
+      headline: featuredProduct?.Name || 'Featured products',
+      description: compact(featuredProduct?.Description || 'Browse your latest drops and essentials in one place.'),
+      imageUrl: imageOrFallback(
+        featuredProduct?.Thumbnail?.url,
+        featuredProduct?.SEO?.socialImage?.formats?.small?.url,
+        featuredProduct?.SEO?.socialImage?.url,
+      ),
+    },
+    {
+      key: 'blog',
+      title: 'Blog',
+      href: `/${slug}/blog`,
+      color: markketColors.sections.blog.main,
+      bg: markketColors.sections.blog.light,
+      countLabel: `${posts.length} posts`,
+      headline: featuredPost?.Title || 'Latest stories',
+      description: compact(featuredPost?.SEO?.metaDescription || 'Read stories, updates, and ideas from this store.'),
+      imageUrl: imageOrFallback(
+        featuredPost?.cover?.formats?.small?.url,
+        featuredPost?.cover?.url,
+        featuredPost?.SEO?.socialImage?.formats?.small?.url,
+        featuredPost?.SEO?.socialImage?.url,
+      ),
+    },
+    {
+      key: 'events',
+      title: 'Events',
+      href: `/${slug}/events`,
+      color: markketColors.sections.events.main,
+      bg: markketColors.sections.events.light,
+      countLabel: `${events.length} events`,
+      headline: featuredEvent?.Name || 'Upcoming sessions',
+      description: compact(featuredEvent?.Description || 'Discover upcoming events, launches, and gatherings.'),
+      imageUrl: imageOrFallback(
+        featuredEvent?.Thumbnail?.formats?.small?.url,
+        featuredEvent?.Thumbnail?.url,
+        featuredEvent?.SEO?.socialImage?.formats?.small?.url,
+        featuredEvent?.SEO?.socialImage?.url,
+      ),
+    },
+    {
+      key: 'about',
+      title: 'About',
+      href: `/${slug}/about`,
+      color: markketColors.sections.about.main,
+      bg: markketColors.sections.about.light,
+      countLabel: `${aboutPages.length} pages`,
+      headline: featuredAbout?.Title || 'About this store',
+      description: compact(featuredAbout?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Learn the story and explore the world behind this store.'),
+      imageUrl: imageOrFallback(
+        featuredAbout?.SEO?.socialImage?.formats?.small?.url,
+        featuredAbout?.SEO?.socialImage?.url,
+        store?.Cover?.url,
+        store?.SEO?.socialImage?.url,
+      ),
+    },
+  ];
 
   const sectionLinks = [
     {
@@ -102,7 +222,7 @@ export default async function StorePage({
       icon: <IconNews size={26} stroke={1.5} />,
       title: 'Newsletter',
       description: 'Subscribe to updates',
-      show: visibility ? visibility.show_newsletter : true,
+      show: false,
       color: markketColors.sections.newsletter.main,
       bgColor: markketColors.sections.newsletter.light,
     },
@@ -207,14 +327,85 @@ export default async function StorePage({
             ) : null}
           </Stack>
 
-          {/* Home page rich content (if set) */}
+
           {!homePage?.Title && store?.Description && (
             <Box maw={720} mx="auto" w="100%">
               <RichTextContent content={store.Description} />
             </Box>
           )}
 
-          {/* Section navigation */}
+
+
+          <Stack gap="md">
+            <Group justify="space-between" align="center">
+              <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
+            </Group>
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+              {previewCards.map((card) => (
+                <Link key={card.key} href={card.href} style={{ textDecoration: 'none' }}>
+                  <Paper
+                    withBorder
+                    radius="xl"
+                    p="md"
+                    style={{
+                      borderColor: card.color,
+                      background: card.bg,
+                      color: '#0f172a',
+                      transition: 'transform 160ms ease, box-shadow 160ms ease',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+                    }}
+                  >
+                    <Stack gap="sm">
+                      <Group justify="space-between" align="center">
+                        <Badge variant="filled" color="dark">{card.title}</Badge>
+                        <Text size="xs" fw={600} style={{ color: card.color }}>{card.countLabel}</Text>
+                      </Group>
+
+                      {card.imageUrl ? (
+                        <Box
+                          style={{
+                            height: 136,
+                            borderRadius: 12,
+                            backgroundImage: `url(${card.imageUrl})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            border: '1px solid rgba(15, 23, 42, 0.08)',
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          style={{
+                            height: 136,
+                            borderRadius: 12,
+                            border: '1px dashed rgba(15, 23, 42, 0.25)',
+                            background: 'rgba(255,255,255,0.72)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text size="sm" c="dimmed">No thumbnail yet</Text>
+                        </Box>
+                      )}
+
+                      <Text fw={700} lh={1.3} lineClamp={2}>{card.headline}</Text>
+                      <Text size="sm" c="dimmed" lh={1.55} lineClamp={2}>{card.description}</Text>
+                      <Group justify="space-between" align="center" mt={2}>
+                        <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: card.color }}>
+                          Open {card.title}
+                        </Text>
+                        <IconArrowRight size={16} color={card.color} />
+                      </Group>
+                    </Stack>
+                  </Paper>
+                </Link>
+              ))}
+            </SimpleGrid>
+          </Stack>
+
+          <PageContent params={{ page: homePage }} />
+
           {sectionLinks.length > 0 && (
             <Stack gap="md">
               <Group justify="center" gap="xs">
@@ -227,9 +418,10 @@ export default async function StorePage({
             </Stack>
           )}
 
-          {/* Home page content */}
-          {homePage?.Title && <Title order={2}>{homePage.Title}</Title>}
-          <PageContent params={{ page: homePage }} />
+
+
+
+
           <Albums albums={homePage?.albums as Album[]} store_slug={store.slug} />
 
           {/* Newsletter CTA */}
