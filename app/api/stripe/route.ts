@@ -4,6 +4,7 @@ import stripeClient, { Stripe } from '@/lib/stripe/server';
 import { markketplace } from '@/markket/config';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+// @TODO: Forward request & resolve webhook in strapi.api
 
 /**
  * @swagger POST /api/stripe
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       body: JSON.stringify({ data: markket }),
       headers: {
-        Authorization: `Bearer ${markketplace.admin_token}`,
+        Authorization: `Bearer ${req.headers.get('Authorization')}`,
         'Content-Type': 'application/json',
       },
     });
