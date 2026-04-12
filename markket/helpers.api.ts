@@ -106,7 +106,7 @@ export const errorResponses = {
 }
 
 export const validators = {
-  config: () => !!markketplace.api && !!markketplace.markket_api_key,
+  config: () => !!markketplace.api,
   slug: (slug: string) => slug.length >= 5 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
   short_slug: (slug: string) => slug.length >= 3 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
   storeContent: (store: Store) => store?.title && store?.Description && store?.slug,

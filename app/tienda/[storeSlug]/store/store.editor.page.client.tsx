@@ -84,7 +84,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
   const [store, setStore] = useState<Store | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
   const [minSkeletonElapsed, setMinSkeletonElapsed] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editorNotice, setEditorNotice] = useState<string | null>(null);
@@ -158,8 +158,8 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
   }, [store]);
 
   useEffect(() => {
-    if (store && startInEditMode) {
-      setIsEditing(true);
+    if (store && !startInEditMode) {
+    // keep edit mode on by default; only override if explicitly set to false
     }
   }, [store, startInEditMode]);
 

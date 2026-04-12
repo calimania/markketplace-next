@@ -26,7 +26,7 @@ interface AuthContextType {
   maybe: () => boolean;
   refreshUser: () => Promise<void>;
   stores: Store[];
-  fetchStores: () => Promise<void>;
+  fetchStores: (options?: { force?: boolean }) => Promise<void>;
   confirmed: () => boolean;
 }
 
@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [stores, setStores] = useState<Store[]>([]);
   const storesRequestInFlightRef = useRef<Promise<void> | null>(null);
   const lastStoresFetchAtRef = useRef(0);
+  const hasPrefetchedStoresRef = useRef(false);
 
   const getStorage = useCallback((): Storage | null => {
     if (typeof window === 'undefined') return null;
@@ -138,12 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!_json?.jwt;
   }, [getStorage]);
 
-  const fetchStores = useCallback(async () => {
+  const fetchStores = useCallback(async (options?: { force?: boolean }) => {
     if (!maybe()) return;
 
     const now = Date.now();
     // Prevent rapid duplicate calls from StrictMode and multiple consumers.
-    if (now - lastStoresFetchAtRef.current < 10_000) return;
+    if (!options?.force && now - lastStoresFetchAtRef.current < 10_000) return;
 
     if (storesRequestInFlightRef.current) {
       return storesRequestInFlightRef.current;
@@ -156,8 +157,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           cache: 'no-store'
         });
 
-        setStores(response?.data || []);
-        lastStoresFetchAtRef.current = Date.now();
+        if (Array.isArray(response?.data)) {
+          setStores(response.data);
+          lastStoresFetchAtRef.current = Date.now();
+        } else {
+          console.warn('Stores response missing data array:', response);
+        }
       } catch (error) {
         console.error('Failed to fetch stores:', error);
       } finally {
@@ -220,7 +225,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.id) return;
     if (!shouldPrefetchStores(pathname)) return;
 
-    fetchStores();
+    // Force fetch the very first time user becomes available to avoid being
+    // blocked by the cooldown when the /me redirect effect already called
+    // fetchStores() before auth settled (before user state was set).
+    const isFirst = !hasPrefetchedStoresRef.current;
+    hasPrefetchedStoresRef.current = true;
+    fetchStores(isFirst ? { force: true } : undefined);
   }, [fetchStores, pathname, shouldPrefetchStores, user?.id]);
 
   const refreshUser = useCallback(async () => {

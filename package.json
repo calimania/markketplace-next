@@ -5,7 +5,11 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
-  "packageManager": "npm@9.8.1",
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11.0.0"
+  },
   "scripts": {
     "dev": "next dev --port 4020",
     "build": "next build",

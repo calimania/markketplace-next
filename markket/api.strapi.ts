@@ -86,7 +86,14 @@ export class StrapiClient {
   };
 
   public update = async (endpoint: string, id: string, options: any) => {
-    const _url = new URL(`api/${endpoint}/${id}`, this.baseUrl);
+    // Compatibility: route store updates to tienda endpoint
+    let path = `api/${endpoint}/${id}`;
+    if (endpoint === 'stores') {
+      path = `api/tienda/${endpoint}/${id}`;
+      console.log('[COMPAT] Redirecting stores update to tienda endpoint');
+    }
+
+    const _url = new URL(path, this.baseUrl);
     console.log('Updating record:', _url.toString());
 
     try {
@@ -101,7 +108,7 @@ export class StrapiClient {
 
       return await response.json();
     } catch (error) {
-      console.error("Record creation failed:", error);
+      console.error("Record update failed:", error);
       return false;
     }
   };
@@ -128,7 +135,14 @@ export class StrapiClient {
   };
 
   public create = async (endpoint: string, options: any) => {
-    const _url = new URL(`api/${endpoint}`, this.baseUrl);
+    // Compatibility: route store creates to tienda endpoint
+    let path = `api/${endpoint}`;
+    if (endpoint === 'stores') {
+      path = `api/tienda/${endpoint}`;
+      console.log('[COMPAT] Redirecting stores create to tienda endpoint');
+    }
+
+    const _url = new URL(path, this.baseUrl);
 
     console.log('Creating record:', _url.toString());
     try {

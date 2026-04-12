@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
-import { IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconSparkles } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import URLsInput from '@/app/components/ui/form.input.urls';
@@ -331,23 +331,6 @@ export default function StoreEditorSkeleton({
           ) : (
             <Text c="dimmed" size="sm">No public links yet.</Text>
           )}
-        </Stack>
-      </Paper>
-
-      <Paper withBorder radius="md" p="md">
-        <Stack gap="sm">
-          <Group justify="space-between" align="center">
-            <Text fw={600}>Next Sections</Text>
-            <Badge variant="light" color="grape" leftSection={<IconSparkles size={12} />}>
-              Coming next
-            </Badge>
-          </Group>
-          <Text c="dimmed" size="sm">
-            We can iterate this into richer modules for visual assets, SEO, links, storefront settings, and long-form content in steps.
-          </Text>
-          <Skeleton height={42} radius="md" />
-          <Skeleton height={84} radius="md" />
-          <Skeleton height={42} radius="md" />
         </Stack>
       </Paper>
 

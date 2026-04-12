@@ -7,7 +7,7 @@ export default function PostHogClient() {
   }
 
   const posthogClient = new PostHog(markketplace.extensions.posthog.api_key, {
-    host: markketplace.extensions.posthog.api_host,
+    host: markketplace.extensions.posthog.host,
     flushAt: 1,
     flushInterval: 0
   })

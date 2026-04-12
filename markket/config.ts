@@ -28,16 +28,12 @@ export const markketplace = {
   slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
   /** NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG */
   design_system_demo_slug: process.env.NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG || 'dev',
-  /** MARKKET_API_KEY */
-  markket_api_key: process.env.MARKKET_API_KEY || '',
   extensions: {
     unsplash_access_key: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
     pexels_access_key: process.env.NEXT_PUBLIC_PEXELS_KEY || '',
     posthog: {
-      api_key: process.env.NEXT_PUBLIC_POSTHOG_API_KEY,
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_API_HOST,
-      ui_host: process.env.NEXT_PUBLIC_POSTHOG_UI_HOST,
-      posthog_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      api_key: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com'
     }
   }
 };
