@@ -4,25 +4,38 @@ import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { JSX, useEffect } from 'react'
 import PostHogPageView from "@/app/components/pageView"
+import { markketplace } from '@/markket/config'
 
-const POSTHOG_API_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
-const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST as string;
+const resolvePostHogHost = () => {
+  if (!markketplace.extensions.posthog.host) {
+    return 'https://us.i.posthog.com';
+  }
+
+  try {
+    return new URL(markketplace.extensions.posthog.host).toString().replace(/\/$/, '');
+  } catch (error) {
+    return 'https://us.i.posthog.com';
+  }
+};
 
 export function PostHogProvider({ children }: { children: JSX.Element }) {
-
   useEffect(() => {
-    if (!POSTHOG_API_KEY) {
+    if (!markketplace.extensions.posthog.api_key) {
       return;
     }
 
-    posthog.init(POSTHOG_API_KEY, {
-      api_host: POSTHOG_HOST || 'https://i.posthog.com',
-      capture_pageview: false
-    })
-  }, []);
+    try {
+      posthog.init(markketplace.extensions.posthog.api_key, {
+        api_host: resolvePostHogHost(),
+        capture_pageview: false,
+      });
+    } catch (error) {
+      console.error('[PostHog] Initialization failed.', error);
+    }
+  }, [markketplace.extensions.posthog.api_key]);
 
   return (
-    POSTHOG_API_KEY ? (
+    markketplace.extensions.posthog.api_key ? (
       <PHProvider client={posthog} >
         <PostHogPageView />
         {children}
