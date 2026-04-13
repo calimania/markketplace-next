@@ -32,3 +32,7 @@ jobs:
           MARKKET_URL: ${{ secrets.MARKKET_URL }}
           MARKKET_STORE_SLUG: next
           BUILD_MODE: static
+          NEXT_PUBLIC_MARKKET_API: https://api.markket.place
+          NEXT_PUBLIC_MARKKET_STORE_SLUG: next
+          NEXT_PUBLIC_MARKKETPLACE_URL: https://markket.place
+

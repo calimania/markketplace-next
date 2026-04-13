@@ -111,6 +111,14 @@ export default async function StorePage({
     }))
     .filter((slide): slide is { src: string; alt: string; key: string | number } => !!slide.src);
 
+  const storeImages = slides.length === 0
+    ? ([
+      store?.Cover?.url && { src: store.Cover.url, alt: `${store.title} cover`, key: 'cover' },
+      store?.Logo?.url && { src: store.Logo.url, alt: `${store.title} logo`, key: 'logo' },
+      store?.SEO?.socialImage?.url && { src: store.SEO.socialImage.url, alt: store.SEO?.metaTitle || store.title, key: 'social' },
+    ].filter(Boolean) as { src: string; alt: string; key: string }[])
+    : [];
+
   const descriptionText = richTextToPlainText(store.Description);
   const hasStoreDescription = Boolean(descriptionText?.trim());
   const shouldRenderRichDescription = !homePage?.Title && hasStoreDescription;
@@ -427,6 +435,10 @@ export default async function StorePage({
 
           {slides.length > 0 && (
             <StoreSlidesGallery slides={slides} />
+          )}
+
+          {slides.length === 0 && storeImages.length > 0 && (
+            <StoreSlidesGallery slides={storeImages} title="Gallery" />
           )}
 
           <PageContent params={{ page: homePage }} />
