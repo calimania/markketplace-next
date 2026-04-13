@@ -31,31 +31,19 @@ export default async function StoresPage() {
   const [storeResponse, response, pageResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getStores(
-      { page: 1, pageSize: 30 },
-      { filter: '', sort: 'active:desc,updatedAt:desc' }
+      { page: 1, pageSize: 42 },
+      { filter: {}, sort: 'active:desc,updatedAt:desc' }
     ),
     strapiClient.getPage('stores'),
   ]);
-
   const store = storeResponse.data?.[0];
-
-  const stores = ((response?.data || []) as Array<Store & { active?: boolean }>).sort((a, b) => {
-    const activeDiff = Number(Boolean(b.active)) - Number(Boolean(a.active));
-    if (activeDiff !== 0) return activeDiff;
-
-    const updatedA = new Date(a.updatedAt || 0).getTime();
-    const updatedB = new Date(b.updatedAt || 0).getTime();
-    if (updatedB !== updatedA) return updatedB - updatedA;
-
-    return a.title.localeCompare(b.title);
-  }) as Store[];
-
+  const stores = response?.data || [];
   const page = pageResponse?.data?.[0] as Page;
+
 
   return (
     <Container size="xl" py={{ base: 'xl', md: 60 }}>
       <Stack gap="xl">
-        {/* Hero */}
         <Paper
           radius="xl"
           p={{ base: 'lg', md: 48 }}
@@ -96,13 +84,11 @@ export default async function StoresPage() {
             </Text>
             <Group gap="xs">
               <Badge variant="light" radius="xl" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-                <IconSparkles size={12} style={{ marginRight: 4 }} />
-                {stores.length} stores
+                <IconSparkles size={24} style={{ marginRight: 4 }} />
               </Badge>
             </Group>
           </Stack>
         </Paper>
-
         <StoreGrid stores={stores} />
         <PageContent params={{ page }} />
       </Stack>

@@ -350,7 +350,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: type,
       filters: { slug: store_slug },
-      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover',
     });
   }
 
@@ -426,7 +426,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover,Slides',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover,Slides',
     });
   }
 
@@ -504,17 +504,13 @@ export class StrapiClient {
    * Requests stores from the strapi / markket api, including pagination, to display in our /stores ,
    * including filters to search for by some attributes like name, slug, title or description using the same keyword
    */
-  async getStores(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
+  async getStores(paginate: { page: number; pageSize: number }, options: { filter: Record<string, string | number | object>, sort: string }) {
     const { sort } = options;
 
     return await this.fetch<Store>({
       contentType: 'stores',
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
-      filters: {
-        active: {
-          $eq: true
-        }
-      },
+      filters: options.filter,
       paginate,
       sort,
     });

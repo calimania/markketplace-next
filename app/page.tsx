@@ -31,7 +31,7 @@ export default async function Home() {
     strapiClient.getStore(),
     strapiClient.getPage('home'),
     strapiClient.getCommunityPosts({ page: 1, pageSize: 6 }, { sort: 'publishedAt:desc' }),
-    strapiClient.getStores({ page: 1, pageSize: 6 }, { filter: '', sort: 'updatedAt:desc' }),
+    strapiClient.getStores({ page: 1, pageSize: 6 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
   ]);
 
   const communityPosts = (communityPostsResponse?.data || []) as Article[];

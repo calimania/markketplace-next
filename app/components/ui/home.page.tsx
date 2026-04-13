@@ -26,8 +26,8 @@ const features = [
   },
   {
     icon: IconBuildingStore,
-    title: "Your Own Store",
-    description: "Beautiful storefront, custom domain, full control.",
+    title: "Own Your Content",
+    description: "No ads or invasive trackers",
     color: markketColors.sections.shop.main,
   },
   {
@@ -226,7 +226,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: Hom
                 border: `1px solid ${markketColors.rosa.main}20`,
               }}
             >
-              Open Ecosystem & Community
+              Comercio Ëlectrónico
             </Badge>
 
             <Title
@@ -665,7 +665,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: Hom
 
                       <Title order={4} style={{ lineHeight: 1.25 }}>{post.Title}</Title>
                       <Text size="sm" c="dimmed" lineClamp={3}>
-                        {post?.SEO?.metaDescription || 'Read the latest update from the community.'}
+                        {post?.SEO?.metaDescription || '...'}
                       </Text>
 
                       <Button
@@ -704,9 +704,9 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: Hom
                   Highlights
                 </Badge>
                 <Title order={2} size={rem(34)} style={{ color: markketColors.neutral.charcoal }}>
-                  Editor Picks
+                  Upcoming Events
                 </Title>
-                <Text c="dimmed">A curated mix of stories worth reading right now.</Text>
+                <Text c="dimmed">Participate and host AFK & IRL</Text>
               </div>
               <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
                 Read More

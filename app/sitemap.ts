@@ -8,7 +8,7 @@ const buildUrl = (slug: string, base: string) => new URL(slug, base).toString();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap[]> {
 
-  const stores = await strapiClient.getStores({ page: 1, pageSize: 100 }, { filter: '', sort: '' });
+  const stores = await strapiClient.getStores({ page: 1, pageSize: 100 }, { filter: { active: { $eq: true } }, sort: 'updatedAt:desc' });
   const list: any[] = [];
 
   stores?.data?.map((store: Store) => (
