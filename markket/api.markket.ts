@@ -46,7 +46,14 @@ export class markketClient {
     return jwt;
   };
 
-  public uploadImage = async (file: File, field: string, refId: string | number, alt?: string, ref?: _validImageRef) => {
+  public uploadImage = async (
+    file: File,
+    field: string,
+    refId: string | number,
+    alt?: string,
+    ref?: _validImageRef,
+    storeId?: string | number
+  ) => {
     this.readToken();
 
     const formData = new FormData();
@@ -54,6 +61,9 @@ export class markketClient {
     formData.append('ref', ref || 'api::store.store');
     formData.append('refId', refId as string);
     formData.append('field', field);
+    if (storeId !== undefined && storeId !== null && String(storeId).trim()) {
+      formData.append('storeId', String(storeId));
+    }
     formData.append("fileInfo", JSON.stringify({
       name: file.name,
       alternativeText: alt,
@@ -61,6 +71,34 @@ export class markketClient {
     }));
 
     const _url = new URL('/api/markket?path=/api/upload', this.baseUrl);
+
+    return await fetch(_url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+      body: formData,
+    });
+  };
+
+  public updateImageAltText = async (
+    mediaId: string | number,
+    altText: string,
+    storeId?: string | number
+  ) => {
+    this.readToken();
+
+    const formData = new FormData();
+    formData.append('fileInfo', JSON.stringify({
+      alternativeText: altText,
+      caption: altText,
+    }));
+
+    if (storeId !== undefined && storeId !== null && String(storeId).trim()) {
+      formData.append('storeId', String(storeId));
+    }
+
+    const _url = new URL(`/api/markket?path=/api/upload&id=${encodeURIComponent(String(mediaId))}`, this.baseUrl);
 
     return await fetch(_url, {
       method: 'POST',

@@ -18,7 +18,7 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
       href: `/${slug}`,
       icon: <IconHome size={18} />,
       label: 'Home',
-      show: true,
+      show: visibility ? visibility.show_home : true,
       color: markketColors.neutral.charcoal,
     },
     {
@@ -126,7 +126,7 @@ export function ClientLayout({
       href: `/${store?.slug}`,
       icon: <IconHome size={16} />,
       label: 'Home',
-      show: true,
+      show: visibility ? visibility.show_home : true,
       color: markketColors.neutral.charcoal,
     },
     {

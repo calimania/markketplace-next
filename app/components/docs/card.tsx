@@ -9,9 +9,10 @@ export interface BlogPostCardProps {
   post: Article;
   prefix?: string;
   showStore?: boolean;
+  imageLoading?: 'eager' | 'lazy';
 };
 
-export function BlogPostCard({ post, prefix, showStore }: BlogPostCardProps) {
+export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }: BlogPostCardProps) {
   const slug = post.slug;
   const linkHref = `/${prefix || 'docs'}/${slug}`;
   const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url;
@@ -50,7 +51,7 @@ export function BlogPostCard({ post, prefix, showStore }: BlogPostCardProps) {
             src={coverUrl}
             alt={post?.Title}
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s ease' }}
-            loading="lazy"
+            loading={imageLoading}
           />
         ) : (
             <Box

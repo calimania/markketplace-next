@@ -10,6 +10,7 @@ import { StoreSectionLinks } from '@/app/components/ui/store.section.links';
 import RichTextContent from '@/app/components/ui/richtext.content';
 import { markketColors } from '@/markket/colors.config';
 import Albums from '@/app/components/ui/albums.grid';
+import StoreSlidesGallery from '@/app/components/ui/store.slides.gallery';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Store } from "@/markket/store.d";
 import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
@@ -35,6 +36,8 @@ type SectionPreviewCard = {
   headline: string;
   description: string;
   imageUrl?: string;
+  show: boolean;
+  hasContent: boolean;
 };
 
 function compact(value?: string | null, max = 96) {
@@ -100,8 +103,17 @@ export default async function StorePage({
   const posts = (postsResponse?.data || []) as Article[];
   const events = (eventsResponse?.data || []) as Event[];
   const pages = (pagesResponse?.data || []) as Page[];
+  const slides = (store?.Slides || [])
+    .map((slide) => ({
+      src: imageOrFallback(slide?.formats?.medium?.url, slide?.formats?.small?.url, slide?.url),
+      alt: slide?.alternativeText || slide?.caption || store?.title || 'Store slide',
+      key: slide?.documentId || slide?.id || slide?.hash || slide?.url || 'slide',
+    }))
+    .filter((slide): slide is { src: string; alt: string; key: string | number } => !!slide.src);
 
   const descriptionText = richTextToPlainText(store.Description);
+  const hasStoreDescription = Boolean(descriptionText?.trim());
+  const shouldRenderRichDescription = !homePage?.Title && hasStoreDescription;
 
   const aboutPages = pages.filter((page) => !['home', 'about', 'blog', 'products', 'events'].includes(page.slug || ''));
 
@@ -117,11 +129,13 @@ export default async function StorePage({
       key: 'shop',
       title: 'Shop',
       href: `/${slug}/products`,
+      show: visibility ? visibility.show_shop : true,
       color: markketColors.sections.shop.main,
       bg: markketColors.sections.shop.light,
       countLabel: `${products.length} products`,
       headline: featuredProduct?.Name || 'Featured products',
       description: compact(featuredProduct?.Description || 'Browse your latest drops and essentials in one place.'),
+      hasContent: products.length > 0,
       imageUrl: imageOrFallback(
         featuredProduct?.Thumbnail?.url,
         featuredProduct?.SEO?.socialImage?.formats?.small?.url,
@@ -132,11 +146,13 @@ export default async function StorePage({
       key: 'blog',
       title: 'Blog',
       href: `/${slug}/blog`,
+      show: visibility ? visibility.show_blog : true,
       color: markketColors.sections.blog.main,
       bg: markketColors.sections.blog.light,
       countLabel: `${posts.length} posts`,
       headline: featuredPost?.Title || 'Latest stories',
       description: compact(featuredPost?.SEO?.metaDescription || 'Read stories, updates, and ideas from this store.'),
+      hasContent: posts.length > 0,
       imageUrl: imageOrFallback(
         featuredPost?.cover?.formats?.small?.url,
         featuredPost?.cover?.url,
@@ -148,11 +164,13 @@ export default async function StorePage({
       key: 'events',
       title: 'Events',
       href: `/${slug}/events`,
+      show: visibility ? visibility.show_events : true,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
       countLabel: `${events.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
       description: compact(featuredEvent?.Description || 'Discover upcoming events, launches, and gatherings.'),
+      hasContent: events.length > 0,
       imageUrl: imageOrFallback(
         featuredEvent?.Thumbnail?.formats?.small?.url,
         featuredEvent?.Thumbnail?.url,
@@ -164,11 +182,13 @@ export default async function StorePage({
       key: 'about',
       title: 'About',
       href: `/${slug}/about`,
+      show: visibility ? visibility.show_about : true,
       color: markketColors.sections.about.main,
       bg: markketColors.sections.about.light,
       countLabel: `${aboutPages.length} pages`,
       headline: featuredAbout?.Title || 'About this store',
       description: compact(featuredAbout?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Learn the story and explore the world behind this store.'),
+      hasContent: aboutPages.length > 0 || hasStoreDescription,
       imageUrl: imageOrFallback(
         featuredAbout?.SEO?.socialImage?.formats?.small?.url,
         featuredAbout?.SEO?.socialImage?.url,
@@ -176,7 +196,7 @@ export default async function StorePage({
         store?.SEO?.socialImage?.url,
       ),
     },
-  ];
+  ].filter((card) => card.show && card.hasContent);
 
   const sectionLinks = [
     {
@@ -308,7 +328,7 @@ export default async function StorePage({
               <StoreTabs urls={store.URLS} basePath={`/${slug}`} />
             )}
 
-            {descriptionText ? (
+            {!shouldRenderRichDescription && descriptionText ? (
               <Text
                 size="md"
                 c="dimmed"
@@ -328,81 +348,86 @@ export default async function StorePage({
           </Stack>
 
 
-          {!homePage?.Title && store?.Description && (
+          {shouldRenderRichDescription && (
             <Box maw={720} mx="auto" w="100%">
               <RichTextContent content={store.Description} />
             </Box>
           )}
 
+          {previewCards.length > 0 && (
+            <Stack gap="md">
+              <Group justify="space-between" align="center">
+                <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
+              </Group>
+
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                {previewCards.map((card) => (
+                  <Link key={card.key} href={card.href} style={{ textDecoration: 'none' }}>
+                    <Paper
+                      withBorder
+                      radius="xl"
+                      p="md"
+                      style={{
+                        borderColor: card.color,
+                        background: card.bg,
+                        color: '#0f172a',
+                        transition: 'transform 160ms ease, box-shadow 160ms ease',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+                      }}
+                    >
+                      <Stack gap="sm">
+                        <Group justify="space-between" align="center">
+                          <Badge variant="filled" color="dark">{card.title}</Badge>
+                          <Text size="xs" fw={600} style={{ color: card.color }}>{card.countLabel}</Text>
+                        </Group>
+
+                        {card.imageUrl ? (
+                          <Box
+                            style={{
+                              height: 136,
+                              borderRadius: 12,
+                              backgroundImage: `url(${card.imageUrl})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              border: '1px solid rgba(15, 23, 42, 0.08)',
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            style={{
+                              height: 136,
+                              borderRadius: 12,
+                              border: '1px dashed rgba(15, 23, 42, 0.25)',
+                              background: 'rgba(255,255,255,0.72)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Text size="sm" c="dimmed">No thumbnail yet</Text>
+                          </Box>
+                        )}
+
+                        <Text fw={700} lh={1.3} lineClamp={2}>{card.headline}</Text>
+                        <Text size="sm" c="dimmed" lh={1.55} lineClamp={2}>{card.description}</Text>
+                        <Group justify="space-between" align="center" mt={2}>
+                          <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: card.color }}>
+                            Open {card.title}
+                          </Text>
+                          <IconArrowRight size={16} color={card.color} />
+                        </Group>
+                      </Stack>
+                    </Paper>
+                  </Link>
+                ))}
+              </SimpleGrid>
+            </Stack>
+          )}
 
 
-          <Stack gap="md">
-            <Group justify="space-between" align="center">
-              <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
-            </Group>
-
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-              {previewCards.map((card) => (
-                <Link key={card.key} href={card.href} style={{ textDecoration: 'none' }}>
-                  <Paper
-                    withBorder
-                    radius="xl"
-                    p="md"
-                    style={{
-                      borderColor: card.color,
-                      background: card.bg,
-                      color: '#0f172a',
-                      transition: 'transform 160ms ease, box-shadow 160ms ease',
-                      boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <Stack gap="sm">
-                      <Group justify="space-between" align="center">
-                        <Badge variant="filled" color="dark">{card.title}</Badge>
-                        <Text size="xs" fw={600} style={{ color: card.color }}>{card.countLabel}</Text>
-                      </Group>
-
-                      {card.imageUrl ? (
-                        <Box
-                          style={{
-                            height: 136,
-                            borderRadius: 12,
-                            backgroundImage: `url(${card.imageUrl})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            border: '1px solid rgba(15, 23, 42, 0.08)',
-                          }}
-                        />
-                      ) : (
-                        <Box
-                          style={{
-                            height: 136,
-                            borderRadius: 12,
-                            border: '1px dashed rgba(15, 23, 42, 0.25)',
-                            background: 'rgba(255,255,255,0.72)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Text size="sm" c="dimmed">No thumbnail yet</Text>
-                        </Box>
-                      )}
-
-                      <Text fw={700} lh={1.3} lineClamp={2}>{card.headline}</Text>
-                      <Text size="sm" c="dimmed" lh={1.55} lineClamp={2}>{card.description}</Text>
-                      <Group justify="space-between" align="center" mt={2}>
-                        <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: card.color }}>
-                          Open {card.title}
-                        </Text>
-                        <IconArrowRight size={16} color={card.color} />
-                      </Group>
-                    </Stack>
-                  </Paper>
-                </Link>
-              ))}
-            </SimpleGrid>
-          </Stack>
+          {slides.length > 0 && (
+            <StoreSlidesGallery slides={slides} />
+          )}
 
           <PageContent params={{ page: homePage }} />
 

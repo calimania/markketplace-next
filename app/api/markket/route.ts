@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markketplace } from '@/markket/config';
-import { headers } from 'next/headers';
+import qs from 'qs';
 
 type ProxyRule = {
   methods: string[];
@@ -17,7 +17,7 @@ const PROXY_RULES: ProxyRule[] = [
   { methods: ['POST'], requiresAuth: false, match: /^\/api\/auth-magic\/request$/ },
 
   // Protected uploads and dashboard read-by-id endpoints.
-  { methods: ['POST'], requiresAuth: true, match: /^\/api\/upload$/ },
+  { methods: ['POST'], requiresAuth: true, match: /^\/api\/upload\/?$/ },
   {
     methods: ['GET'],
     requiresAuth: true,
@@ -46,6 +46,139 @@ function normalizePath(path: string | null) {
 
 function findRule(method: string, path: string) {
   return PROXY_RULES.find((rule) => rule.methods.includes(method) && rule.match.test(path));
+}
+
+function readBearerToken(req: NextRequest) {
+  const rawAuth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
+  const match = rawAuth.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() || '';
+}
+
+type StoreOwnershipCheck = {
+  allowed: boolean;
+  reason: 'ok' | 'missing_token_or_store' | 'invalid_user_token' | 'missing_user_id' | 'stores_lookup_failed' | 'store_not_found' | 'user_not_in_store';
+};
+
+function extractStoreUsers(store: any): Array<{ id?: string | number; documentId?: string | number }> {
+  const users = store?.users;
+
+  if (Array.isArray(users)) return users;
+  if (Array.isArray(users?.data)) return users.data;
+
+  return [];
+}
+
+async function verifyStoreOwnership(token: string, storeIdentifier: string): Promise<StoreOwnershipCheck> {
+  if (!token || !storeIdentifier) {
+    return { allowed: false, reason: 'missing_token_or_store' };
+  }
+
+  try {
+    const meResponse = await fetch(new URL('/api/users/me', markketplace.api), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 0 },
+    });
+
+    if (!meResponse.ok) {
+      return { allowed: false, reason: 'invalid_user_token' };
+    }
+
+    const me = await meResponse.json();
+    const userId = me?.id;
+    const userDocumentId = me?.documentId;
+
+    if (!userId && !userDocumentId) {
+      return { allowed: false, reason: 'missing_user_id' };
+    }
+
+    const query = qs.stringify({
+      filters: {
+        users: {
+          id: {
+            $eq: userId,
+          },
+        },
+      },
+      pagination: {
+        page: 1,
+        pageSize: 200,
+      },
+      fields: ['id', 'documentId'],
+    }, { encodeValuesOnly: true });
+
+    const storesResponse = await fetch(new URL(`/api/stores?${query}`, markketplace.api), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      next: { revalidate: 0 },
+    });
+
+    if (storesResponse.ok) {
+      const storesPayload = await storesResponse.json();
+      const stores = Array.isArray(storesPayload?.data) ? storesPayload.data : [];
+
+      const directMatch = stores.some((store: any) => `${store?.id}` === `${storeIdentifier}` || `${store?.documentId}` === `${storeIdentifier}`);
+      if (directMatch) {
+        return { allowed: true, reason: 'ok' };
+      }
+    }
+
+    const specificStoreQuery = qs.stringify({
+      filters: {
+        $or: [
+          { id: { $eq: Number.isNaN(Number(storeIdentifier)) ? -1 : Number(storeIdentifier) } },
+          { documentId: { $eq: storeIdentifier } },
+        ],
+      },
+      fields: ['id', 'documentId'],
+      populate: {
+        users: {
+          fields: ['id', 'documentId'],
+        },
+      },
+      pagination: {
+        page: 1,
+        pageSize: 1,
+      },
+    }, { encodeValuesOnly: true });
+
+    const specificStoreResponse = await fetch(new URL(`/api/stores?${specificStoreQuery}`, markketplace.api), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      next: { revalidate: 0 },
+    });
+
+    if (!specificStoreResponse.ok) {
+      return { allowed: false, reason: 'stores_lookup_failed' };
+    }
+
+    const specificStorePayload = await specificStoreResponse.json();
+    const targetStore = Array.isArray(specificStorePayload?.data) ? specificStorePayload.data[0] : null;
+
+    if (!targetStore) {
+      return { allowed: false, reason: 'store_not_found' };
+    }
+
+    const users = extractStoreUsers(targetStore);
+    const ownsStore = users.some((user: any) => {
+      const matchesNumericId = userId !== undefined && userId !== null && (`${user?.id}` === `${userId}` || `${user?.documentId}` === `${userId}`);
+      const matchesDocumentId = !!userDocumentId && (`${user?.id}` === `${userDocumentId}` || `${user?.documentId}` === `${userDocumentId}`);
+      return matchesNumericId || matchesDocumentId;
+    });
+
+    if (!ownsStore) {
+      return { allowed: false, reason: 'user_not_in_store' };
+    }
+
+    return { allowed: true, reason: 'ok' };
+  } catch (error) {
+    console.error('Upload ownership verification failed:', error);
+    return { allowed: false, reason: 'stores_lookup_failed' };
+  }
 }
 
 /**
@@ -217,8 +350,7 @@ async function handler(req: NextRequest) {
 
   console.log(`Proxie:${req.method}:${targetUrl.toString()}`);
 
-  const headersList = await headers();
-  const token = headersList.get('authorization')?.split('Bearer ')[1] || '';
+  const token = readBearerToken(req);
 
   if (rule.requiresAuth) {
     if (!token) {
@@ -244,6 +376,25 @@ async function handler(req: NextRequest) {
 
     if (isMultipart) {
       const formData = await req.formData();
+
+      if (path.startsWith('/api/upload')) {
+        const storeId = formData.get('storeId')?.toString().trim() || '';
+
+        if (storeId) {
+          const storeCheck = await verifyStoreOwnership(token, storeId);
+
+          if (!storeCheck.allowed) {
+            return NextResponse.json(
+              {
+                error: 'Store not found or unauthorized for upload',
+                reason: storeCheck.reason,
+              },
+              { status: 403 }
+            );
+          }
+        }
+      }
+
       fetchOptions.body = formData;
     } else {
       fetchOptions.headers = {
@@ -256,10 +407,19 @@ async function handler(req: NextRequest) {
     }
 
     const response = await fetch(targetUrl.toString(), fetchOptions);
-    const data = await response.json();
+    const responseContentType = response.headers.get('content-type') || '';
 
-    return NextResponse.json(data, {
+    if (responseContentType.includes('application/json')) {
+      const data = await response.json();
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    const text = await response.text();
+    return new NextResponse(text, {
       status: response.status,
+      headers: {
+        'Content-Type': responseContentType || 'text/plain',
+      },
     });
 
   } catch (error) {

@@ -1,7 +1,7 @@
 'use client';
 
-import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon } from '@mantine/core';
-import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles } from '@tabler/icons-react';
+import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon, Box } from '@mantine/core';
+import { IconPalette, IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles, IconPhoto } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import NavTable from '@/app/components/ui/nav.table';
@@ -46,6 +46,14 @@ export default function StoreOverview({
     { label: 'Products', value: allProducts.length, icon: IconShoppingCart },
     { label: 'Events', value: upcomingEvents.length, icon: IconCalendarEvent },
   ];
+  const slideThumbs = (store?.Slides || [])
+    .map((slide) => ({
+      key: slide.documentId || slide.id,
+      src: slide.formats?.thumbnail?.url || slide.formats?.small?.url || slide.url,
+      alt: slide.alternativeText || slide.caption || 'Slide',
+    }))
+    .filter((slide) => !!slide.src)
+    .slice(0, 10);
 
   return (
     <Stack gap="md">
@@ -106,6 +114,52 @@ export default function StoreOverview({
               </Paper>
             ))}
           </SimpleGrid>
+          {isAuthorized && (
+            <Stack gap="xs">
+              <Group justify="space-between" align="center">
+                <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
+                  Slides Preview
+                </Text>
+                <Button
+                  component="a"
+                  variant="light"
+                  color="grape"
+                  href={`/tienda/${store.slug}/snapshot`}
+                  leftSection={<IconPhoto size={14} />}
+                  size="xs"
+                >
+                  Open Media Studio
+                </Button>
+              </Group>
+              {slideThumbs.length > 0 ? (
+                <Box style={{ overflowX: 'auto', paddingBottom: 2 }}>
+                  <Group gap="xs" wrap="nowrap" style={{ minWidth: 'max-content' }}>
+                    {slideThumbs.map((slide, index) => (
+                      <Box
+                        key={`${slide.key || 'slide'}-${index}`}
+                        component="a"
+                        href={`/tienda/${store.slug}/snapshot`}
+                        style={{
+                          width: 68,
+                          height: 52,
+                          borderRadius: 10,
+                          backgroundImage: `url(${slide.src})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          border: '1px solid rgba(15, 23, 42, 0.12)',
+                          display: 'block',
+                          flex: '0 0 auto',
+                        }}
+                        title={slide.alt}
+                      />
+                    ))}
+                  </Group>
+                </Box>
+              ) : (
+                <Text size="xs" c="dimmed">No slides yet. Add one in Media Studio.</Text>
+              )}
+            </Stack>
+          )}
           </Stack>
         </Paper>
 
