@@ -20,7 +20,8 @@ const normalizePostHogHost = (value?: string) => {
   }
 
   try {
-    const url = new URL(normalized);
+    const withProtocol = /^https?:\/\//i.test(normalized) ? normalized : `https://${normalized}`;
+    const url = new URL(withProtocol);
 
     if (url.hostname === 'us.posthog.com' || url.hostname === 'app.posthog.com') {
       return DEFAULT_POSTHOG_HOST;

@@ -27,7 +27,9 @@ export function PostHogProvider({ children }: { children: JSX.Element }) {
     try {
       posthog.init(markketplace.extensions.posthog.api_key, {
         api_host: resolvePostHogHost(),
+        ui_host: 'https://us.posthog.com',
         capture_pageview: false,
+        person_profiles: 'identified_only',
       });
     } catch (error) {
       console.error('[PostHog] Initialization failed.', error);
