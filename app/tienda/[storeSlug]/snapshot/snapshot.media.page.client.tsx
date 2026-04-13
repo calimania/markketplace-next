@@ -72,7 +72,7 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
     }
   };
 
-  const saveSlides = async (slides: Media[]) => {
+  const saveSlides = async (slides: Store['Slides']) => {
     const targetId = store.documentId || store.id;
     if (!targetId) throw new Error('Missing store identifier');
 
@@ -80,7 +80,7 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
       store: {
         ...store,
         title: store.title || '',
-        Description: store.Description || store.description || '',
+        Description: store.Description || '',
         slug: store.slug || storeSlug,
         URLS: store.URLS || [],
         SEO: {

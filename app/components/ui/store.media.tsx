@@ -24,11 +24,12 @@ interface StoreMediaProps {
   store: Store;
   onUpdate: (file: Media, field: string, id: number | string) => void;
   onRefresh?: () => Promise<void> | void;
-  onSaveSlides?: (slides: Media[]) => Promise<void> | void;
+  onSaveSlides?: (slides: Store['Slides']) => Promise<void> | void;
 }
 
 type UploadField = 'Logo' | 'Favicon' | 'SEO.socialImage' | 'Cover' | 'Slides';
 type LoadingField = 'logo' | 'favicon' | 'social' | 'slides' | null;
+type SlideMedia = Store['Slides'][number];
 
 type MediaSlot = {
   id: string;
@@ -46,14 +47,14 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   const [savingAlt, setSavingAlt] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState('Logo');
   const [altText, setAltText] = useState('');
-  const [draftSlides, setDraftSlides] = useState<Media[]>(Array.isArray(store.Slides) ? store.Slides : []);
+  const [draftSlides, setDraftSlides] = useState<SlideMedia[]>(Array.isArray(store.Slides) ? store.Slides : []);
   const client = new markketClient();
 
   useEffect(() => {
     setDraftSlides(Array.isArray(store.Slides) ? store.Slides : []);
   }, [store.documentId, store.Slides]);
 
-  const getSlideSlotId = (slide: Media, index: number) => `slide-${slide.documentId || slide.id || index}`;
+  const getSlideSlotId = (slide: SlideMedia, index: number) => `slide-${slide.documentId || slide.id || index}`;
 
   const slots: MediaSlot[] = [
     {
@@ -159,7 +160,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
         if (field === 'Slides') {
           setDraftSlides((current) => {
             const exists = current.some((slide) => `${slide.id}` === `${uploaded.id}` || `${slide.documentId}` === `${uploaded.documentId}`);
-            return exists ? current : [...current, uploaded];
+            return exists ? current : [...current, uploaded as SlideMedia];
           });
           setSelectedSlotId(`slide-${uploaded.documentId || uploaded.id}`);
         }
