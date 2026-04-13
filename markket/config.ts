@@ -1,5 +1,40 @@
 
 const MAX_STORES: number = parseInt(process.env.NEXT_PUBLIC_MAX_STORES_PER_USER || '3', 10);
+const DEFAULT_POSTHOG_HOST = 'https://us.i.posthog.com';
+
+const readPublicEnv = (value?: string) => {
+  const normalized = value?.trim();
+
+  if (!normalized || normalized === 'undefined' || normalized === 'null') {
+    return '';
+  }
+
+  return normalized;
+};
+
+const normalizePostHogHost = (value?: string) => {
+  const normalized = readPublicEnv(value);
+
+  if (!normalized) {
+    return DEFAULT_POSTHOG_HOST;
+  }
+
+  try {
+    const url = new URL(normalized);
+
+    if (url.hostname === 'us.posthog.com' || url.hostname === 'app.posthog.com') {
+      return DEFAULT_POSTHOG_HOST;
+    }
+
+    if (url.hostname === 'eu.posthog.com') {
+      return 'https://eu.i.posthog.com';
+    }
+
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return DEFAULT_POSTHOG_HOST;
+  }
+};
 
 /**
  * Runtime configuration for the Markket app
@@ -30,8 +65,8 @@ export const markketplace = {
     unsplash_access_key: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
     pexels_access_key: process.env.NEXT_PUBLIC_PEXELS_KEY || '',
     posthog: {
-      api_key: process.env.NEXT_PUBLIC_POSTHOG_KEY,
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com'
+      api_key: readPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY),
+      host: normalizePostHogHost(process.env.NEXT_PUBLIC_POSTHOG_HOST)
     }
   }
 };
