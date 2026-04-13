@@ -77,8 +77,13 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
 
         {posts.length > 0 ? (
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-            {posts.map((post) => (
-              <BlogPostCard key={(post as Article)?.id} post={post as Article} prefix={`${slug}/blog`} />
+            {posts.map((post, index) => (
+              <BlogPostCard
+                key={(post as Article)?.id}
+                post={post as Article}
+                prefix={`${slug}/blog`}
+                imageLoading={index === 0 ? 'eager' : 'lazy'}
+              />
             ))}
           </SimpleGrid>
         ) : (

@@ -54,17 +54,36 @@ const ImageConfig: Record<supported_kind, Record<string, { multi?: boolean, max_
 const upload = (item: ContentTypes, kind: supported_kind) => {
   const markket = new markketClient();
 
+  const resolveStoreId = () => {
+    if (kind === 'store') {
+      return item?.id || item?.documentId;
+    }
+
+    const singleStore = (item as any)?.store;
+    if (singleStore?.documentId || singleStore?.id) {
+      return singleStore.documentId || singleStore.id;
+    }
+
+    const manyStores = (item as any)?.stores;
+    if (Array.isArray(manyStores) && manyStores.length > 0) {
+      return manyStores[0]?.documentId || manyStores[0]?.id;
+    }
+
+    return undefined;
+  };
+
   return async (path: string, img: File, alt: string, multiIndex?: number) => {
     console.log(`uploading:${kind}:${path}:index-${multiIndex}`);
+    const storeId = resolveStoreId();
 
     if (path == 'SEO.socialImage' && item?.SEO?.id) {
-      await markket.uploadImage(img, 'socialImage', item.SEO?.id, alt, `common.seo` as _validImageRef);
+      await markket.uploadImage(img, 'socialImage', item.SEO?.id, alt, `common.seo` as _validImageRef, storeId);
       return;
     }
 
     if (item.id) {
       const ref = ((kind == 'track') ? 'api::album.track' : `api::${kind}.${kind}`) as _validImageRef;
-      await markket.uploadImage(img, path, item.id, alt, ref);
+      await markket.uploadImage(img, path, item.id, alt, ref, storeId);
       return;
     }
   }

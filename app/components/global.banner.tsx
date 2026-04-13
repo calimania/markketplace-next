@@ -39,14 +39,15 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
       }}
     >
       <Container size="lg">
-        <Group justify="space-between">
-          <Group gap={4}>
+        <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
+          <Group gap="xs" align="center" wrap="nowrap">
             <ActionIcon
               component={Link}
               href="/"
               variant="subtle"
               size="md"
               aria-label="Home"
+              radius="md"
             >
               <IconHome size={18} />
             </ActionIcon>
@@ -55,7 +56,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
               component={Link}
               href="/stores"
               underline="never"
-              style={{ display: 'flex', alignItems: 'center', gap: 4, color: markketColors.neutral.darkGray }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, color: markketColors.neutral.darkGray, paddingInline: 2 }}
             >
               <IconBuildingStore size={15} />
               <Text size="sm" visibleFrom="sm">Stores</Text>
@@ -65,14 +66,14 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
               component={Link}
               href="/blog"
               underline="never"
-              style={{ display: 'flex', alignItems: 'center', gap: 4, color: markketColors.neutral.darkGray }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, color: markketColors.neutral.darkGray, paddingInline: 2 }}
             >
               <IconArticle size={15} />
               <Text size="sm" visibleFrom="sm">Blog</Text>
             </Anchor>
           </Group>
 
-          <Group gap="xs">
+          <Group gap="xs" align="center" wrap="nowrap">
             {extraActions}
             {isMaybe && (
               <ActionIcon
@@ -80,6 +81,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
                 href="/me"
                 variant="light"
                 size="md"
+                radius="md"
                 aria-label="My workspace"
                 style={{ color: markketColors.rosa.main, background: markketColors.rosa.light }}
               >
