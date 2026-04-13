@@ -46,14 +46,18 @@ export default function StoreOverview({
     { label: 'Products', value: allProducts.length, icon: IconShoppingCart },
     { label: 'Events', value: upcomingEvents.length, icon: IconCalendarEvent },
   ];
-  const slideThumbs = (store?.Slides || [])
-    .map((slide) => ({
-      key: slide.documentId || slide.id,
+  const allMediaThumbs = [
+    store.Logo?.url && { key: 'logo', src: store.Logo.url, alt: store.Logo.alternativeText || 'Logo', label: 'Logo' },
+    store.Cover?.url && { key: 'cover', src: store.Cover.url, alt: store.Cover.alternativeText || 'Cover', label: 'Cover' },
+    store.Favicon?.url && { key: 'favicon', src: store.Favicon.url, alt: store.Favicon.alternativeText || 'Favicon', label: 'Favicon' },
+    store.SEO?.socialImage?.url && { key: 'social', src: store.SEO.socialImage.url, alt: store.SEO.socialImage.alternativeText || 'Social', label: 'Social' },
+    ...(store.Slides || []).map((slide, i) => ({
+      key: `slide-${slide.documentId || slide.id || i}`,
       src: slide.formats?.thumbnail?.url || slide.formats?.small?.url || slide.url,
-      alt: slide.alternativeText || slide.caption || 'Slide',
-    }))
-    .filter((slide) => !!slide.src)
-    .slice(0, 10);
+      alt: slide.alternativeText || slide.caption || `Slide ${i + 1}`,
+      label: `Slide ${i + 1}`,
+    })),
+  ].filter((item): item is { key: string; src: string; alt: string; label: string } => !!item && !!item.src);
 
   return (
     <Stack gap="md">
@@ -118,7 +122,7 @@ export default function StoreOverview({
             <Stack gap="xs">
               <Group justify="space-between" align="center">
                 <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
-                  Slides Preview
+                  Media ({allMediaThumbs.length})
                 </Text>
                 <Button
                   component="a"
@@ -131,32 +135,47 @@ export default function StoreOverview({
                   Open Media Studio
                 </Button>
               </Group>
-              {slideThumbs.length > 0 ? (
+              {allMediaThumbs.length > 0 ? (
                 <Box style={{ overflowX: 'auto', paddingBottom: 2 }}>
                   <Group gap="xs" wrap="nowrap" style={{ minWidth: 'max-content' }}>
-                    {slideThumbs.map((slide, index) => (
+                    {allMediaThumbs.map((item) => (
                       <Box
-                        key={`${slide.key || 'slide'}-${index}`}
+                        key={item.key}
                         component="a"
                         href={`/tienda/${store.slug}/snapshot`}
                         style={{
                           width: 68,
                           height: 52,
                           borderRadius: 10,
-                          backgroundImage: `url(${slide.src})`,
+                          backgroundImage: `url(${item.src})`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           border: '1px solid rgba(15, 23, 42, 0.12)',
                           display: 'block',
                           flex: '0 0 auto',
+                          position: 'relative',
                         }}
-                        title={slide.alt}
-                      />
+                        title={item.label}
+                      >
+                        <Text
+                          size="9px"
+                          fw={700}
+                          c="white"
+                          style={{
+                            position: 'absolute',
+                            bottom: 3,
+                            left: 4,
+                            textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+                          }}
+                        >
+                          {item.label}
+                        </Text>
+                      </Box>
                     ))}
                   </Group>
                 </Box>
               ) : (
-                <Text size="xs" c="dimmed">No slides yet. Add one in Media Studio.</Text>
+                  <Text size="xs" c="dimmed">No images yet. Add some in Media Studio.</Text>
               )}
             </Stack>
           )}

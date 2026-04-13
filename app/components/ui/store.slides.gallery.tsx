@@ -12,9 +12,10 @@ type StoreSlideItem = {
 
 type StoreSlidesGalleryProps = {
   slides: StoreSlideItem[];
+  title?: string;
 };
 
-export default function StoreSlidesGallery({ slides }: StoreSlidesGalleryProps) {
+export default function StoreSlidesGallery({ slides, title }: StoreSlidesGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selected = useMemo(() => slides[selectedIndex] || slides[0], [slides, selectedIndex]);
@@ -26,7 +27,7 @@ export default function StoreSlidesGallery({ slides }: StoreSlidesGalleryProps) 
   return (
     <Stack gap="md">
       <Group justify="space-between" align="center">
-        <Title order={2} fw={700} size="lg">Slides</Title>
+        <Title order={2} fw={700} size="lg">{title || 'Slides'}</Title>
         <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
           {slides.length} saved
         </Text>
