@@ -64,7 +64,7 @@ export const markketplace = {
   design_system_demo_slug: process.env.NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG || 'dev',
   extensions: {
     unsplash_access_key: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
-    pexels_access_key: process.env.NEXT_PUBLIC_PEXELS_KEY || '',
+    pexels_access_key: process.env.PEXELS_API_KEY || process.env.NEXT_PUBLIC_PEXELS_KEY || '',
     posthog: {
       api_key: readPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY),
       host: normalizePostHogHost(process.env.NEXT_PUBLIC_POSTHOG_HOST)

@@ -1,12 +1,17 @@
+import type { Metadata } from 'next';
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Article } from '@/markket/article';
-import NavTable from '@/app/components/ui/nav.table';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
+import BlogListClient from './blog.list.client';
 
 type TiendaBlogPageProps = {
   params: Promise<{ storeSlug: string }>;
+};
+
+export const metadata: Metadata = {
+  title: 'Articles',
 };
 
 export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
@@ -15,7 +20,6 @@ export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
   const postsResponse = await strapiClient.getPosts({ page: 1, pageSize: 50 }, { sort: 'createdAt:desc' }, storeSlug);
 
   const posts = (postsResponse?.data || []) as Article[];
-  const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
   return (
     <TiendaListShell
@@ -32,28 +36,19 @@ export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
         <>
             <Button
               component="a"
-              href={`/tienda/${storeSlug}/articles`}
+              href={`/tienda/${storeSlug}/blog`}
               variant="default"
               leftSection={<IconListSearch size={16} />}
             >
               Open Editor
             </Button>
-            <Button component="a" href={`/tienda/${storeSlug}/articles/new`} leftSection={<IconPlus size={16} />}>
+            <Button component="a" href={`/tienda/${storeSlug}/blog/new`} leftSection={<IconPlus size={16} />}>
               New Article
             </Button>
         </>
       }
     >
-      <NavTable
-        emptyText="No articles yet."
-        items={posts.map((post) => ({
-          key: post.documentId || post.slug,
-          title: post.Title || 'Untitled article',
-          subtitle: `${formatDate(post.createdAt)} · ${post.slug}`,
-          href: `/tienda/${storeSlug}/blog/${post.documentId || post.slug}`,
-          icon: 'article',
-        }))}
-      />
+      <BlogListClient storeSlug={storeSlug} initialPosts={posts} />
     </TiendaListShell>
   );
 }

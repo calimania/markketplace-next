@@ -6,6 +6,7 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Page, Album } from "@/markket";
 import { Metadata } from "next";
 import Albums from '@/app/components/ui/albums.grid';
+import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 
 interface PageProps {
   params: Promise<{ page_slug: string, slug: string }>;
@@ -31,8 +32,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AboutPage({ params }: PageProps) {
   const { page_slug, slug } = await params;
-  const response = await strapiClient.getPage(page_slug, slug);
+  const [response, storeResponse, relatedPagesResponse] = await Promise.all([
+    strapiClient.getPage(page_slug, slug),
+    strapiClient.getStore(slug),
+    strapiClient.getPages(slug),
+  ]);
   const page = response?.data?.[0];
+  const store = storeResponse?.data?.[0];
+  const relatedPages = (relatedPagesResponse?.data || []) as Page[];
+  const otherPages = relatedPages.filter((p) => p.slug !== page_slug && !['home', 'about'].includes(p.slug || ''));
 
   if (!page) {
     notFound();
@@ -68,6 +76,16 @@ export default async function AboutPage({ params }: PageProps) {
             </div>
           )}
         </div>
+
+        <StoreCrosslinks
+          slug={slug}
+          store={store}
+          currentSection="about"
+          items={otherPages.map((p) => ({
+            href: `/${slug}/about/${p.slug}`,
+            label: p.Title || p.slug,
+          }))}
+        />
       </Stack>
     </Container>
   );

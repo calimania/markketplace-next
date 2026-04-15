@@ -50,13 +50,16 @@ export default function MeHomePage() {
   }, [user?.displayName, user?.username, user?.bio, isLoading]);
 
   useEffect(() => {
+    // Wait for auth provider to finish its initial fetch before deciding to redirect.
+    if (isLoading) return;
+
     if (!confirmed()) {
       router.replace('/auth');
       return;
     }
 
     fetchStores({ force: true });
-  }, [confirmed, fetchStores, router]);
+  }, [confirmed, fetchStores, isLoading, router]);
 
   useEffect(() => {
     if (!confirmed() || isLoading) return;

@@ -15,7 +15,7 @@ export interface BlogPostCardProps {
 export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }: BlogPostCardProps) {
   const slug = post.slug;
   const linkHref = `/${prefix || 'docs'}/${slug}`;
-  const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url;
+  const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
   const storeTitle = (post as Article & { store?: { title?: string } })?.store?.title;
 
   return (

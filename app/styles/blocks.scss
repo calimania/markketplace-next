@@ -46,28 +46,39 @@ $markket-white: #fff;
 }
 
 .blocks-content {
+  // Restore semantic typography that Tailwind preflight strips
+  strong, b { font-weight: 700; }
+  em, i { font-style: italic; }
+  u { text-decoration: underline; }
+  s, del, strike { text-decoration: line-through; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold mb-6;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
     background: linear-gradient(90deg, $markket-blue, $markket-pink);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  h1 { @apply text-4xl md:text-5xl; }
-  h2 { @apply text-3xl md:text-4xl; }
-  h3 { @apply text-2xl md:text-3xl; }
-  h4 { @apply text-xl md:text-2xl; }
-  h5 { @apply text-lg md:text-xl; }
-  h6 { @apply text-base md:text-lg; }
+  h1 { font-size: clamp(1.75rem, 4vw, 3rem); }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+  h3 { font-size: clamp(1.25rem, 2.5vw, 1.875rem); }
+  h4 { font-size: clamp(1.1rem, 2vw, 1.5rem); }
+  h5 { font-size: 1.125rem; }
+  h6 { font-size: 1rem; }
 
   .code-block-wrapper {
-    @apply my-6 rounded-lg overflow-hidden;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
     // Style for Mantine's Prism component
     .mantine-Prism-root {
-      @apply rounded-lg;
+      border-radius: 0.5rem;
       background: linear-gradient(
         135deg,
         rgba($markket-blue, 0.05) 0%,
@@ -86,16 +97,20 @@ $markket-white: #fff;
     }
 
     .mantine-Prism-copy {
-      @apply opacity-50 transition-opacity duration-200;
+      opacity: 0.5;
+      transition: opacity 0.2s;
       &:hover {
-        @apply opacity-100;
+        opacity: 1;
         color: $markket-pink;
       }
     }
   }
 
   .inline-code {
-    @apply font-mono px-1.5 py-0.5 rounded text-sm;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.875rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     background: linear-gradient(
       135deg,
       rgba($markket-blue, 0.1),
@@ -107,27 +122,33 @@ $markket-white: #fff;
 
   // Special styling for code blocks that are direct children of paragraphs
   p > code {
-    @apply mx-1;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
   }
 
   // Paragraphs with better readability
   p {
-    @apply text-gray-800 mb-6 leading-relaxed;
+    color: #1f2937; // text-gray-800
+    margin-bottom: 1.5rem;
+    line-height: 1.75;
 
     strong {
       color: $markket-pink;
+      font-weight: 700;
     }
   }
 
-  // Funky lists
+  // Funky lists — explicit values bypass @apply failures and Mantine list reset
   ul, ol {
-    @apply mb-6 pl-6;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
   }
 
   ul {
-    @apply list-disc;
+    list-style: disc !important; // override Mantine's ul { list-style: none }
     li {
-      @apply mb-3 text-gray-800;
+      margin-bottom: 0.75rem;
+      color: #1f2937;
       &::marker {
         color: $markket-blue;
       }
@@ -141,20 +162,28 @@ $markket-white: #fff;
   }
 
   .list-container {
-    @apply my-6 space-y-2;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 
     .list-item {
-
       span, strong {
-        @apply text-blue-800;
+        color: #1e40af; // blue-800
+        font-weight: 700;
       }
 
-      @apply relative pl-6 text-gray-700;
-      list-style: none; // Prevent default bullets
+      position: relative;
+      padding-left: 1.5rem;
+      color: #374151; // gray-700
+      list-style: none;
 
       &::before {
         content: '';
-        @apply absolute left-0 top-[0.6em] w-2.5 h-2.5 rounded-full;
+        position: absolute;
+        left: 0;
+        top: 0.6em;
+        width: 0.625rem;
+        height: 0.625rem;
+        border-radius: 50%;
         background: linear-gradient(135deg, $markket-blue, $markket-pink);
         transform: scale(0.4);
         transition: transform 0.2s ease;
@@ -168,11 +197,20 @@ $markket-white: #fff;
 
   a {
     color: $markket-blue;
-    @apply relative inline-block;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
 
     &::after {
       content: '';
-      @apply absolute bottom-0 left-0 w-full h-0.5 bg-markket-yellow;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: $markket-yellow;
       transform: scaleX(0);
       transition: transform 0.3s ease;
     }
@@ -186,36 +224,50 @@ $markket-white: #fff;
   }
 
   blockquote {
-    @apply my-8 pl-6 py-2;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding-left: 1.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     border-image: linear-gradient(to bottom, $markket-blue, $markket-pink) 1;
     border-left-width: 4px;
     border-left-style: solid;
 
     p {
-      @apply text-gray-700 italic;
+      color: #374151; // gray-700
+      font-style: italic;
     }
   }
 
   pre {
     background: linear-gradient(45deg, rgba($markket-cyan, 0.1), rgba($markket-pink, 0.1));
-    @apply p-4 rounded-lg mb-6 overflow-x-auto;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
   }
 
   code {
-    @apply font-mono px-1.5 py-0.5 rounded;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
     background-color: rgba($markket-yellow, 0.2);
   }
 
   table {
-    @apply w-full border-collapse mb-6;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
 
     th {
-      @apply p-3 font-semibold;
+      padding: 0.75rem;
+      font-weight: 600;
       background: linear-gradient(90deg, rgba($markket-blue, 0.1), rgba($markket-pink, 0.1));
     }
 
     td {
-      @apply p-3 border-b border-gray-200;
+      padding: 0.75rem;
+      border-bottom: 1px solid #e5e7eb; // gray-200
     }
 
     tr:hover {
@@ -224,26 +276,34 @@ $markket-white: #fff;
   }
 
   .callout {
-    @apply p-4 rounded-lg mb-6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
     background: linear-gradient(135deg, rgba($markket-blue, 0.1), rgba($markket-pink, 0.1));
     border-left: 4px solid $markket-yellow;
   }
 
-
-
   .image-container {
-    @apply my-8 relative;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
 
     img {
-      @apply rounded-xl shadow-lg transition-all duration-300;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      transition: box-shadow 0.3s, transform 0.3s;
 
       &:hover {
-        @apply shadow-xl transform -translate-y-1;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        transform: translateY(-2px);
       }
     }
 
     figcaption {
-      @apply mt-3 text-sm text-left text-gray-600;
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      text-align: left;
+      color: #4b5563; // gray-600
       background: linear-gradient(90deg, $markket-blue, $markket-pink);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -251,7 +311,10 @@ $markket-white: #fff;
   }
 
   .image-gallery {
-    @apply grid gap-6 my-8;
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }

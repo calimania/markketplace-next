@@ -34,6 +34,7 @@ interface ImageFormat {
   width: number;
   height: number;
   sizeInBytes: number;
+  alternativeText?: string;
 }
 
 interface ImageFormats {

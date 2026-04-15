@@ -23,7 +23,7 @@ body {
   -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
   }
-  
+
   h1,
   h2,
   h3,
@@ -59,6 +59,88 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Restore semantic typography inside Tiptap / ProseMirror that Tailwind preflight strips */
+.ProseMirror strong,
+.ProseMirror b {
+  font-weight: 700;
+}
+
+.ProseMirror em,
+.ProseMirror i {
+  font-style: italic;
+}
+
+.ProseMirror u {
+  text-decoration: underline;
+}
+
+.ProseMirror s,
+.ProseMirror del {
+  text-decoration: line-through;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25rem;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 1rem;
+  font-style: italic;
+}
+
+.ProseMirror a {
+  color: #0051ba;
+  text-decoration: underline;
+}
+
+.ProseMirror code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.75em;
+}
 html[data-display-mode='embed'] .global-banner,
 html[data-display-mode='embed'] .store-shell-header,
 html[data-display-mode='embed'] .store-shell-navbar {

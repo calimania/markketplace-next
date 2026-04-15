@@ -97,15 +97,14 @@ export function StoreCard({ store, featured }: StoreCardProps) {
             <Badge
               variant="light"
               radius="xl"
-              size="xs"
+              size="md"
               style={{
                 background: markketColors.rosa.light,
                 color: markketColors.rosa.main,
                 flexShrink: 0,
               }}
             >
-              <IconMapPin size={10} style={{ marginRight: 2 }} />
-              store
+              <IconMapPin size={12} style={{ marginRight: 2 }} />
             </Badge>
           </Group>
 

@@ -322,10 +322,21 @@ export class StrapiClient {
     console.log(`url:${url}`);
 
     try {
+      let authToken = options?.headers?.Authorization as string || '';
+
+      if (!authToken && options.includeAuth) {
+        // Server-side: use API key; client-side: use JWT from localStorage
+        if (typeof window === 'undefined') {
+          authToken = process.env.MARKKET_API_KEY || '';
+        } else {
+          authToken = this._token();
+        }
+      }
+
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': options?.headers?.Authorization || options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
         },
         next: { revalidate: 1 },
       });
@@ -350,7 +361,7 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: type,
       filters: { slug: store_slug },
-      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover',
     });
   }
 
@@ -426,22 +437,31 @@ export class StrapiClient {
     return await this.fetch<Store>({
       contentType: `stores`,
       filters: { slug },
-      populate: 'Logo,SEO.socialImage,Favicon,URLS,Cover,Slides',
+      populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover,Slides',
     });
   }
 
   async getStoreVisibility(storeId: string | number) {
+    const apiKey = typeof window === 'undefined' ? process.env.MARKKET_API_KEY : undefined;
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
       const response = await fetch(new URL(`api/stores/${storeId}/visibility`, this.baseUrl), {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        next: { revalidate: 60 },
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch store visibility: ${response.statusText}`);
+        console.warn(`Store visibility unavailable (${response.status}), using defaults`);
+        return null;
       }
 
       return await response.json();
@@ -504,17 +524,13 @@ export class StrapiClient {
    * Requests stores from the strapi / markket api, including pagination, to display in our /stores ,
    * including filters to search for by some attributes like name, slug, title or description using the same keyword
    */
-  async getStores(paginate: { page: number; pageSize: number }, options: { filter: string, sort: string }) {
+  async getStores(paginate: { page: number; pageSize: number }, options: { filter: Record<string, string | number | object>, sort: string }) {
     const { sort } = options;
 
     return await this.fetch<Store>({
       contentType: 'stores',
       populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS',
-      filters: {
-        active: {
-          $eq: true
-        }
-      },
+      filters: options.filter,
       paginate,
       sort,
     });
@@ -547,6 +563,30 @@ export class StrapiClient {
       status: 'published',
       paginate,
       populate: 'SEO.socialImage,Tags,cover,store,store.Logo',
+    });
+  }
+
+  async getCommunityPages(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch<Page>({
+      contentType: 'pages',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO.socialImage,store,store.Logo',
+    });
+  }
+
+  async getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'events',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,stores,stores.Logo',
     });
   }
 

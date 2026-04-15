@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -19,6 +19,29 @@ import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { RichTextValue, TiptapDoc } from '@/markket/richtext';
 
+declare module '@tiptap/extension-image' {
+  interface SetImageOptions {
+    strapiImage?: string | null;
+  }
+}
+
+const StrapiImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      strapiImage: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-strapi-image'),
+        renderHTML: attributes => {
+          return attributes.strapiImage
+            ? { 'data-strapi-image': attributes.strapiImage }
+            : {};
+        },
+      },
+    };
+  },
+});
+
 interface ContentEditorProps {
   value?: RichTextValue;
   onChange: (value: RichTextValue) => void;
@@ -28,6 +51,7 @@ interface ContentEditorProps {
   minHeight?: number;
   error?: string;
   format?: 'markdown' | 'blocks' | 'html';
+  onUploadImage?: (file: File, altText?: string) => Promise<string | undefined>;
 }
 
 const getEditorMarkdown = (editor: any): string => {
@@ -55,6 +79,7 @@ const ContentEditor = ({
   minHeight = 300,
   error,
   format = 'markdown',
+  onUploadImage,
 }: ContentEditorProps) => {
   const [activeTab, setActiveTab] = useState<string>('editor');
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -65,6 +90,7 @@ const ContentEditor = ({
   const [isUploading, setIsUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedImageData, setUploadedImageData] = useState<Record<string, unknown> | null>(null);
 
   const uploadFile = async (file: File) => {
     try {
@@ -83,15 +109,26 @@ const ContentEditor = ({
         });
       }, 160);
 
-      const response = await strapiClient.uploadImage(file, {
-        alternativeText: imageAlt || file.name
-      });
+      let uploadUrl: string | undefined;
+
+      // Use custom upload handler if provided (e.g., Tienda), otherwise fall back to Strapi
+      if (onUploadImage) {
+        uploadUrl = await onUploadImage(file, imageAlt || file.name);
+      } else {
+        const response = await strapiClient.uploadImage(file, {
+          alternativeText: imageAlt || file.name
+        });
+        uploadUrl = response?.[0]?.url;
+        if (response?.[0]) {
+          setUploadedImageData(response[0] as Record<string, unknown>);
+        }
+      }
 
       clearInterval(interval);
       setUploadProgress(100);
 
-      if (response?.[0]?.url) {
-        setImageUrl(response?.[0]?.url);
+      if (uploadUrl) {
+        setImageUrl(uploadUrl);
         setTimeout(() => {
           setUploadProgress(0);
           setIsUploading(false);
@@ -116,7 +153,20 @@ const ContentEditor = ({
     setImageFile(null);
     setPreviewUrl(null);
     setUploadProgress(0);
+    setUploadedImageData(null);
   };
+
+  // Compute safe initial content once at mount.
+  // Tiptap's schema cannot parse a raw Strapi blocks array; convert to HTML first.
+  // Track whether the last change came from inside the editor so the syncing
+  // useEffect below doesn't call setContent() and jump the cursor.
+  const isInternalUpdateRef = useRef(false);
+
+  const initialContentRef = useRef<string>(
+    format === 'blocks' && Array.isArray(value) && value.length > 0
+      ? blocksToHtml(value as any[])
+      : typeof value === 'string' ? value : '',
+  );
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -129,38 +179,48 @@ const ContentEditor = ({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-500 hover:text-blue-700 underline',
+          target: '_blank',
+          rel: 'noopener noreferrer',
         },
       }),
       Placeholder.configure({
         placeholder,
       }),
-      Image.configure({
+      StrapiImage.configure({
         allowBase64: true,
         HTMLAttributes: {
           class: 'rounded-md max-w-full',
         },
       }),
     ],
-    content: value,
+    content: initialContentRef.current,
     // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
     onBlur: ({ editor }) => {
       if (format == 'markdown') {
+        isInternalUpdateRef.current = true;
         const markdown = getEditorMarkdown(editor);
         onChange(markdown);
       }
 
       if (format == 'html') {
+        isInternalUpdateRef.current = true;
         onChange(editor.getHTML());
       }
 
       if (format == 'blocks') {
+        isInternalUpdateRef.current = true;
         onChange(getBlocksValue(editor));
       }
     },
     onUpdate: ({ editor }) => {
       if (format == 'html') {
+        isInternalUpdateRef.current = true;
         onChange(editor.getHTML());
+      }
+
+      if (format == 'blocks') {
+        isInternalUpdateRef.current = true;
+        onChange(getBlocksValue(editor));
       }
     },
     onCreate: ({ editor }) => {
@@ -181,6 +241,13 @@ const ContentEditor = ({
 
   useEffect(() => {
     if (!editor) return;
+
+    // Skip when the change originated from within the editor (onUpdate / onBlur).
+    // This prevents setContent() from resetting cursor position on every keystroke.
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      return;
+    }
 
     if (!value || (Array.isArray(value) && value.length === 0)) {
       editor.commands.clearContent();
@@ -222,6 +289,7 @@ const ContentEditor = ({
       .setImage({
         src: imageUrl,
         alt: imageAlt,
+        strapiImage: uploadedImageData ? JSON.stringify(uploadedImageData) : null,
       })
       .run();
 
@@ -289,7 +357,7 @@ const ContentEditor = ({
             </Tabs.List>
 
             <Group>
-              {format == 'markdown' && (
+              {(format === 'markdown' || format === 'blocks') && (
                 <Tooltip label="Insert image">
                   <ActionIcon
                     onClick={() => setImageModalOpen(true)}
@@ -343,7 +411,7 @@ const ContentEditor = ({
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
-                  {format == 'markdown' && (
+                  {(format === 'markdown' || format === 'blocks') && (
                     <ActionIcon
                       variant="subtle"
                       onClick={() => setImageModalOpen(true)}

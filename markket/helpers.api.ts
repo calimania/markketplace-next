@@ -49,28 +49,13 @@ export async function validateUserAndToken() {
 export async function fetchUserStores() {
   const headersList = await headers();
   const token = headersList.get('authorization')?.split('Bearer ')[1];
-  const user_id: string | number = headersList.get('markket-user-id') || '';
-
-  const query = qs.stringify({
-    filters: {
-      users: {
-        id: {
-          $eq: user_id
-        }
-      }
-    },
-    sort: 'updatedAt:desc',
-    populate: ['Logo', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover', 'Slides', 'users'],
-  }, {
-    encodeValuesOnly: true
-  });
 
   try {
-    if (!token || !user_id) {
+    if (!token) {
       throw new Error('Missing user credentials');
     }
 
-    const response = await fetch(new URL(`api/stores?${query}`, markketplace.api), {
+    const response = await fetch(new URL('api/tienda/stores', markketplace.api), {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -79,14 +64,23 @@ export async function fetchUserStores() {
 
 
     if (!response.ok) {
-      console.warn(`fetch:error:user.stores`, { user_id, status: response.status });
+      console.warn(`fetch:error:user.stores`, { status: response.status });
 
       return ({
         status: response.status
       });
     }
 
-    return await response.json();
+    const payload = await response.json();
+    if (Array.isArray(payload?.data)) {
+      return payload;
+    }
+
+    if (Array.isArray(payload)) {
+      return { data: payload };
+    }
+
+    return payload || { data: [] };
   } catch (error) {
     console.error('Failed to fetch stores:', error);
     throw error;

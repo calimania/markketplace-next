@@ -1,5 +1,112 @@
 import type { StrapiBlock, StrapiBlockLinkChild, StrapiBlockTextChild } from '@/markket/richtext';
 
+type StrapiInlineChild = StrapiBlockTextChild | StrapiBlockLinkChild;
+type StrapiListItemBlock = Omit<StrapiBlock, 'type' | 'children'> & {
+  type: 'list-item';
+  children?: StrapiInlineChild[];
+};
+type StrapiListBlock = Omit<StrapiBlock, 'type' | 'children'> & {
+  type: 'list' | 'bullet-list' | 'ordered-list';
+  children?: StrapiListItemBlock[];
+};
+
+const encodeAttribute = (value: string): string => {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
+
+const decodeStrapiImage = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value !== 'string' || !value.trim()) return null;
+
+  try {
+    return JSON.parse(value) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+const isMeaningfulTextNode = (child: StrapiBlockTextChild): boolean => {
+  return typeof child.text === 'string' && child.text.trim().length > 0;
+};
+
+const isMeaningfulLinkNode = (child: StrapiBlockLinkChild): boolean => {
+  return typeof child.url === 'string'
+    && child.url.trim().length > 0
+    && Array.isArray(child.children)
+    && child.children.some(isMeaningfulTextNode);
+};
+
+const isMeaningfulInlineChild = (child: StrapiBlockTextChild | StrapiBlockLinkChild): boolean => {
+  return child.type === 'link' ? isMeaningfulLinkNode(child) : isMeaningfulTextNode(child);
+};
+
+const sanitizeInlineNodes = (
+  nodes?: Array<StrapiBlockTextChild | StrapiBlockLinkChild>,
+): Array<StrapiBlockTextChild | StrapiBlockLinkChild> => {
+  return (nodes || []).filter(isMeaningfulInlineChild);
+};
+
+const hasValidImagePayload = (block: StrapiBlock): boolean => {
+  return Boolean(
+    block.type === 'image'
+      && block.image
+      && typeof block.image.url === 'string'
+      && block.image.url.trim().length > 0
+      && typeof block.image.name === 'string'
+      && typeof block.image.width === 'number'
+      && typeof block.image.height === 'number'
+      && block.image.formats
+      && typeof block.image.hash === 'string'
+      && typeof block.image.ext === 'string'
+      && typeof block.image.mime === 'string'
+      && typeof block.image.size === 'number'
+      && typeof block.image.provider === 'string'
+      && typeof block.image.createdAt === 'string'
+      && typeof block.image.updatedAt === 'string',
+  );
+};
+
+const ensureImageChildren = (block: StrapiBlock): StrapiBlock => {
+  const existingChildren = Array.isArray(block.children) ? block.children : [];
+  return {
+    ...block,
+    children: existingChildren.length > 0 ? existingChildren : [{ type: 'text', text: '' }],
+  };
+};
+
+export const sanitizeStrapiBlocks = (blocks: StrapiBlock[]): StrapiBlock[] => {
+  return ((blocks || []) as StrapiBlock[]).flatMap((block): StrapiBlock[] => {
+
+    if (!block || typeof block !== 'object') return [];
+
+    if (block.type === 'paragraph' || block.type === 'heading' || block.type === 'quote' || block.type === 'code') {
+      const children = sanitizeInlineNodes(block.children);
+      return children.length > 0 ? [{ ...block, children }] : [];
+    }
+
+    if (block.type === 'list' || block.type === 'bullet-list' || block.type === 'ordered-list') {
+      const listBlock = block as StrapiListBlock;
+      const children = (listBlock.children || []).flatMap((item): StrapiListItemBlock[] => {
+        const itemChildren = sanitizeInlineNodes(item?.children);
+        return itemChildren.length > 0 ? [{ ...item, children: itemChildren }] : [];
+      });
+
+      return children.length > 0
+        ? [{ ...listBlock, children: children as unknown as StrapiBlock['children'] }]
+        : [];
+    }
+
+    if (block.type === 'image') {
+      return hasValidImagePayload(block) ? [ensureImageChildren(block)] : [];
+    }
+
+    return [block];
+  });
+};
+
 const escapeHtml = (value: string): string => {
   return value
     .replace(/&/g, '&amp;')
@@ -13,6 +120,8 @@ const renderInlineText = (child: StrapiBlockTextChild): string => {
   let text = escapeHtml(child.text || '');
 
   if (child.code) text = `<code>${text}</code>`;
+  if (child.strikethrough) text = `<s>${text}</s>`;
+  if (child.underline) text = `<u>${text}</u>`;
   if (child.bold) text = `<strong>${text}</strong>`;
   if (child.italic) text = `<em>${text}</em>`;
 
@@ -23,7 +132,7 @@ const renderInlineChild = (child: StrapiBlockTextChild | StrapiBlockLinkChild): 
   if (child.type === 'link') {
     const label = (child.children || []).map(renderInlineText).join('');
     const href = escapeHtml(child.url || '');
-    return `<a href="${href}">${label}</a>`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
   }
 
   return renderInlineText(child);
@@ -34,13 +143,22 @@ const renderBlockChildren = (children?: Array<StrapiBlockTextChild | StrapiBlock
 };
 
 const renderListItem = (item: any): string => {
-  const paragraphs = Array.isArray(item?.children) ? item.children : [];
-  const content = paragraphs
-    .map((paragraph: any) => renderBlockChildren(paragraph?.children || []))
-    .filter(Boolean)
-    .join('');
+  // Strapi v5: list-item children are inline nodes directly
+  // Strapi v4/legacy: list-item children are paragraphs wrapping inline nodes
+  const children = Array.isArray(item?.children) ? item.children : [];
+  const firstChild = children[0];
 
-  return `<li>${content}</li>`;
+  if (firstChild?.type === 'paragraph') {
+    // Legacy format: children are paragraphs
+    const content = children
+      .map((paragraph: any) => renderBlockChildren(paragraph?.children || []))
+      .filter(Boolean)
+      .join('');
+    return `<li>${content}</li>`;
+  }
+
+  // v5 format: children are inline nodes directly
+  return `<li>${renderBlockChildren(children)}</li>`;
 };
 
 const getNormalizedBlockType = (block: StrapiBlock): string => {
@@ -93,7 +211,9 @@ export const blocksToHtml = (blocks: StrapiBlock[]): string => {
       if (normalizedType === 'image') {
         const src = block.image?.url || block.url || '';
         const alt = block.image?.alternativeText || block.alt || '';
-        return `<img src="${escapeHtml(src)}" alt="${escapeHtml(String(alt))}" />`;
+        const imageData = block.image ? encodeAttribute(JSON.stringify(block.image)) : '';
+        const dataAttr = imageData ? ` data-strapi-image="${imageData}"` : '';
+        return `<img src="${escapeHtml(src)}" alt="${escapeHtml(String(alt))}"${dataAttr} />`;
       }
 
       return '';
@@ -108,148 +228,103 @@ export const blocksToHtml = (blocks: StrapiBlock[]): string => {
 export const JSONDocToBlocks = (doc: any): StrapiBlock[] => {
   if (!doc || !doc.content) return [];
 
-  return doc.content.map((node: any) => {
+  const mapInlineNodes = (nodes: any[]): any[] => {
+    if (!Array.isArray(nodes) || nodes.length === 0) return [];
+
+    return nodes.map((child: any) => {
+      if (child.type === 'text') {
+        const marks = child.marks || [];
+        // In Tiptap, links are marks on text nodes. Convert to Strapi link wrapper.
+        const linkMark = marks.find((m: any) => m.type === 'link');
+        const textNode: any = { type: 'text', text: child.text || '' };
+        marks.forEach((mark: any) => {
+          if (mark.type === 'bold') textNode.bold = true;
+          if (mark.type === 'italic') textNode.italic = true;
+          if (mark.type === 'code') textNode.code = true;
+          if (mark.type === 'underline') textNode.underline = true;
+          if (mark.type === 'strikethrough') textNode.strikethrough = true;
+        });
+        if (linkMark) {
+          return {
+            type: 'link',
+            url: linkMark.attrs?.href || '',
+            children: [textNode],
+          };
+        }
+        return textNode;
+      }
+      // Tiptap also emits link as a node type (e.g., from paste); handle both.
+      if (child.type === 'link') {
+        const children = mapInlineNodes(child.content || []);
+        return {
+          type: 'link',
+          url: child.attrs?.href || '',
+          children,
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  };
+
+  const mapParagraphContent = (node: any): any[] => {
+    return mapInlineNodes(node.content || []);
+  };
+
+  return sanitizeStrapiBlocks(doc.content.map((node: any) => {
     switch (node.type) {
       case 'paragraph':
-        return {
-          type: 'paragraph',
-          children: node.content
-            ? node.content.map((child: any) => {
-              if (child.type === 'text') {
-                const marks = child.marks || [];
-                const textNode: any = {
-                  type: 'text',  // Add explicit type: 'text'
-                  text: child.text || ''
-                };
-
-                // Apply formatting marks
-                marks.forEach((mark: any) => {
-                  if (mark.type === 'bold') textNode.bold = true;
-                  if (mark.type === 'italic') textNode.italic = true;
-                  if (mark.type === 'code') textNode.code = true;
-                });
-
-                return textNode;
-              }
-
-              if (child.type === 'link') {
-                return {
-                  type: 'link',
-                  url: child.attrs?.href || '',
-                  children: child.content?.map((c: any) => ({
-                    type: 'text',  // Add explicit type: 'text'
-                    text: c.text || ''
-                  })) || [{ type: 'text', text: '' }]
-                };
-              }
-
-              return { type: 'text', text: '' };  // Add explicit type: 'text'
-            })
-            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
-        };
+        return { type: 'paragraph', children: mapParagraphContent(node) };
 
       case 'heading':
         return {
           type: 'heading',
           level: node.attrs?.level || 1,
-          children: node.content
-            ? node.content.map((child: any) => {
-              if (child.type === 'text') {
-                return { type: 'text', text: child.text || '' };  // Add explicit type: 'text'
-              }
-
-              if (child.type === 'link') {
-                return {
-                  type: 'link',
-                  url: child.attrs?.href || '',
-                  children: child.content?.map((c: any) => ({
-                    type: 'text',  // Add explicit type: 'text'
-                    text: c.text || ''
-                  })) || [{ type: 'text', text: '' }]
-                };
-              }
-
-              return { type: 'text', text: '' };  // Add explicit type: 'text'
-            })
-            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+          children: mapInlineNodes(node.content || []),
         };
 
       case 'bulletList':
         return {
-          type: 'bullet-list',
-          children: node.content
-            ? node.content.map((listItem: any) => ({
-              type: 'list-item',
-              children: listItem.content?.map((p: any) => ({
-                type: 'paragraph',
-                children: p.content?.map((c: any) => ({
-                  type: 'text',  // Add explicit type: 'text'
-                  text: c.text || ''
-                })) || [{ type: 'text', text: '' }]
-              })) || [{ type: 'text', text: '' }]
-            }))
-            : []
+          type: 'list',
+          format: 'unordered',
+          children: (node.content || []).map((listItem: any) => ({
+            type: 'list-item',
+            children: mapInlineNodes(listItem.content?.[0]?.content || []),
+          })),
         };
 
       case 'orderedList':
         return {
-          type: 'ordered-list',
-          children: node.content
-            ? node.content.map((listItem: any) => ({
-              type: 'list-item',
-              children: listItem.content?.map((p: any) => ({
-                type: 'paragraph',
-                children: p.content?.map((c: any) => ({
-                  type: 'text',  // Add explicit type: 'text'
-                  text: c.text || ''
-                })) || [{ type: 'text', text: '' }]
-              })) || [{ type: 'text', text: '' }]
-            }))
-            : []
+          type: 'list',
+          format: 'ordered',
+          children: (node.content || []).map((listItem: any) => ({
+            type: 'list-item',
+            children: mapInlineNodes(listItem.content?.[0]?.content || []),
+          })),
         };
 
       case 'blockquote':
         return {
-          type: 'blockquote',
-          children: node.content
-            ? node.content.flatMap((p: any) =>
-              p.content?.map((c: any) => ({
-                type: 'text',  // Add explicit type: 'text'
-                text: c.text || ''
-              })) || [{ type: 'text', text: '' }]
-            )
-            : [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+          type: 'quote',
+          children: mapInlineNodes(node.content?.[0]?.content || []),
         };
 
       case 'code':
       case 'codeBlock':
         return {
           type: 'code',
-          language: node.attrs?.language || 'plaintext',
-          children: [{ type: 'text', text: node.content?.[0]?.text || '' }]  // Add explicit type: 'text'
+          children: [{ type: 'text', text: node.content?.[0]?.text || '' }],
         };
 
       case 'image':
+        const imagePayload = decodeStrapiImage(node.attrs?.strapiImage);
         return {
           type: 'image',
-          url: node.attrs?.src || '',
-          alt: node.attrs?.alt || '',
-          children: [{ type: 'text', text: '' }]  // Add explicit type: 'text'
+          image: imagePayload || undefined,
+          children: [{ type: 'text', text: '' }],
         };
 
       default:
-        // Handle any other node types as paragraphs
-        return {
-          type: 'paragraph',
-          children: [{ type: 'text', text: '' }]  // Add explicit type: 'text'
-        };
+        return null;
     }
-  });
-  // .filter((block: any) => {
-  //   // Filter out empty paragraphs (no text content)
-  //   if (block.type === 'paragraph') {
-  //     return block.children.some((child: any) => child.text?.trim().length > 0 || child.type === 'link');
-  //   }
-  //   return true;
-  // });
+  }).filter(Boolean));
 };

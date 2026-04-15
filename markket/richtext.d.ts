@@ -89,6 +89,8 @@ export interface StrapiBlockTextChild {
   text: string;
   bold?: boolean;
   italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
   code?: boolean;
 }
 
@@ -123,6 +125,13 @@ export interface StrapiBlock {
     width?: number;
     height?: number;
     name?: string;
+    hash?: string;
+    ext?: string;
+    mime?: string;
+    size?: number;
+    provider?: string;
+    createdAt?: string;
+    updatedAt?: string;
     formats?: {
       thumbnail?: { url: string };
       small?: { url: string };

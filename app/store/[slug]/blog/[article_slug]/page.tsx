@@ -1,10 +1,10 @@
-import BlogPostPage from '@/app/components/blog.details';
-import { Suspense } from 'react';
-import { LoadingOverlay } from '@mantine/core';
+import { Container, Image, Stack, Text, Title } from '@mantine/core';
 import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api.strapi';
 import { Article } from '@/markket/article';
 import { generateSEOMetadata } from '@/markket/metadata';
+import PageContent from '@/app/components/ui/page.content';
+import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 
 export interface BlogPageProps {
   params: Promise<{
@@ -57,9 +57,61 @@ export default async function BlogPostPageContainer({
 }: BlogPageProps) {
   const { article_slug, slug } = await params;
 
+  const [postResponse, storeResponse, postsResponse] = await Promise.all([
+    strapiClient.getPost(article_slug, slug),
+    strapiClient.getStore(slug),
+    strapiClient.getPosts({ page: 1, pageSize: 5 }, { sort: 'updatedAt:desc' }, slug),
+  ]);
+
+  const post = postResponse?.data?.[0] as Article | undefined;
+  const store = storeResponse?.data?.[0];
+
+  if (!post) {
+    return null;
+  }
+
+  const relatedPosts = ((postsResponse?.data || []) as Article[])
+    .filter((item) => item.slug !== article_slug)
+    .slice(0, 4)
+    .map((item) => ({
+      href: `/${slug}/blog/${item.slug}`,
+      label: item.Title || item.slug,
+    }));
+
   return (
-    <Suspense fallback={<LoadingOverlay visible />}>
-      <BlogPostPage params={{ article_slug, slug }} />
-    </Suspense>
+    <Container size="md" py="xl">
+      <Stack gap="xl">
+        {post.cover?.url && (
+          <Image
+            src={post.cover.url}
+            alt={post.Title}
+            radius="md"
+            className="w-full"
+          />
+        )}
+
+        <div>
+          <Title order={1}>{post.Title}</Title>
+          {post.Tags && (
+            <div className="mt-2 flex gap-2">
+              {post.Tags.map((tag) => (
+                <Text key={tag.id} size="sm" c={tag.Color?.toLowerCase() || 'blue'}>
+                  #{tag.Label}
+                </Text>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <PageContent params={{ post }} />
+
+        <StoreCrosslinks
+          slug={slug}
+          store={store}
+          currentSection="blog"
+          items={relatedPosts}
+        />
+      </Stack>
+    </Container>
   );
 };

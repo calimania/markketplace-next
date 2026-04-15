@@ -26,6 +26,7 @@ export interface Event {
   stores?: Store[];
   Thumbnail?: {
     url: string;
+    alternativeText?: string | null;
     formats?: {
       thumbnail?: { url: string };
       small?: { url: string };

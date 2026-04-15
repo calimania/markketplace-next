@@ -222,18 +222,40 @@ export default function StoreOverview({
           <Stack gap="sm">
             <Group justify="space-between" align="center">
               <Text fw={600}><span className="accent-yellow">Latest</span> Articles</Text>
-              <Button
-                component="a"
-                variant="subtle"
-                href={`/tienda/${store.slug}/blog`}
-                leftSection={<IconNews size={14} />}
-                size="sm"
-              >
-                See all
-              </Button>
+              <Group gap="xs">
+                {isAuthorized && (
+                  <Button
+                    component="a"
+                    href={`/tienda/${store.slug}/blog/new`}
+                    leftSection={<IconPlus size={14} />}
+                    size="sm"
+                    variant="subtle"
+                  >
+                    New
+                  </Button>
+                )}
+                {latestPosts.length > 0 && (
+                  <Button
+                    component="a"
+                    variant="subtle"
+                    href={`/tienda/${store.slug}/blog`}
+                    leftSection={<IconNews size={14} />}
+                    size="sm"
+                  >
+                    See all
+                  </Button>
+                )}
+              </Group>
             </Group>
             {latestPosts.length === 0 ? (
-              <Text c="dimmed">No articles yet.</Text>
+              <EmptyStateCTA
+                title="Articles"
+                description="No articles yet. Publish your first story or update."
+                ctaLabel="Create Article"
+                ctaHref={`/tienda/${store.slug}/blog/new`}
+                icon={<IconPlus size={14} />}
+                isAuthorized={isAuthorized}
+              />
             ) : (
               <NavTable
                 items={latestPosts.map((post) => ({
@@ -264,15 +286,17 @@ export default function StoreOverview({
                     New
                   </Button>
                 )}
-                <Button
-                  component="a"
-                  variant="subtle"
-                  href={`/tienda/${store.slug}/about`}
-                  leftSection={<IconFileText size={14} />}
-                  size="sm"
-                >
-                  See all
-                </Button>
+                {latestPages.length > 0 && (
+                  <Button
+                    component="a"
+                    variant="subtle"
+                    href={`/tienda/${store.slug}/about`}
+                    leftSection={<IconFileText size={14} />}
+                    size="sm"
+                  >
+                    See all
+                  </Button>
+                )}
               </Group>
             </Group>
             {latestPages.length === 0 ? (
@@ -314,15 +338,17 @@ export default function StoreOverview({
                     New
                   </Button>
                 )}
-                <Button
-                  component="a"
-                  variant="subtle"
-                  href={`/tienda/${store.slug}/products`}
-                  leftSection={<IconShoppingCart size={14} />}
-                  size="sm"
-                >
-                  See all
-                </Button>
+                {allProducts.length > 0 && (
+                  <Button
+                    component="a"
+                    variant="subtle"
+                    href={`/tienda/${store.slug}/products`}
+                    leftSection={<IconShoppingCart size={14} />}
+                    size="sm"
+                  >
+                    See all
+                  </Button>
+                )}
               </Group>
             </Group>
             {allProducts.length === 0 ? (
@@ -364,15 +390,17 @@ export default function StoreOverview({
                     New
                   </Button>
                 )}
-                <Button
-                  component="a"
-                  variant="subtle"
-                  href={`/tienda/${store.slug}/events`}
-                  leftSection={<IconCalendarEvent size={14} />}
-                  size="sm"
-                >
-                  See all
-                </Button>
+                {upcomingEvents.length > 0 && (
+                  <Button
+                    component="a"
+                    variant="subtle"
+                    href={`/tienda/${store.slug}/events`}
+                    leftSection={<IconCalendarEvent size={14} />}
+                    size="sm"
+                  >
+                    See all
+                  </Button>
+                )}
               </Group>
             </Group>
             {upcomingEvents.length === 0 ? (

@@ -1,4 +1,5 @@
 // @Maybe use the office Strapi block render // @strapi/blocks-react-renderer
+import React from 'react';
 import { Title, Code } from '@mantine/core';
 import { Page, ContentBlock } from "@/markket/page.d";
 import { Album, AlbumTrack } from '@/markket/album';
@@ -91,14 +92,6 @@ export default function PageContent({ params, }: PageContentProps) {
   };
 
   const renderInline = (node: StrapiBlockTextChild | StrapiBlockLinkChild, key: number) => {
-    if (isTextChild(node) && node.code) {
-      return (
-        <code key={key} className="inline-code">
-          {node.text}
-        </code>
-      );
-    }
-
     if (isLinkChild(node)) {
       const isImage = node.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
@@ -119,15 +112,23 @@ export default function PageContent({ params, }: PageContentProps) {
       );
     }
 
-    if (node.bold) {
-      return <strong key={key}>{node.text}</strong>
+    if (!isTextChild(node)) return null;
+
+    const text = node.text;
+
+    // code wins independently
+    if (node.code) {
+      return <code key={key} className="inline-code">{text}</code>;
     }
 
-    if (node.italic) {
-      return <em key={key}>{node.text}</em>;
-    }
+    // Build up nested marks so combined styles (bold+italic, bold+underline, etc.) all apply
+    let el: React.ReactNode = text;
+    if (node.strikethrough) el = <s>{el}</s>;
+    if (node.underline) el = <u>{el}</u>;
+    if (node.italic) el = <em>{el}</em>;
+    if (node.bold) el = <strong>{el}</strong>;
 
-    return <span key={key}>{node.text}</span>;
+    return <span key={key}>{el}</span>;
   };
 
   /**
@@ -139,18 +140,24 @@ export default function PageContent({ params, }: PageContentProps) {
   const renderListItem = (node: any, key: number) => {
     if (node.type !== 'list-item') return null;
 
-    const paragraphs = Array.isArray(node.children) ? node.children : [];
+    const children = Array.isArray(node.children) ? node.children : [];
+    // Strapi v5: children are inline nodes directly
+    // Strapi v4/legacy: children are paragraphs wrapping inline nodes
+    const isV4 = children.length > 0 && children[0]?.type === 'paragraph';
 
     return (
       <li key={key} className="list-item">
-        {paragraphs.map((paragraph: any, paragraphIndex: number) => {
-          const inlineChildren = Array.isArray(paragraph?.children) ? paragraph.children : [];
-          return (
-            <span key={paragraphIndex}>
-              {inlineChildren.map((child: StrapiBlockTextChild | StrapiBlockLinkChild, i: number) => renderInline(child, i))}
-            </span>
-          );
-        })}
+        {isV4
+          ? children.map((paragraph: any, paragraphIndex: number) => {
+            const inlineChildren = Array.isArray(paragraph?.children) ? paragraph.children : [];
+            return (
+              <span key={paragraphIndex}>
+                {inlineChildren.map((child: StrapiBlockTextChild | StrapiBlockLinkChild, i: number) => renderInline(child, i))}
+              </span>
+            );
+          })
+          : children.map((child: StrapiBlockTextChild | StrapiBlockLinkChild, i: number) => renderInline(child, i))
+        }
       </li>
     );
   };
