@@ -9,7 +9,7 @@ interface EventImageGalleryProps {
 }
 
 export function EventImageGallery({ event }: EventImageGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState(event.SEO?.socialImage);
+  const [selectedImage, setSelectedImage] = useState(event.SEO?.socialImage || event.Slides?.[0]);
 
   return (
     <div className="flex flex-col">

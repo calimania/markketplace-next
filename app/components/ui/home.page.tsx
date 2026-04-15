@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import {
   IconRocket, IconBuildingStore, IconShoppingCart,
   IconArticle, IconSparkles, IconArrowRight,
-  IconCheck, IconStars,
+  IconCheck, IconStars, IconFileText, IconCalendar,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
   Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
-import { Store, Page, Article } from "@/markket";
+import { Store, Page, Article, Event } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
 import { markketColors } from "@/markket/colors.config";
@@ -50,9 +50,11 @@ type HomePageProps = {
   page?: Page;
   communityPosts?: Article[];
   featuredStores?: Store[];
+  communityPages?: Page[];
+  communityEvents?: Event[];
 };
 
-const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: HomePageProps) => {
+const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [] }: HomePageProps) => {
   const { maybe } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -779,6 +781,199 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [] }: Hom
           </Stack>
         </Container>
       </Box>
+      {communityPages.length > 0 && (
+        <Container size="lg" py={80}>
+          <Stack gap={32}>
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Badge
+                  size="lg"
+                  radius="md"
+                  variant="light"
+                  leftSection={<IconFileText size={14} />}
+                  style={{
+                    background: markketColors.sections.about.light,
+                    color: markketColors.sections.about.main,
+                    marginBottom: rem(12),
+                  }}
+                >
+                  Pages Feed
+                </Badge>
+                <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
+                  From the Community
+                </Title>
+                <Text c="dimmed">Pages and stories published by creators.</Text>
+              </div>
+            </Group>
+
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {communityPages.slice(0, 6).map((p) => {
+                const storeSlug = (p as any)?.store?.slug;
+                const href = storeSlug ? `/${storeSlug}/about/${p.slug}` : '/stores';
+                const logoUrl = (p as any)?.store?.Logo?.url;
+
+                return (
+                  <Card
+                    key={p.documentId || p.id}
+                    withBorder
+                    radius="lg"
+                    padding="lg"
+                    component="a"
+                    href={href}
+                    style={{
+                      borderColor: markketColors.neutral.lightGray,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+                      textDecoration: 'none',
+                      transition: 'transform 0.15s, box-shadow 0.15s',
+                    }}
+                    className="hover:scale-[1.02]"
+                  >
+                    {logoUrl && (
+                      <CardSection mb="sm">
+                        <img
+                          src={logoUrl}
+                          alt={(p as any)?.store?.title || storeSlug || 'Store'}
+                          style={{ width: '100%', height: rem(120), objectFit: 'cover' }}
+                          loading="lazy"
+                        />
+                      </CardSection>
+                    )}
+                    <Stack gap="xs">
+                      {storeSlug && (
+                        <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                          {(p as any)?.store?.title || storeSlug}
+                        </Text>
+                      )}
+                      <Title order={4} style={{ lineHeight: 1.25, color: markketColors.neutral.charcoal }}>
+                        {p.Title}
+                      </Title>
+                      <Text size="sm" c="dimmed" lineClamp={3}>
+                        {p.SEO?.metaDescription || ''}
+                      </Text>
+                      <Text
+                        size="sm"
+                        fw={500}
+                        style={{ color: markketColors.sections.about.main, marginTop: rem(4) }}
+                      >
+                        Read page →
+                      </Text>
+                    </Stack>
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
+          </Stack>
+        </Container>
+      )}
+
+      {communityEvents.length > 0 && (
+        <Container size="lg" py={80}>
+          <Stack gap={32}>
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Badge
+                  size="lg"
+                  radius="md"
+                  variant="light"
+                  leftSection={<IconCalendar size={14} />}
+                  style={{
+                    background: markketColors.sections.events.light,
+                    color: markketColors.sections.events.main,
+                    marginBottom: rem(12),
+                  }}
+                >
+                  Upcoming Events
+                </Badge>
+                <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
+                  Join the Community
+                </Title>
+                <Text c="dimmed">Workshops, webinars, and meetups hosted by creators.</Text>
+              </div>
+            </Group>
+
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {communityEvents.slice(0, 6).map((event: Event) => {
+                const thumbnailUrl = event?.Thumbnail?.formats?.medium?.url || event?.Thumbnail?.formats?.small?.url || event?.Thumbnail?.url;
+                const storeSlug = (event as any)?.stores?.[0]?.slug;
+                const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
+                const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
+
+                return (
+                  <Card
+                    key={event.documentId || event.id}
+                    withBorder
+                    radius="lg"
+                    padding={0}
+                    style={{
+                      overflow: 'hidden',
+                      borderColor: markketColors.neutral.lightGray,
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                    }}
+                  >
+                    <CardSection>
+                      {thumbnailUrl ? (
+                        <img
+                          src={thumbnailUrl}
+                          alt={event.Name}
+                          style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Box
+                          style={{
+                            height: rem(190),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: markketColors.sections.events.light,
+                            color: markketColors.sections.events.main,
+                          }}
+                        >
+                          <Box style={{ textAlign: 'center' }}>
+                            <IconCalendar size={32} />
+                            <Text size="sm" fw={500}>Event</Text>
+                          </Box>
+                        </Box>
+                      )}
+                    </CardSection>
+
+                    <Stack gap="sm" p="md">
+                      <Group gap="xs">
+                        <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
+                        {(event as any)?.stores?.[0]?.title && (
+                          <Text size="xs" c="dimmed">{(event as any).stores[0].title}</Text>
+                        )}
+                      </Group>
+
+                      <Title order={4} style={{ lineHeight: 1.25 }}>{event.Name}</Title>
+                      <Text size="sm" c="dimmed" lineClamp={2}>
+                        {event?.SEO?.metaDescription || 'Join us for this event'}
+                      </Text>
+
+                      {event.usd_price && event.usd_price > 0 && (
+                        <Text size="sm" fw={600} style={{ color: markketColors.sections.events.main }}>
+                          ${(event.usd_price / 100).toFixed(2)}
+                        </Text>
+                      )}
+
+                      <Button
+                        component="a"
+                        href={href}
+                        variant="light"
+                        rightSection={<IconArrowRight size={16} />}
+                        style={{ alignSelf: 'flex-start' }}
+                      >
+                        Learn More
+                      </Button>
+                    </Stack>
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
+          </Stack>
+        </Container>
+      )}
+
       <Box
         py={80}
         suppressHydrationWarning

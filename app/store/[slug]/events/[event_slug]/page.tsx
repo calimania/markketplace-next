@@ -12,12 +12,19 @@ interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
 }
 
+function formatDateTime(value?: string) {
+  if (!value) return 'Not set';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString();
+}
+
 export async function generateMetadata({ params }: EventsPageProps) {
   const { slug, event_slug } = await params;
   const response = await strapiClient.getStore(slug);
   const store = response?.data?.[0] as Store;
 
-  const eventResponse = await strapiClient.getEventBySlug(slug, event_slug);
+  const eventResponse = await strapiClient.getEventBySlug(event_slug, slug);
   const event = eventResponse?.data?.[0] as Event;
 
   const eventName = event?.Name || 'Event';
@@ -32,13 +39,13 @@ export async function generateMetadata({ params }: EventsPageProps) {
     slug,
     entity: {
       SEO: event?.SEO || store?.SEO,
-      Name: event?.Name,  // Pass real value, not fallback
+      Name: event?.Name || event?.SEO?.metaTitle,
       Description: description,
       id: event?.id?.toString(),
       url: `/${slug}/events/${event_slug}`,
     },
     type: "article",
-    defaultTitle: 'Event',
+    defaultTitle: event?.SEO?.metaTitle || eventName || 'Event',
     keywords: [
       'event',
       'workshop',
@@ -61,6 +68,8 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   const eventsResponse = await strapiClient.getEventBySlug(event_slug, slug);
 
   const event = (eventsResponse?.data?.[0] || []) as Event;
+  const startsAt = formatDateTime(event?.startDate);
+  const endsAt = formatDateTime(event?.endDate);
 
   return (
     <Container size="xl" py="xl">
@@ -75,6 +84,12 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                 {event.Name}
               </h1>
 
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <p className="text-sm font-semibold text-gray-900">Schedule</p>
+                <p className="text-sm text-gray-700">Starts: {startsAt}</p>
+                <p className="text-sm text-gray-700">Ends: {endsAt}</p>
+              </div>
+
               <div className="mt-6">
                 <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
                   <Markdown content={event?.Description || ""} />
@@ -82,8 +97,8 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
               </div>
             </div>
           </div>
-          {!event?.SEO?.metaUrl && <RSVPModal eventId={event?.id.toString()} />}
-          {event?.SEO?.metaUrl && (
+
+          {event?.SEO?.metaUrl ? (
             <Button
               className="mt-8 text-accent-500 dark:text-accent-300 w-full cursor-pointer"
             >
@@ -95,7 +110,7 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                 RSVP in {(new URL(event?.SEO?.metaUrl)?.hostname)}
               </a>
             </Button>
-          )}
+          ) : (<RSVPModal eventId={event?.id.toString()} />)}
         </div>
       </main>
     </Container>

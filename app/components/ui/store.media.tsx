@@ -18,7 +18,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import { IconUpload, IconPhoto, IconArrowLeft, IconArrowRight, IconTrash, IconDeviceFloppy } from '@tabler/icons-react';
 import { Store, Media } from '@/markket/store';
-import { markketClient } from '@/markket/api';
+import { markketClient, tiendaClient } from '@/markket/api';
 
 interface StoreMediaProps {
   store: Store;
@@ -49,6 +49,18 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   const [altText, setAltText] = useState('');
   const [draftSlides, setDraftSlides] = useState<SlideMedia[]>(Array.isArray(store.Slides) ? store.Slides : []);
   const client = new markketClient();
+
+  const readAuthToken = () => {
+    if (typeof window === 'undefined') return '';
+
+    try {
+      const raw = localStorage.getItem('markket.auth');
+      const parsed = raw ? JSON.parse(raw) : null;
+      return parsed?.jwt || '';
+    } catch {
+      return '';
+    }
+  };
 
   useEffect(() => {
     setDraftSlides(Array.isArray(store.Slides) ? store.Slides : []);
@@ -132,18 +144,28 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
     try {
       setLoading(toLoadingField(field));
 
-      const response = await client.uploadImage(
-        file,
-        field,
-        store.id,
-        altText.trim() || `${store.title || store.slug || 'Store'} ${field}`,
-        'api::store.store',
-        store.id || store.documentId
-      );
+      const token = readAuthToken();
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Upload failed');
+      if (!token) {
+        throw new Error('Missing session token');
+      }
+
+      const storeRef = store.documentId || store.slug || store.id;
+      const attachField = field === 'SEO.socialImage' ? 'Cover' : field;
+      const uploadResult = await tiendaClient.uploadStoreMedia(storeRef, {
+        token,
+        files: [file],
+        caption: altText.trim() || `${store.title || store.slug || 'Store'} ${field}`,
+        alternativeText: altText.trim() || `${store.title || store.slug || 'Store'} ${field}`,
+        attach: {
+          contentType: 'store',
+          field: attachField,
+          mode: field === 'Slides' ? 'append' : 'replace',
+        },
+      });
+
+      if (!uploadResult?.ok) {
+        throw new Error(uploadResult?.message || uploadResult?.text || 'Upload failed');
       }
 
       notifications.show({
@@ -152,9 +174,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
         color: 'green',
       });
 
-      const json = await response.json();
-
-      const uploaded = json?.[0] as Media | undefined;
+      const uploaded = uploadResult?.data?.[0] as Media | undefined;
       if (uploaded) {
         onUpdate(uploaded, field, store.id);
         if (field === 'Slides') {

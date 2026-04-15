@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { strapiClient } from '@/markket/api.strapi';
 import StoreOverview from './store.overview';
@@ -9,6 +10,10 @@ import type { Event } from '@/markket/event';
 
 type TiendaStorePageProps = {
   params: Promise<{ storeSlug: string }>;
+};
+
+export const metadata: Metadata = {
+  title: 'Overview',
 };
 
 export default async function TiendaStorePage({ params }: TiendaStorePageProps) {

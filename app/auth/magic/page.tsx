@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Paper, Title, Text, Button, Group } from '@mantine/core';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { Container, Paper, Title, Text, Button, Group, ThemeIcon } from '@mantine/core';
+import { IconCheck, IconX, IconMailStar, IconHome } from '@tabler/icons-react';
 import { markketClient  } from '@/markket/api.markket';
 import { Suspense } from 'react';
 
@@ -43,7 +43,9 @@ function MagicPage() {
           setStatus('success');
           setMessage('You are logged in. Taking you to your workspace...');
 
-          router.replace('/me');
+          // Hard navigate so the auth provider re-initializes with the fresh JWT
+          // instead of showing an empty /me because the provider already ran before confirm.
+          window.location.replace('/me');
           return;
         }
 
@@ -68,31 +70,72 @@ function MagicPage() {
 
   return (
     <Container size={420} py={80}>
-      <Paper withBorder shadow="md" p={30} radius="md" className="auth-layout-neobrutal">
+      <Paper
+        withBorder
+        shadow="md"
+        p={30}
+        radius="xl"
+        style={{
+          boxShadow: '0 16px 32px rgba(0,0,0,0.08)',
+          background: 'white',
+        }}
+      >
         <Group justify="center" mb="md">
-          {status === 'success' && <IconCheck size={40} color="#0ea5e9" />}
-          {status === 'error' && <IconX size={40} color="#f472b6" />}
+          {status === 'success' && (
+            <ThemeIcon size={64} radius="xl" variant="light" color="cyan">
+              <IconMailStar size={32} />
+            </ThemeIcon>
+          )}
+          {status === 'error' && (
+            <ThemeIcon size={64} radius="xl" variant="light" color="pink">
+              <IconX size={32} />
+            </ThemeIcon>
+          )}
+          {status === 'loading' && (
+            <ThemeIcon size={64} radius="xl" variant="light" color="blue">
+              <IconCheck size={32} />
+            </ThemeIcon>
+          )}
         </Group>
         <Title ta="center" fw={900} mb="xs">
           {status === 'loading' && 'Logging you in...'}
           {status === 'success' && 'Welcome!'}
-          {status === 'error' && 'Oops, error!'}
+          {status === 'error' && 'Something went wrong'}
         </Title>
         <Text ta="center" c="dimmed" mb="lg">
-          {status === 'loading' && 'Please wait while we log you in.'}
+          {status === 'loading' && 'Please wait while we verify your magic link.'}
           {status !== 'loading' && message}
         </Text>
         {status === 'error' && (
-          <Button fullWidth mt="md" onClick={() => router.push('/auth/login')}>
+          <Button
+            fullWidth
+            size="md"
+            leftSection={<IconMailStar size={18} />}
+            onClick={() => router.push('/auth/login')}
+            style={{
+              background: 'linear-gradient(135deg, #E4007C 0%, #E91E63 100%)',
+            }}
+          >
             Try again
           </Button>
         )}
         {status === 'success' && (
           <Group grow mt="md">
-            <Button variant="default" onClick={() => router.push('/me')}>
-              Open Profile
+            <Button
+              variant="light"
+              color="cyan"
+              leftSection={<IconHome size={16} />}
+              onClick={() => router.push('/me')}
+            >
+              My Profile
             </Button>
-            <Button onClick={() => router.push('/tienda/new')}>
+            <Button
+              leftSection={<IconCheck size={16} />}
+              onClick={() => router.push('/tienda/new')}
+              style={{
+                background: 'linear-gradient(135deg, #00BCD4 0%, #E4007C 100%)',
+              }}
+            >
               Create Store
             </Button>
           </Group>

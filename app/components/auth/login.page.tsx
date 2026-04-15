@@ -12,11 +12,14 @@ import {
   Text,
   Anchor,
   Group,
+  Badge,
+  rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
-import { IconMusicHeart, IconX } from '@tabler/icons-react';
+import { IconMusicHeart, IconX, IconLock } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
 
 import { useAuth } from '@/app/providers/auth.provider';
 
@@ -101,29 +104,52 @@ export default function LoginPage() {
   };
 
   return (
-    <Container size={420} my={40}>
-      <Title ta="center" fw={900}>
-        Welcome back!
-      </Title>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Request a secret link{' '}
-        <Anchor size="sm" component="button" onClick={() => router.push('/auth/magic')}>
-          [ /auth/magic]
-        </Anchor>
-      </Text>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Don&apos;t have an account yet?{' '}
-        <Anchor size="sm" component="button" onClick={() => router.push('/auth/register')}>
-          [ /auth/register]
-        </Anchor>
-      </Text>
+    <Container size={480} my={32}>
+      <Stack gap="sm" align="center" mb="lg">
+        <Badge
+          size="lg"
+          radius="md"
+          variant="light"
+          leftSection={<IconLock size={14} />}
+          style={{
+            background: markketColors.sections.shop.light,
+            color: markketColors.sections.shop.main,
+          }}
+        >
+          Sign In
+        </Badge>
+        <Title ta="center" fw={900} style={{ color: markketColors.neutral.charcoal }}>
+          Welcome back!
+        </Title>
+        <Text c="dimmed" size="sm" ta="center">
+          No password?{' '}
+          <Anchor size="sm" component="button" onClick={() => router.push('/auth/magic')}>
+            Get a magic link
+          </Anchor>
+          {' · '}
+          <Anchor size="sm" component="button" onClick={() => router.push('/auth/register')}>
+            Create account
+          </Anchor>
+        </Text>
+      </Stack>
 
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+      <Paper
+        withBorder
+        radius="xl"
+        p={{ base: 22, sm: 34 }}
+        shadow="sm"
+        style={{
+          borderColor: markketColors.neutral.lightGray,
+          boxShadow: '0 16px 32px rgba(0,0,0,0.08)',
+          background: 'white',
+        }}
+      >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <TextInput
               label="Email or Username"
               placeholder="de@markket.place"
+              size="md"
               required
               disabled={loading}
               {...form.getInputProps('identifier')}
@@ -132,12 +158,13 @@ export default function LoginPage() {
             <PasswordInput
               label="Password"
               placeholder="Your password"
+              size="md"
               disabled={loading}
               required
               {...form.getInputProps('password')}
             />
 
-            <Group justify="space-between">
+            <Group justify="flex-end">
               <Anchor
                 component="button"
                 type="button"
@@ -149,7 +176,17 @@ export default function LoginPage() {
               </Anchor>
             </Group>
 
-            <Button loading={loading} type="submit" fullWidth disabled={loading}>
+            <Button
+              loading={loading}
+              type="submit"
+              fullWidth
+              size="md"
+              leftSection={<IconMusicHeart size={18} />}
+              disabled={loading}
+              style={{
+                background: `linear-gradient(135deg, ${markketColors.sections.shop.main} 0%, ${markketColors.rosa.main} 100%)`,
+              }}
+            >
               Sign in
             </Button>
           </Stack>

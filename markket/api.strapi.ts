@@ -431,17 +431,26 @@ export class StrapiClient {
   }
 
   async getStoreVisibility(storeId: string | number) {
+    const apiKey = typeof window === 'undefined' ? process.env.MARKKET_API_KEY : undefined;
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
       const response = await fetch(new URL(`api/stores/${storeId}/visibility`, this.baseUrl), {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        next: { revalidate: 60 },
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch store visibility: ${response.statusText}`);
+        console.warn(`Store visibility unavailable (${response.status}), using defaults`);
+        return null;
       }
 
       return await response.json();
@@ -543,6 +552,30 @@ export class StrapiClient {
       status: 'published',
       paginate,
       populate: 'SEO.socialImage,Tags,cover,store,store.Logo',
+    });
+  }
+
+  async getCommunityPages(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch<Page>({
+      contentType: 'pages',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO.socialImage,store,store.Logo',
+    });
+  }
+
+  async getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'events',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,stores,stores.Logo',
     });
   }
 

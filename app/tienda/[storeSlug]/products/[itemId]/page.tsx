@@ -1,42 +1,41 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Button, Text } from '@mantine/core';
-import { strapiClient } from '@/markket/api.strapi';
-import type { Product } from '@/markket/product';
+import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import { IconPhoto } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
+import Markdown from '@/app/components/ui/page.markdown';
+import ContentMediaPreview from '@/app/components/ui/content.media.preview';
+import { findProduct } from '../products.find';
+import { strapiClient } from '@/markket/api.strapi';
+import type { Store } from '@/markket/store';
 
 type TiendaProductItemPageProps = {
   params: Promise<{ storeSlug: string; itemId: string }>;
 };
 
-async function findProduct(itemId: string, storeSlug: string) {
-  const byDocumentId = await strapiClient.fetch<Product>({
-    contentType: 'products',
-    filters: {
-      documentId: itemId,
-      stores: {
-        slug: {
-          $eq: storeSlug,
-        },
-      },
-    },
-    populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores,extras',
-    paginate: { page: 1, pageSize: 1 },
-  });
+export async function generateMetadata({ params }: TiendaProductItemPageProps): Promise<Metadata> {
+  const { storeSlug, itemId } = await params;
+  const product = await findProduct(itemId, storeSlug);
 
-  if (byDocumentId?.data?.[0]) return byDocumentId.data[0] as Product;
-
-  const bySlug = await strapiClient.getProduct(itemId, storeSlug);
-  return bySlug?.data?.[0] as Product | undefined;
+  return {
+    title: product?.Name || 'Product Detail',
+  };
 }
 
 export default async function TiendaProductItemPage({ params }: TiendaProductItemPageProps) {
   const { storeSlug, itemId } = await params;
-  const product = await findProduct(itemId, storeSlug);
+  const [product, storeResponse] = await Promise.all([
+    findProduct(itemId, storeSlug),
+    strapiClient.getStore(storeSlug),
+  ]);
 
   if (!product) notFound();
 
+  const store = storeResponse?.data?.[0] as Store | undefined;
   const editorId = product.documentId || product.slug;
+  const itemDocumentId = product.documentId || itemId;
+  const storeRef = store?.documentId || store?.slug || storeSlug;
 
   return (
     <TiendaDetailShell
@@ -51,13 +50,56 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
       actions={
         <>
           <SmartBackButton fallbackHref={`/tienda/${storeSlug}/products`} />
-          <Button component="a" href={`/tienda/${storeSlug}/products/edit/${editorId}`}>
+          <Button component="a" href={`/tienda/${storeSlug}/products/${editorId}/edit`}>
             Edit
           </Button>
         </>
       }
     >
-      <Text>{product.Description || product.SEO?.metaDescription || 'No description yet.'}</Text>
+      <Stack gap="md">
+        <Text c="dimmed">{product.SEO?.metaDescription || 'No summary yet.'}</Text>
+
+        <ContentMediaPreview
+          storeRef={storeRef}
+          contentType="product"
+          itemDocumentId={itemDocumentId}
+          studioHref={`/tienda/${storeSlug}/snapshot`}
+          slots={[
+            {
+              label: 'Thumbnail',
+              field: 'Thumbnail',
+              src: product.Thumbnail?.url,
+              alt: product.Thumbnail?.alternativeText || product.Name,
+            },
+            {
+              label: 'Cover / Social',
+              field: 'SEO.socialImage',
+              src: product.SEO?.socialImage?.url,
+              alt: product.SEO?.socialImage?.alternativeText || product.Name,
+            },
+          ]}
+        />
+
+        <Divider label={
+          <Badge variant="dot" color="gray" size="sm">Description</Badge>
+        } labelPosition="left" />
+
+        {product.Description && (
+          <Paper withBorder p="lg" radius="md" className="prose dark:prose-dark max-w-none">
+            <Markdown content={product.Description} />
+          </Paper>
+        )}
+        {!product.Description && product.SEO?.metaDescription && (
+          <Paper withBorder p="lg" radius="md">
+            {product.SEO.metaDescription}
+          </Paper>
+        )}
+        {!product.Description && !product.SEO?.metaDescription && (
+          <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
+            No description yet.
+          </Paper>
+        )}
+      </Stack>
     </TiendaDetailShell>
   );
 }

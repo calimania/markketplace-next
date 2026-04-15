@@ -1,10 +1,25 @@
-import { redirect } from 'next/navigation';
+import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
+import ProductEditorForm from '../product.editor.form';
 
-type TiendaProductNewPageProps = {
+type TiendaProductNewProps = {
   params: Promise<{ storeSlug: string }>;
 };
 
-export default async function TiendaProductNewPage({ params }: TiendaProductNewPageProps) {
+export default async function TiendaProductNewPage({ params }: TiendaProductNewProps) {
   const { storeSlug } = await params;
-  redirect(`/dashboard/products/new?store=${encodeURIComponent(storeSlug)}`);
+
+  return (
+    <TiendaDetailShell
+      breadcrumbs={[
+        { label: 'Tienda', href: '/tienda' },
+        { label: storeSlug, href: `/tienda/${storeSlug}` },
+        { label: 'Products', href: `/tienda/${storeSlug}/products` },
+        { label: 'New Product' },
+      ]}
+      title="New Product"
+      routePath={`/tienda/${storeSlug}/products/new`}
+    >
+      <ProductEditorForm storeSlug={storeSlug} mode="new" />
+    </TiendaDetailShell>
+  );
 }
