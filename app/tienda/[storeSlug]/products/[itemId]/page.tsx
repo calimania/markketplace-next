@@ -6,6 +6,7 @@ import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import Markdown from '@/app/components/ui/page.markdown';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
+import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { findProduct } from '../products.find';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
@@ -99,6 +100,11 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
             No description yet.
           </Paper>
         )}
+
+        <PublicLinkActions
+          path={`/${storeSlug}/products/${product.slug || product.documentId || itemId}`}
+          openLabel="Open public product"
+        />
       </Stack>
     </TiendaDetailShell>
   );

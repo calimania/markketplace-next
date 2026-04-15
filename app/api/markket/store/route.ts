@@ -4,8 +4,23 @@ import { markketplace } from '@/markket/config';
 import { fetchUserStores, errorResponses, validators } from '@/markket/helpers.api';
 import { Store } from '@/markket';
 import { headers } from 'next/headers';
+import type { RichTextValue } from '@/markket/richtext';
 
 export const fetchCache = 'force-no-store';
+
+type StorePayload = {
+  store: Store & {
+    description?: RichTextValue | null;
+    Description?: RichTextValue | null;
+  };
+};
+
+function getStoreDescription(payloadStore?: StorePayload['store']) {
+  if (!payloadStore) return undefined;
+  if (payloadStore.Description !== undefined) return payloadStore.Description;
+  if (payloadStore.description !== undefined) return payloadStore.description;
+  return undefined;
+}
 
 export async function GET() {
 
@@ -39,7 +54,7 @@ export async function POST(request: Request) {
       return errorResponses.storeLimit(stores?.data?.length);
     }
 
-    const payload: { store: Store } = await request.json();
+    const payload: StorePayload = await request.json();
 
     if (!validators.storeContent(payload?.store)) {
       return errorResponses.missingFields();
@@ -49,10 +64,14 @@ export async function POST(request: Request) {
       return errorResponses.invalidSlug()
     }
 
-    const { title, Description, slug, URLS, SEO } = payload.store;
+    const title = payload?.store?.title;
+    const slug = payload?.store?.slug;
+    const Description = getStoreDescription(payload?.store);
+    const URLS = payload?.store?.URLS || [];
+    const SEO = payload?.store?.SEO || {};
     const data = {
       title,
-      Description,
+      ...(Description !== undefined ? { Description } : {}),
       slug,
       URLS: URLS?.map(({ URL, Label }) => ({ URL, Label })),
       SEO: {
@@ -110,7 +129,7 @@ export async function PUT(request: NextRequest) {
 
     const stores = await fetchUserStores();
 
-    const payload: { store: Store } = await request.json();
+    const payload: StorePayload = await request.json();
 
     const store = stores.data.find((store: any) => store.documentId === id);
 
@@ -126,10 +145,18 @@ export async function PUT(request: NextRequest) {
       return errorResponses.invalidSlug()
     }
 
-    const { title, Description, slug, URLS, SEO, Favicon, Cover, Slides, Logo } = payload.store;
+    const title = payload?.store?.title;
+    const slug = payload?.store?.slug;
+    const Description = getStoreDescription(payload?.store);
+    const URLS = payload?.store?.URLS || [];
+    const SEO = payload?.store?.SEO || {};
+    const Favicon = payload?.store?.Favicon;
+    const Cover = payload?.store?.Cover;
+    const Slides = payload?.store?.Slides;
+    const Logo = payload?.store?.Logo;
     const data = {
       title,
-      Description,
+      ...(Description !== undefined ? { Description } : {}),
       slug,
       URLS: URLS?.map(({ URL, Label }) => ({ URL, Label })),
       SEO: {

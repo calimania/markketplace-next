@@ -8,6 +8,7 @@ import BlogItemActions from '../blog.item.actions';
 import { findBlogArticle } from '../blog.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PageContent from '@/app/components/ui/page.content';
+import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 
@@ -113,19 +114,10 @@ export default async function TiendaBlogItemPage({ params }: TiendaBlogItemPageP
           )}
         </Paper>
 
-        {/* public link */}
-        <Text size="xs" c="dimmed">
-          Public URL:{' '}
-          <a
-            href={`/${storeSlug}/blog/${post.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'inherit', textDecoration: 'underline' }}
-          >
-            /{storeSlug}/blog/{post.slug}
-            <IconExternalLink size={11} />
-          </a>
-        </Text>
+        <PublicLinkActions
+          path={`/${storeSlug}/blog/${post.slug || post.documentId || itemId}`}
+          openLabel="Open public article"
+        />
       </Stack>
     </TiendaDetailShell>
   );

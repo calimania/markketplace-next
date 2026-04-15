@@ -8,6 +8,7 @@ import PageItemActions from '../pages.item.actions';
 import { findPage } from '../pages.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PageContent from '@/app/components/ui/page.content';
+import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 
@@ -37,6 +38,11 @@ export default async function TiendaPageDetailPage({ params }: TiendaPageDetailP
   const editorId = page.documentId || page.slug || itemId;
   const itemDocumentId = page.documentId || itemId;
   const storeRef = store?.documentId || store?.slug || storeSlug;
+  const publicPath = page.slug === 'home'
+    ? `/${storeSlug}`
+    : page.slug === 'about'
+      ? `/${storeSlug}/about`
+      : `/${storeSlug}/about/${page.slug || page.documentId || itemId}`;
 
   return (
     <TiendaDetailShell
@@ -113,19 +119,10 @@ export default async function TiendaPageDetailPage({ params }: TiendaPageDetailP
           )}
         </Paper>
 
-        {/* public link */}
-        <Text size="xs" c="dimmed">
-          Public URL:{' '}
-          <a
-            href={`/${storeSlug}/about/${page.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'inherit', textDecoration: 'underline' }}
-          >
-            /{storeSlug}/about/{page.slug}
-            <IconExternalLink size={11} />
-          </a>
-        </Text>
+        <PublicLinkActions
+          path={publicPath}
+          openLabel="Open public page"
+        />
       </Stack>
     </TiendaDetailShell>
   );
