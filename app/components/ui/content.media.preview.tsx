@@ -19,6 +19,10 @@ export type ContentMediaSlot = {
   src?: string;
   /** Alt text */
   alt?: string;
+  /** Disable uploads for this slot while still showing the preview */
+  disabled?: boolean;
+  /** Optional reason shown when a disabled slot is clicked */
+  disabledMessage?: string;
 };
 
 type ContentMediaPreviewProps = {
@@ -44,17 +48,12 @@ function readAuthToken() {
 
 function resolveAttachField(field: string, contentType: string) {
   const normalized = (field || '').trim().toLowerCase();
-  const normalizedContentType = (contentType || '').trim().toLowerCase();
 
   if (normalized === 'slides') {
     return 'Slides';
   }
 
   if (normalized === 'seo.socialimage') {
-    if (normalizedContentType === 'page' || normalizedContentType === 'event') {
-      return 'SEO.socialImage';
-    }
-
     return 'Cover';
   }
 
@@ -87,8 +86,8 @@ function buildAttachCandidates(field: string, contentType: string) {
 
   if (normalizedField === 'seo.socialimage') {
     return contentTypes.flatMap((candidateType) => [
-      { contentType: candidateType, field: 'SEO.socialImage', mode: 'replace' as const },
       { contentType: candidateType, field: 'Cover', mode: 'replace' as const },
+      { contentType: candidateType, field: 'SEO.socialImage', mode: 'replace' as const },
     ]);
   }
 
@@ -164,6 +163,15 @@ function MediaSlot({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
+    if (slot.disabled) {
+      notifications.show({
+        title: 'Upload unavailable',
+        message: slot.disabledMessage || `${slot.label} cannot be uploaded here yet.`,
+        color: 'yellow',
+      });
+      return;
+    }
+
     const token = readAuthToken();
     if (!token) {
       notifications.show({ title: 'Session expired', message: 'Please sign in again.', color: 'red' });
@@ -178,6 +186,10 @@ function MediaSlot({
         ...attach,
         ...(itemDocumentId ? { itemId: itemDocumentId } : {}),
       }));
+
+      if (attachCandidates.length === 0) {
+        throw new Error(slot.disabledMessage || `${slot.label} uploads are not supported for ${contentType} yet.`);
+      }
 
       let result: any = null;
       let lastErrorMessage = 'Upload failed';
@@ -235,9 +247,31 @@ function MediaSlot({
   };
 
   return (
-    <Tooltip label={uploading ? 'Uploading…' : `Click to upload ${slot.label}`} withArrow>
+    <Tooltip
+      label={
+        slot.disabled
+          ? (slot.disabledMessage || `${slot.label} is preview-only right now`)
+          : uploading
+            ? 'Uploading…'
+            : `Click to upload ${slot.label}`
+      }
+      withArrow
+    >
       <Box
-        onClick={() => !uploading && inputRef.current?.click()}
+        onClick={() => {
+          if (slot.disabled) {
+            notifications.show({
+              title: 'Preview only',
+              message: slot.disabledMessage || `${slot.label} is not editable here yet.`,
+              color: 'yellow',
+            });
+            return;
+          }
+
+          if (!uploading) {
+            inputRef.current?.click();
+          }
+        }}
         style={{
           width: rem(80),
           height: rem(80),
@@ -245,13 +279,13 @@ function MediaSlot({
           border: `2px dashed ${preview ? markketColors.sections.about.main : '#d0d0d0'}`,
           background: preview ? 'transparent' : markketColors.sections.about.light,
           overflow: 'hidden',
-          cursor: uploading ? 'wait' : 'pointer',
+          cursor: slot.disabled ? 'not-allowed' : uploading ? 'wait' : 'pointer',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'border-color 0.15s, opacity 0.15s',
-          opacity: uploading ? 0.6 : 1,
+          opacity: slot.disabled ? 0.7 : uploading ? 0.6 : 1,
         }}
       >
         {preview ? (
@@ -275,7 +309,7 @@ function MediaSlot({
             position: 'absolute', inset: 0,
             background: 'rgba(0,0,0,0.35)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: 0,
+            opacity: slot.disabled ? 1 : 0,
             transition: 'opacity 0.15s',
           }}
           className="media-slot-overlay"

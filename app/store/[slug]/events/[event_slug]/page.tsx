@@ -7,6 +7,7 @@ import { Container, Button } from "@mantine/core";
 import { EventImageGallery } from "@/app/components/events/event.gallery.image";
 import RSVPModal from "@/app/components/events/event.rsvp.modal";
 import Markdown from "@/app/components/ui/page.markdown";
+import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -58,7 +59,10 @@ export async function generateMetadata({ params }: EventsPageProps) {
 
 export default async function StoreEventPage({ params }: EventsPageProps) {
   const { slug, event_slug } = await params;
-  const storeResponse = await strapiClient.getStore(slug);
+  const [storeResponse, eventsListResponse] = await Promise.all([
+    strapiClient.getStore(slug),
+    strapiClient.getEvents(slug),
+  ]);
   const store = storeResponse?.data?.[0] as Store;
 
   if (!store) {
@@ -70,6 +74,13 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   const event = (eventsResponse?.data?.[0] || []) as Event;
   const startsAt = formatDateTime(event?.startDate);
   const endsAt = formatDateTime(event?.endDate);
+  const relatedEvents = ((eventsListResponse?.data || []) as Event[])
+    .filter((item) => item.slug !== event_slug)
+    .slice(0, 4)
+    .map((item) => ({
+      href: `/${slug}/events/${item.slug}`,
+      label: item.Name || item.slug,
+    }));
 
   return (
     <Container size="xl" py="xl">
@@ -111,6 +122,13 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
               </a>
             </Button>
           ) : (<RSVPModal eventId={event?.id.toString()} />)}
+
+          <StoreCrosslinks
+            slug={slug}
+            store={store}
+            currentSection="events"
+            items={relatedEvents}
+          />
         </div>
       </main>
     </Container>

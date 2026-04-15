@@ -5,6 +5,7 @@ import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
+import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 
 interface ProductSlugPageProps {
   params: Promise<{ slug: string; product_slug: string }>;
@@ -44,16 +45,37 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
 export default async function ProductSlugPage({ params }: ProductSlugPageProps) {
   const { slug, product_slug } = await params;
 
-  const { data: [product] } = (await strapiClient.getProduct(product_slug, slug) || {});
-
-  const { data: [mainPage] } = await strapiClient.getPage('product',);
-  const { data: [page] } = await strapiClient.getPage('product', slug);
-
-  const { data: [store] } = await strapiClient.getStore(slug);
+  const [{ data: [product] }, { data: [mainPage] }, { data: [page] }, { data: [store] }, productsResponse] = await Promise.all([
+    strapiClient.getProduct(product_slug, slug),
+    strapiClient.getPage('product'),
+    strapiClient.getPage('product', slug),
+    strapiClient.getStore(slug),
+    strapiClient.getProducts({ page: 1, pageSize: 5 }, { filter: '', sort: 'updatedAt:desc' }, slug),
+  ]);
 
   if (!(product as Product)?.id) {
     return notFound();
   }
 
-  return <ProductDisplay product={product as Product} page={(page || mainPage) as Page} store={store} />;
+  const relatedProducts = ((productsResponse?.data || []) as Product[])
+    .filter((item) => item.slug !== product_slug)
+    .slice(0, 4)
+    .map((item) => ({
+      href: `/${slug}/products/${item.slug}`,
+      label: item.Name || item.slug,
+    }));
+
+  return (
+    <>
+      <ProductDisplay product={product as Product} page={(page || mainPage) as Page} store={store} />
+      <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+        <StoreCrosslinks
+          slug={slug}
+          store={store}
+          currentSection="products"
+          items={relatedProducts}
+        />
+      </div>
+    </>
+  );
 };

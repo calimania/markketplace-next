@@ -361,7 +361,6 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
               <Stack gap="sm">
                 <Box
                   {...props}
-                  key={selectedSlot?.id}
                   style={{
                     height: 340,
                     borderRadius: 10,
@@ -378,6 +377,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                 >
                   {loading && (
                     <Box
+                      key="uploading-overlay"
                       style={{
                         position: 'absolute',
                         inset: 0,
@@ -395,13 +395,14 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                     </Box>
                   )}
                   {!selectedSlot?.src && (
-                    <Stack align="center" gap={4}>
+                    <Stack key="empty-state" align="center" gap={4}>
                       <IconPhoto size={30} opacity={0.45} />
                       <Text size="sm" c="dimmed">Click to upload {selectedSlot.label}</Text>
                     </Stack>
                   )}
                   {selectedSlot?.src && (
                     <img
+                      key="selected-image"
                       src={selectedSlot.src}
                       alt={selectedSlot.alt || selectedSlot.label}
                       style={{

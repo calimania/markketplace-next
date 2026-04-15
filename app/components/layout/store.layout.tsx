@@ -1,6 +1,6 @@
 'use client';
 
-import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box } from "@mantine/core";
+import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box, Paper, Anchor } from "@mantine/core";
 import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft, IconCalendar, IconNews } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
@@ -255,6 +255,40 @@ export function ClientLayout({
 
       <AppShell.Main p="xs" className="store-page">
         {children}
+        {!embedded && (
+          <Container size="lg" mt="xl" mb="xl">
+            <Paper
+              radius="xl"
+              p="lg"
+              style={{
+                background: 'linear-gradient(135deg, rgba(250,250,250,0.96) 0%, rgba(245,245,245,0.92) 100%)',
+                border: `1px solid ${markketColors.neutral.lightGray}`,
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.06)',
+              }}
+            >
+              <Group justify="space-between" align="center" gap="md" wrap="wrap">
+                <Box>
+                  <Text size="sm" fw={700} c="dark">
+                    Leaving this storefront?
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    Return to the Markkët homepage to browse other stores and sections.
+                  </Text>
+                </Box>
+                <Anchor component={Link} href="/" underline="never">
+                  <Button
+                    variant="light"
+                    color="gray"
+                    leftSection={<IconArrowLeft size={18} />}
+                    radius="xl"
+                  >
+                    Back to homepage
+                  </Button>
+                </Anchor>
+              </Group>
+            </Paper>
+          </Container>
+        )}
       </AppShell.Main>
     </AppShell>
   );

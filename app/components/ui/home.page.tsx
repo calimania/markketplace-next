@@ -59,6 +59,19 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const upcomingCommunityEvents = communityEvents.filter((event) => {
+    if (!event?.startDate) return false;
+
+    const eventStart = new Date(event.startDate);
+    if (Number.isNaN(eventStart.getTime())) return false;
+
+    const yesterdayStart = new Date();
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    yesterdayStart.setHours(0, 0, 0, 0);
+
+    return eventStart.getTime() >= yesterdayStart.getTime();
+  });
+
   useEffect(() => {
     setIsLoggedIn(maybe());
     setMounted(true);
@@ -706,9 +719,9 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                   Highlights
                 </Badge>
                 <Title order={2} size={rem(34)} style={{ color: markketColors.neutral.charcoal }}>
-                  Upcoming Events
+                  Community Articles
                 </Title>
-                <Text c="dimmed">Participate and host AFK & IRL</Text>
+                <Text c="dimmed">FEED</Text>
               </div>
               <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
                 Read More
@@ -866,7 +879,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
         </Container>
       )}
 
-      {communityEvents.length > 0 && (
+      {upcomingCommunityEvents.length > 0 && (
         <Container size="lg" py={80}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
@@ -892,7 +905,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             </Group>
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-              {communityEvents.slice(0, 6).map((event: Event) => {
+              {upcomingCommunityEvents.slice(0, 6).map((event: Event) => {
                 const thumbnailUrl = event?.Thumbnail?.formats?.medium?.url || event?.Thumbnail?.formats?.small?.url || event?.Thumbnail?.url;
                 const storeSlug = (event as any)?.stores?.[0]?.slug;
                 const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';

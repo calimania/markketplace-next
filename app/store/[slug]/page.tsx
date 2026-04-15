@@ -328,6 +328,16 @@ export default async function StorePage({
         <Stack gap="xl">
           {/* Store identity */}
           <Stack align="center" gap="sm" pt={16}>
+            <Badge
+              size="lg"
+              radius="xl"
+              variant="light"
+              color="pink"
+              leftSection={<IconSparkles size={14} />}
+            >
+              Independent storefront
+            </Badge>
+
             <Title order={1} ta="center" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.5px' }}>
               {store?.title || store?.SEO?.metaTitle}
             </Title>
@@ -355,6 +365,52 @@ export default async function StorePage({
             ) : null}
           </Stack>
 
+          <Paper
+            withBorder
+            radius="xl"
+            p={{ base: 'md', sm: 'lg' }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(250,250,250,0.92) 100%)',
+              borderColor: 'rgba(15, 23, 42, 0.08)',
+              boxShadow: '0 12px 30px rgba(15, 23, 42, 0.05)',
+            }}
+          >
+            <Stack gap="md">
+              <Group justify="space-between" align="flex-start" wrap="wrap">
+                <Stack gap={4} maw={560}>
+                  <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.12em' }}>
+                    At a glance
+                  </Text>
+                  <Text fw={700} size="xl" style={{ letterSpacing: '-0.03em' }}>
+                    A storefront, journal, and gathering place in one link.
+                  </Text>
+                  <Text c="dimmed" lh={1.7}>
+                    Browse what&apos;s for sale, read the latest notes, find upcoming events, and wander through the pages that make this store feel lived in.
+                  </Text>
+                </Stack>
+
+                <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="sm" verticalSpacing="sm" maw={320} style={{ flex: 1 }}>
+                  <Paper withBorder radius="lg" p="sm" bg={markketColors.sections.shop.light} style={{ borderColor: markketColors.sections.shop.main }}>
+                    <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: markketColors.sections.shop.main }}>Shop</Text>
+                    <Text fw={700} size="lg">{products.length}</Text>
+                  </Paper>
+                  <Paper withBorder radius="lg" p="sm" bg={markketColors.sections.blog.light} style={{ borderColor: markketColors.sections.blog.main }}>
+                    <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: markketColors.sections.blog.main }}>Stories</Text>
+                    <Text fw={700} size="lg">{posts.length}</Text>
+                  </Paper>
+                  <Paper withBorder radius="lg" p="sm" bg={markketColors.sections.events.light} style={{ borderColor: markketColors.sections.events.main }}>
+                    <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: markketColors.sections.events.main }}>Events</Text>
+                    <Text fw={700} size="lg">{events.length}</Text>
+                  </Paper>
+                  <Paper withBorder radius="lg" p="sm" bg={markketColors.sections.about.light} style={{ borderColor: markketColors.sections.about.main }}>
+                    <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: markketColors.sections.about.main }}>Pages</Text>
+                    <Text fw={700} size="lg">{aboutPages.length}</Text>
+                  </Paper>
+                </SimpleGrid>
+              </Group>
+            </Stack>
+          </Paper>
+
 
           {shouldRenderRichDescription && (
             <Box maw={720} mx="auto" w="100%">
@@ -365,7 +421,12 @@ export default async function StorePage({
           {previewCards.length > 0 && (
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
+                <Stack gap={2}>
+                  <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.12em' }}>
+                    Store map
+                  </Text>
+                  <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
+                </Stack>
               </Group>
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -377,10 +438,10 @@ export default async function StorePage({
                       p="md"
                       style={{
                         borderColor: card.color,
-                        background: card.bg,
+                        background: `linear-gradient(180deg, ${card.bg} 0%, rgba(255,255,255,0.98) 100%)`,
                         color: '#0f172a',
                         transition: 'transform 160ms ease, box-shadow 160ms ease',
-                        boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+                        boxShadow: '0 10px 28px rgba(0,0,0,0.07)',
                       }}
                     >
                       <Stack gap="sm">
@@ -451,7 +512,9 @@ export default async function StorePage({
                   Explore
                 </Text>
               </Group>
-              <StoreSectionLinks links={sectionLinks} borderColor={markketColors.neutral.gray} />
+              <Paper withBorder radius="xl" p="md" style={{ borderColor: 'rgba(15, 23, 42, 0.08)', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.05)' }}>
+                <StoreSectionLinks links={sectionLinks} borderColor={markketColors.neutral.gray} />
+              </Paper>
             </Stack>
           )}
 
