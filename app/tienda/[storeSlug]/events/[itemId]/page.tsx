@@ -6,6 +6,7 @@ import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import Markdown from '@/app/components/ui/page.markdown';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
+import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { findEvent } from '../events.find';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
@@ -136,6 +137,11 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
             No details yet.
           </Paper>
         )}
+
+        <PublicLinkActions
+          path={`/${storeSlug}/events/${event.slug || event.documentId || itemId}`}
+          openLabel="Open public event"
+        />
 
         {event.SEO?.metaUrl && (
           <>

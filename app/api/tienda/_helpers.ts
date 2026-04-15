@@ -5,6 +5,34 @@ import { tiendaContentTypes } from '@/markket/tienda.endpoints';
 export const fetchCache = 'force-no-store';
 
 const ALLOWED_CONTENT_TYPES = new Set<string>(tiendaContentTypes as readonly string[]);
+const AUTO_PUBLISH_CONTENT_TYPES = new Set<string>(['article', 'page', 'product', 'event', 'album', 'track']);
+
+const DEFAULT_STORE_POPULATE = ['Logo', 'SEO', 'SEO.socialImage', 'Favicon', 'URLS', 'Cover', 'Slides'];
+
+const DEFAULT_CONTENT_POPULATE: Record<string, string[]> = {
+  article: ['SEO', 'SEO.socialImage', 'Tags', 'cover', 'store', 'store.Logo'],
+  page: ['SEO', 'SEO.socialImage', 'store', 'store.Logo', 'albums', 'albums.cover', 'albums.SEO', 'albums.tracks'],
+  product: ['SEO', 'SEO.socialImage', 'Thumbnail', 'Slides', 'PRICES', 'stores', 'stores.Logo', 'extras'],
+  event: ['SEO', 'SEO.socialImage', 'Tag', 'Thumbnail', 'Slides', 'stores', 'stores.Logo'],
+  album: ['SEO', 'cover', 'tracks', 'tracks.SEO', 'tracks.media', 'store', 'store.Logo'],
+  track: ['SEO', 'media', 'urls', 'store', 'store.Logo'],
+};
+
+function hasPopulateParams(searchParams: URLSearchParams) {
+  for (const key of searchParams.keys()) {
+    if (key === 'populate' || key.startsWith('populate[')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function appendPopulateDefaults(searchParams: URLSearchParams, fields: string[]) {
+  fields.forEach((field) => {
+    searchParams.append('populate[]', field);
+  });
+}
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -87,6 +115,33 @@ export async function proxyToUpstream(req: NextRequest, upstreamUrl: URL, token:
     headers['Content-Type'] = 'application/json';
   }
 
+  const targetUrl = new URL(upstreamUrl.toString());
+  const isTiendaContentRequest = targetUrl.pathname.includes('/api/tienda/stores/') && targetUrl.pathname.includes('/content/');
+  const contentTypeMatch = targetUrl.pathname.match(/\/content\/([^/]+)/);
+  const targetContentType = contentTypeMatch?.[1];
+  const shouldAutoPublish = isTiendaContentRequest && !!targetContentType && AUTO_PUBLISH_CONTENT_TYPES.has(targetContentType);
+
+  // iOS and dashboard clients often omit populate params; provide media-rich defaults.
+  if (method === 'GET' && !hasPopulateParams(targetUrl.searchParams)) {
+    const isStoresCollectionRequest = targetUrl.pathname === '/api/tienda/stores';
+
+    if (isStoresCollectionRequest) {
+      appendPopulateDefaults(targetUrl.searchParams, DEFAULT_STORE_POPULATE);
+      console.log('[tiendaProxy] appended default store populate fields');
+    }
+
+    if (isTiendaContentRequest && targetContentType && DEFAULT_CONTENT_POPULATE[targetContentType]) {
+      appendPopulateDefaults(targetUrl.searchParams, DEFAULT_CONTENT_POPULATE[targetContentType]);
+      console.log(`[tiendaProxy] appended default populate fields for ${targetContentType}`);
+    }
+  }
+
+  // Strapi draft/publish content types require status=published at create time for immediate visibility.
+  if (method === 'POST' && shouldAutoPublish && !targetUrl.searchParams.get('status')) {
+    targetUrl.searchParams.set('status', 'published');
+    console.log(`[tiendaProxy] appended status=published to ${targetContentType} create request`);
+  }
+
   const options: RequestInit = {
     method: req.method,
     headers,
@@ -128,9 +183,9 @@ export async function proxyToUpstream(req: NextRequest, upstreamUrl: URL, token:
     }
   }
 
-  console.log(`[tiendaProxy] sending to ${upstreamUrl.toString()}, method: ${req.method}, headers:`, Object.keys(headers));
+  console.log(`[tiendaProxy] sending to ${targetUrl.toString()}, method: ${req.method}, headers:`, Object.keys(headers));
 
-  const response = await fetch(upstreamUrl.toString(), options);
+  const response = await fetch(targetUrl.toString(), options);
   const responseContentType = response.headers.get('content-type') || '';
 
   console.log(`[tiendaProxy] upstream ${req.method} -> ${response.status} ${response.statusText}, content-type: ${responseContentType}`);

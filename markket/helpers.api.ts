@@ -103,10 +103,10 @@ export const validators = {
   config: () => !!markketplace.api,
   slug: (slug: string) => slug.length >= 5 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
   short_slug: (slug: string) => slug.length >= 3 && /^[a-z0-9](.)+(?:-[a-z0-9]+)*$/.test(slug),
-  storeContent: (store: Store) => store?.title && store?.Description && store?.slug,
+  // Keep store saves resilient across web/iOS clients; Description is optional.
+  storeContent: (store: Store) => !!store?.title && !!store?.slug,
   storePayload: (payload: { store: Store }) =>
     !!payload?.store?.title &&
-    !!payload?.store?.Description &&
     !!payload?.store?.slug &&
     validators.slug(payload.store.slug)
 }
