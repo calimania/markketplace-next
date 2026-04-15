@@ -100,12 +100,12 @@ export default async function AboutPage({ params }: PageProps) {
                     {store.Logo?.url && (
                       <img
                         src={store.Logo.url}
-                        alt={store.Title || slug}
+                        alt={store.title || slug}
                         style={{ width: rem(48), height: rem(48), objectFit: 'cover', borderRadius: rem(8) }}
                       />
                     )}
                     <Stack gap={2}>
-                      <Text fw={600} size="sm" c="dark">{store.Title || slug}</Text>
+                      <Text fw={600} size="sm" c="dark">{store.title || slug}</Text>
                       <Badge size="xs" variant="light" color="cyan">View store</Badge>
                     </Stack>
                   </Group>

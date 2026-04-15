@@ -61,7 +61,7 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
         const merged = new Map<string, Product>();
         const allItems = Array.isArray(response?.data) ? (response.data as Product[]) : (Array.isArray(response) ? (response as Product[]) : []);
 
-        console.log('[ProductListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Title, published: !!p.publishedAt })) });
+        console.log('[ProductListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Name, published: !!p.publishedAt })) });
 
         if (allItems.length > 0) {
           allItems.forEach((product) => {

@@ -1,5 +1,15 @@
 import type { StrapiBlock, StrapiBlockLinkChild, StrapiBlockTextChild } from '@/markket/richtext';
 
+type StrapiInlineChild = StrapiBlockTextChild | StrapiBlockLinkChild;
+type StrapiListItemBlock = Omit<StrapiBlock, 'type' | 'children'> & {
+  type: 'list-item';
+  children?: StrapiInlineChild[];
+};
+type StrapiListBlock = Omit<StrapiBlock, 'type' | 'children'> & {
+  type: 'list' | 'bullet-list' | 'ordered-list';
+  children?: StrapiListItemBlock[];
+};
+
 const encodeAttribute = (value: string): string => {
   return value
     .replace(/&/g, '&amp;')
@@ -68,7 +78,8 @@ const ensureImageChildren = (block: StrapiBlock): StrapiBlock => {
 };
 
 export const sanitizeStrapiBlocks = (blocks: StrapiBlock[]): StrapiBlock[] => {
-  return (blocks || []).flatMap((block) => {
+  return ((blocks || []) as StrapiBlock[]).flatMap((block): StrapiBlock[] => {
+
     if (!block || typeof block !== 'object') return [];
 
     if (block.type === 'paragraph' || block.type === 'heading' || block.type === 'quote' || block.type === 'code') {
@@ -77,12 +88,15 @@ export const sanitizeStrapiBlocks = (blocks: StrapiBlock[]): StrapiBlock[] => {
     }
 
     if (block.type === 'list' || block.type === 'bullet-list' || block.type === 'ordered-list') {
-      const children = ((block.children as StrapiBlock[] | undefined) || []).flatMap((item) => {
+      const listBlock = block as StrapiListBlock;
+      const children = (listBlock.children || []).flatMap((item): StrapiListItemBlock[] => {
         const itemChildren = sanitizeInlineNodes(item?.children);
         return itemChildren.length > 0 ? [{ ...item, children: itemChildren }] : [];
       });
 
-      return children.length > 0 ? [{ ...block, children }] : [];
+      return children.length > 0
+        ? [{ ...listBlock, children: children as unknown as StrapiBlock['children'] }]
+        : [];
     }
 
     if (block.type === 'image') {
@@ -106,6 +120,8 @@ const renderInlineText = (child: StrapiBlockTextChild): string => {
   let text = escapeHtml(child.text || '');
 
   if (child.code) text = `<code>${text}</code>`;
+  if (child.strikethrough) text = `<s>${text}</s>`;
+  if (child.underline) text = `<u>${text}</u>`;
   if (child.bold) text = `<strong>${text}</strong>`;
   if (child.italic) text = `<em>${text}</em>`;
 

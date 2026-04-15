@@ -5,13 +5,14 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * API extension endpoints for image interactions
  *
- * Enabled actions - proxy | unsplash -
+ * Enabled actions - proxy | unsplash | pexels -
  *
  * Proxy reads URL images to go around cross origin restrictions
  * Unsplash queries their API for suggested images
  *
  * GET /api/markket/img?action=proxy&url=..
  * GET /api/markket/img?action=unsplash&query=[keywords]
+ * GET /api/markket/img?action=pexels&query=[keywords]
  * @param req
  * @returns
  */
@@ -95,6 +96,44 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ urls });
     } catch (e) {
       return NextResponse.json({ error: 'Unsplash error', message: e }, { status: 500 });
+    }
+  }
+
+  if (action === 'pexels') {
+    const accessKey = markketplace.extensions?.pexels_access_key;
+    if (!accessKey) {
+      return NextResponse.json({ error: 'Pexels access key not set' }, { status: 500 });
+    }
+
+    const query = searchParams.get('query')?.trim();
+    const perPageRaw = searchParams.get('per_page');
+    const perPageNum = Number.parseInt(perPageRaw || '10', 10);
+    const perPage = Number.isFinite(perPageNum) ? Math.min(Math.max(perPageNum, 1), 30) : 10;
+
+    try {
+      const url = query
+        ? `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}`
+        : `https://api.pexels.com/v1/curated?per_page=${perPage}`;
+
+      const pexelsRes = await fetch(url, {
+        headers: {
+          Authorization: accessKey,
+        },
+      });
+
+      if (!pexelsRes.ok) {
+        return NextResponse.json({ error: 'Failed to fetch Pexels images' }, { status: 502 });
+      }
+
+      const data = await pexelsRes.json();
+      const photos = Array.isArray(data?.photos) ? data.photos : [];
+      const urls = photos
+        .map((photo: any) => photo?.src?.large2x || photo?.src?.large || photo?.src?.medium || photo?.src?.original)
+        .filter(Boolean);
+
+      return NextResponse.json({ urls });
+    } catch (e) {
+      return NextResponse.json({ error: 'Pexels error', message: e }, { status: 500 });
     }
   }
 

@@ -34,6 +34,7 @@ const ImageModal = ({
   disableReplace = false, // NEW PROP
 }: ImageModalProps) => {
   const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('upload');
+  const [imageLibrary, setImageLibrary] = useState<'unsplash' | 'pexels'>('unsplash');
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
   const [imageAlt, setImageAlt] = useState(initialImageAlt);
   const [isUploading, setIsUploading] = useState(false);
@@ -41,7 +42,7 @@ const ImageModal = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
-  const [unsplashLoading, setUnsplashLoading] = useState(false);
+  const [libraryLoading, setLibraryLoading] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -111,7 +112,7 @@ const ImageModal = ({
           canvas.height = height * ratio + .5 | 0;
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
           const blob = await new Promise<Blob>(rs => canvas.toBlob(rs as any, 'image/png'));
-          const file = new File([blob], 'unsplash-image.png', { type: 'image/png' });
+          const file = new File([blob], 'library-image.png', { type: 'image/png' });
           setImageFile(file);
           setPreviewUrl(URL.createObjectURL(file));
         } else {
@@ -119,36 +120,35 @@ const ImageModal = ({
           canvas.height = height;
           ctx?.drawImage(img, 0, 0);
           const blob = await new Promise<Blob>(rs => canvas.toBlob(rs as any, 'image/png'));
-          const file = new File([blob], 'unsplash-image.png', { type: 'image/png' });
+          const file = new File([blob], 'library-image.png', { type: 'image/png' });
           setImageFile(file);
           setPreviewUrl(URL.createObjectURL(file));
         }
         setImageUploadOption('upload');
       };
       img.onerror = () => {
-        setUrlError('Could not load Unsplash image.');
+        setUrlError('Could not load image from library.');
       };
     } catch {
-      setUrlError('Could not load Unsplash image.');
+      setUrlError('Could not load image from library.');
     }
   };
 
-  /** When the input has keywords, pull from the unsplash endpoint */
-  const handleRandomUnsplash = async () => {
-    setUnsplashLoading(true);
+  /** When the input has keywords, pull from the selected image library endpoint */
+  const handleRandomLibraryImage = async () => {
+    setLibraryLoading(true);
     setUrlError(null);
 
     try {
       const query = imageUrl && !/^https?:\/\//.test(imageUrl) ? imageUrl : '';
-
+      const action = imageLibrary === 'pexels' ? 'pexels' : 'unsplash';
       const endpoint = query
-        ? `/api/markket/img?action=unsplash&query=${encodeURIComponent(query)}`
-        : '/api/markket/img?action=unsplash';
+        ? `/api/markket/img?action=${action}&query=${encodeURIComponent(query)}`
+        : `/api/markket/img?action=${action}`;
       const res = await fetch(endpoint);
       const data = await res.json();
 
       if (data.urls && data.urls.length > 0) {
-        // Use Unsplash image URL directly (no proxy needed)
         const url = data.urls[Math.floor(Math.random() * data.urls.length)];
         setImageUrl(url);
         // Load as preview (simulate upload)
@@ -166,7 +166,7 @@ const ImageModal = ({
             canvas.height = height * ratio + .5 | 0;
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
             const blob = await new Promise<Blob>(rs => canvas.toBlob(rs as any, 'image/png'));
-            const file = new File([blob], 'unsplash-image.png', { type: 'image/png' });
+            const file = new File([blob], 'library-image.png', { type: 'image/png' });
             setImageFile(file);
             setPreviewUrl(URL.createObjectURL(file));
           } else {
@@ -174,22 +174,22 @@ const ImageModal = ({
             canvas.height = height;
             ctx?.drawImage(img, 0, 0);
             const blob = await new Promise<Blob>(rs => canvas.toBlob(rs as any, 'image/png'));
-            const file = new File([blob], 'unsplash-image.png', { type: 'image/png' });
+            const file = new File([blob], 'library-image.png', { type: 'image/png' });
             setImageFile(file);
             setPreviewUrl(URL.createObjectURL(file));
           }
           setImageUploadOption('upload');
         };
         img.onerror = () => {
-          setUrlError('Could not load Unsplash image.');
+          setUrlError('Could not load image from library.');
         };
       } else {
-        setUrlError('No Unsplash images found.');
+        setUrlError(`No ${imageLibrary === 'pexels' ? 'Pexels' : 'Unsplash'} images found.`);
       }
     } catch {
-      setUrlError('Could not fetch Unsplash image.');
+      setUrlError(`Could not fetch ${imageLibrary === 'pexels' ? 'Pexels' : 'Unsplash'} image.`);
     } finally {
-      setUnsplashLoading(false);
+      setLibraryLoading(false);
     }
   };
 
@@ -339,6 +339,15 @@ const ImageModal = ({
               />
               {imageUploadOption === 'url' && (
                 <>
+                  <SegmentedControl
+                    value={imageLibrary}
+                    onChange={(value) => setImageLibrary(value as 'unsplash' | 'pexels')}
+                    data={[
+                      { label: 'Unsplash', value: 'unsplash' },
+                      { label: 'Pexels', value: 'pexels' },
+                    ]}
+                    fullWidth
+                  />
                   <TextInput
                     label="Image URL or search keywords"
                     placeholder="Paste an image URL or type something like 'cat' or 'mountain'"
@@ -370,15 +379,15 @@ const ImageModal = ({
                     </Button>
                     <Button
                       variant="light"
-                      color="pink"
+                      color={imageLibrary === 'pexels' ? 'violet' : 'pink'}
                       size={isMobile ? 'xs' : 'sm'}
                       radius={isMobile ? 'md' : 'xl'}
                       leftSection={<IconSparkles size={16} />}
-                      loading={unsplashLoading}
-                      onClick={handleRandomUnsplash}
+                      loading={libraryLoading}
+                      onClick={handleRandomLibraryImage}
                       style={{ fontWeight: 600, width: isMobile ? '100%' : undefined }}
                     >
-                      Unsplash
+                      {imageLibrary === 'pexels' ? 'Pexels' : 'Unsplash'}
                     </Button>
                   </Group>
                 </>

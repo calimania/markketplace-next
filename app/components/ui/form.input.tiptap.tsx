@@ -19,6 +19,12 @@ import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
 import { RichTextValue, TiptapDoc } from '@/markket/richtext';
 
+declare module '@tiptap/extension-image' {
+  interface SetImageOptions {
+    strapiImage?: string | null;
+  }
+}
+
 const StrapiImage = Image.extend({
   addAttributes() {
     return {

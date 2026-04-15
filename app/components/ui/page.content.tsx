@@ -124,7 +124,7 @@ export default function PageContent({ params, }: PageContentProps) {
     // Build up nested marks so combined styles (bold+italic, bold+underline, etc.) all apply
     let el: React.ReactNode = text;
     if (node.strikethrough) el = <s>{el}</s>;
-    if ((node as any).underline) el = <u>{el}</u>;
+    if (node.underline) el = <u>{el}</u>;
     if (node.italic) el = <em>{el}</em>;
     if (node.bold) el = <strong>{el}</strong>;
 
