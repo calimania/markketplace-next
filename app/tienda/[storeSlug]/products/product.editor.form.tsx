@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';

@@ -21,6 +21,7 @@ async function findProductByField(field: 'documentId' | 'slug', itemId: string, 
     status,
     populate: 'SEO.socialImage,Thumbnail,Slides,PRICES,stores,extras',
     paginate: { page: 1, pageSize: 1 },
+    includeAuth: true,
   });
 }
 

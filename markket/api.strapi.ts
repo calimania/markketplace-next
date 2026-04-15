@@ -322,10 +322,21 @@ export class StrapiClient {
     console.log(`url:${url}`);
 
     try {
+      let authToken = options?.headers?.Authorization as string || '';
+
+      if (!authToken && options.includeAuth) {
+        // Server-side: use API key; client-side: use JWT from localStorage
+        if (typeof window === 'undefined') {
+          authToken = process.env.MARKKET_API_KEY || '';
+        } else {
+          authToken = this._token();
+        }
+      }
+
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': options?.headers?.Authorization || options.includeAuth ? `Bearer ${this._token()}` : '', // Only include auth if specified
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
         },
         next: { revalidate: 1 },
       });

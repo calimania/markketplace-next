@@ -21,6 +21,7 @@ async function findEventByField(field: 'documentId' | 'slug', itemId: string, st
     status,
     populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores',
     paginate: { page: 1, pageSize: 1 },
+    includeAuth: true,
   });
 }
 
