@@ -4,18 +4,22 @@ import { useEffect, useState } from "react";
 import {
   IconRocket, IconBuildingStore, IconShoppingCart,
   IconArticle, IconSparkles, IconArrowRight,
-  IconCheck, IconStars, IconFileText, IconCalendar,
+  IconCheck, IconStars, IconFileText, IconCalendar, IconPackage,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
   Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
-import { Store, Page, Article, Event } from "@/markket";
+import { Carousel } from '@mantine/carousel';
+import { useMediaQuery } from '@mantine/hooks';
+import { motion } from 'framer-motion';
+import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { useAuth } from "@/app/providers/auth.provider";
 import { markketColors } from "@/markket/colors.config";
 import Link from "next/link";
 import { StoreCard } from "@/app/components/stores/card";
+import { stripMarkdown } from '@/markket/richtext.utils';
 
 const features = [
   {
@@ -45,6 +49,15 @@ const benefits = [
   "Simplified dashboards",
 ];
 
+const revealUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: 'easeOut' as const }
+  }
+};
+
 type HomePageProps = {
   store?: Store;
   page?: Page;
@@ -52,25 +65,21 @@ type HomePageProps = {
   featuredStores?: Store[];
   communityPages?: Page[];
   communityEvents?: Event[];
+  communityProducts?: Product[];
 };
 
-const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [] }: HomePageProps) => {
+const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
   const { maybe } = useAuth();
+  const isXs = useMediaQuery('(max-width: 36em)');
+  const isSm = useMediaQuery('(max-width: 48em)');
+  const isMd = useMediaQuery('(max-width: 62em)');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const upcomingCommunityEvents = communityEvents.filter((event) => {
-    if (!event?.startDate) return false;
+  const compactSlideSize = isXs ? '88%' : isSm ? '50%' : isMd ? '33.333333%' : '25%';
 
-    const eventStart = new Date(event.startDate);
-    if (Number.isNaN(eventStart.getTime())) return false;
-
-    const yesterdayStart = new Date();
-    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-    yesterdayStart.setHours(0, 0, 0, 0);
-
-    return eventStart.getTime() >= yesterdayStart.getTime();
-  });
+  // Strapi already filters to upcoming events via getCommunityEvents, but guard client-side too
+  const eventsToDisplay = communityEvents.filter(e => Boolean(e?.startDate));
 
   useEffect(() => {
     setIsLoggedIn(maybe());
@@ -78,7 +87,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
   }, [maybe]);
 
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       <Box
         style={{
           background: 'white',
@@ -132,6 +141,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `3px solid ${markketColors.sections.shop.main}40`,
               borderRadius: 12,
               transform: 'rotate(45deg)',
+                willChange: 'transform, opacity',
               animation: 'float-rotate 20s ease-in-out infinite',
             }}
           />
@@ -147,7 +157,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `2px solid ${markketColors.rosa.main}35`,
               borderRadius: 8,
               transform: 'rotate(18deg)',
-              animation: 'float-rotate 18s ease-in-out infinite 2s',
+                willChange: 'transform, opacity',
+                animation: 'float-rotate-soft 18s ease-in-out infinite 2s',
             }}
           />
 
@@ -162,7 +173,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `3px solid ${markketColors.sections.events.main}35`,
               borderRadius: 10,
               transform: 'rotate(-12deg)',
-              animation: 'float-rotate 22s ease-in-out infinite 3s',
+                willChange: 'transform, opacity',
+                animation: 'float-sway 22s ease-in-out infinite 3s',
             }}
           />
 
@@ -177,6 +189,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `2px solid ${markketColors.sections.blog.main}30`,
               borderRadius: 10,
               transform: 'rotate(28deg)',
+                willChange: 'transform, opacity',
               animation: 'float-rotate 19s ease-in-out infinite 4s',
             }}
           />
@@ -192,7 +205,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `2px solid ${markketColors.sections.events.main}28`,
               borderRadius: 6,
               transform: 'rotate(-8deg)',
-              animation: 'float-rotate 24s ease-in-out infinite 5s',
+                willChange: 'transform, opacity',
+                animation: 'float-sway 24s ease-in-out infinite 5s',
             }}
           />
 
@@ -207,7 +221,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `2px solid ${markketColors.sections.shop.main}30`,
               borderRadius: 6,
               transform: 'rotate(35deg)',
-              animation: 'float-rotate 21s ease-in-out infinite 1s',
+                willChange: 'transform, opacity',
+                animation: 'float-pulse-rotate 21s ease-in-out infinite 1s',
             }}
           />
 
@@ -222,14 +237,16 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               border: `2px solid ${markketColors.rosa.main}32`,
               borderRadius: 5,
               transform: 'rotate(15deg)',
-              animation: 'float-rotate 23s ease-in-out infinite 6s',
+                willChange: 'transform, opacity',
+                animation: 'float-rotate-soft 23s ease-in-out infinite 6s',
             }}
           />
         </Box>
         )}
 
         <Container size="lg" py={80}>
-          <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>
+          <motion.div initial="hidden" animate="show" variants={revealUp}>
+            <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>
             <Badge
               size="lg"
               radius="md"
@@ -338,7 +355,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 Explore Stores
               </Button>
             </Group>
-          </Stack>
+            </Stack>
+          </motion.div>
         </Container>
       </Box>
 
@@ -355,9 +373,56 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
         @keyframes float-rotate {
           0%, 100% {
             transform: translateY(0) rotate(45deg);
+            opacity: 0.6;
           }
           50% {
-            transform: translateY(-20px) rotate(55deg);
+            transform: translateY(-16px) rotate(55deg);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes float-rotate-soft {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(16deg) scale(1);
+            opacity: 0.45;
+          }
+          35% {
+            transform: translate3d(8px, -10px, 0) rotate(24deg) scale(1.02);
+            opacity: 0.78;
+          }
+          70% {
+            transform: translate3d(-4px, 6px, 0) rotate(10deg) scale(0.98);
+            opacity: 0.58;
+          }
+        }
+
+        @keyframes float-sway {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(-10deg);
+            opacity: 0.4;
+          }
+          30% {
+            transform: translate3d(10px, -12px, 0) rotate(-4deg);
+            opacity: 0.72;
+          }
+          65% {
+            transform: translate3d(-8px, 8px, 0) rotate(-14deg);
+            opacity: 0.55;
+          }
+        }
+
+        @keyframes float-pulse-rotate {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) rotate(35deg) scale(1);
+            opacity: 0.35;
+          }
+          40% {
+            transform: translate3d(6px, -12px, 0) rotate(46deg) scale(1.08);
+            opacity: 0.75;
+          }
+          75% {
+            transform: translate3d(-6px, 4px, 0) rotate(28deg) scale(0.94);
+            opacity: 0.45;
           }
         }
 
@@ -420,7 +485,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             {/* Remaining stores smaller */}
             {featuredStores.length > 2 && (
               <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
-                {featuredStores.slice(2).map((s, i) => (
+                {featuredStores.slice(2, 6).map((s, i) => (
                   <StoreCard key={s.id} store={s} idx={i + 2} />
                 ))}
               </SimpleGrid>
@@ -582,10 +647,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 borderRadius: 16,
                 overflow: 'hidden',
                 border: `1px solid ${markketColors.neutral.lightGray}`,
-                background: 'white',
+                background: store?.Logo?.url ? 'white' : markketColors.neutral.offWhite,
+                minHeight: rem(300),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {store?.Logo?.url && (
+              {store?.Logo?.url ? (
                 <img
                   src={store.Logo.url}
                   alt={store.SEO?.metaTitle || 'Markket'}
@@ -595,6 +664,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                     objectFit: 'cover',
                   }}
                 />
+              ) : (
+                <Stack gap="sm" align="center">
+                  <IconBuildingStore size={64} color={markketColors.neutral.mediumGray} />
+                  <Text size="lg" fw={600} c="dimmed">Your Store Here</Text>
+                  <Text size="sm" c="dimmed" ta="center" maw={220}>
+                    Launch your store and it&apos;ll appear right here.
+                  </Text>
+                </Stack>
               )}
             </Box>
           </SimpleGrid>
@@ -603,6 +680,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
       {communityPosts.length > 0 && (
         <Container size="lg" py={80}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -630,7 +708,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
               {communityPosts.slice(0, 6).map((post) => {
-                const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url;
+                const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post?.SEO?.socialImage?.url || post?.store?.Logo?.url;
                 const storeSlug = post?.store?.slug;
                 const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
 
@@ -661,11 +739,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: markketColors.neutral.lightGray,
-                            color: markketColors.neutral.darkGray,
+                              background: markketColors.sections.blog.light,
+                              color: markketColors.sections.blog.main,
                           }}
                         >
-                          No Cover Image
+                            <Box style={{ textAlign: 'center' }}>
+                              <IconArticle size={32} />
+                              <Text size="sm" fw={500}>Article</Text>
+                            </Box>
                         </Box>
                       )}
                     </CardSection>
@@ -698,11 +779,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               })}
             </SimpleGrid>
           </Stack>
+          </motion.div>
         </Container>
       )}
 
-      {communityPosts.length > 2 && (
+      {communityProducts.length > 0 && (
         <Container size="lg" py={80}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -710,57 +793,108 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                   size="lg"
                   radius="md"
                   variant="light"
+                  leftSection={<IconPackage size={14} />}
                   style={{
                     background: markketColors.sections.shop.light,
                     color: markketColors.sections.shop.main,
                     marginBottom: rem(12),
                   }}
                 >
-                  Highlights
+                  Products
                 </Badge>
-                <Title order={2} size={rem(34)} style={{ color: markketColors.neutral.charcoal }}>
-                  Community Articles
+                <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
+                  Shop Community Picks
                 </Title>
-                <Text c="dimmed">FEED</Text>
+                <Text c="dimmed">Featured products from active stores.</Text>
               </div>
-              <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                Read More
+              <Button component="a" href="/stores" variant="outline" rightSection={<IconArrowRight size={16} />}>
+                Browse Stores
               </Button>
             </Group>
 
-            <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
-              {communityPosts.slice(0, 3).map((post) => {
-                const storeSlug = post?.store?.slug;
-                const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
+              {communityProducts.slice(0, 6).map((product) => {
+                const productImage = product?.Thumbnail?.url || product?.Slides?.[0]?.formats?.medium?.url || product?.Slides?.[0]?.formats?.small?.url || product?.Slides?.[0]?.url;
+                const storeSlug = (product as any)?.stores?.[0]?.slug;
+                const href = storeSlug ? `/${storeSlug}/products/${product.slug}` : '/stores';
+                const price = typeof product.usd_price === 'number' && product.usd_price > 0
+                  ? `$${(product.usd_price / 100).toFixed(2)}`
+                  : 'See details';
 
                 return (
-                  <Paper
-                    key={`highlight-${post.documentId || post.id}`}
+                  <Card
+                    key={product.documentId || product.id}
                     withBorder
                     radius="lg"
-                    p="lg"
+                    padding={0}
                     style={{
+                      overflow: 'hidden',
                       borderColor: markketColors.neutral.lightGray,
-                      background: 'white',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
                     }}
                   >
-                    <Stack gap="xs">
-                      <Text size="xs" fw={700} tt="uppercase" c="dimmed">{post?.store?.title || 'Community'}</Text>
-                      <Title order={4} style={{ lineHeight: 1.25 }}>{post.Title}</Title>
-                      <Text size="sm" c="dimmed" lineClamp={4}>
-                        {post?.SEO?.metaDescription || 'Read this story from the Markket community.'}
+                    <CardSection>
+                      {productImage ? (
+                        <img
+                          src={productImage}
+                          alt={product.Name}
+                          style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Box
+                          style={{
+                            height: rem(190),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: markketColors.sections.shop.light,
+                            color: markketColors.sections.shop.main,
+                          }}
+                        >
+                          <Box style={{ textAlign: 'center' }}>
+                            <IconPackage size={32} />
+                            <Text size="sm" fw={500}>Product</Text>
+                          </Box>
+                        </Box>
+                      )}
+                    </CardSection>
+
+                    <Stack gap="sm" p="md">
+                      <Group gap="xs">
+                        <Badge variant="outline" color="cyan">Product</Badge>
+                        {(product as any)?.stores?.[0]?.title && (
+                          <Text size="xs" c="dimmed">{(product as any).stores[0].title}</Text>
+                        )}
+                      </Group>
+
+                      <Title order={4} style={{ lineHeight: 1.25 }}>{product.Name}</Title>
+                      <Text size="sm" c="dimmed" lineClamp={2}>
+                        {product?.SEO?.metaDescription || stripMarkdown(product?.Description as string) || 'Discover this product from the Markket community.'}
                       </Text>
-                      <Button component="a" href={href} variant="subtle" rightSection={<IconArrowRight size={14} />}>
-                        Open Article
+                      <Text size="sm" fw={600} style={{ color: markketColors.sections.shop.main }}>
+                        {price}
+                      </Text>
+
+                      <Button
+                        component="a"
+                        href={href}
+                        variant="light"
+                        rightSection={<IconArrowRight size={16} />}
+                        style={{ alignSelf: 'flex-start' }}
+                      >
+                        View Product
                       </Button>
                     </Stack>
-                  </Paper>
+                  </Card>
                 );
               })}
             </SimpleGrid>
           </Stack>
+          </motion.div>
         </Container>
       )}
+
 
       {page?.Content && (
         <Container size="lg" py={80}>
@@ -794,8 +928,10 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
           </Stack>
         </Container>
       </Box>
+
       {communityPages.length > 0 && (
         <Container size="lg" py={80}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -819,68 +955,92 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               </div>
             </Group>
 
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-              {communityPages.slice(0, 6).map((p) => {
+            <Carousel
+              slideGap="md"
+              withControls={communityPages.length > 1}
+              withIndicators={communityPages.length > 1}
+              slideSize={compactSlideSize}
+                style={{ paddingBottom: rem(56) }}
+                styles={{
+                  slides: { alignItems: 'stretch' },
+                  slide: { height: 'auto' },
+                  controls: {
+                    top: 'unset',
+                    bottom: rem(4),
+                    transform: 'none',
+                    justifyContent: 'center',
+                    gap: rem(8),
+                  },
+                }}
+            >
+                {communityPages.slice(0, 24).map((p) => {
                 const storeSlug = (p as any)?.store?.slug;
                 const href = storeSlug ? `/${storeSlug}/about/${p.slug}` : '/stores';
                 const logoUrl = (p as any)?.store?.Logo?.url;
 
                 return (
-                  <Card
-                    key={p.documentId || p.id}
-                    withBorder
-                    radius="lg"
-                    padding="lg"
-                    component="a"
-                    href={href}
-                    style={{
-                      borderColor: markketColors.neutral.lightGray,
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
-                      textDecoration: 'none',
-                      transition: 'transform 0.15s, box-shadow 0.15s',
-                    }}
-                    className="hover:scale-[1.02]"
-                  >
-                    {logoUrl && (
-                      <CardSection mb="sm">
-                        <img
-                          src={logoUrl}
-                          alt={(p as any)?.store?.title || storeSlug || 'Store'}
-                          style={{ width: '100%', height: rem(120), objectFit: 'cover' }}
-                          loading="lazy"
-                        />
-                      </CardSection>
-                    )}
-                    <Stack gap="xs">
-                      {storeSlug && (
-                        <Text size="xs" fw={600} tt="uppercase" c="dimmed">
-                          {(p as any)?.store?.title || storeSlug}
-                        </Text>
+                  <Carousel.Slide key={p.documentId || p.id} style={{ height: '100%' }}>
+                    <Card
+                      withBorder
+                      radius="lg"
+                      padding="md"
+                      component="a"
+                      href={href}
+                      style={{
+                        height: '100%',
+                        minHeight: rem(160),
+                        maxWidth: rem(320),
+                        margin: '0 auto',
+                        borderColor: markketColors.neutral.lightGray,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+                        textDecoration: 'none',
+                        transition: 'transform 0.15s, box-shadow 0.15s',
+                      }}
+                      className="hover:scale-[1.02]"
+                    >
+                      {logoUrl && (
+                        <CardSection mb="sm">
+                          <img
+                            src={logoUrl}
+                            alt={(p as any)?.store?.title || storeSlug || 'Store'}
+                            style={{ width: '100%', height: rem(100), objectFit: 'cover' }}
+                            loading="lazy"
+                          />
+                        </CardSection>
                       )}
-                      <Title order={4} style={{ lineHeight: 1.25, color: markketColors.neutral.charcoal }}>
-                        {p.Title}
-                      </Title>
-                      <Text size="sm" c="dimmed" lineClamp={3}>
-                        {p.SEO?.metaDescription || ''}
-                      </Text>
-                      <Text
-                        size="sm"
-                        fw={500}
-                        style={{ color: markketColors.sections.about.main, marginTop: rem(4) }}
-                      >
-                        Read page →
-                      </Text>
-                    </Stack>
-                  </Card>
+                      <Stack gap="xs">
+                        {storeSlug && (
+                          <Text size="xs" fw={600} tt="uppercase" c="dimmed">
+                            {(p as any)?.store?.title || storeSlug}
+                          </Text>
+                        )}
+                        <Title order={4} style={{ lineHeight: 1.25, color: markketColors.neutral.charcoal }}>
+                          {p.Title}
+                        </Title>
+                        <Text size="sm" c="dimmed" lineClamp={2}>
+                          {p.SEO?.metaDescription || 'Read this page from the community.'}
+                        </Text>
+                        <Text
+                          size="sm"
+                          fw={500}
+                          style={{ color: markketColors.sections.about.main, marginTop: rem(4) }}
+                        >
+                          Read page →
+                        </Text>
+                      </Stack>
+                    </Card>
+                  </Carousel.Slide>
                 );
               })}
-            </SimpleGrid>
+            </Carousel>
           </Stack>
+          </motion.div>
         </Container>
       )}
 
-      {upcomingCommunityEvents.length > 0 && (
+      {eventsToDisplay.length > 0 && (
         <Container size="lg" py={80}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -904,86 +1064,104 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               </div>
             </Group>
 
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-              {upcomingCommunityEvents.slice(0, 6).map((event: Event) => {
-                const thumbnailUrl = event?.Thumbnail?.formats?.medium?.url || event?.Thumbnail?.formats?.small?.url || event?.Thumbnail?.url;
+            <Carousel
+              slideGap="md"
+              withControls={eventsToDisplay.length > 1}
+              withIndicators={eventsToDisplay.length > 1}
+              slideSize={compactSlideSize}
+                style={{ paddingBottom: rem(56) }}
+                styles={{
+                  slides: { alignItems: 'stretch' },
+                  slide: { height: 'auto' },
+                  controls: {
+                    top: 'unset',
+                    bottom: rem(4),
+                    transform: 'none',
+                    justifyContent: 'center',
+                    gap: rem(8),
+                  },
+                }}
+            >
+                {eventsToDisplay.slice(0, 24).map((event: Event) => {
+                const thumbnailUrl = event?.Thumbnail?.formats?.medium?.url || event?.Thumbnail?.formats?.small?.url || event?.Thumbnail?.url || event?.Slides?.[0]?.formats?.medium?.url || event?.Slides?.[0]?.formats?.small?.url || event?.Slides?.[0]?.url || event?.SEO?.socialImage?.url || (event as any)?.stores?.[0]?.Logo?.url;
                 const storeSlug = (event as any)?.stores?.[0]?.slug;
                 const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
                 const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
 
                 return (
-                  <Card
-                    key={event.documentId || event.id}
-                    withBorder
-                    radius="lg"
-                    padding={0}
-                    style={{
-                      overflow: 'hidden',
-                      borderColor: markketColors.neutral.lightGray,
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                    }}
-                  >
-                    <CardSection>
-                      {thumbnailUrl ? (
-                        <img
-                          src={thumbnailUrl}
-                          alt={event.Name}
-                          style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <Box
-                          style={{
-                            height: rem(190),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: markketColors.sections.events.light,
-                            color: markketColors.sections.events.main,
-                          }}
-                        >
-                          <Box style={{ textAlign: 'center' }}>
-                            <IconCalendar size={32} />
-                            <Text size="sm" fw={500}>Event</Text>
+                  <Carousel.Slide key={event.documentId || event.id} style={{ height: '100%' }}>
+                    <Card
+                      withBorder
+                      radius="lg"
+                      padding={0}
+                      style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        maxWidth: rem(330),
+                        margin: '0 auto',
+                        overflow: 'hidden',
+                        borderColor: markketColors.neutral.lightGray,
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                      }}
+                    >
+                      <CardSection>
+                        {thumbnailUrl ? (
+                          <img
+                            src={thumbnailUrl}
+                            alt={event.Name}
+                            style={{ width: '100%', height: rem(170), objectFit: 'cover' }}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <Box
+                            style={{
+                                height: rem(170),
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: markketColors.sections.events.light,
+                                color: markketColors.sections.events.main,
+                              }}
+                            >
+                              <Box style={{ textAlign: 'center' }}>
+                              <IconCalendar size={30} />
+                              <Text size="sm" fw={500}>Event</Text>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
-                    </CardSection>
-
-                    <Stack gap="sm" p="md">
-                      <Group gap="xs">
-                        <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
-                        {(event as any)?.stores?.[0]?.title && (
-                          <Text size="xs" c="dimmed">{(event as any).stores[0].title}</Text>
                         )}
-                      </Group>
+                      </CardSection>
 
-                      <Title order={4} style={{ lineHeight: 1.25 }}>{event.Name}</Title>
-                      <Text size="sm" c="dimmed" lineClamp={2}>
-                        {event?.SEO?.metaDescription || 'Join us for this event'}
-                      </Text>
+                      <Stack gap="sm" p="md" style={{ flex: 1 }}>
+                        <Group gap="xs">
+                          <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
+                          {(event as any)?.stores?.[0]?.title && (
+                            <Text size="xs" c="dimmed">{(event as any).stores[0].title}</Text>
+                          )}
+                        </Group>
 
-                      {event.usd_price && event.usd_price > 0 && (
-                        <Text size="sm" fw={600} style={{ color: markketColors.sections.events.main }}>
-                          ${(event.usd_price / 100).toFixed(2)}
+                        <Title order={4} style={{ lineHeight: 1.25 }}>{event.Name}</Title>
+                        <Text size="sm" c="dimmed" lineClamp={2} style={{ flex: 1 }}>
+                          {event?.SEO?.metaDescription || 'Join us for this event'}
                         </Text>
-                      )}
 
-                      <Button
-                        component="a"
-                        href={href}
-                        variant="light"
-                        rightSection={<IconArrowRight size={16} />}
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        Learn More
-                      </Button>
-                    </Stack>
-                  </Card>
+                        <Button
+                          component="a"
+                          href={href}
+                          variant="light"
+                          rightSection={<IconArrowRight size={16} />}
+                          style={{ alignSelf: 'flex-start', marginTop: 'auto' }}
+                        >
+                          Learn More
+                        </Button>
+                      </Stack>
+                    </Card>
+                  </Carousel.Slide>
                 );
               })}
-            </SimpleGrid>
+            </Carousel>
           </Stack>
+          </motion.div>
         </Container>
       )}
 
@@ -1057,7 +1235,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
           </Stack>
         </Container>
       </Box>
-    </div>
+    </main>
   );
 }
 

@@ -578,15 +578,38 @@ export class StrapiClient {
     });
   }
 
-  async getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+  async getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string; from?: Date }) {
     const { sort } = options;
+
+    const fromDate = options.from ?? (() => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    })();
 
     return this.fetch({
       contentType: 'events',
       sort,
+      filters: {
+        startDate: {
+          $gte: fromDate.toISOString(),
+        },
+      },
       status: 'published',
       paginate,
       populate: 'SEO,SEO.socialImage,Tag,Thumbnail,stores,stores.Logo',
+    });
+  }
+
+  async getCommunityProducts(paginate: { page: number; pageSize: number }, options: { sort: string }) {
+    const { sort } = options;
+
+    return this.fetch({
+      contentType: 'products',
+      sort,
+      status: 'published',
+      paginate,
+      populate: 'SEO,SEO.socialImage,Thumbnail,Slides,PRICES,stores,stores.Logo',
     });
   }
 

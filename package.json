@@ -1,6 +1,6 @@
 {
   "name": "markket-next",
-  "version": "0.10.0-a",
+  "version": "0.9.0",
   "private": false,
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -50,13 +50,13 @@
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.4.10",
-    "next": "^16.2.3",
+    "next": "16.2.4",
     "next-swagger-doc": "^0.4.1",
     "posthog-js": "^1.223.3",
     "posthog-node": "^4.8.1",
     "qs": "^6.14.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "remarkable": "^2.0.1",
     "sass": "^1.85.0",
     "stripe": "^17.7.0",
@@ -69,11 +69,11 @@
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/node": "^20",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/remarkable": "^2.0.8",
     "eslint": "^9",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "16.2.4",
     "postcss": "^8.5.1",
     "postcss-simple-vars": "^7.0.1",
     "rollup": "^4.45.1",
@@ -84,6 +84,10 @@
   },
   "overrides": {
     "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
+  },
+  "resolutions": {
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3"
   }
 }

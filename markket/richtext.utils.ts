@@ -58,3 +58,14 @@ export const richTextToPlainText = (value: RichTextValue | StoredRichText): stri
     .replace(/\s+/g, ' ')
     .trim();
 };
+
+export const stripMarkdown = (text?: string): string =>
+  text
+    ?.replace(/!\[.*?\]\(.*?\)/g, '')
+    .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+    .replace(/`{1,3}[^`]*`{1,3}/g, '')
+    .replace(/#{1,6}\s*/g, '')
+    .replace(/[*_~]{1,3}([^*_~]+)[*_~]{1,3}/g, '$1')
+    .replace(/^\s*[-*+>]\s+/gm, '')
+    .replace(/\n+/g, ' ')
+    .trim() ?? '';
