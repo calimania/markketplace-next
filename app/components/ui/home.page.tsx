@@ -11,7 +11,6 @@ import {
   Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
 import { Carousel } from '@mantine/carousel';
-import { useMediaQuery } from '@mantine/hooks';
 import { motion } from 'framer-motion';
 import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
@@ -50,11 +49,11 @@ const benefits = [
 ];
 
 const revealUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0.94, y: 8 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: 'easeOut' as const }
+    transition: { duration: 0.35, ease: 'easeOut' as const }
   }
 };
 
@@ -69,22 +68,26 @@ type HomePageProps = {
 };
 
 const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
-  const { maybe } = useAuth();
-  const isXs = useMediaQuery('(max-width: 36em)');
-  const isSm = useMediaQuery('(max-width: 48em)');
-  const isMd = useMediaQuery('(max-width: 62em)');
+  const { maybe, isLoading: authLoading } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const compactSlideSize = isXs ? '88%' : isSm ? '50%' : isMd ? '33.333333%' : '25%';
+  const compactSlideSize = { base: '94%', xs: '88%', sm: '50%', md: '33.333333%', lg: '25%' };
 
   // Strapi already filters to upcoming events via getCommunityEvents, but guard client-side too
   const eventsToDisplay = communityEvents.filter(e => Boolean(e?.startDate));
 
   useEffect(() => {
-    setIsLoggedIn(maybe());
     setMounted(true);
-  }, [maybe]);
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading) {
+      setIsLoggedIn(maybe());
+    }
+  }, [authLoading, maybe]);
+
+  const resolvedIsLoggedIn = mounted && !authLoading && isLoggedIn;
 
   return (
     <main className="min-h-screen">
@@ -96,8 +99,6 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
           borderBottom: `1px solid ${markketColors.neutral.lightGray}`,
         }}
       >
-        {/* Geometric background - client only to prevent hydration mismatch */}
-        {mounted && (
         <Box
           style={{
             position: 'absolute',
@@ -241,11 +242,89 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 animation: 'float-rotate-soft 23s ease-in-out infinite 6s',
             }}
           />
+
+          {/* Glow blob - rosa */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '10%',
+              left: '42%',
+              width: 180,
+              height: 180,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${markketColors.rosa.main}24 0%, transparent 72%)`,
+              filter: 'blur(2px)',
+              willChange: 'transform, opacity',
+              animation: 'float-orbit 28s ease-in-out infinite 1s',
+            }}
+          />
+
+          {/* Glow blob - cyan */}
+          <Box
+            style={{
+              position: 'absolute',
+              bottom: '8%',
+              right: '28%',
+              width: 150,
+              height: 150,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${markketColors.sections.shop.main}20 0%, transparent 70%)`,
+              willChange: 'transform, opacity',
+              animation: 'float-orbit 24s ease-in-out infinite 4s',
+            }}
+          />
+
+          {/* Spark dot 1 */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '22%',
+              left: '58%',
+              width: 9,
+              height: 9,
+              borderRadius: '50%',
+              background: markketColors.sections.blog.main,
+              opacity: 0.42,
+              willChange: 'transform, opacity',
+              animation: 'spark-drift 11s ease-in-out infinite',
+            }}
+          />
+
+          {/* Spark dot 2 */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '68%',
+              right: '38%',
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: markketColors.sections.events.main,
+              opacity: 0.35,
+              willChange: 'transform, opacity',
+              animation: 'spark-drift 13s ease-in-out infinite 2s',
+            }}
+          />
+
+          {/* Spark dot 3 */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '38%',
+              right: '12%',
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: markketColors.rosa.main,
+              opacity: 0.38,
+              willChange: 'transform, opacity',
+              animation: 'spark-drift 12s ease-in-out infinite 1s',
+            }}
+          />
         </Box>
-        )}
 
         <Container size="lg" py={80}>
-          <motion.div initial="hidden" animate="show" variants={revealUp}>
+          <motion.div initial={false} animate="show" variants={revealUp}>
             <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>
             <Badge
               size="lg"
@@ -304,13 +383,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             <Group gap={16} mt={32} justify="center" wrap="wrap">
               <Button
                 component="a"
-                href={mounted && isLoggedIn ? '/me' : '/auth/magic'}
+                  href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
                 size="lg"
                 radius="md"
                 suppressHydrationWarning
                 leftSection={<IconSparkles size={20} />}
                 style={{
-                  background: mounted && isLoggedIn
+                  background: resolvedIsLoggedIn
                     ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
                     : markketColors.rosa.main,
                   color: 'white',
@@ -321,7 +400,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 }}
                 className="transform hover:scale-105 transition-transform"
               >
-                {mounted && isLoggedIn && (
+                  {resolvedIsLoggedIn && (
                   <Box
                     style={{
                       position: 'absolute',
@@ -335,7 +414,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                   />
                 )}
                 <span style={{ position: 'relative', zIndex: 1 }}>
-                  {mounted && isLoggedIn ? 'Open Workspace' : 'Create Your Store'}
+                    {resolvedIsLoggedIn ? 'Open Workspace' : 'Create Your Store'}
                 </span>
               </Button>
 
@@ -437,6 +516,36 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
           }
         }
 
+        @keyframes float-orbit {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+            opacity: 0.32;
+          }
+          30% {
+            transform: translate3d(12px, -14px, 0) scale(1.08);
+            opacity: 0.5;
+          }
+          68% {
+            transform: translate3d(-10px, 10px, 0) scale(0.94);
+            opacity: 0.38;
+          }
+        }
+
+        @keyframes spark-drift {
+          0%, 100% {
+            transform: translate3d(0, 0, 0);
+            opacity: 0.25;
+          }
+          35% {
+            transform: translate3d(8px, -10px, 0);
+            opacity: 0.6;
+          }
+          70% {
+            transform: translate3d(-6px, 8px, 0);
+            opacity: 0.34;
+          }
+        }
+
         @keyframes shimmer {
           0% {
             left: -100%;
@@ -512,7 +621,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             <Text size="lg" ta="center" c="dimmed" maw={700} mx="auto">
               {page?.SEO?.metaDescription || 'A complete web publishing and ecommerce platform for creators and small businesses'}
             </Text>
-            {mounted && !isLoggedIn && (
+            {mounted && !authLoading && !isLoggedIn && (
               <>
                 <Text size="sm" ta="center" c="dimmed" maw={700} mx="auto">
                   Prefer passwordless login? Use a magic link and land directly in your workspace.
@@ -613,7 +722,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               <Group mt="md">
                 <Button
                   component="a"
-                  href={!isLoggedIn ? '/auth/magic' : '/me'}
+                  href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
                   size="lg"
                   radius="md"
                   suppressHydrationWarning
@@ -623,7 +732,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                     color: 'white',
                   }}
                 >
-                  {!isLoggedIn ? 'Get Started Free' : 'Open Workspace'}
+                  {resolvedIsLoggedIn ? 'Open Workspace' : 'Get Started Free'}
                 </Button>
 
                 <Button
@@ -680,7 +789,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
       {communityPosts.length > 0 && (
         <Container size="lg" py={80}>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
+          <motion.div initial={false} whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -718,11 +827,16 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                     withBorder
                     radius="lg"
                     padding={0}
+                    component="a"
+                    href={href}
                     style={{
                       overflow: 'hidden',
                       borderColor: markketColors.neutral.lightGray,
                       boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                      textDecoration: 'none',
+                      transition: 'transform 0.15s, box-shadow 0.15s',
                     }}
+                    className="hover:scale-[1.02]"
                   >
                     <CardSection>
                       {coverUrl ? (
@@ -764,15 +878,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                         {post?.SEO?.metaDescription || '...'}
                       </Text>
 
-                      <Button
-                        component="a"
-                        href={href}
-                        variant="light"
-                        rightSection={<IconArrowRight size={16} />}
-                        style={{ alignSelf: 'flex-start' }}
+                      <Text
+                        size="sm"
+                        fw={500}
+                        style={{ color: markketColors.sections.blog.main, marginTop: rem(4) }}
                       >
-                        Read Post
-                      </Button>
+                        Read Post →
+                      </Text>
                     </Stack>
                   </Card>
                 );
@@ -785,7 +897,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
       {communityProducts.length > 0 && (
         <Container size="lg" py={80}>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
+          <motion.div initial={false} whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -827,11 +939,16 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                     withBorder
                     radius="lg"
                     padding={0}
+                    component="a"
+                    href={href}
                     style={{
                       overflow: 'hidden',
                       borderColor: markketColors.neutral.lightGray,
                       boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                      textDecoration: 'none',
+                      transition: 'transform 0.15s, box-shadow 0.15s',
                     }}
+                    className="hover:scale-[1.02]"
                   >
                     <CardSection>
                       {productImage ? (
@@ -876,15 +993,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                         {price}
                       </Text>
 
-                      <Button
-                        component="a"
-                        href={href}
-                        variant="light"
-                        rightSection={<IconArrowRight size={16} />}
-                        style={{ alignSelf: 'flex-start' }}
+                      <Text
+                        size="sm"
+                        fw={500}
+                        style={{ color: markketColors.sections.shop.main, marginTop: rem(4) }}
                       >
-                        View Product
-                      </Button>
+                        View Product →
+                      </Text>
                     </Stack>
                   </Card>
                 );
@@ -931,7 +1046,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
       {communityPages.length > 0 && (
         <Container size="lg" py={80}>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
+          <motion.div initial={false} whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -962,7 +1077,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               slideSize={compactSlideSize}
                 style={{ paddingBottom: rem(56) }}
                 styles={{
-                  slides: { alignItems: 'stretch' },
+                  container: { alignItems: 'stretch' },
                   slide: { height: 'auto' },
                   controls: {
                     top: 'unset',
@@ -1040,7 +1155,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
       {eventsToDisplay.length > 0 && (
         <Container size="lg" py={80}>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
+          <motion.div initial={false} whileInView="show" viewport={{ once: true, amount: 0.15 }} variants={revealUp}>
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
               <div>
@@ -1071,7 +1186,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               slideSize={compactSlideSize}
                 style={{ paddingBottom: rem(56) }}
                 styles={{
-                  slides: { alignItems: 'stretch' },
+                  container: { alignItems: 'stretch' },
                   slide: { height: 'auto' },
                   controls: {
                     top: 'unset',
@@ -1086,7 +1201,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 const thumbnailUrl = event?.Thumbnail?.formats?.medium?.url || event?.Thumbnail?.formats?.small?.url || event?.Thumbnail?.url || event?.Slides?.[0]?.formats?.medium?.url || event?.Slides?.[0]?.formats?.small?.url || event?.Slides?.[0]?.url || event?.SEO?.socialImage?.url || (event as any)?.stores?.[0]?.Logo?.url;
                 const storeSlug = (event as any)?.stores?.[0]?.slug;
                 const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
-                const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
+                  const eventDate = event.startDate
+                    ? new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      timeZone: 'UTC',
+                    }).format(new Date(event.startDate))
+                    : 'TBD';
 
                 return (
                   <Carousel.Slide key={event.documentId || event.id} style={{ height: '100%' }}>
@@ -1094,6 +1216,8 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                       withBorder
                       radius="lg"
                       padding={0}
+                      component="a"
+                      href={href}
                       style={{
                         height: '100%',
                         display: 'flex',
@@ -1103,7 +1227,10 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                         overflow: 'hidden',
                         borderColor: markketColors.neutral.lightGray,
                         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                        textDecoration: 'none',
+                        transition: 'transform 0.15s, box-shadow 0.15s',
                       }}
+                      className="hover:scale-[1.02]"
                     >
                       <CardSection>
                         {thumbnailUrl ? (
@@ -1145,15 +1272,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                           {event?.SEO?.metaDescription || 'Join us for this event'}
                         </Text>
 
-                        <Button
-                          component="a"
-                          href={href}
-                          variant="light"
-                          rightSection={<IconArrowRight size={16} />}
-                          style={{ alignSelf: 'flex-start', marginTop: 'auto' }}
+                        <Text
+                          size="sm"
+                          fw={500}
+                          style={{ color: markketColors.sections.events.main, marginTop: 'auto' }}
                         >
-                          Learn More
-                        </Button>
+                          Learn More →
+                        </Text>
                       </Stack>
                     </Card>
                   </Carousel.Slide>
@@ -1195,7 +1320,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             </Text>
             <Button
               component="a"
-              href={!isLoggedIn ? '/auth/magic' : '/me'}
+              href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
               size="xl"
               radius="md"
               suppressHydrationWarning
@@ -1210,7 +1335,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 paddingRight: rem(40),
               }}
             >
-              {!isLoggedIn ? 'Start Your Free Store' : 'Open Workspace'}
+              {resolvedIsLoggedIn ? 'Open Workspace' : 'Start Your Free Store'}
             </Button>
 
             <Group gap="lg" mt="md">
