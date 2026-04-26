@@ -4,6 +4,7 @@ import { Card, CardSection, Text, Badge, Group, Anchor, Box, Stack } from '@mant
 import { IconCalendar, IconArrowRight } from '@tabler/icons-react';
 import { Article } from '@/markket/article';
 import { markketColors } from '@/markket/colors.config';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 
 export interface BlogPostCardProps {
   post: Article;
@@ -17,6 +18,9 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
   const linkHref = `/${prefix || 'docs'}/${slug}`;
   const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
   const storeTitle = (post as Article & { store?: { title?: string } })?.store?.title;
+  const excerpt = post?.SEO?.metaDescription
+    || stripMarkdown(richTextToPlainText(post?.Content))
+    || '';
 
   return (
     <Card
@@ -89,9 +93,9 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
           </Text>
         </Anchor>
 
-        {post?.SEO?.metaDescription && (
+        {excerpt && (
           <Text size="xs" c="dimmed" lineClamp={3} style={{ lineHeight: 1.6, flex: 1 }}>
-            {post.SEO.metaDescription}
+            {excerpt}
           </Text>
         )}
 

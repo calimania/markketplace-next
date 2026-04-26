@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   TextInput,
   Group,
@@ -21,36 +21,24 @@ import { notifications } from '@mantine/notifications';
 import { IconCheck, IconMailStar, IconSparkles } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { type Page, type Store } from '@/markket/index.d';
-import { strapiClient } from '@/markket/api.strapi';
-import { markketplace } from '@/markket/config';
 import PageContent from '../ui/page.content';
 import { markketColors } from '@/markket/colors.config';
 
-interface MagicLinkPage {
+interface MagicLinkForm {
   email: string;
 }
 
-export default function MagicLinkPage() {
+interface MagicLinkPageProps {
+  page?: Page;
+  store?: Store;
+}
+
+export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState<{ success: boolean; error: string | null }>({ success: false, error: null });
   const router = useRouter();
-  const [page, setPage] = useState({} as Page);
-  const [store, setStore] = useState({} as Store);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: pages } = await strapiClient.getPage('auth.magic', markketplace.slug);
-
-      setPage(pages?.[0] as Page);
-
-      const { data: stores } = await strapiClient.getStore(markketplace.slug);
-      setStore(stores?.[0] || {});
-    };
-
-    fetchData();
-  }, []);
-
-  const form = useForm<MagicLinkPage>({
+  const form = useForm<MagicLinkForm>({
     initialValues: {
       email: '',
     },
@@ -59,7 +47,7 @@ export default function MagicLinkPage() {
     },
   });
 
-  const handleSubmit = async (values: MagicLinkPage) => {
+  const handleSubmit = async (values: MagicLinkForm) => {
     setLoading(true);
     try {
       const response = await fetch('/api/markket?path=/api/auth-magic/request', {
@@ -101,76 +89,113 @@ export default function MagicLinkPage() {
   };
 
   return (
-    <Box
-      style={{
-        background: `linear-gradient(165deg, ${markketColors.neutral.offWhite} 0%, #ffffff 55%, ${markketColors.sections.blog.light}40 100%)`,
-        borderRadius: rem(18),
-        padding: rem(12),
-      }}
-    >
-      <Container size={680} my={32}>
-        <Stack gap="lg">
-          <Stack gap="sm" align="center">
+    <Box>
+      <Container size={640} my={16}>
+        <Stack gap="xl">
+
+          {/* Hero — only before sending */}
+          {!state.success && (<Stack gap="xs" align="center">
+            <ThemeIcon
+              size={72}
+              radius="xl"
+              variant="gradient"
+              gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
+              mb={4}
+            >
+              <IconMailStar size={36} />
+            </ThemeIcon>
             <Badge
-              size="lg"
-              radius="md"
-              variant="light"
-              leftSection={<IconSparkles size={14} />}
+              size="md"
+              radius="xl"
+              leftSection={<IconSparkles size={12} />}
               style={{
                 background: markketColors.rosa.light,
                 color: markketColors.rosa.main,
+                fontWeight: 600,
+                letterSpacing: '0.03em',
               }}
             >
               Passwordless Access
             </Badge>
-            <Title ta="center" fw={900} style={{ color: markketColors.neutral.charcoal }}>
-              {page?.SEO?.metaTitle || 'Magic Link Login'}
+            <Title order={1} ta="center" fw={900} fz={{ base: 28, sm: 34 }} style={{ color: markketColors.neutral.charcoal }}>
+              {page?.SEO?.metaTitle || 'Sign in with Magic Link'}
             </Title>
-            <Text c="dimmed" ta="center" maw={560}>
-              {page?.SEO?.metaDescription || 'Enter your email and we will send a secure login link to open your workspace.'}
+            <Text ta="center" maw={460} style={{ color: markketColors.neutral.darkGray, lineHeight: 1.6 }}>
+              {page?.SEO?.metaDescription || 'Enter your email and we\'ll send a one-click login link straight to your inbox — no password needed.'}
             </Text>
-          </Stack>
+          </Stack>)}
 
+          {/* Form card */}
           <Paper
             withBorder
             radius="xl"
-            p={{ base: 22, sm: 34 }}
-            shadow="sm"
+            p={{ base: 24, sm: 40 }}
             style={{
               borderColor: markketColors.neutral.lightGray,
-              boxShadow: '0 16px 32px rgba(0, 0, 0, 0.08)',
-              background: 'white',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
             }}
           >
             {state.success ? (
-              <Stack gap="md" align="center">
-                <ThemeIcon size={64} radius="xl" variant="light" color="pink">
-                  <IconMailStar size={32} />
+              <Stack gap="xl" align="center" py="xl">
+                <ThemeIcon
+                  size={88}
+                  radius="xl"
+                  variant="gradient"
+                  gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
+                >
+                  <IconMailStar size={44} />
                 </ThemeIcon>
-                <Title order={2} ta="center" style={{ color: markketColors.neutral.charcoal }}>
-                  Link Sent
-                </Title>
-                <Text ta="center" c="dimmed" maw={440}>
-                  Check your inbox and open the link on this device to sign in instantly.
-                </Text>
-                <Group>
-                  <Button variant="light" onClick={() => setState({ success: false, error: null })}>
-                    Send Another Link
+                <Stack gap="sm" align="center">
+                  <Title order={2} ta="center" fw={800} style={{ color: markketColors.neutral.charcoal }}>
+                    Link sent — check your email
+                  </Title>
+                  <Text ta="center" maw={360} style={{ color: markketColors.neutral.darkGray, lineHeight: 1.7 }}>
+                    We emailed you a magic link. Tap it from your phone or this browser to sign in — no password needed.
+                  </Text>
+                  <Text size="xs" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
+                    Can't find it? Check your spam folder.
+                  </Text>
+                </Stack>
+                <Stack w="100%" gap="sm">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    h={58}
+                    fw={700}
+                    radius="xl"
+                    variant="gradient"
+                    gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
+                    leftSection={<IconMailStar size={18} />}
+                    onClick={() => setState({ success: false, error: null })}
+                  >
+                    Try again with a different email
                   </Button>
-                  <Button variant="default" onClick={() => router.push('/auth/login')}>
-                    Use Password Instead
-                  </Button>
-                </Group>
+                  <Text size="sm" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
+                    Prefer your password?{' '}
+                    <Anchor
+                      size="sm"
+                      component="button"
+                      style={{ color: markketColors.rosa.main, fontWeight: 600 }}
+                      onClick={() => router.push('/auth/login')}
+                    >
+                      Sign in with password
+                    </Anchor>
+                  </Text>
+                </Stack>
               </Stack>
             ) : (
               <form onSubmit={form.onSubmit(handleSubmit)}>
-                  <Stack gap="md">
+                  <Stack gap="lg">
                     <TextInput
-                      label="Email"
-                      placeholder="de@markket.place"
+                      label="Your email address"
+                      placeholder="you@example.com"
                       required
                       size="md"
-                      description="We only send one-time login links to this address."
+                      radius="lg"
+                      description="We'll send a one-time login link to this address."
+                      styles={{
+                        input: { borderColor: markketColors.neutral.lightGray },
+                      }}
                       {...form.getInputProps('email')}
                     />
 
@@ -178,11 +203,14 @@ export default function MagicLinkPage() {
                       loading={loading}
                       type="submit"
                       fullWidth
-                      size="md"
-                      leftSection={<IconMailStar size={18} />}
-                      style={{
-                        background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`,
-                      }}
+                      size="xl"
+                      h={56}
+                      fz="md"
+                      fw={700}
+                      radius="xl"
+                      leftSection={<IconMailStar size={20} />}
+                      variant="gradient"
+                      gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
                     >
                       Send Magic Link
                     </Button>
@@ -193,10 +221,15 @@ export default function MagicLinkPage() {
                       </Text>
                     )}
 
-                    <Text c="dimmed" size="sm" ta="center" mt={5}>
-                      Have a password account?{' '}
-                      <Anchor size="sm" component="button" onClick={() => router.push('/auth/login')}>
-                        Login
+                    <Text size="sm" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
+                      Have a password?{' '}
+                      <Anchor
+                        size="sm"
+                        component="button"
+                        style={{ color: markketColors.rosa.main, fontWeight: 600 }}
+                        onClick={() => router.push('/auth/login')}
+                      >
+                        Sign in instead
                       </Anchor>
                     </Text>
                   </Stack>
@@ -204,24 +237,18 @@ export default function MagicLinkPage() {
             )}
           </Paper>
 
-          <Paper
-            withBorder
-            radius="lg"
-            p="md"
-            style={{
-              borderColor: markketColors.neutral.lightGray,
-              background: markketColors.neutral.offWhite,
-            }}
-          >
-            {page?.Title ? (
-              <PageContent params={{ page }} />
-            ) : (
-              <Group justify="center">
-                <IconCheck size={16} color={markketColors.sections.events.main} />
-                <Text size="sm" c="dimmed">Secure, fast, and passwordless.</Text>
-              </Group>
-            )}
-          </Paper>
+          {/* Bottom content / trust strip */}
+          {page?.Title ? (
+            <PageContent params={{ page }} />
+          ) : (
+            <Group justify="center" gap="xs">
+              <IconCheck size={15} color={markketColors.sections.events.main} />
+              <Text size="sm" style={{ color: markketColors.neutral.mediumGray }}>
+                Secure, instant, and no password required.
+              </Text>
+            </Group>
+          )}
+
         </Stack>
       </Container>
     </Box>

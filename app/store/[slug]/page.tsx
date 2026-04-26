@@ -12,11 +12,12 @@ import { markketColors } from '@/markket/colors.config';
 import Albums from '@/app/components/ui/albums.grid';
 import StoreSlidesGallery from '@/app/components/ui/store.slides.gallery';
 import { generateSEOMetadata } from '@/markket/metadata';
+import { markketplace } from '@/markket/config';
 import { Store } from "@/markket/store.d";
 import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
-import { richTextToPlainText } from '@/markket/richtext.utils';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { Product } from '@/markket/product';
 import type { Article } from '@/markket/article';
 import type { Event } from '@/markket/event';
@@ -46,31 +47,22 @@ function compact(value?: string | null, max = 96) {
   return clean.length > max ? `${clean.slice(0, max - 1)}...` : clean;
 }
 
+function compactRich(value: unknown, max = 96) {
+  if (!value) return '';
+  const plain = stripMarkdown(richTextToPlainText(value as string));
+  return compact(plain, max);
+}
+
 function imageOrFallback(...candidates: Array<string | undefined | null>): string | undefined {
   return candidates.find((item): item is string => typeof item === 'string' && item.length > 0);
 }
 
-function describeSectionMood(card: SectionPreviewCard): string {
-  switch (card.key) {
-    case 'shop':
-      return card.hasContent
-        ? 'A softer way into the catalog: featured pieces, recent drops, and the things this store is ready to share.'
-        : '';
-    case 'blog':
-      return card.hasContent
-        ? 'Notes, reflections, process, and small signals from behind the storefront.'
-        : '';
-    case 'events':
-      return card.hasContent
-        ? 'Invitations to gather, learn, launch something new, or simply show up together.'
-        : '';
-    case 'about':
-      return card.hasContent
-        ? 'The world behind the store: context, story, references, and the pages that make it feel personal.'
-        : '';
-    default:
-      return card.description;
-  }
+function toAbsoluteUrl(path?: string): string | undefined {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
+  if (!base) return path;
+  return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -203,12 +195,6 @@ export default async function StorePage({
       bg: markketColors.sections.about.light,
     },
   ].filter((card) => card.value > 0);
-  const heroNotes = [
-    featuredProduct?.Name && `Now showing ${featuredProduct.Name}`,
-    featuredPost?.Title && `Latest note: ${featuredPost.Title}`,
-    featuredEvent?.Name && `Upcoming: ${featuredEvent.Name}`,
-  ].filter((note): note is string => Boolean(note));
-
   const previewCards: SectionPreviewCard[] = [
     {
       key: 'shop',
@@ -219,7 +205,7 @@ export default async function StorePage({
       bg: markketColors.sections.shop.light,
       countLabel: `${products.length} products`,
       headline: featuredProduct?.Name || 'Featured products',
-      description: compact(featuredProduct?.Description || 'Browse your latest drops and essentials in one place.'),
+      description: compactRich(featuredProduct?.Description, 96) || 'Browse your latest drops and essentials in one place.',
       hasContent: products.length > 0,
       imageUrl: imageOrFallback(
         featuredProduct?.Thumbnail?.url,
@@ -254,7 +240,7 @@ export default async function StorePage({
       bg: markketColors.sections.events.light,
       countLabel: `${events.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
-      description: compact(featuredEvent?.Description || 'Discover upcoming events, launches, and gatherings.'),
+      description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
       hasContent: events.length > 0,
       imageUrl: imageOrFallback(
         featuredEvent?.Thumbnail?.formats?.small?.url,
@@ -333,8 +319,72 @@ export default async function StorePage({
     },
   ].filter(link => link.show);
 
+  const hasPublishedCollections = products.length > 0 || posts.length > 0 || events.length > 0 || aboutPages.length > 0;
+  const hasPresentationContent = hasHomePageStory || hasStoreDescription || slides.length > 0 || storeImages.length > 0;
+  const shouldShowEmptyLaunchState = !hasPublishedCollections && !hasPresentationContent;
+  const siteUrl = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
+  const storefrontUrl = siteUrl ? `${siteUrl}/${slug}` : `/${slug}`;
+  const homepageUrl = siteUrl || '/';
+  const structuredImage = toAbsoluteUrl(imageOrFallback(heroImage, slides[0]?.src, storeImages[0]?.src, store?.SEO?.socialImage?.url, store?.Logo?.url));
+  const structuredLogo = toAbsoluteUrl(imageOrFallback(store?.Logo?.url, store?.SEO?.socialImage?.url));
+  const structuredDescription = compact(
+    homePage?.SEO?.metaDescription
+    || store?.SEO?.metaDescription
+    || descriptionText
+    || `Discover ${store?.title || slug}`,
+    200
+  );
+
+  const storefrontJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${storefrontUrl}#webpage`,
+        url: storefrontUrl,
+        name: store?.title || slug,
+        description: structuredDescription,
+        isPartOf: {
+          '@id': `${homepageUrl}#website`,
+        },
+        about: {
+          '@id': `${storefrontUrl}#store`,
+        },
+        primaryImageOfPage: structuredImage ? { '@type': 'ImageObject', url: structuredImage } : undefined,
+      },
+      {
+        '@type': 'Store',
+        '@id': `${storefrontUrl}#store`,
+        name: store?.title || slug,
+        url: storefrontUrl,
+        description: structuredDescription,
+        image: structuredImage,
+        logo: structuredLogo,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: homepageUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: store?.title || slug,
+            item: storefrontUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
-    <div>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(storefrontJsonLd) }} />
+      <div>
       {/* Hero */}
       <Box
         pos="relative"
@@ -404,7 +454,7 @@ export default async function StorePage({
                     letterSpacing: '0.08em',
                   }}
                 >
-                  {homePage?.Title || 'Editorial homepage'}
+                    {homePage?.Title || 'Homepage'}
                 </Badge>
               </Group>
 
@@ -440,29 +490,6 @@ export default async function StorePage({
                 </Link>
               </Group>
 
-              {heroNotes.length > 0 && (
-                <Paper
-                  withBorder
-                  radius="xl"
-                  p="md"
-                  style={{
-                    background: 'rgba(255,255,255,0.76)',
-                    borderColor: 'rgba(15,23,42,0.09)',
-                    boxShadow: '0 12px 30px rgba(15,23,42,0.05)',
-                  }}
-                >
-                  <Stack gap={8}>
-                    <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.12em', color: markketColors.neutral.mediumGray }}>
-                      Current signals
-                    </Text>
-                    {heroNotes.map((note) => (
-                      <Text key={note} size="sm" fw={600} style={{ color: markketColors.neutral.charcoal }}>
-                        {note}
-                      </Text>
-                    ))}
-                  </Stack>
-                </Paper>
-              )}
             </Stack>
 
             <Stack gap="md">
@@ -489,21 +516,7 @@ export default async function StorePage({
                     gradient={heroImage ? markketColors.gradients.overlay : 'linear-gradient(140deg, rgba(228,0,124,0.16), rgba(15,23,42,0.08))'}
                     opacity={heroImage ? 0.42 : 1}
                     zIndex={1}
-                  />
-                  <Box
-                    style={{
-                      position: 'absolute',
-                      top: 18,
-                      left: 18,
-                      zIndex: 2,
-                    }}
-                  >
-                    <Paper radius="md" px="sm" py={6} style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(8px)' }}>
-                      <Text size="xs" fw={800} tt="uppercase" style={{ letterSpacing: '0.12em' }}>
-                        Store signal board
-                      </Text>
-                    </Paper>
-                  </Box>
+                    />
                   <Paper
                     pos="absolute"
                     left={18}
@@ -617,10 +630,10 @@ export default async function StorePage({
                     <Text c="dimmed" lh={1.7}>
                       {homePage?.SEO?.metaDescription
                         || (homePage?.Content?.length
-                          ? 'This store already has its own homepage writing and layout, so the front page can feel personal from the start.'
+                          ? 'This store already has a custom homepage, so the front page feels personal from the start.'
                           : previewCards.length > 0
                             ? 'Open whatever feels alive here first: a product, a story, an event, or a page with more context.'
-                            : 'This space can stay simple while it grows. Add things over time, and the homepage will make room for them naturally.')}
+                              : 'This storefront will keep growing as new products, stories, events, and pages are published.')}
                     </Text>
                   </Stack>
 
@@ -656,27 +669,7 @@ export default async function StorePage({
                           </Text>
                         )}
                       </Stack>
-                    </Paper>
-                  ) : previewCards.length > 0 ? (
-                    <Stack gap="xs" maw={360} style={{ flex: 1 }}>
-                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.12em', color: markketColors.neutral.mediumGray }}>
-                        Vibe check
-                      </Text>
-                      {previewCards.slice(0, 3).map((card) => (
-                        <Paper key={card.key} radius="lg" p="sm" withBorder style={{ borderColor: `${card.color}35`, background: 'rgba(255,255,255,0.72)' }}>
-                          <Stack gap={6}>
-                            <Group justify="space-between" align="center" wrap="nowrap">
-                              <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.08em', color: card.color }}>{card.title}</Text>
-                              <Text size="xs" c="dimmed">{card.countLabel}</Text>
-                            </Group>
-                            <Text size="sm" fw={700}>{card.headline}</Text>
-                            <Text size="sm" c="dimmed" lh={1.55}>
-                              {describeSectionMood(card)}
-                            </Text>
-                          </Stack>
-                        </Paper>
-                      ))}
-                    </Stack>
+                      </Paper>
                   ) : null}
                 </Group>
               </Stack>
@@ -690,78 +683,187 @@ export default async function StorePage({
             </Box>
           )}
 
-          {previewCards.length > 0 && (
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Stack gap={2}>
-                  <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.12em' }}>
-                    Store map
-                  </Text>
-                  <Title order={2} fw={700} size="lg">{homePage?.Title || 'Start Here'}</Title>
-                </Stack>
-              </Group>
+            {(products.length > 0 || posts.length > 0 || events.length > 0 || aboutPages.length > 0) && (
+              <Stack gap="lg">
+                {(visibility ? visibility.show_shop : true) && products.length > 0 && (
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.shop.main }}>
+                        Shop
+                      </Text>
+                      <Link href={`/${slug}/products`} style={{ textDecoration: 'none' }}>
+                        <Text size="sm" fw={700} style={{ color: markketColors.sections.shop.main }}>View all</Text>
+                      </Link>
+                    </Group>
+                    <Group gap="md" wrap="nowrap" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+                      {products.slice(0, 6).map((product) => {
+                        const image = imageOrFallback(
+                          product?.Thumbnail?.url,
+                          product?.Slides?.[0]?.formats?.medium?.url,
+                          product?.Slides?.[0]?.formats?.small?.url,
+                          product?.Slides?.[0]?.url,
+                          product?.SEO?.socialImage?.url,
+                        );
 
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                {previewCards.map((card) => (
-                  <Link key={card.key} href={card.href} style={{ textDecoration: 'none' }}>
-                    <Paper
-                      withBorder
-                      radius="xl"
-                      p="md"
-                      style={{
-                        borderColor: card.color,
-                        background: `linear-gradient(180deg, ${card.bg} 0%, rgba(255,255,255,0.98) 100%)`,
-                        color: '#0f172a',
-                        transition: 'transform 160ms ease, box-shadow 160ms ease',
-                        boxShadow: '0 10px 28px rgba(0,0,0,0.07)',
-                      }}
-                    >
-                      <Stack gap="sm">
-                        <Group justify="space-between" align="center">
-                          <Badge variant="filled" color="dark">{card.title}</Badge>
-                          <Text size="xs" fw={600} style={{ color: card.color }}>{card.countLabel}</Text>
-                        </Group>
+                      return (
+                        <Link key={product.documentId || product.id || product.slug} href={`/${slug}/products/${product.slug}`} style={{ textDecoration: 'none', flex: '0 0 270px' }}>
+                          <Paper withBorder radius="xl" p="sm" style={{ borderColor: `${markketColors.sections.shop.main}40`, background: '#fff' }}>
+                            <Box
+                              style={{
+                                height: 170,
+                                borderRadius: 12,
+                                background: image ? `url(${image}) center/cover no-repeat` : `${markketColors.sections.shop.light}`,
+                                border: '1px solid rgba(15, 23, 42, 0.08)',
+                              }}
+                            />
+                            <Stack gap={6} mt="sm">
+                              <Text fw={700} lineClamp={2}>{product.Name}</Text>
+                              <Text size="sm" c="dimmed" lineClamp={2}>
+                                {compactRich(product.Description, 90) || 'A featured piece from this store.'}
+                              </Text>
+                            </Stack>
+                          </Paper>
+                        </Link>
+                      );
+                    })}
+                    </Group>
+                  </Stack>
+                )}
 
-                        {card.imageUrl ? (
-                          <Box
-                            style={{
-                              height: 136,
-                              borderRadius: 12,
-                              backgroundImage: `url(${card.imageUrl})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              border: '1px solid rgba(15, 23, 42, 0.08)',
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            style={{
-                              height: 136,
-                              borderRadius: 12,
-                              border: '1px dashed rgba(15, 23, 42, 0.25)',
-                              background: 'rgba(255,255,255,0.72)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Text size="sm" c="dimmed">No thumbnail yet</Text>
-                          </Box>
-                        )}
+                {(visibility ? visibility.show_blog : true) && posts.length > 0 && (
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.blog.main }}>
+                        Stories
+                      </Text>
+                      <Link href={`/${slug}/blog`} style={{ textDecoration: 'none' }}>
+                        <Text size="sm" fw={700} style={{ color: markketColors.sections.blog.main }}>View all</Text>
+                      </Link>
+                    </Group>
+                    <Group gap="md" wrap="nowrap" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+                      {posts.slice(0, 6).map((post) => {
+                        const image = imageOrFallback(
+                          post?.cover?.formats?.medium?.url,
+                          post?.cover?.formats?.small?.url,
+                          post?.cover?.url,
+                          post?.SEO?.socialImage?.url,
+                        );
 
-                        <Text fw={700} lh={1.3} lineClamp={2}>{card.headline}</Text>
-                        <Text size="sm" c="dimmed" lh={1.55} lineClamp={2}>{card.description}</Text>
-                        <Group justify="space-between" align="center" mt={2}>
-                          <Text size="xs" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em', color: card.color }}>
-                            Open {card.title}
-                          </Text>
-                          <IconArrowRight size={16} color={card.color} />
-                        </Group>
-                      </Stack>
-                    </Paper>
-                  </Link>
-                ))}
-              </SimpleGrid>
+                      return (
+                        <Link key={post.documentId || post.id || post.slug} href={`/${slug}/blog/${post.slug}`} style={{ textDecoration: 'none', flex: '0 0 270px' }}>
+                          <Paper withBorder radius="xl" p="sm" style={{ borderColor: `${markketColors.sections.blog.main}40`, background: '#fff' }}>
+                            <Box
+                              style={{
+                                height: 170,
+                                borderRadius: 12,
+                                background: image ? `url(${image}) center/cover no-repeat` : `${markketColors.sections.blog.light}`,
+                                border: '1px solid rgba(15, 23, 42, 0.08)',
+                              }}
+                            />
+                            <Stack gap={6} mt="sm">
+                              <Text fw={700} lineClamp={2}>{post.Title}</Text>
+                              <Text size="sm" c="dimmed" lineClamp={2}>
+                                {compact(post?.SEO?.metaDescription || '') || 'A story from this storefront.'}
+                              </Text>
+                            </Stack>
+                          </Paper>
+                        </Link>
+                      );
+                    })}
+                    </Group>
+                  </Stack>
+                )}
+
+                {(visibility ? visibility.show_events : true) && events.length > 0 && (
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.events.main }}>
+                        Events
+                      </Text>
+                      <Link href={`/${slug}/events`} style={{ textDecoration: 'none' }}>
+                        <Text size="sm" fw={700} style={{ color: markketColors.sections.events.main }}>View all</Text>
+                      </Link>
+                    </Group>
+                    <Group gap="md" wrap="nowrap" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+                      {events.slice(0, 6).map((event) => {
+                        const image = imageOrFallback(
+                          event?.Thumbnail?.formats?.medium?.url,
+                          event?.Thumbnail?.formats?.small?.url,
+                          event?.Thumbnail?.url,
+                          event?.Slides?.[0]?.formats?.medium?.url,
+                          event?.Slides?.[0]?.formats?.small?.url,
+                          event?.Slides?.[0]?.url,
+                          event?.SEO?.socialImage?.url,
+                        );
+
+                        return (
+                          <Link key={event.documentId || event.id || event.slug} href={`/${slug}/events/${event.slug}`} style={{ textDecoration: 'none', flex: '0 0 270px' }}>
+                            <Paper withBorder radius="xl" p="sm" style={{ borderColor: `${markketColors.sections.events.main}40`, background: '#fff' }}>
+                              <Box
+                                style={{
+                                height: 170,
+                                borderRadius: 12,
+                                background: image ? `url(${image}) center/cover no-repeat` : `${markketColors.sections.events.light}`,
+                                border: '1px solid rgba(15, 23, 42, 0.08)',
+                              }}
+                            />
+                            <Stack gap={6} mt="sm">
+                              <Text fw={700} lineClamp={2}>{event.Name}</Text>
+                              <Text size="sm" c="dimmed" lineClamp={2}>
+                                {compactRich(event.Description, 90) || 'An upcoming event from this store.'}
+                              </Text>
+                            </Stack>
+                          </Paper>
+                        </Link>
+                      );
+                    })}
+                    </Group>
+                  </Stack>
+                )}
+
+                {(visibility ? visibility.show_about : true) && aboutPages.length > 0 && (
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.about.main }}>
+                        Pages
+                      </Text>
+                      <Link href={`/${slug}/about`} style={{ textDecoration: 'none' }}>
+                        <Text size="sm" fw={700} style={{ color: markketColors.sections.about.main }}>View all</Text>
+                      </Link>
+                    </Group>
+                    <Group gap="md" wrap="nowrap" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+                      {aboutPages.slice(0, 6).map((page) => {
+                        const image = imageOrFallback(
+                          page?.SEO?.socialImage?.formats?.medium?.url,
+                          page?.SEO?.socialImage?.formats?.small?.url,
+                          page?.SEO?.socialImage?.url,
+                          store?.Cover?.url,
+                        );
+
+                        return (
+                          <Link key={page.documentId || page.id || page.slug} href={`/${slug}/about/${page.slug}`} style={{ textDecoration: 'none', flex: '0 0 270px' }}>
+                            <Paper withBorder radius="xl" p="sm" style={{ borderColor: `${markketColors.sections.about.main}40`, background: '#fff' }}>
+                              <Box
+                                style={{
+                                  height: 170,
+                                  borderRadius: 12,
+                                  background: image ? `url(${image}) center/cover no-repeat` : `${markketColors.sections.about.light}`,
+                                  border: '1px solid rgba(15, 23, 42, 0.08)',
+                                }}
+                              />
+                              <Stack gap={6} mt="sm">
+                                <Text fw={700} lineClamp={2}>{page.Title}</Text>
+                                <Text size="sm" c="dimmed" lineClamp={2}>
+                                  {compact(page?.SEO?.metaDescription || '', 90) || 'Learn more from this page.'}
+                                </Text>
+                            </Stack>
+                          </Paper>
+                        </Link>
+                      );
+                    })}
+                    </Group>
+                  </Stack>
+                )}
             </Stack>
           )}
 
@@ -774,6 +876,67 @@ export default async function StorePage({
             <StoreSlidesGallery slides={storeImages} title="Gallery" />
           )}
 
+            {shouldShowEmptyLaunchState && (
+              <Paper
+                withBorder
+                radius="xl"
+                p={{ base: 'lg', sm: 'xl' }}
+                style={{
+                  borderColor: 'rgba(15, 23, 42, 0.1)',
+                  background: 'linear-gradient(135deg, rgba(255,245,250,0.95) 0%, rgba(255,255,255,0.98) 45%, rgba(235,250,252,0.95) 100%)',
+                  boxShadow: '0 14px 34px rgba(15, 23, 42, 0.08)',
+                }}
+              >
+                <Stack gap="md" align="center" ta="center">
+                  <Badge
+                    size="lg"
+                    radius="md"
+                    variant="light"
+                    style={{
+                      background: markketColors.rosa.light,
+                      color: markketColors.rosa.main,
+                      border: `1px solid ${markketColors.rosa.main}2A`,
+                    }}
+                  >
+                    Storefront warming up
+                  </Badge>
+                  <Title order={3} fw={700} style={{ letterSpacing: '-0.02em' }}>
+                    This store is live, and first pieces are on their way.
+                  </Title>
+                  <Text c="dimmed" maw={640} lh={1.75}>
+                    You are early here. Products, stories, events, and pages will appear as soon as the creator publishes them.
+                    Until then, this storefront is ready and waiting.
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" w="100%" maw={760}>
+                    <Paper withBorder radius="lg" p="md" style={{ borderColor: `${markketColors.sections.shop.main}35`, background: '#fff' }}>
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.shop.main }}>
+                        Shop
+                      </Text>
+                      <Text size="sm" c="dimmed" lh={1.55}>
+                        Product drops will show up here first.
+                      </Text>
+                    </Paper>
+                    <Paper withBorder radius="lg" p="md" style={{ borderColor: `${markketColors.sections.blog.main}35`, background: '#fff' }}>
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.blog.main }}>
+                        Blog
+                      </Text>
+                      <Text size="sm" c="dimmed" lh={1.55}>
+                        Stories and updates are coming soon.
+                      </Text>
+                    </Paper>
+                    <Paper withBorder radius="lg" p="md" style={{ borderColor: `${markketColors.sections.events.main}35`, background: '#fff' }}>
+                      <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.events.main }}>
+                        Events
+                      </Text>
+                      <Text size="sm" c="dimmed" lh={1.55}>
+                        Future sessions and launches will appear here.
+                      </Text>
+                    </Paper>
+                  </SimpleGrid>
+                </Stack>
+              </Paper>
+            )}
+
           <PageContent params={{ page: homePage }} />
 
           {sectionLinks.length > 0 && (
@@ -781,7 +944,7 @@ export default async function StorePage({
               <Group justify="center" gap="xs">
                 <IconSparkles size={18} color={markketColors.rosa.main} />
                 <Text fw={600} ta="center" size="sm" tt="uppercase" style={{ letterSpacing: '0.08em', color: markketColors.neutral.mediumGray }}>
-                  Explore
+                    Quick links
                 </Text>
               </Group>
               <Paper withBorder radius="xl" p="md" style={{ borderColor: 'rgba(15, 23, 42, 0.08)', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.05)' }}>
@@ -866,6 +1029,7 @@ export default async function StorePage({
           )}
         </Stack>
       </Container>
-    </div>
+      </div>
+    </>
   );
 };

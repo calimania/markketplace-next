@@ -7,10 +7,20 @@ import { IconCalendar, IconMapPin } from '@tabler/icons-react';
 import StorePageHeader from '@/app/components/ui/store.page.header';
 import { markketColors } from '@/markket/colors.config';
 import Link from 'next/link';
+import PageContent from '@/app/components/ui/page.content';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import type { RichTextValue, StoredRichText } from '@/markket/richtext';
 import './events.css';
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
+}
+
+function getEventExcerpt(value?: string | RichTextValue | StoredRichText, max = 120): string {
+  if (!value) return '';
+  const plain = stripMarkdown(richTextToPlainText(value));
+  if (!plain) return '';
+  return plain.length > max ? `${plain.slice(0, max - 1)}...` : plain;
 }
 
 export async function generateMetadata({ params }: EventsPageProps) {
@@ -85,6 +95,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               const eventDate = new Date(event.startDate);
               const isUpcoming = eventDate > new Date();
               const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+              const excerpt = getEventExcerpt(event.Description);
 
               return (
                 <Link
@@ -153,14 +164,14 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                         </Text>
                       </Group>
 
-                      {event.Description && (
+                      {excerpt && (
                         <Text
                           size="sm"
                           c={markketColors.neutral.mediumGray}
                           lineClamp={3}
                           style={{ flex: 1 }}
                         >
-                          {event.Description.replace(/<[^>]*>/g, '').substring(0, 120)}...
+                          {excerpt}
                         </Text>
                       )}
 
@@ -193,6 +204,8 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
             </Text>
           </Paper>
         )}
+
+        <PageContent params={{ page: eventPage }} />
       </Stack>
     </Container>
   );
