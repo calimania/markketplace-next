@@ -10,6 +10,7 @@ interface SEOProps {
     metaDescription?: string;
     metaKeywords?: string;
     excludeFromSearch?: boolean;
+    metaUrl?: string;
     socialImage?: {
       url: string;
       width?: number;
@@ -38,9 +39,9 @@ export async function generateSEOMetadata({
   entity?: SEOProps;
   type?: 'website' | 'article';
   defaultTitle?: string;
-    defaultDescription?: string;
-    keywords?: string[];
-  }): Promise<Metadata> {
+  defaultDescription?: string;
+  keywords?: string[];
+}): Promise<Metadata> {
 
   const storeResponse = await strapiClient.getStore(slug);
   const store = storeResponse?.data?.[0];
@@ -88,7 +89,7 @@ export async function generateSEOMetadata({
 
   const keywords = keywordsList.join(', ');
 
-  const canonical = entity?.url || `/${slug}`;
+  const canonical = entity?.SEO?.metaUrl || entity?.url || `/${slug}`;
 
   return {
     title,

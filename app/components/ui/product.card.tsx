@@ -2,13 +2,14 @@ import { Product } from "@/markket/product";
 import Link from "next/link";
 import { Badge } from '@mantine/core';
 import { markketColors } from '@/markket/colors.config';
+import { stripMarkdown } from '@/markket/richtext.utils';
 
 export default function ProductCard({ product, slug }: { product: Product; slug: string }) {
   const imageUrl = product.Slides?.[0]?.formats?.medium?.url ||
     product?.SEO?.socialImage?.url;
 
-  const description =
-    product.SEO?.metaDescription || product.Description?.split("\n")[0];
+  const rawDesc = product.SEO?.metaDescription || product.Description?.split("\n")[0];
+  const description = stripMarkdown(rawDesc);
 
   const price = product.usd_price || product.PRICES?.[0]?.Price || 'X';
 

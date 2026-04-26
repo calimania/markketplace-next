@@ -9,6 +9,7 @@ import { PostHogProvider } from '@/app/providers/posthog.provider';
 import { GlobalBanner } from '@/app/components/global.banner';
 import EmbedQueryPropagator from '@/app/components/embed.query.propagator';
 import '@mantine/code-highlight/styles.css';
+import '@mantine/carousel/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/tiptap/styles.css';
 import { Notifications } from '@mantine/notifications';
@@ -41,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const favicon = store?.Favicon?.formats?.thumbnail?.url || markketplace.blank_favicon_url;
   const currentDate = new Date().toISOString();
   const baseUrl = markketplace.markket_url;
+  const shouldIndex = !seo?.excludeFromSearch;
 
   return {
     title: {
@@ -77,11 +79,11 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: seo?.metaAuthor ? `@${seo.metaAuthor}` : undefined,
     },
     robots: {
-      index: !seo?.excludeFromSearch || true,
-      follow: !seo?.excludeFromSearch || true,
+      index: shouldIndex,
+      follow: shouldIndex,
       googleBot: {
-        index: !seo?.excludeFromSearch || true,
-        follow: !seo?.excludeFromSearch || true,
+        index: shouldIndex,
+        follow: shouldIndex,
         'max-video-preview': -1,
         'max-image-preview': 'large',
         'max-snippet': -1,

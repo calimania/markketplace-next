@@ -3,6 +3,29 @@
 ## Upcoming
 
 
+### v0.9.0 May 2026
+
+P0 (must-fix before launch)
+- [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
+- [ ] tienda dashboard: adding/editing Event dates works end-to-end (draft -> save -> list -> detail)
+- [ ] tienda dashboard: validate forms for price/date fields and show clear error states
+- [ ] content QA: drafts are visible in dashboard lists and can open individual item screens reliably
+- [ ] stripe dashboard connection: reconnect and verify account status sync in tienda
+- [ ] buyer side: improve checkout UX (totals, loading states, validation, success/receipt transitions)
+- [ ] payments QA: test successful payment, failed payment, and refund visibility paths
+
+P1 (strongly recommended this wave)
+- [ ] buyer side: introduce per-store cart flow (add/remove/update quantity)
+- [ ] buyer side: verify checkout supports single-item fast buy and cart checkout
+- [ ] payment form: improve in-app payment form reliability and preview state
+- [ ] payout form: add/verify payout setup form with status preview in dashboard
+- [ ] launch QA: technical pass (type checks, lint/build, critical route smoke tests)
+
+P2 (polish if time)
+- [ ] tienda dashboard: verify date/timezone display consistency in list and detail pages
+- [ ] stripe connect option: define standard flow (connected account onboarding + dashboard handoff)
+- [ ] launch QA: mobile pass for homepage, store list, and checkout screens
+
 - [ ] inbox widget in receipt page
 - [ ] links not working in tiptapp - articles
 - [ ] slug for article starts with YEAR-
@@ -73,7 +96,6 @@
 
 ## 2026
 
-
 - [ ] use SEO endpoints to generate, skip asking
 - [ ] enable paid RSVP to events
 - [ ] pexels search in image modal
@@ -100,9 +122,9 @@
 - [ ] read pages in english spanish
 - [ ] create/edit pages in english spanish
 
-
 ## April
 
+- [x] homepage design revision
 - [x] save store basics, via proxy
 - [x] embed mode to load on webview
 - [x] new storefront design
