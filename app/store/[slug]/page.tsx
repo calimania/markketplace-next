@@ -16,7 +16,7 @@ import { Store } from "@/markket/store.d";
 import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
-import { richTextToPlainText } from '@/markket/richtext.utils';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { Product } from '@/markket/product';
 import type { Article } from '@/markket/article';
 import type { Event } from '@/markket/event';
@@ -44,6 +44,12 @@ function compact(value?: string | null, max = 96) {
   if (!value) return '';
   const clean = value.trim();
   return clean.length > max ? `${clean.slice(0, max - 1)}...` : clean;
+}
+
+function compactRich(value: unknown, max = 96) {
+  if (!value) return '';
+  const plain = stripMarkdown(richTextToPlainText(value as string));
+  return compact(plain, max);
 }
 
 function imageOrFallback(...candidates: Array<string | undefined | null>): string | undefined {
@@ -219,7 +225,7 @@ export default async function StorePage({
       bg: markketColors.sections.shop.light,
       countLabel: `${products.length} products`,
       headline: featuredProduct?.Name || 'Featured products',
-      description: compact(featuredProduct?.Description || 'Browse your latest drops and essentials in one place.'),
+      description: compactRich(featuredProduct?.Description, 96) || 'Browse your latest drops and essentials in one place.',
       hasContent: products.length > 0,
       imageUrl: imageOrFallback(
         featuredProduct?.Thumbnail?.url,
@@ -254,7 +260,7 @@ export default async function StorePage({
       bg: markketColors.sections.events.light,
       countLabel: `${events.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
-      description: compact(featuredEvent?.Description || 'Discover upcoming events, launches, and gatherings.'),
+      description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
       hasContent: events.length > 0,
       imageUrl: imageOrFallback(
         featuredEvent?.Thumbnail?.formats?.small?.url,

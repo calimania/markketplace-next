@@ -93,11 +93,11 @@ export default async function Home() {
   const [{ data: [store] }, { data: [page] }, communityPostsResponse, storesResponse, communityPagesResponse, communityEventsResponse, communityProductsResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getPage('home'),
-    strapiClient.getCommunityPosts({ page: 1, pageSize: 18 }, { sort: 'publishedAt:desc' }),
-    strapiClient.getStores({ page: 1, pageSize: 12 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
-    strapiClient.getCommunityPages({ page: 1, pageSize: 36 }, { sort: 'updatedAt:desc' }),
-    strapiClient.getCommunityEvents({ page: 1, pageSize: 36 }, { sort: 'startDate:asc' }),
-    strapiClient.getCommunityProducts({ page: 1, pageSize: 18 }, { sort: 'updatedAt:desc' }),
+    strapiClient.getCommunityPosts({ page: 1, pageSize: 12 }, { sort: 'publishedAt:desc' }),
+    strapiClient.getStores({ page: 1, pageSize: 8 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
+    strapiClient.getCommunityPages({ page: 1, pageSize: 12 }, { sort: 'updatedAt:desc' }),
+    strapiClient.getCommunityEvents({ page: 1, pageSize: 12 }, { sort: 'startDate:asc' }),
+    strapiClient.getCommunityProducts({ page: 1, pageSize: 12 }, { sort: 'updatedAt:desc' }),
   ]);
 
   const communityPosts = prioritizeWithImage((communityPostsResponse?.data || []) as Article[], articleHasImage);

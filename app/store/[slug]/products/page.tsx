@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { markketplace } from "@/markket/config";
 import ProductCard from "@/app/components/ui/product.card";
+import PageContent from '@/app/components/ui/page.content';
 import {
   Container,
   Title,
@@ -134,6 +135,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           </Paper>
         )}
       </Box>
+
+      <PageContent params={{ page }} />
 
       {/* Store Description */}
       {store?.Description && (

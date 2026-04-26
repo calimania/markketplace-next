@@ -1,18 +1,16 @@
 import { Container, Title, Text, Stack, Box, Paper, Group, Badge } from "@mantine/core";
 import { IconSparkles } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
-import { Store } from "@/markket/store.d";
 import StoreGrid from '@/app/components/stores/grid';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
-import PageContent from "../components/ui/page.content";
+import PageContent from "@/app/components/ui/page.content";
 import { markketColors } from '@/markket/colors.config';
-
-const defaultLogo = `https://markketplace.nyc3.digitaloceanspaces.com/uploads/1a82697eaeeb5b376d6983f452d1bf3d.png`;
+import { markketplace } from "@/markket/config";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const response = await strapiClient.getPage('stores');
+  const response = await strapiClient.getPage('stores', markketplace.slug);
   const page = response?.data?.[0] as Page;
 
   return generateSEOMetadata({
@@ -39,7 +37,6 @@ export default async function StoresPage() {
   const store = storeResponse.data?.[0];
   const stores = response?.data || [];
   const page = pageResponse?.data?.[0] as Page;
-
 
   return (
     <Container size="xl" py={{ base: 'xl', md: 60 }}>
@@ -68,7 +65,7 @@ export default async function StoresPage() {
           />
           <Stack align="center" gap="md" style={{ position: 'relative', zIndex: 1 }}>
             <img
-              src={store?.Logo?.url || defaultLogo}
+              src={store?.Logo?.url || markketplace.blank_logo_url}
               alt={store?.SEO?.metaTitle || 'Markket Logo'}
               style={{ width: 80, height: 80, borderRadius: 16, objectFit: 'contain', background: 'rgba(255,255,255,0.15)', padding: 8 }}
             />
@@ -79,12 +76,13 @@ export default async function StoresPage() {
             >
               {page?.Title || `Discover Stores`}
             </Title>
-            <Text size="md" ta="center" c="rgba(255,255,255,0.85)" maw={500}>
+            <Text size="md" ta="center" c="rgba(255,255,255,0.96)" maw={500}>
               {page?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Discover amazing independent stores'}
             </Text>
             <Group gap="xs">
-              <Badge variant="light" radius="xl" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-                <IconSparkles size={24} style={{ marginRight: 4 }} />
+              <Badge variant="light" radius="xl" style={{ background: 'rgba(255,255,255,0.92)', color: markketColors.neutral.charcoal }}>
+                <IconSparkles size={18} style={{ marginRight: 6 }} />
+                Curated spaces
               </Badge>
             </Group>
           </Stack>

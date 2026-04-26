@@ -12,8 +12,8 @@ export interface StoreCardProps {
 }
 
 export function StoreCard({ store, featured }: StoreCardProps) {
-  const coverUrl = store.Cover?.url || store.SEO?.socialImage?.url;
-  const logoUrl = store.Logo?.url;
+  const coverUrl = store.Cover?.formats?.small?.url || store.Cover?.formats?.thumbnail?.url || store.Cover?.url || store.SEO?.socialImage?.formats?.small?.url || store.SEO?.socialImage?.url;
+  const logoUrl = store.Logo?.formats?.small?.url || store.Logo?.formats?.thumbnail?.url || store.Logo?.url;
   const description = store.SEO?.metaDescription || '';
 
   return (
