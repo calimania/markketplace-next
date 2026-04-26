@@ -1,4 +1,4 @@
-import { Container, Title, Stack } from '@mantine/core';
+import { Container, Title, Stack, Paper } from '@mantine/core';
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import PageContent from '@/app/components/ui/page.content';
@@ -7,6 +7,9 @@ import { Page, Album } from "@/markket";
 import { Metadata } from "next";
 import Albums from '@/app/components/ui/albums.grid';
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
+import StorePageHeader from '@/app/components/ui/store.page.header';
+import { IconNotebook } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
 
 interface PageProps {
   params: Promise<{ page_slug: string, slug: string }>;
@@ -49,33 +52,27 @@ export default async function AboutPage({ params }: PageProps) {
   return (
     <Container size="md">
       <Stack gap="xl">
-        {page.SEO?.socialImage && (
-          <img
-            src={page.SEO.socialImage.url}
-            alt={page.Title}
-            style={{
-              width: '100%',
-              height: '300px',
-              objectFit: 'cover',
-              borderRadius: '8px',
-            }}
-          />
+        <StorePageHeader
+          icon={<IconNotebook size={48} />}
+          title={page.Title || 'Page'}
+          description={page?.SEO?.metaDescription || store?.SEO?.metaDescription}
+          page={page}
+          backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
+          iconColor={markketColors.sections.about.main}
+        />
+
+        <Paper withBorder radius="xl" p={{ base: 'md', sm: 'xl' }} style={{ borderColor: 'rgba(15, 23, 42, 0.08)' }}>
+          <PageContent params={{ page }} />
+        </Paper>
+
+        {page?.albums && page.albums.length > 0 && (
+          <Stack gap="md">
+            <Title order={2} size="h3" ta="left">
+              Gallery
+            </Title>
+            <Albums albums={page.albums as Album[]} store_slug={slug as ''} />
+          </Stack>
         )}
-
-        <Title order={1}>{page.Title}</Title>
-
-        <PageContent params={{ page }} />
-
-        <div className="mb-6">
-          {page?.albums && page.albums.length > 0 && (
-            <div className="py-10">
-              <Title order={2} size="h2" ta="left" mb="xl">
-                Related
-              </Title>
-              <Albums albums={page.albums as Album[]} store_slug={slug as ''} />
-            </div>
-          )}
-        </div>
 
         <StoreCrosslinks
           slug={slug}

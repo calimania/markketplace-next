@@ -128,8 +128,8 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
                 radius="md"
                 p={2}
                 style={{
-                  borderColor: isActive ? markketColors.rosa.main : markketColors.neutral.gray,
-                  boxShadow: isActive ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
+                  borderColor: isActive ? markketColors.neutral.charcoal : markketColors.neutral.gray,
+                  boxShadow: isActive ? '0 0 0 2px rgba(15,23,42,0.12)' : 'none',
                   transition: 'border-color 140ms ease, box-shadow 140ms ease',
                 }}
               >
@@ -183,7 +183,7 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               size="lg"
               onClick={goPrevious}
               aria-label="Previous slide"
-              disabled={slides.length <= 1 || atStart}
+              disabled={slides.length <= 1}
             >
               <IconChevronLeft size={18} />
             </ActionIcon>
@@ -196,7 +196,7 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               size="lg"
               onClick={goNext}
               aria-label="Next slide"
-              disabled={slides.length <= 1 || atEnd}
+              disabled={slides.length <= 1}
             >
               <IconChevronRight size={18} />
             </ActionIcon>

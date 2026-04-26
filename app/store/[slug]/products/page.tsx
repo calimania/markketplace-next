@@ -1,7 +1,6 @@
 import { Product } from "@/markket/product.d";
 import { strapiClient } from "@/markket/api.strapi";
 import { notFound } from "next/navigation";
-import Markdown from "@/app/components/ui/page.markdown";
 import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { markketplace } from "@/markket/config";
@@ -9,13 +8,11 @@ import ProductCard from "@/app/components/ui/product.card";
 import PageContent from '@/app/components/ui/page.content';
 import {
   Container,
-  Title,
   Text,
   Paper,
   SimpleGrid,
   Box,
-  Divider,
-  Stack,
+  Group,
   Button,
 } from "@mantine/core";
 import { IconShoppingBag, IconMail } from '@tabler/icons-react';
@@ -87,50 +84,35 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       <StorePageHeader
         icon={<IconShoppingBag size={48} />}
         title={title}
-        description="Discover our curated collection of products. Each item is carefully selected to ensure quality and satisfaction."
+        description="Discover the current collection from this storefront, from signature pieces to fresh arrivals."
         page={page}
         backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
         iconColor={markketColors.sections.shop.main}
       />
 
-      {!!products.length && (<Title order={2} size="h3" mb={40}>
-        Product Catalog
-      </Title>)}
-
       <Box mb={40}>
         {products.length > 0 ? (
           <SimpleGrid
             cols={{ base: 1, sm: 2 }}
-            spacing="xl"
-            verticalSpacing="xl"
+            spacing="lg"
+            verticalSpacing="lg"
             className="product-grid"
           >
             {products.map((product) => (
-              <Box
+              <ProductCard
                 key={(product as Product).id}
-                className="product-card-neobrutal"
-                style={{
-                  transform: 'translateY(0)',
-                  transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
-                  borderWidth: 3,
-                  borderColor: '#222',
-                  borderStyle: 'solid',
-                  boxShadow: '6px 6px 0 #222',
-                  background: '#fffbe6',
-                  borderRadius: 16,
-                }}
-              >
-                <ProductCard
-                  product={product as Product}
-                  slug={slug}
-                />
-              </Box>
+                product={product as Product}
+                slug={slug}
+              />
             ))}
           </SimpleGrid>
         ) : (
-          <Paper p="xl" withBorder ta="center">
-            <Text size="lg" c="dimmed">
-              No products available yet. Check back soon!
+            <Paper p="xl" withBorder radius="xl" ta="center" style={{ borderColor: `${markketColors.sections.shop.main}33` }}>
+              <Text size="lg" fw={600} style={{ color: markketColors.neutral.charcoal }}>
+                The shop is being prepared.
+              </Text>
+              <Text c="dimmed" mt={6}>
+                Products will appear here as soon as new items are added.
             </Text>
           </Paper>
         )}
@@ -138,68 +120,19 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
       <PageContent params={{ page }} />
 
-      {/* Store Description */}
-      {store?.Description && (
-        <>
-          <Divider my={40} className="product-divider" />
-          <Paper p="xl" radius="md" withBorder className="about-fade-in">
-            <Title order={2} size="h3" mb="md" ta="center">
-              About {store.title}
-            </Title>
-            <Box maw={800} mx="auto">
-              <Markdown content={store.Description} />
-            </Box>
-          </Paper>
-        </>
-      )}
-
-      {/* Newsletter CTA */}
-      <Divider my="xl" />
-      <Paper
-        p="xl"
-        radius="md"
-        style={{
-          background: markketColors.neutral.offWhite,
-          borderWidth: '1px',
-          borderColor: markketColors.neutral.gray,
-        }}
-      >
-        <Stack align="center" gap="md">
-          <Box
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: '8px',
-              background: markketColors.rosa.light,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <IconMail size={28} color={markketColors.rosa.main} stroke={1.5} />
-          </Box>
-          <Title order={3} ta="center" fw={500} style={{ color: markketColors.neutral.charcoal }}>
-            Stay in the Loop
-          </Title>
-          <Text size="sm" ta="center" maw={500} style={{ color: markketColors.neutral.mediumGray, lineHeight: 1.5 }}>
-            Get notified when we add new products and special offers.
-          </Text>
-          <Button
-            component="a"
-            href={`/${slug}/about/newsletter`}
-            size="md"
-            radius="md"
-            style={{
-              background: markketColors.rosa.main,
-              color: 'white',
-              fontWeight: 500,
-            }}
-            leftSection={<IconMail size={18} />}
-          >
-            Subscribe Now
-          </Button>
-        </Stack>
-      </Paper>
+      <Group justify="center" mt="xl">
+        <Button
+          component="a"
+          href={`/${slug}/about/newsletter`}
+          variant="subtle"
+          radius="xl"
+          size="sm"
+          leftSection={<IconMail size={16} />}
+          style={{ color: markketColors.sections.newsletter.main }}
+        >
+          Subscribe for updates
+        </Button>
+      </Group>
     </Container>
   );
 };

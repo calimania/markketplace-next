@@ -9,6 +9,7 @@ import { Page } from "@/markket/page";
 import { Metadata } from "next";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from '@/markket/colors.config';
+import StorePageHeader from '@/app/components/ui/store.page.header';
 
 interface NewsletterPageProps {
   params: Promise<{  slug: string }>;
@@ -39,68 +40,63 @@ export default async function NewsletterPage({ params }: NewsletterPageProps) {
   const { data: [page] } = await strapiClient.getPage('newsletter', slug);
   const { data: [store] } = await strapiClient.getStore(slug);
   const title = page?.Title || `Newsletter`;
+  const subtitle = page?.SEO?.metaDescription || `A calm inbox with updates from ${store?.title || 'this store'}.`;
 
   return (
     <Container size="lg" py="xl">
-      <Box maw={680} mx="auto">
-        <Stack gap="lg" align="center" mb="xl">
-          <Box
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: 20,
-              background: `linear-gradient(135deg, ${markketColors.sections.newsletter.main} 0%, ${markketColors.sections.newsletter.main}dd 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(228, 0, 124, 0.2)',
-            }}
-          >
-            <IconMail size={40} color={markketColors.neutral.white} stroke={2} />
+      <Stack gap="xl">
+        <StorePageHeader
+          icon={<IconMail size={48} />}
+          title={title}
+          description={subtitle}
+          page={page}
+          backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
+          iconColor={markketColors.sections.newsletter.main}
+        />
+
+        {page?.Content?.length > 0 && (
+          <Box>
+            <PageContent params={{ page }} />
           </Box>
+        )}
 
-          <Stack gap="xs" align="center">
-            <Text
-              size="2rem"
-              fw={600}
-              ta="center"
-              c={markketColors.neutral.charcoal}
-              style={{ lineHeight: 1.2 }}
-            >
-              {title}
-            </Text>
-            <Text
-              size="md"
-              c={markketColors.neutral.mediumGray}
-              ta="center"
-              maw={560}
-            >
-              Stay in the loop with original updates
-            </Text>
-          </Stack>
-        </Stack>
-
-        <Stack gap="xl">
-          {page?.Content?.length > 0 && (
-            <Box>
-              <PageContent params={{ page }} />
-            </Box>
-          )}
-
+        {!(page?.Content?.length > 0) && (
           <Paper
             p="xl"
             radius="xl"
+            withBorder
             style={{
-              backgroundColor: markketColors.neutral.offWhite,
-              border: `1px solid ${markketColors.neutral.lightGray}`,
+              borderColor: `${markketColors.sections.newsletter.main}2e`,
+              background: `linear-gradient(145deg, ${markketColors.sections.newsletter.light} 0%, #ffffff 70%)`,
+              minHeight: 220,
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
-            <Suspense fallback={<LoadingOverlay visible />}>
-              <SubscribeForm store={store as Store} />
-            </Suspense>
+            <Stack gap="sm" w="100%">
+              <Text c={markketColors.neutral.charcoal} ta="center" fw={600}>
+                New editions are on the way.
+              </Text>
+              <Text c={markketColors.neutral.mediumGray} ta="center" lh={1.7}>
+                Expect thoughtful updates on new arrivals, upcoming events, and selected stories.
+              </Text>
+            </Stack>
           </Paper>
-        </Stack>
-      </Box>
+        )}
+
+        <Paper
+          p="xl"
+          radius="xl"
+          style={{
+            backgroundColor: markketColors.neutral.offWhite,
+            border: `1px solid ${markketColors.neutral.lightGray}`,
+          }}
+        >
+          <Suspense fallback={<LoadingOverlay visible />}>
+            <SubscribeForm store={store as Store} />
+          </Suspense>
+        </Paper>
+      </Stack>
     </Container>
   );
 };

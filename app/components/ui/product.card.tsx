@@ -14,8 +14,8 @@ export default function ProductCard({ product, slug }: { product: Product; slug:
   const price = product.usd_price || product.PRICES?.[0]?.Price || 'X';
 
   return (
-    <Link href={`/store/${slug}/products/${product.slug}`}>
-      <div className="group relative bg-white rounded-lg shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden" style={{ borderWidth: '1px', borderColor: markketColors.neutral.gray }}>
+    <Link href={`/store/${slug}/products/${product.slug}`} style={{ textDecoration: 'none' }}>
+      <div className="group relative bg-white transition-all duration-200 cursor-pointer overflow-hidden" style={{ borderRadius: 20, boxShadow: '0 4px 14px rgba(15, 23, 42, 0.06)', border: `1px solid ${markketColors.neutral.lightGray}` }}>
         <div className="aspect-[16/9] overflow-hidden bg-gray-50">
           {imageUrl ? (
             <div className="relative h-full w-full">

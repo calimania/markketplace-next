@@ -1,8 +1,8 @@
 import { type Page } from '@/markket/page.d';
-import { Card, Group, Text, Title, Badge } from '@mantine/core';
+import { Group, Text, Title, Paper, Box, Stack } from '@mantine/core';
 import { IconArrowRight } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
 import Link from 'next/link';
-import './pages.list.css';
 
 type PageListProps = {
   pages: Page[];
@@ -11,100 +11,74 @@ type PageListProps = {
 
 const excluded_list = ['docs', 'blog', 'events', 'about', 'products'];
 
-export const PageList = ({ pages, storeSlug}: PageListProps) => {
+export const PageList = ({ pages, storeSlug }: PageListProps) => {
   return (
-    <div className="space-y-4">
-      {pages.map((page) => (
-        <Link
-          key={page.id}
-          href={`/store/${storeSlug}/${!excluded_list.includes(page.slug) ? 'about/' : ''}${page.slug}`}
-          className="no-underline block"
-        >
-          <Card
-            withBorder
-            padding="0"
-            radius="md"
-            className="page-list-card overflow-hidden"
-            style={{
-              borderWidth: 3,
-              borderColor: '#222',
-              borderStyle: 'solid',
-              boxShadow: '6px 6px 0 #222',
-              background: '#fffbe6',
-              transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
-              display: ['home', 'receipt'].includes(page.slug) ? 'none' : 'block'
-            }}
+    <Stack gap="md">
+      {pages.map((page) => {
+        if (['home', 'receipt'].includes(page.slug)) return null;
+        return (
+          <Link
+            key={page.id}
+            href={`/store/${storeSlug}/${!excluded_list.includes(page.slug) ? 'about/' : ''}${page.slug}`}
+            style={{ textDecoration: 'none' }}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-0">
-              <div className="sm:col-span-4">
+            <Paper
+              withBorder
+              radius="xl"
+              p={0}
+              style={{
+                borderColor: `${markketColors.sections.about.main}28`,
+                background: '#ffffff',
+                boxShadow: '0 4px 14px rgba(15, 23, 42, 0.05)',
+                overflow: 'hidden',
+                transition: 'box-shadow 0.18s ease, transform 0.18s ease',
+              }}
+              className="page-list-card"
+            >
+              <Group gap={0} wrap="nowrap" align="stretch">
                 {page?.SEO?.socialImage?.url ? (
-                  <div className="h-full page-list-img-wrap">
-                    <img
-                      src={page.SEO.socialImage.url}
-                      alt={page.Title || 'Page thumbnail'}
-                      className="w-full h-full object-cover min-h-[200px] page-list-img"
-                      style={{ objectFit: 'cover', objectPosition: 'top', width: '100%', height: '100%', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)' }}
-                    />
-                  </div>
+                  <Box
+                    style={{
+                      width: 140,
+                      minHeight: 120,
+                      flexShrink: 0,
+                      background: `url(${page.SEO.socialImage.url}) center/cover no-repeat`,
+                    }}
+                  />
                 ) : (
-                  <div className="h-full min-h-[200px] bg-gray-100 flex items-center justify-center">
-                    <Text c="dimmed" size="sm">No image available</Text>
-                  </div>
+                    <Box
+                      style={{
+                        width: 140,
+                        minHeight: 120,
+                        flexShrink: 0,
+                        background: `linear-gradient(135deg, ${markketColors.sections.about.light} 0%, #ffffff 100%)`,
+                      }}
+                    />
                 )}
-              </div>
 
-              <div className="sm:col-span-8">
-                <div className="p-6 flex flex-col h-full">
-                  <Group justify="space-between" mb="xs">
-                    <Badge
-                      variant="light"
-                      size="sm"
-                      className="tracking-wider"
-                    >
-                      {page.menuOrder ? `0${page.menuOrder}` : 'Featured'}
-                    </Badge>
-                    <Text size="xs" c="dimmed">
-                      {new Date(page.publishedAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </Text>
-                  </Group>
-
-                  <Title order={3} className="mb-3 leading-tight page-list-title">
+                <Stack gap={6} p="md" style={{ flex: 1, minWidth: 0 }}>
+                  <Title order={4} fw={600} lineClamp={1} style={{ color: markketColors.neutral.charcoal, letterSpacing: '-0.02em' }}>
                     {page.Title || 'Untitled Page'}
                   </Title>
 
                   {page.SEO?.metaDescription && (
-                    <Text
-                      size="sm"
-                      className="mb-4 leading-relaxed page-list-desc"
-                      style={{ fontWeight: 600, fontFamily: 'monospace', background: '#181818', color: '#fff', padding: '0.7em', borderRadius: 6, border: '2px dashed #222', letterSpacing: 0.2 }}
-                      lineClamp={2}
-                    >
+                    <Text size="sm" c="dimmed" lineClamp={2} lh={1.6}>
                       {page.SEO.metaDescription}
                     </Text>
                   )}
 
-                  <Group justify="space-between" className="mt-auto pt-4 border-t border-gray-100 page-list-footer">
-                    <Text size="sm" c="dimmed">
-                      {page.SEO?.metaAuthor || 'Markket.place'}
+                  <Group gap={4} mt="auto" align="center">
+                    <Text size="xs" fw={600} style={{ color: markketColors.sections.about.main }}>
+                      Read more
                     </Text>
-                    <Text
-                      size="sm"
-                      c="blue"
-                      className="flex items-center gap-1 font-medium page-list-read"
-                    >
-                      Read article <IconArrowRight size={14} />
-                    </Text>
+                    <IconArrowRight size={12} color={markketColors.sections.about.main} />
                   </Group>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </Link>
-      ))}
-    </div>
+                </Stack>
+              </Group>
+            </Paper>
+          </Link>
+        );
+      })}
+    </Stack>
   );
 };

@@ -28,26 +28,26 @@ export async function generateMetadata({ params }: EventsPageProps) {
   const response = await strapiClient.getStore(slug);
   const store = response?.data?.[0] as Store;
 
-  const pageResponse = await strapiClient.getPage('events');
+  const pageResponse = await strapiClient.getPage('events', slug);
   const page = pageResponse?.data?.[0] as Page;
 
   const eventsResponse = await strapiClient.getEvents(slug);
   const events = (eventsResponse?.data || []) as Event[];
 
   const eventCount = events.length;
-  const eventNames = events.slice(0, 5).map(e => e.Name).filter(Boolean);
-  const upcomingEvents = events.filter(e => new Date(e.startDate) > new Date());
+  const eventNames = events.slice(0, 5).map((e) => e.Name).filter(Boolean);
+  const upcomingEvents = events.filter((e) => new Date(e.startDate) > new Date());
   const upcomingCount = upcomingEvents.length;
 
   return generateSEOMetadata({
     slug,
     entity: {
       SEO: page?.SEO || store?.SEO,
-      Title: page?.Title,  // Add page title if exists
+      Title: page?.Title,
       id: store?.id?.toString(),
       url: `/${slug}/events`,
     },
-    type: "website",
+    type: 'website',
     defaultTitle: 'Events',
     defaultDescription: upcomingCount > 0
       ? `Join us for ${upcomingCount} upcoming events: ${eventNames.slice(0, 3).join(', ')}${eventNames.length > 3 ? ' and more' : ''}.`
@@ -71,7 +71,6 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   }
 
   const eventsResponse = await strapiClient.getEvents(slug);
-
   const events = (eventsResponse?.data || []) as Event[];
 
   return (
@@ -80,17 +79,14 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
         <StorePageHeader
           icon={<IconCalendar size={48} />}
           title={eventPage?.Title || `${store?.title} Events`}
-          description={eventPage?.SEO?.metaDescription}
+          description={eventPage?.SEO?.metaDescription || `Upcoming gatherings, launches, and calendar moments from ${store?.title || 'this store'}.`}
           page={eventPage}
           backgroundImage={eventPage?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
           iconColor={markketColors.sections.events.main}
         />
 
         {events.length > 0 ? (
-          <SimpleGrid
-            cols={{ base: 1, sm: 2, lg: 3 }}
-            spacing="lg"
-          >
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
             {events.map((event) => {
               const eventDate = new Date(event.startDate);
               const isUpcoming = eventDate > new Date();
@@ -116,7 +112,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                     }}
                     className="event-card"
                   >
-                    {image && (
+                    {image ? (
                       <Box
                         style={{
                           width: '100%',
@@ -141,15 +137,19 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                           </Badge>
                         )}
                       </Box>
+                    ) : (
+                      <Box
+                        style={{
+                          width: '100%',
+                          height: 200,
+                          background: `linear-gradient(135deg, ${markketColors.sections.events.light} 0%, #ffffff 100%)`,
+                          borderBottom: `1px solid ${markketColors.sections.events.main}33`,
+                        }}
+                      />
                     )}
 
                     <Stack gap="sm" p="lg" style={{ flex: 1 }}>
-                      <Text
-                        size="lg"
-                        fw={600}
-                        c={markketColors.neutral.charcoal}
-                        lineClamp={2}
-                      >
+                      <Text size="lg" fw={600} c={markketColors.neutral.charcoal} lineClamp={2}>
                         {event.Name}
                       </Text>
 
@@ -159,7 +159,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                           {eventDate.toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
-                            year: 'numeric'
+                            year: 'numeric',
                           })}
                         </Text>
                       </Group>
@@ -200,7 +200,10 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               }}
             >
             <Text size="lg" c={markketColors.neutral.mediumGray}>
-              No events scheduled at the moment.
+                No events are scheduled yet.
+              </Text>
+              <Text size="sm" c={markketColors.neutral.mediumGray} mt={6}>
+                Check back soon for workshops, launches, and community meetups.
             </Text>
           </Paper>
         )}
@@ -209,4 +212,4 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
       </Stack>
     </Container>
   );
-};
+}

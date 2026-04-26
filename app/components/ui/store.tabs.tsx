@@ -16,6 +16,10 @@ import {
   IconBrandPinterest,
   IconBrandApple,
   IconBrandSoundcloud,
+  IconBrandPatreon,
+  IconLink,
+  IconNews,
+  IconCrown,
   IconWorld,
 } from "@tabler/icons-react";
 
@@ -46,6 +50,10 @@ function detectLinkProfile(url: string): LinkProfile {
   if (lower.includes('pinterest.com')) return { Icon: IconBrandPinterest, color: '#E60023' };
   if (lower.includes('apple.com') || lower.includes('music.apple') || lower.includes('podcasts.apple')) return { Icon: IconBrandApple, color: '#424242' };
   if (lower.includes('soundcloud.com')) return { Icon: IconBrandSoundcloud, color: '#FF5500' };
+  if (lower.includes('patreon.com')) return { Icon: IconBrandPatreon, color: '#FF424D' };
+  if (lower.includes('onlyfans.com')) return { Icon: IconCrown, color: '#00AEEF' };
+  if (lower.includes('linktr.ee') || lower.includes('linktree.com')) return { Icon: IconLink, color: '#1DE9B6' };
+  if (lower.includes('substack.com')) return { Icon: IconNews, color: '#FF6719' };
   return { Icon: IconWorld, color: '#00BCD4' };
 }
 
