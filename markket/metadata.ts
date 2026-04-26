@@ -10,7 +10,7 @@ interface SEOProps {
     metaDescription?: string;
     metaKeywords?: string;
     excludeFromSearch?: boolean;
-    metaUrl: string;
+    metaUrl?: string;
     socialImage?: {
       url: string;
       width?: number;
