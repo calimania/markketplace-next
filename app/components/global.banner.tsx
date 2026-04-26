@@ -3,6 +3,7 @@
 import { Group, ActionIcon, Container, Paper, Anchor, Text } from '@mantine/core';
 import { IconHome, IconBuildingStore, IconArticle, IconUser } from '@tabler/icons-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth.provider';
 import { useEffect, useState } from 'react';
 import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
@@ -16,6 +17,10 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
   const { maybe } = useAuth();
   const [isMaybe, setIsMaybe] = useState(false);
   const embedded = useEmbeddedMode();
+  const pathname = usePathname();
+
+  const storesActive = pathname?.startsWith('/stores');
+  const blogActive = pathname?.startsWith('/blog');
 
   useEffect(() => {
     const ismaybe = maybe();
@@ -56,7 +61,16 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
               component={Link}
               href="/stores"
               underline="never"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, color: markketColors.neutral.darkGray, paddingInline: 2 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                color: storesActive ? markketColors.rosa.main : markketColors.neutral.darkGray,
+                paddingInline: 10,
+                paddingBlock: 4,
+                borderRadius: 999,
+                background: storesActive ? markketColors.rosa.light : 'transparent',
+              }}
             >
               <IconBuildingStore size={15} />
               <Text size="sm" visibleFrom="sm">Stores</Text>
@@ -66,7 +80,16 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
               component={Link}
               href="/blog"
               underline="never"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, color: markketColors.neutral.darkGray, paddingInline: 2 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                color: blogActive ? markketColors.sections.blog.main : markketColors.neutral.darkGray,
+                paddingInline: 10,
+                paddingBlock: 4,
+                borderRadius: 999,
+                background: blogActive ? markketColors.sections.blog.light : 'transparent',
+              }}
             >
               <IconArticle size={15} />
               <Text size="sm" visibleFrom="sm">Blog</Text>

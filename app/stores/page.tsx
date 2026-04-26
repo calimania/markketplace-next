@@ -1,5 +1,4 @@
-import { Container, Title, Text, Stack, Box, Paper, Group, Badge } from "@mantine/core";
-import { IconSparkles } from '@tabler/icons-react';
+import { Container, Title, Text, Stack, Box, Group, Badge } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
 import StoreGrid from '@/app/components/stores/grid';
 import { generateSEOMetadata } from '@/markket/metadata';
@@ -29,7 +28,7 @@ export default async function StoresPage() {
   const [storeResponse, response, pageResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getStores(
-      { page: 1, pageSize: 42 },
+      { page: 1, pageSize: 41 },
       { filter: {}, sort: 'active:desc,updatedAt:desc' }
     ),
     strapiClient.getPage('stores'),
@@ -37,56 +36,75 @@ export default async function StoresPage() {
   const store = storeResponse.data?.[0];
   const stores = response?.data || [];
   const page = pageResponse?.data?.[0] as Page;
+  const storeCount = stores.length;
 
   return (
-    <Container size="xl" py={{ base: 'xl', md: 60 }}>
+    <Container size="xl" pt={0} pb={{ base: 'xl', md: 60 }}>
       <Stack gap="xl">
-        <Paper
-          radius="xl"
-          p={{ base: 'lg', md: 48 }}
+        <Box
           style={{
-            background: markketColors.gradients.hero,
-            border: 'none',
+            background: `linear-gradient(120deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 54%, ${markketColors.sections.shop.main} 100%)`,
+            marginLeft: 'calc(50% - 50vw)',
+            marginRight: 'calc(50% - 50vw)',
+            marginTop: 0,
             overflow: 'hidden',
             position: 'relative',
+            paddingTop: 46,
+            paddingBottom: 52,
           }}
         >
           <Box
             style={{
+              inset: 0,
               position: 'absolute',
-              top: -60,
-              right: -60,
-              width: 240,
-              height: 240,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.07)',
+              background: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.22), transparent 38%), radial-gradient(circle at 80% 75%, rgba(255,255,255,0.18), transparent 34%)',
               pointerEvents: 'none',
             }}
           />
-          <Stack align="center" gap="md" style={{ position: 'relative', zIndex: 1 }}>
-            <img
-              src={store?.Logo?.url || markketplace.blank_logo_url}
-              alt={store?.SEO?.metaTitle || 'Markket Logo'}
-              style={{ width: 80, height: 80, borderRadius: 16, objectFit: 'contain', background: 'rgba(255,255,255,0.15)', padding: 8 }}
-            />
-            <Title
-              ta="center"
-              c="white"
-              style={{ fontSize: 'clamp(1.6rem, 5vw, 2.8rem)', fontWeight: 800, lineHeight: 1.2 }}
-            >
-              {page?.Title || `Discover Stores`}
-            </Title>
-            <Text size="md" ta="center" c="rgba(255,255,255,0.96)" maw={500}>
-              {page?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Discover amazing independent stores'}
-            </Text>
-            <Group gap="xs">
-              <Badge variant="light" radius="xl" style={{ background: 'rgba(255,255,255,0.92)', color: markketColors.neutral.charcoal }}>
-                <IconSparkles size={18} style={{ marginRight: 6 }} />
-                Curated spaces
-              </Badge>
-            </Group>
-          </Stack>
-        </Paper>
+          <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
+            <Stack align="center" gap="md">
+              <img
+                src={store?.Logo?.url || markketplace.blank_logo_url}
+                alt={store?.SEO?.metaTitle || 'Markket Logo'}
+                style={{ width: 82, height: 82, borderRadius: 16, objectFit: 'contain', background: 'rgba(255,255,255,0.15)', padding: 8 }}
+              />
+              <Title
+                ta="center"
+                c="white"
+                style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 850, lineHeight: 1.16 }}
+              >
+                {page?.Title || 'Discover Stores'}
+              </Title>
+              <Text size="lg" ta="center" c="rgba(255,255,255,0.96)" maw={760} style={{ lineHeight: 1.55 }}>
+                {page?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Explore highlights from independent creators and browse the latest stores joining the marketplace.'}
+              </Text>
+              <Group gap="xs" justify="center">
+                <Badge
+                  variant="light"
+                  radius="xl"
+                  style={{
+                    background: 'rgba(255,255,255,0.94)',
+                    color: markketColors.neutral.charcoal,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Highlights
+                </Badge>
+                <Badge
+                  variant="light"
+                  radius="xl"
+                  style={{
+                    background: 'rgba(255,255,255,0.85)',
+                    color: markketColors.neutral.charcoal,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Discover {storeCount} Storefronts
+                </Badge>
+              </Group>
+            </Stack>
+          </Container>
+        </Box>
         <StoreGrid stores={stores} />
         <PageContent params={{ page }} />
       </Stack>

@@ -1,6 +1,6 @@
 'use client';
 
-import { TextInput, Button, Text, Modal } from '@mantine/core';
+import { TextInput, Button, Text, Modal, Stack, Group, Paper } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 import { type Store } from '@/markket/store.d';
@@ -60,20 +60,32 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
   return (
     <>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        {error && <Text color="red">{error}</Text>}
-        <Text size="sm" fw={500} mb="md">
-          Subscribe to {store?.title}&apos;s newsletter
+        <Stack gap="sm">
+          {error && <Text c="red" size="sm">{error}</Text>}
+          <Text size="sm" style={{ color: '#616161' }}>
+            Subscribe to {store?.title}&apos;s newsletter for new stories, product drops, and event highlights.
         </Text>
 
-        <div className="flex gap-3">
+          <Group gap="sm" align="flex-start" wrap="wrap">
           <TextInput
             placeholder="your@email.com"
             required
-            className="flex-1"
+              radius="xl"
+              size="md"
+              style={{ flex: 1, minWidth: 240 }}
             {...form.getInputProps('email')}
           />
-          <Button type="submit">Subscribe</Button>
-        </div>
+            <Button type="submit" radius="xl" size="md" variant="gradient" gradient={{ from: '#E4007C', to: '#E91E63', deg: 135 }}>
+              Subscribe
+            </Button>
+          </Group>
+
+          <Paper withBorder p="sm" radius="md" style={{ borderColor: '#F5F5F5', background: '#FAFAFA' }}>
+            <Text size="xs" style={{ color: '#616161' }}>
+              No spam. Unsubscribe anytime.
+            </Text>
+          </Paper>
+        </Stack>
       </form>
 
       <Modal
