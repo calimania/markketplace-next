@@ -104,7 +104,7 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
             }}
             onTouchEnd={e => {
               console.log('Box touch end');
-              onTouchEnd(e);
+              onTouchEnd();
             }}
           />
         </UnstyledButton>
