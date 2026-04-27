@@ -268,11 +268,8 @@ export function ClientLayout({
             >
               <Group justify="space-between" align="center" gap="md" wrap="wrap">
                 <Box>
-                  <Text size="sm" fw={700} c="dark">
-                    Leaving this storefront?
-                  </Text>
                   <Text size="sm" c="dimmed">
-                    Return to the Markkët homepage to browse other stores and sections.
+                    Return to the Markkët homepage to browse other stores and sections
                   </Text>
                 </Box>
                 <Anchor component={Link} href="/" underline="never">
@@ -282,7 +279,7 @@ export function ClientLayout({
                     leftSection={<IconArrowLeft size={18} />}
                     radius="xl"
                   >
-                    Back to homepage
+                    markkët homepage
                   </Button>
                 </Anchor>
               </Group>

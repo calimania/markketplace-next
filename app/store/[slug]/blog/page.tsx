@@ -1,4 +1,4 @@
-import { Container, Text, Stack, SimpleGrid } from "@mantine/core";
+import { Container, Text, Stack, SimpleGrid, Paper, Group, Badge } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
 import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import { IconArticle } from '@tabler/icons-react';
 import StorePageHeader from "@/app/components/ui/store.page.header";
 import PageContent from '@/app/components/ui/page.content';
+import { markketColors } from '@/markket/colors.config';
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -72,8 +73,16 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
           description={description}
           page={page}
           backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
-          iconColor="var(--mantine-color-violet-6)"
+          iconColor={markketColors.sections.blog.main}
         />
+
+        {posts.length > 0 && (
+          <Group justify="flex-end">
+            <Badge size="md" radius="xl" variant="light" style={{ background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}>
+              {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+            </Badge>
+          </Group>
+        )}
 
         {posts.length > 0 ? (
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
@@ -87,9 +96,20 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
             ))}
           </SimpleGrid>
         ) : (
-          <Text ta="center" c="dimmed">
-            No blog posts yet.
-          </Text>
+            <Paper
+              withBorder
+              radius="xl"
+              p="xl"
+              ta="center"
+              style={{ borderColor: `${markketColors.sections.blog.main}33`, background: '#fff' }}
+            >
+              <Text size="lg" fw={600} style={{ color: markketColors.neutral.charcoal }}>
+                No stories published yet.
+              </Text>
+              <Text c="dimmed" mt={6}>
+                New articles and updates will appear here as soon as they go live.
+              </Text>
+            </Paper>
         )}
       </Stack>
       <PageContent params={{ page }} />

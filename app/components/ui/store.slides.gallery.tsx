@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Modal, Paper, Stack, Text, Title, UnstyledButton } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconZoomIn } from '@tabler/icons-react';
 import { markketColors } from '@/markket/colors.config';
@@ -17,19 +17,37 @@ type StoreSlidesGalleryProps = {
 };
 
 export default function StoreSlidesGallery({ slides, title }: StoreSlidesGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(slides.length > 1 ? 1 : 0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
   const selected = useMemo(() => slides[selectedIndex] || slides[0], [slides, selectedIndex]);
-  const atStart = selectedIndex <= 0;
-  const atEnd = selectedIndex >= slides.length - 1;
 
   const goPrevious = () => {
     setSelectedIndex((current) => (current <= 0 ? slides.length - 1 : current - 1));
   };
-
   const goNext = () => {
     setSelectedIndex((current) => (current >= slides.length - 1 ? 0 : current + 1));
+  };
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const delta = touchEndX.current - touchStartX.current;
+      if (Math.abs(delta) > 40) {
+        if (delta > 0) {
+          goPrevious();
+        } else {
+          goNext();
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
   };
 
   if (!selected) {
@@ -56,9 +74,14 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
         }}
       >
         <UnstyledButton
-          onClick={() => setLightboxOpen(true)}
+          component="button"
+          tabIndex={0}
+          onClick={() => {
+            console.log('UnstyledButton clicked');
+            setLightboxOpen(true);
+          }}
           aria-label="Open full image"
-          style={{ display: 'block', width: '100%' }}
+          style={{ display: 'block', width: '100%', pointerEvents: 'auto', background: '#ffe5e5', }}
         >
           <Box
             style={{
@@ -67,19 +90,35 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               backgroundImage: `url(${selected.src})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              border: '1px solid rgba(15, 23, 42, 0.08)',
+              touchAction: 'pan-y',
+              pointerEvents: 'auto',
+              backgroundColor: 'rgba(0,188,212,0.08)',
+            }}
+            onTouchStart={e => {
+              console.log('Box touch start');
+              onTouchStart(e);
+            }}
+            onTouchMove={e => {
+              console.log('Box touch move');
+              onTouchMove(e);
+            }}
+            onTouchEnd={e => {
+              console.log('Box touch end');
+              onTouchEnd();
             }}
           />
         </UnstyledButton>
+
         <Group justify="space-between" align="center" mt="sm" gap="xs">
           <Text size="sm" c="dimmed" lineClamp={2} style={{ flex: 1 }}>
             {selected.alt}
           </Text>
           <Button
-            size="xs"
+            size="md"
             variant="light"
-            leftSection={<IconZoomIn size={14} />}
+            leftSection={<IconZoomIn size={16} />}
             onClick={() => setLightboxOpen(true)}
+            style={{ minWidth: 44, minHeight: 36 }}
           >
             Full image
           </Button>
@@ -90,25 +129,27 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
         <ActionIcon
           variant="outline"
           radius="xl"
-          size="lg"
+          size="xl"
           onClick={goPrevious}
           aria-label="Previous slide"
           disabled={slides.length <= 1}
+          style={{ minWidth: 48, minHeight: 48, touchAction: 'manipulation' }}
         >
-          <IconChevronLeft size={18} />
+          <IconChevronLeft size={24} />
         </ActionIcon>
         <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
-          Tap image to expand
+          Tap or swipe image
         </Text>
         <ActionIcon
           variant="outline"
           radius="xl"
-          size="lg"
+          size="xl"
           onClick={goNext}
           aria-label="Next slide"
           disabled={slides.length <= 1}
+          style={{ minWidth: 48, minHeight: 48, touchAction: 'manipulation' }}
         >
-          <IconChevronRight size={18} />
+          <IconChevronRight size={24} />
         </ActionIcon>
       </Group>
 
@@ -128,8 +169,8 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
                 radius="md"
                 p={2}
                 style={{
-                  borderColor: isActive ? markketColors.rosa.main : markketColors.neutral.gray,
-                  boxShadow: isActive ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
+                  borderColor: isActive ? markketColors.neutral.charcoal : markketColors.neutral.gray,
+                  boxShadow: isActive ? '0 0 0 2px rgba(15,23,42,0.12)' : 'none',
                   transition: 'border-color 140ms ease, box-shadow 140ms ease',
                 }}
               >
@@ -183,7 +224,7 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               size="lg"
               onClick={goPrevious}
               aria-label="Previous slide"
-              disabled={slides.length <= 1 || atStart}
+              disabled={slides.length <= 1}
             >
               <IconChevronLeft size={18} />
             </ActionIcon>
@@ -196,7 +237,7 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               size="lg"
               onClick={goNext}
               aria-label="Next slide"
-              disabled={slides.length <= 1 || atEnd}
+              disabled={slides.length <= 1}
             >
               <IconChevronRight size={18} />
             </ActionIcon>

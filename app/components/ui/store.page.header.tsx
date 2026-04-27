@@ -29,6 +29,9 @@ export default function StorePageHeader({
       style={{
         position: 'relative',
         overflow: 'hidden',
+        minHeight: 200,
+        display: 'flex',
+        alignItems: 'center',
         background: hasCover
           ? `linear-gradient(135deg, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.28) 100%), url(${backgroundImage}) center/cover no-repeat`
           : markketColors.gradients.hero,
@@ -49,7 +52,7 @@ export default function StorePageHeader({
         }}
       />
 
-      <Stack align="center" gap="sm" style={{ position: 'relative', zIndex: 1 }}>
+      <Stack align="center" gap="sm" style={{ position: 'relative', zIndex: 1, width: '100%' }}>
         <Box
           style={{
             width: 56,
