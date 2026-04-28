@@ -46,24 +46,6 @@ function readAuthToken() {
   }
 }
 
-function resolveAttachField(field: string, contentType: string) {
-  const normalized = (field || '').trim().toLowerCase();
-
-  if (normalized === 'slides') {
-    return 'Slides';
-  }
-
-  if (normalized === 'seo.socialimage') {
-    return 'Cover';
-  }
-
-  if (normalized === 'cover') {
-    return 'Cover';
-  }
-
-  return field;
-}
-
 function resolveContentTypeCandidates(contentType: string) {
   const normalized = (contentType || '').trim().toLowerCase();
   if (normalized === 'event') return ['event', 'events'];
@@ -76,24 +58,34 @@ function resolveContentTypeCandidates(contentType: string) {
 function buildAttachCandidates(field: string, contentType: string) {
   const normalizedField = (field || '').trim().toLowerCase();
   const contentTypes = resolveContentTypeCandidates(contentType);
+  const normalizedType = (contentType || '').trim().toLowerCase();
 
   if (normalizedField === 'slides') {
-    return contentTypes.flatMap((candidateType) => [
-      { contentType: candidateType, field: 'Slides', mode: 'append' as const },
-      { contentType: candidateType, field: 'Slides', mode: 'replace' as const },
-    ]);
+    return contentTypes.map((candidateType) => ({
+      contentType: candidateType,
+      field: 'Slides',
+      mode: 'append' as const,
+    }));
   }
 
   if (normalizedField === 'seo.socialimage') {
+    return contentTypes.map((candidateType) => ({
+      contentType: candidateType,
+      field: 'SEO.socialImage',
+      mode: 'replace' as const,
+    }));
+  }
+
+  if (normalizedField === 'cover' && normalizedType === 'article') {
     return contentTypes.flatMap((candidateType) => [
+      { contentType: candidateType, field: 'cover', mode: 'replace' as const },
       { contentType: candidateType, field: 'Cover', mode: 'replace' as const },
-      { contentType: candidateType, field: 'SEO.socialImage', mode: 'replace' as const },
     ]);
   }
 
   return contentTypes.map((candidateType) => ({
     contentType: candidateType,
-    field: resolveAttachField(field, candidateType),
+    field,
     mode: 'replace' as const,
   }));
 }

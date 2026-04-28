@@ -3,21 +3,36 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Container, Title, Text, Paper, Stack, Group, Button } from '@mantine/core';
+import { Badge, Container, Title, Text, Paper, Stack, Group, Button } from '@mantine/core';
 import { IconArrowLeft, IconPlus } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
+
+type StoreStatusShape = {
+  status?: string;
+  publishedAt?: string | null;
+  slug?: string;
+  documentId?: string;
+};
+
+function isStorePublished(store: StoreStatusShape) {
+  const status = String(store.status || '').toLowerCase();
+  if (status === 'published') return true;
+  if (status === 'draft') return false;
+  return Boolean(store.publishedAt);
+}
 
 export default function MeStoresPage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
 
-  const uniqueStores = stores.filter((store, index, array) => {
-    const identity = store.documentId || store.slug;
-    if (!identity) return true;
-
-    return array.findIndex((candidate) => (candidate.documentId || candidate.slug) === identity) === index;
-  });
+  const uniqueStores = stores
+    .filter((store, index, array) => {
+      const identity = store.documentId || store.slug;
+      if (!identity) return true;
+      return array.findIndex((candidate) => (candidate.documentId || candidate.slug) === identity) === index;
+    })
+    .sort((a, b) => (a.title || a.slug || '').localeCompare(b.title || b.slug || ''));
 
   useEffect(() => {
     if (!confirmed()) {
@@ -27,6 +42,25 @@ export default function MeStoresPage() {
 
     fetchStores();
   }, [confirmed, fetchStores, router]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    const statusSnapshot = uniqueStores.map((store) => {
+      const typed = store as StoreStatusShape;
+      return {
+        slug: store.slug,
+        documentId: typed.documentId,
+        status: typed.status,
+        publishedAt: typed.publishedAt,
+        resolved: isStorePublished(typed) ? 'Published' : 'Draft',
+      };
+    });
+
+    if (statusSnapshot.length > 0) {
+      console.table(statusSnapshot);
+    }
+  }, [uniqueStores]);
 
   return (
     <Container size="md" py="xl">
@@ -68,7 +102,18 @@ export default function MeStoresPage() {
           <Paper key={store.documentId || `${store.slug || 'store'}-${index}`} withBorder p="md" radius="md">
             <Group justify="space-between">
               <div>
-                <Title order={4}>{store.title}</Title>
+                {(() => {
+                  const isPublished = isStorePublished(store as StoreStatusShape);
+
+                  return (
+                    <Group gap="xs" align="center" mb={2}>
+                      <Title order={4}>{store.title}</Title>
+                      <Badge variant="light" color={isPublished ? 'green' : 'gray'}>
+                        {isPublished ? 'Published' : 'Draft'}
+                      </Badge>
+                    </Group>
+                  );
+                })()}
                 <Text c="dimmed" size="sm">{store.slug}</Text>
               </div>
               <Button component={Link} href={`/tienda/${store.slug}`}>

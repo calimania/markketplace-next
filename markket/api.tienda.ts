@@ -188,4 +188,16 @@ export const tiendaClient = {
   getMediaTargets(ref: TiendaRef, options: TiendaRequestOptions) {
     return tiendaFetch('GET', `/api/tienda/stores/${ref}/media-targets`, options);
   },
+
+  storeAction(ref: TiendaRef, action: 'publish' | 'unpublish', options: TiendaRequestOptions) {
+    return tiendaFetch('POST', `/api/tienda/stores/${ref}/actions/${action}`, options);
+  },
+
+  getEventRsvps(ref: TiendaRef, eventId: TiendaItemId, options: TiendaRequestOptions) {
+    return tiendaFetch('GET', `/api/tienda/stores/${ref}/events/${eventId}/rsvps`, options);
+  },
+
+  syncEventRsvps(ref: TiendaRef, eventId: TiendaItemId, options: TiendaRequestOptions) {
+    return tiendaFetch('POST', `/api/tienda/stores/${ref}/events/${eventId}/rsvps/sync`, options);
+  },
 };

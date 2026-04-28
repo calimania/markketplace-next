@@ -11,7 +11,7 @@
     "npm": ">=11.0.0"
   },
   "scripts": {
-    "dev": "next dev --port 4020",
+    "dev": "next dev --port 4020 --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "check-types": "tsc --noEmit",

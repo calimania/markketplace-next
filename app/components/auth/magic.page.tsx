@@ -184,7 +184,10 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                 </Stack>
               </Stack>
             ) : (
-              <form onSubmit={form.onSubmit(handleSubmit)}>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  form.onSubmit(handleSubmit)();
+                }}>
                   <Stack gap="lg">
                     <TextInput
                       label="Your email address"
@@ -238,7 +241,7 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
           </Paper>
 
           {/* Bottom content / trust strip */}
-          {page?.Title ? (
+          {page?.Content?.length ? (
             <PageContent params={{ page }} />
           ) : (
             <Group justify="center" gap="xs">

@@ -120,6 +120,9 @@ export function ClientLayout({
     close();
   };
 
+  const storeInitial = (store?.title || store?.SEO?.metaTitle || store?.slug || 'S').charAt(0).toUpperCase();
+  const logoUrl = store?.Logo?.url;
+
   // Generate nav links for header
   const headerNavLinks = [
     {
@@ -184,11 +187,31 @@ export function ClientLayout({
               />
               <Link href={`/${store?.slug}`} onClick={handleNavigation} style={{ textDecoration: 'none' }}>
                 <Group gap="sm">
-                  <img
-                    src={store?.Logo?.url}
-                    alt={store?.SEO?.metaTitle}
-                    style={{ height: '30px', width: 'auto' }}
-                  />
+                    {logoUrl ? (
+                      <img
+                        src={logoUrl}
+                        alt={store?.SEO?.metaTitle || store?.title || 'Store logo'}
+                        style={{ height: '30px', width: 'auto', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <Box
+                        style={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: 8,
+                          background: markketColors.gradients.hero,
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 14,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {storeInitial}
+                      </Box>
+                    )}
                   <Text size="lg" fw={600} visibleFrom="sm" c="dark">
                     {store?.title || store?.SEO?.metaTitle}
                   </Text>
@@ -225,12 +248,30 @@ export function ClientLayout({
           {/* Store Branding */}
           <Box>
             <Group gap="sm" mb="xs" wrap="nowrap">
-              {store?.Logo?.url && (
+                {logoUrl ? (
                 <img
-                  src={store.Logo.url}
+                    src={logoUrl}
                   alt={store.SEO?.metaTitle || store.title}
                   style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
                 />
+                ) : (
+                  <Box
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      background: markketColors.gradients.hero,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {storeInitial}
+                  </Box>
               )}
               <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={700} truncate>

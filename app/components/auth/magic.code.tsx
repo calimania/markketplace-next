@@ -18,6 +18,9 @@ export default function MagicCodeHandler({ code }: Props) {
 
   useEffect(() => {
     const markket = new markketClient();
+    const redirectToMagicForm = () => {
+      router.replace('/auth/magic');
+    };
 
     async function handleMagicLogin() {
       setStatus('loading');
@@ -40,6 +43,7 @@ export default function MagicCodeHandler({ code }: Props) {
 
         setStatus('error');
         setMessage('Login did not return a valid session. Please try again.');
+        setTimeout(redirectToMagicForm, 900);
       } catch (err) {
         setStatus('error');
         setMessage(
@@ -47,6 +51,7 @@ export default function MagicCodeHandler({ code }: Props) {
             ? (err.message as string)
             : 'Oops! Something went wrong.',
         );
+        setTimeout(redirectToMagicForm, 900);
       }
     }
 
@@ -97,9 +102,9 @@ export default function MagicCodeHandler({ code }: Props) {
             leftSection={<IconMailStar size={18} />}
             variant="gradient"
             gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.replace('/auth/magic')}
           >
-            Try again
+            Back to Magic Link
           </Button>
         )}
         {status === 'success' && (

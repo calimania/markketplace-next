@@ -26,7 +26,7 @@ async function findProductByField(field: 'documentId' | 'slug', itemId: string, 
 }
 
 export async function findProduct(itemId: string, storeSlug: string) {
-  const statusesToTry: ProductStatus[] = ['all', 'draft', 'published'];
+  const statusesToTry: ProductStatus[] = ['published', 'draft', 'all'];
 
   for (const status of statusesToTry) {
     const byDocumentId = await findProductByField('documentId', itemId, storeSlug, status);

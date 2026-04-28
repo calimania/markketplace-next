@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
+import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 
 type PagesListClientProps = {
   storeSlug: string;
@@ -53,7 +54,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
         console.log('[PagesListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'page', {
           token,
-          query: { sort: 'updatedAt:desc', pageSize: 200 },
+          query: TIENDA_CONTENT_LIST_QUERY.page,
         });
 
         console.log('[PagesListClient] API response:', { response, hasData: !!response?.data });

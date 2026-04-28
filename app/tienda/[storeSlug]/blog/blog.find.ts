@@ -1,27 +1,39 @@
 import { strapiClient } from '@/markket/api.strapi';
 import type { Article } from '@/markket/article';
 
-export async function findBlogArticle(itemId: string, storeSlug: string) {
-  const byDocumentId = await strapiClient.fetch<Article>({
+type ArticleStatus = 'all' | 'draft' | 'published';
+
+async function findArticleByField(
+  field: 'documentId' | 'slug',
+  itemId: string,
+  storeSlug: string,
+  status: ArticleStatus = 'all',
+) {
+  return strapiClient.fetch<Article>({
     contentType: 'articles',
     filters: {
-      documentId: itemId,
-      store: {
-        slug: {
-          $eq: storeSlug,
-        },
-      },
+      [field]: { $eq: itemId },
+      store: { slug: { $eq: storeSlug } },
     },
+    status,
     populate: 'SEO.socialImage,Tags,cover,store',
     paginate: { page: 1, pageSize: 1 },
+    includeAuth: true,
   });
+}
 
-  if (byDocumentId?.data?.[0]) {
-    return byDocumentId.data[0] as Article;
+export async function findBlogArticle(itemId: string, storeSlug: string) {
+  const statusesToTry: ArticleStatus[] = ['published', 'draft', 'all'];
+
+  for (const status of statusesToTry) {
+    const byDocumentId = await findArticleByField('documentId', itemId, storeSlug, status);
+    if (byDocumentId?.data?.[0]) return byDocumentId.data[0] as Article;
+
+    const bySlug = await findArticleByField('slug', itemId, storeSlug, status);
+    if (bySlug?.data?.[0]) return bySlug.data[0] as Article;
   }
 
-  const bySlug = await strapiClient.getPost(itemId, storeSlug);
-  return bySlug?.data?.[0] as Article | undefined;
+  return undefined;
 }
 
 export function contentBlocksToText(content: Article['Content']) {

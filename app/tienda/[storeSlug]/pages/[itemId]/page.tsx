@@ -61,7 +61,7 @@ export default async function TiendaPageDetailPage({ params }: TiendaPageDetailP
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={Boolean(page.publishedAt)}
+            isPublished={String((page as any).status || '').toLowerCase() === 'published' || Boolean(page.publishedAt)}
           />
         </>
       }

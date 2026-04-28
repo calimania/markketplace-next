@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
-import { IconPhoto } from '@tabler/icons-react';
+import { IconExternalLink } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import Markdown from '@/app/components/ui/page.markdown';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
+import ProductItemActions from '../product.item.actions';
 import { findProduct } from '../products.find';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
@@ -37,6 +38,12 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
   const editorId = product.documentId || product.slug;
   const itemDocumentId = product.documentId || itemId;
   const storeRef = store?.documentId || store?.slug || storeSlug;
+  const slideSlots = (product.Slides || []).map((slide, index) => ({
+    label: `Slide ${index + 1}`,
+    field: 'Slides',
+    src: slide?.formats?.small?.url || slide?.url,
+    alt: slide?.alternativeText || `${product.Name || 'Product'} slide ${index + 1}`,
+  }));
 
   return (
     <TiendaDetailShell
@@ -51,9 +58,12 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
       actions={
         <>
           <SmartBackButton fallbackHref={`/tienda/${storeSlug}/products`} />
-          <Button component="a" href={`/tienda/${storeSlug}/products/${editorId}/edit`}>
-            Edit
-          </Button>
+          <ProductItemActions
+            storeSlug={storeSlug}
+            itemDocumentId={itemDocumentId}
+            editorId={editorId}
+            isPublished={String((product as any).status || '').toLowerCase() === 'published' || Boolean(product.publishedAt)}
+          />
         </>
       }
     >
@@ -64,7 +74,6 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
           storeRef={storeRef}
           contentType="product"
           itemDocumentId={itemDocumentId}
-          studioHref={`/tienda/${storeSlug}/snapshot`}
           slots={[
             {
               label: 'Thumbnail',
@@ -77,6 +86,12 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
               field: 'SEO.socialImage',
               src: product.SEO?.socialImage?.url,
               alt: product.SEO?.socialImage?.alternativeText || product.Name,
+            },
+            ...slideSlots,
+            {
+              label: 'Add Slide',
+              field: 'Slides',
+              alt: `${product.Name || 'Product'} slide`,
             },
           ]}
         />
@@ -105,6 +120,23 @@ export default async function TiendaProductItemPage({ params }: TiendaProductIte
           path={`/${storeSlug}/products/${product.slug || product.documentId || itemId}`}
           openLabel="Open public product"
         />
+
+        {product.SEO?.metaUrl && (
+          <>
+            <Divider />
+            <Button
+              component="a"
+              href={product.SEO.metaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="lg"
+              fullWidth
+              rightSection={<IconExternalLink size={16} />}
+            >
+              Buy at {new URL(product.SEO.metaUrl).hostname}
+            </Button>
+          </>
+        )}
       </Stack>
     </TiendaDetailShell>
   );

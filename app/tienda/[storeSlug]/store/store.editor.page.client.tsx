@@ -5,7 +5,6 @@ import { Badge, Group, Paper, Skeleton, Stack, Text, Title } from '@mantine/core
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient } from '@/markket/api';
-import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 import type { URLItem } from '@/app/components/ui/form.input.urls';
 import StoreEditorSkeleton from './store.editor.skeleton';
@@ -28,11 +27,22 @@ type StoreDraft = {
 
 const buildDraftKey = (store: Store) => `markket.store-draft.${store.documentId || store.slug || store.id}`;
 
+function isStorePublished(store: Store | null) {
+  if (!store) return false;
+
+  const status = String((store as Store & { status?: string }).status || '').toLowerCase();
+  if (status === 'published') return true;
+  if (status === 'draft') return false;
+
+  return Boolean(store.publishedAt);
+}
+
 function StoreEditorLoadingScaffold() {
   return (
     <Stack gap="md">
       <TinyBreadcrumbs
         items={[
+          { label: 'Me', href: '/me' },
           { label: 'Tienda', href: '/tienda' },
           { label: '......' },
           { label: 'Store' },
@@ -103,6 +113,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
   const canAuthorize = !isLoading && isConfirmed;
   const isAuthorized = !!ownerStore || (!!store && stores.some((candidate) => candidate.documentId === store.documentId));
   const ownershipLoading = isConfirmed && stores.length === 0;
+  const isPublished = useMemo(() => isStorePublished(store), [store]);
 
   useEffect(() => {
     const timer = setTimeout(() => setMinSkeletonElapsed(true), 650);
@@ -127,10 +138,14 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       }
 
       try {
-        const response = await strapiClient.getStore(storeSlug);
+        const client = new markketClient();
+        const response = await client.fetch('/api/markket/store', {
+          method: 'GET',
+        });
         if (!active) return;
 
-        const nextStore = response?.data?.[0] as Store | undefined;
+        const storesFromApi = Array.isArray(response?.data) ? response.data as Store[] : [];
+        const nextStore = storesFromApi.find((candidate) => candidate.slug === storeSlug) as Store | undefined;
         setStore(nextStore || null);
       } finally {
         if (active) {
@@ -433,6 +448,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
       draftUrls={draftUrls}
       draftSeoTitle={draftSeoTitle}
       draftSeoDescription={draftSeoDescription}
+      isPublished={isPublished}
       onStartEditing={() => {
         setSaveError(null);
         setIsEditing(true);

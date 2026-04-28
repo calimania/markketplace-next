@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Product } from '@/markket/product';
 import { tiendaClient } from '@/markket/api.tienda';
+import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 
 type ProductListClientProps = {
   storeSlug: string;
@@ -53,7 +54,7 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
         console.log('[ProductListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'product', {
           token,
-          query: { sort: 'updatedAt:desc', pageSize: 200 },
+          query: TIENDA_CONTENT_LIST_QUERY.product,
         });
 
         console.log('[ProductListClient] API response:', { response, hasData: !!response?.data });

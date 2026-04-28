@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Badge, Button, Group, Paper, Stack, Text, Title } from '@mantine/core';
+import { useEffect, useMemo, useState } from 'react';
+import { Badge, Button, Group, Paper, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { IconArrowLeft, IconPhoto, IconSparkles } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import StoreMedia from '@/app/components/ui/store.media';
@@ -16,15 +16,23 @@ type StoreSnapshotMediaClientPageProps = {
 
 export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapshotMediaClientPageProps) {
   const contextStore = useStore();
-  const { confirmed, stores } = useAuth();
+  const { confirmed, stores, fetchStores, isLoading } = useAuth();
   const [store, setStore] = useState<Store>(contextStore);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const client = new markketClient();
+  const isConfirmed = confirmed();
+  const ownershipLoading = isLoading || (isConfirmed && stores.length === 0);
 
   const isAuthorized = useMemo(() => {
-    if (!confirmed()) return false;
+    if (!isConfirmed) return false;
     return stores.some((candidate) => candidate.slug === storeSlug || candidate.documentId === store.documentId);
-  }, [confirmed, stores, storeSlug, store.documentId]);
+  }, [isConfirmed, stores, storeSlug, store.documentId]);
+
+  useEffect(() => {
+    if (!isConfirmed) return;
+    if (stores.length > 0) return;
+    fetchStores();
+  }, [isConfirmed, stores.length, fetchStores]);
 
   const handleMediaUpdate = (media: Media, field: string, id: number | string) => {
     if (`${store.id}` !== `${id}`) return;
@@ -105,6 +113,24 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
     setStore((current) => ({ ...current, Slides: slides }));
   };
 
+  if (ownershipLoading) {
+    return (
+      <Stack gap="md">
+        <Paper withBorder radius="md" p="md">
+          <Stack gap="sm">
+            <Skeleton height={18} width={180} radius="sm" />
+            <Skeleton height={32} width={260} radius="md" />
+            <Skeleton height={12} width="72%" radius="sm" />
+            <Group>
+              <Skeleton height={32} width={110} radius="md" />
+              <Skeleton height={32} width={90} radius="md" />
+            </Group>
+          </Stack>
+        </Paper>
+      </Stack>
+    );
+  }
+
   if (!isAuthorized) {
     return (
       <Stack gap="md">
@@ -123,6 +149,7 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
     <Stack gap="md">
       <TinyBreadcrumbs
         items={[
+          { label: 'Me', href: '/me' },
           { label: 'Tienda', href: '/tienda' },
           { label: storeSlug, href: `/tienda/${storeSlug}` },
           { label: 'Media Studio' },

@@ -111,17 +111,31 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
 
           {event?.SEO?.metaUrl ? (
             <Button
-              className="mt-8 text-accent-500 dark:text-accent-300 w-full cursor-pointer"
+              component="a"
+              href={event.SEO.metaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              fullWidth
+              size="lg"
+              mt="md"
+              radius="md"
+              color="pink"
             >
-              <a
-                href={event?.SEO?.metaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                RSVP in {(new URL(event?.SEO?.metaUrl)?.hostname)}
-              </a>
+              RSVP at {new URL(event.SEO.metaUrl).hostname}
             </Button>
-          ) : (<RSVPModal eventId={event?.id.toString()} />)}
+          ) : (
+            <RSVPModal
+              eventId={event?.documentId || event?.id?.toString()}
+              eventName={event?.Name}
+              eventStartDate={event?.startDate}
+              eventEndDate={event?.endDate}
+              eventTimezone={event?.timezone}
+              storeName={store?.title}
+              storeSlug={slug}
+              eventSlug={event_slug}
+              storeDocumentId={store?.documentId}
+            />
+          )}
 
           <StoreCrosslinks
             slug={slug}

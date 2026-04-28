@@ -14,6 +14,7 @@ export { type InboxMessage } from './inbox';
 export { type Form } from './form';
 export { type Subscriber } from './newsletter';
 export { type Order } from './order';
+export { type CrmCustomer, type CrmCustomerSubscriber, type CrmSubscriberStatus } from './crm';
 export { type Tag } from './tag';
 export { type RichTextValue, type StoredRichText, type TiptapDoc, type StrapiBlock } from './richtext';
 

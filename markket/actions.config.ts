@@ -276,10 +276,8 @@ export const actionsMap: Record<string, ActionComponent> = {
       });
     },
     create: async (values: Store) => {
-      return await client.post('/api/markket/store', {
-        body: {
-          store: values,
-        },
+      return await client.post('/api/tienda/stores', {
+        body: values,
       });
     },
     form: {

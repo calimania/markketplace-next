@@ -8,11 +8,15 @@
 P0 (must-fix before launch)
 - [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
 - [ ] tienda dashboard: adding/editing Event dates works end-to-end (draft -> save -> list -> detail)
+- [ ] tienda dashboard: add/edit `event.timezone` (IANA) and ensure emails/rendering use event timezone instead of server timezone
 - [ ] tienda dashboard: validate forms for price/date fields and show clear error states
 - [ ] content QA: drafts are visible in dashboard lists and can open individual item screens reliably
 - [ ] stripe dashboard connection: reconnect and verify account status sync in tienda
 - [ ] buyer side: improve checkout UX (totals, loading states, validation, success/receipt transitions)
 - [ ] payments QA: test successful payment, failed payment, and refund visibility paths
+- [ ] owner dashboard CRM integration (JWT): wire preview/dashboard data to `/api/crm/subscribers?storeRef=<slug>`, `/api/crm/newsletters?storeRef=<slug>`, `/api/crm/orders?storeRef=<slug>`, `/api/crm/customers?storeRef=<slug>` (unified per-email record merging orders + RSVPs + subscriber status)
+- [ ] owner dashboard actions (JWT): wire `/api/crm/subscribers/:documentId/sync`, `/api/crm/newsletters/:documentId/send`, and `/api/crm/stripe/connect`
+- [ ] event preview RSVPs (JWT): ensure `/api/tienda/stores/:ref/events/:eventId/rsvps` renders records and `/api/tienda/stores/:ref/events/:eventId/rsvps/sync` only runs when sync metadata exists
 
 P1 (strongly recommended this wave)
 - [ ] buyer side: introduce per-store cart flow (add/remove/update quantity)
@@ -20,6 +24,11 @@ P1 (strongly recommended this wave)
 - [ ] payment form: improve in-app payment form reliability and preview state
 - [ ] payout form: add/verify payout setup form with status preview in dashboard
 - [ ] launch QA: technical pass (type checks, lint/build, critical route smoke tests)
+- [ ] CRM index view (single table): one unified list for customers/subscribers/orders/RSVP-derived records from `/api/crm/customers?storeRef=<slug>`
+- [ ] CRM category toggle: switch table lens between `All`, `Customers`, `Subscribers`, `Orders`, `RSVP` without leaving the page
+- [ ] CRM search + sort: text search (email/name/documentId) and sort by `lastOrderAt`, `lastRsvpAt`, `totalSpent`, `ordersCount`
+- [ ] CRM detail modal: click row to open modal with record summary + quick links/actions (`order-documentId`, `subscriber-documentId`, `rsvp-documentId`)
+- [ ] CRM modal actions (phase 1): subscriber sync + newsletter send hooks; deeper edit flows deferred
 
 P2 (polish if time)
 - [ ] tienda dashboard: verify date/timezone display consistency in list and detail pages

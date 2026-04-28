@@ -26,7 +26,7 @@ async function findEventByField(field: 'documentId' | 'slug', itemId: string, st
 }
 
 export async function findEvent(itemId: string, storeSlug: string) {
-  const statusesToTry: EventStatus[] = ['all', 'draft', 'published'];
+  const statusesToTry: EventStatus[] = ['published', 'draft', 'all'];
 
   for (const status of statusesToTry) {
     const byDocumentId = await findEventByField('documentId', itemId, storeSlug, status);

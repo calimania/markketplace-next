@@ -169,17 +169,24 @@ export async function proxyToUpstream(req: NextRequest, upstreamUrl: URL, token:
         throw error;
       }
     } else {
-      const bodyJson = await req.json();
+      let bodyJson: any = null;
+      const rawBody = await req.text();
 
-      // Auto-publish content on creation so it's visible on public pages immediately
-      if (method === 'POST' && bodyJson?.data && typeof bodyJson.data === 'object' && !bodyJson.data.publishedAt) {
-        bodyJson.data.publishedAt = new Date().toISOString();
-        bodyJson.data.status = 'published';
-        console.log('[tiendaProxy] injected publishedAt + status:published for auto-publish on create');
+      if (rawBody.trim()) {
+        bodyJson = JSON.parse(rawBody);
+
+        // Auto-publish content on creation so it's visible on public pages immediately
+        if (method === 'POST' && bodyJson?.data && typeof bodyJson.data === 'object' && !bodyJson.data.publishedAt) {
+          bodyJson.data.publishedAt = new Date().toISOString();
+          bodyJson.data.status = 'published';
+          console.log('[tiendaProxy] injected publishedAt + status:published for auto-publish on create');
+        }
+
+        console.log(`[tiendaProxy] ${req.method} upstream body keys:`, Object.keys(bodyJson?.data || {}));
+        options.body = JSON.stringify(bodyJson);
+      } else {
+        console.log(`[tiendaProxy] ${req.method} request has no JSON body`);
       }
-
-      console.log(`[tiendaProxy] ${req.method} upstream body keys:`, Object.keys(bodyJson?.data || {}));
-      options.body = JSON.stringify(bodyJson);
     }
   }
 

@@ -317,10 +317,31 @@ export const JSONDocToBlocks = (doc: any): StrapiBlock[] => {
 
       case 'image':
         const imagePayload = decodeStrapiImage(node.attrs?.strapiImage);
+        const src = typeof node.attrs?.src === 'string' ? node.attrs.src.trim() : '';
+        const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt.trim() : '';
+
+        if (imagePayload?.url) {
+          return {
+            type: 'image',
+            url: imagePayload.url,
+            image: imagePayload,
+            alt: alt || imagePayload.alternativeText || undefined,
+            children: [{ type: 'text', text: '' }],
+          };
+        }
+
+        if (!src) {
+          return null;
+        }
+
+        // Keep user intent without creating invalid Strapi image blocks.
         return {
-          type: 'image',
-          image: imagePayload || undefined,
-          children: [{ type: 'text', text: '' }],
+          type: 'paragraph',
+          children: [{
+            type: 'link',
+            url: src,
+            children: [{ type: 'text', text: alt || src }],
+          }],
         };
 
       default:

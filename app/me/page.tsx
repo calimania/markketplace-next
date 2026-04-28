@@ -19,11 +19,16 @@ import {
   Divider,
   Skeleton,
 } from '@mantine/core';
-import { IconBuildingStore, IconPlus, IconUserCircle, IconCamera, IconPencil } from '@tabler/icons-react';
+import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient, strapiClient } from '@/markket/api';
 
+/**
+ * Dashboard home for logged in users
+ *
+ * @returns
+ */
 export default function MeHomePage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading, user, refreshUser } = useAuth();
@@ -197,105 +202,105 @@ export default function MeHomePage() {
             </Stack>
           ) : (
             <>
-          <Group justify="space-between" align="flex-start" mb="md">
-            <div>
-              <Title order={3}>Profile</Title>
-              <Text mt="xs" c="dimmed">
+                <Group justify="space-between" align="flex-start" mb="md">
+                  <div>
+                    <Title order={3}>Profile</Title>
+                    <Text mt="xs" c="dimmed">
                       {isEditingProfile
                         ? (!displayName ? 'Welcome! Fill in your name and a short bio to get started.' : 'Editing mode. Save when done.')
                         : 'Tap edit to update name, bio, and avatar.'}
-              </Text>
-            </div>
-            <div style={{ position: 'relative' }}>
-              <Avatar src={user?.avatar?.url} size={72} radius="xl">
-                {(user?.displayName || user?.username || 'M').charAt(0).toUpperCase()}
-              </Avatar>
-              {isEditingProfile && (
-                <label
-                  htmlFor="me-avatar-upload"
-                  style={{
-                    position: 'absolute',
-                    right: -6,
-                    bottom: -6,
-                    width: 28,
-                    height: 28,
-                    borderRadius: '999px',
-                    background: '#0ea5e9',
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: isUploading ? 'wait' : 'pointer',
-                  }}
-                >
-                  <IconCamera size={14} />
-                </label>
-              )}
-              <input
-                id="me-avatar-upload"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={onUploadAvatar}
-                disabled={isUploading || !isEditingProfile}
-                style={{ display: 'none' }}
-              />
-            </div>
-          </Group>
+                    </Text>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Avatar src={user?.avatar?.url} size={72} radius="xl">
+                      {(user?.displayName || user?.username || 'M').charAt(0).toUpperCase()}
+                    </Avatar>
+                    {isEditingProfile && (
+                      <label
+                        htmlFor="me-avatar-upload"
+                        style={{
+                          position: 'absolute',
+                          right: -6,
+                          bottom: -6,
+                          width: 28,
+                          height: 28,
+                          borderRadius: '999px',
+                          background: '#0ea5e9',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: isUploading ? 'wait' : 'pointer',
+                        }}
+                      >
+                        <IconCamera size={14} />
+                      </label>
+                    )}
+                    <input
+                      id="me-avatar-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={onUploadAvatar}
+                      disabled={isUploading || !isEditingProfile}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                </Group>
 
-          {!isEditingProfile ? (
-            <Stack gap="sm">
-              <div>
-                <Text size="sm" c="dimmed">Display name</Text>
-                <Text fw={600}>{displayName || 'No display name yet'}</Text>
-              </div>
-              <div>
-                <Text size="sm" c="dimmed">Email</Text>
-                <Text fw={600}>{user?.email || '-'}</Text>
-              </div>
-              <div>
-                <Text size="sm" c="dimmed">Bio</Text>
-                <Text>{bio || 'No bio yet. Add a short intro.'}</Text>
-              </div>
-              <Group justify="flex-end">
-                <Button
-                  leftSection={<IconPencil size={15} />}
-                  onClick={() => setIsEditingProfile(true)}
-                  radius="xl"
-                >
-                  Edit Profile
-                </Button>
-              </Group>
-            </Stack>
-          ) : (
-            <Stack>
-              <TextInput
-                label="Email"
-                value={user?.email || ''}
-                readOnly
-              />
-              <TextInput
-                label="Display name"
-                value={displayName}
-                onChange={(event) => setDisplayName(event.currentTarget.value)}
-              />
-              <Textarea
-                label="Bio"
-                minRows={3}
-                value={bio}
-                onChange={(event) => setBio(event.currentTarget.value)}
-              />
-              <Group justify="flex-end">
-                        {(!(!displayName && !bio)) && (
-                          <Button variant="default" onClick={() => setIsEditingProfile(false)} radius="xl">
-                            Cancel
-                          </Button>
-                        )}
-                <Button onClick={onSaveQuickProfile} loading={isSaving} radius="xl">
-                  Save Profile
-                </Button>
-              </Group>
-            </Stack>
-          )}
+                {!isEditingProfile ? (
+                  <Stack gap="sm">
+                    <div>
+                      <Text size="sm" c="dimmed">Display name</Text>
+                      <Text fw={600}>{displayName || 'No display name yet'}</Text>
+                    </div>
+                    <div>
+                      <Text size="sm" c="dimmed">Email</Text>
+                      <Text fw={600}>{user?.email || '-'}</Text>
+                    </div>
+                    <div>
+                      <Text size="sm" c="dimmed">Bio</Text>
+                      <Text>{bio || 'No bio yet. Add a short intro.'}</Text>
+                    </div>
+                    <Group justify="flex-end">
+                      <Button
+                        leftSection={<IconPencil size={15} />}
+                        onClick={() => setIsEditingProfile(true)}
+                        radius="xl"
+                      >
+                        Edit Profile
+                      </Button>
+                    </Group>
+                  </Stack>
+                ) : (
+                  <Stack>
+                    <TextInput
+                      label="Email"
+                      value={user?.email || ''}
+                      readOnly
+                    />
+                    <TextInput
+                      label="Display name"
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.currentTarget.value)}
+                    />
+                    <Textarea
+                      label="Bio"
+                      minRows={3}
+                      value={bio}
+                      onChange={(event) => setBio(event.currentTarget.value)}
+                    />
+                    <Group justify="flex-end">
+                      {(!(!displayName && !bio)) && (
+                        <Button variant="default" onClick={() => setIsEditingProfile(false)} radius="xl">
+                          Cancel
+                        </Button>
+                      )}
+                      <Button onClick={onSaveQuickProfile} loading={isSaving} radius="xl">
+                        Save Profile
+                      </Button>
+                    </Group>
+                  </Stack>
+                )}
             </>
           )}
         </Paper>
@@ -309,17 +314,8 @@ export default function MeHomePage() {
                 </Title>
                 <Badge variant="light" className="me-store-count">{stores.length}</Badge>
               </Group>
-              <Text mt="xs" c="dimmed">Click to manage. Create store to add more.</Text>
+              <Text mt="xs" c="dimmed">Click to manage</Text>
             </Stack>
-
-            <Button
-              component={Link}
-              href="/me/store/new"
-              leftSection={<IconPlus size={16} />}
-              radius="xl"
-            >
-              Create Store
-            </Button>
           </Group>
 
           <Divider mb="sm" />
@@ -333,7 +329,17 @@ export default function MeHomePage() {
               </Stack>
             )}
             {!isLoading && stores.length === 0 && (
+              <>
+                <Button
+                  component={Link}
+                  href="/me/store/new"
+                  leftSection={<IconPlus size={16} />}
+                  radius="xl"
+                >
+                  Create Store
+                </Button>
               <Text c="dimmed">No stores yet. Hit Create Store to launch your first one.</Text>
+              </>
             )}
             {!isLoading && previewStores.map((store, index) => {
               const storeKey = `${store.documentId || store.slug || store.id || 'store'}-${index}`;
@@ -357,16 +363,17 @@ export default function MeHomePage() {
                 </Paper>
               );
             })}
-
-            <Button
-              variant="default"
-              component={Link}
-              href="/tienda"
-              leftSection={<IconBuildingStore size={16} />}
-              radius="xl"
-            >
-              See All Stores
-            </Button>
+            {(stores.length > 2) && (
+              <Button
+                variant="default"
+                component={Link}
+                href="/tienda"
+                leftSection={<IconBuildingStore size={16} />}
+                radius="xl"
+              >
+                See All Stores
+              </Button>
+            )}
           </Stack>
         </Paper>
       </SimpleGrid>
