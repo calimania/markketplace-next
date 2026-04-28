@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'http://localhost:1337/';
+import { markketplace } from '@/markket/config';
+
+const STRAPI_URL = markketplace.api;
 
 export async function GET(
   _request: NextRequest,
@@ -28,6 +30,8 @@ export async function GET(
     headers: { 'Content-Type': 'application/json' },
     next: { revalidate: 60 },
   });
+
+  console.log(`[rsvp/get] <- GET ${url.toString()} — ${response.status}`);
 
   if (!response.ok) {
     return NextResponse.json({ error: 'RSVP not found' }, { status: 404 });

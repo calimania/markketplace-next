@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { markketplace } from '@/markket/config';
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API || 'http://localhost:1337/';
+const STRAPI_URL = markketplace.api;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'newsletter@markket.place';
 const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Markketplace';
+const PUBLIC_URL = markketplace.markket_url;
 
 function formatEventDate(value?: string, timeZone?: string) {
   if (!value) return '';
@@ -78,7 +80,7 @@ async function sendConfirmationEmail({
 }) {
   if (!SENDGRID_API_KEY) return;
 
-  const publicUrl = process.env.NEXT_PUBLIC_MARKKET_URL || 'https://markket.place';
+  const publicUrl = PUBLIC_URL;
   const eventLink = storeSlug && eventSlug
     ? `${publicUrl}/${storeSlug}/events/${eventSlug}`
     : publicUrl;
@@ -147,6 +149,8 @@ export async function POST(request: NextRequest) {
     }
 
     const strapiUrl = new URL('api/rsvps', STRAPI_URL);
+    console.log(`[rsvp/post] -> POST ${strapiUrl.toString()} email:${email} event:${eventId}`);
+
     const strapiResponse = await fetch(strapiUrl.toString(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -162,12 +166,13 @@ export async function POST(request: NextRequest) {
 
     if (!strapiResponse.ok) {
       const body = await strapiResponse.text();
-      console.error('[rsvp] Strapi error', strapiResponse.status, body);
+      console.error(`[rsvp/post] Strapi error ${strapiResponse.status}:`, body);
       return NextResponse.json({ error: 'Could not save RSVP' }, { status: 502 });
     }
 
     const saved = await strapiResponse.json();
     const rsvpDocumentId: string | undefined = saved?.data?.documentId;
+    console.log(`[rsvp/post] saved rsvp:${rsvpDocumentId} for event:${eventId}`);
 
     // Fire-and-forget — don't fail the response if email fails
     sendConfirmationEmail({

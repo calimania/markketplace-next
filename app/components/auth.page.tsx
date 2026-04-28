@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { Store } from '@/markket/store';
 import { markketplace } from '@/markket/config';
 import { Page } from '@/markket/page';
+import { notifications } from '@mantine/notifications';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -75,7 +76,16 @@ export default function AuthPage() {
             fullWidth
             variant="subtle"
             leftSection={<IconLogout size={16} />}
-            onClick={() => logout()}
+            onClick={() => {
+              logout();
+              notifications.show({
+                title: 'Signed out',
+                message: 'See you next time! 👋',
+                color: 'pink',
+                autoClose: 3000,
+              });
+              router.push('/');
+            }}
             color="gray"
           >
             Sign out

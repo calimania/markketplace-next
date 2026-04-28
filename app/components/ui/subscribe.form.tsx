@@ -1,6 +1,6 @@
 'use client';
 
-import { TextInput, Button, Text, Modal, Stack, Group, Paper } from '@mantine/core';
+import { TextInput, Button, Text, Modal, Stack, Group, Paper, Title, Badge, ThemeIcon } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 import { type Store } from '@/markket/store.d';
@@ -31,9 +31,10 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
   });
 
   const handleSubmit = async (values: { email: string }) => {
-    const url = new URL('api/subscribers/subscribe', markketplace.api);
+    const url = new URL('/api/subscribers/subscribe', markketplace.api);
 
     try {
+      console.log(`[subscribe/form] -> POST ${url.toString()} email:${values.email} store:${store?.documentId || 'none'}`);
       const res = await fetch(url.toString(), {
         method: 'POST',
         headers: {
@@ -47,7 +48,13 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
         }),
       });
 
-      if (!res.ok) throw new Error('Subscription failed');
+      if (!res.ok) {
+        const body = await res.text();
+        console.error(`[subscribe/form] <- ${res.status}`, body);
+        throw new Error('Subscription failed');
+      }
+
+      console.log('[subscribe/form] <- success');
 
       setIsSuccess(true);
       form.reset();
@@ -91,9 +98,33 @@ export function SubscribeForm({ store }: SubscribeFormProps) {
       <Modal
         opened={isSuccess}
         onClose={() => setIsSuccess(false)}
-        title="Thank you!"
+        centered
+        radius="lg"
+        withCloseButton={false}
+        title={null}
       >
-        <Text>You&apos;ve been successfully subscribed to our newsletter.</Text>
+        <Stack gap="md" align="center" ta="center" py="xs">
+          <ThemeIcon size={58} radius="xl" variant="light" color="pink">
+            ✨
+          </ThemeIcon>
+          <Title order={3} style={{ color: '#424242' }}>
+            You&apos;re officially subscribed
+          </Title>
+          <Text size="sm" c="dimmed">
+            Thanks for joining {store?.title}&apos;s newsletter. We&apos;ll send thoughtful updates, launches, and event highlights.
+          </Text>
+          <Badge variant="light" color="pink" radius="sm">
+            Welcome to the list
+          </Badge>
+          <Button
+            radius="xl"
+            variant="gradient"
+            gradient={{ from: '#E4007C', to: '#E91E63', deg: 135 }}
+            onClick={() => setIsSuccess(false)}
+          >
+            Continue
+          </Button>
+        </Stack>
       </Modal>
     </>
   );

@@ -12,6 +12,8 @@ function toError(message: string, status: number) {
 async function proxyUpstream(method: 'GET' | 'DELETE', documentId: string) {
   const url = new URL(`/api/cliente/subscription/${documentId}`, markketplace.api);
 
+  console.log(`[subscription] → ${method} ${url.toString()}`);
+
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
@@ -22,7 +24,8 @@ async function proxyUpstream(method: 'GET' | 'DELETE', documentId: string) {
 
   if (contentType.includes('application/json')) {
     const payload = await res.json();
-    return NextResponse.json(payload, { status: res.status });
+      console.log(`[subscription] ← ${method} ${res.status}`, JSON.stringify(payload).slice(0, 200));
+      return NextResponse.json(payload, { status: res.status });
   }
 
   const text = await res.text();

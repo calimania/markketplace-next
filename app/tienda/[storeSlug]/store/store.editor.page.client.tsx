@@ -53,11 +53,11 @@ function StoreEditorLoadingScaffold() {
         <div>
           <Skeleton height={34} width={260} radius="md" mb={8} />
           <Text c="dimmed" mt={2}>
-            <span className="accent-blue">/tienda/[store]/store ::: loading :::</span>
+            <span className="accent-blue">Setting up your store workspace...</span>
           </Text>
           <Text size="xs" c="dimmed" mt={4}>[ ] [ ] [ ] [ ] [ ] [ ]</Text>
         </div>
-        <Badge variant="light" color="cyan">Tendero...</Badge>
+        <Badge variant="light" color="pink" radius="xl">Store Studio</Badge>
       </Group>
 
       <Group>

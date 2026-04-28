@@ -151,7 +151,10 @@ export default function ProductDisplay({ params }: ReceiptPageProps) {
               ).value;
 
               try {
-                const response = await fetch(new URL(`/api/subscribers`, markketplace.api), {
+                const subscribeUrl = new URL(`/api/subscribers/subscribe`, markketplace.api);
+                console.log(`[subscribe/receipt] -> POST ${subscribeUrl.toString()} email:${email} store:${store.documentId}`);
+
+                const response = await fetch(subscribeUrl, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -162,7 +165,13 @@ export default function ProductDisplay({ params }: ReceiptPageProps) {
                   }),
                 });
 
-                if (!response.ok) throw new Error();
+                if (!response.ok) {
+                  const body = await response.text();
+                  console.error(`[subscribe/receipt] <- ${response.status}`, body);
+                  throw new Error();
+                }
+
+                console.log('[subscribe/receipt] <- success');
                 form.reset();
                 setOpenModal(true);
               } catch (error) {

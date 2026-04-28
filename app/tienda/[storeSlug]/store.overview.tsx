@@ -73,6 +73,14 @@ export default function StoreOverview({
     { label: 'CRM', value: 'Open', icon: IconUsers, href: `/tienda/${store.slug}/crm`, disabled: false },
     { label: 'Payouts', value: 'Soon', icon: IconCreditCard, href: `/tienda/${store.slug}/payouts`, disabled: true },
   ];
+  const overviewTileColors: Record<string, string> = {
+    Articles: 'pink',
+    Pages: 'grape',
+    Products: 'cyan',
+    Events: 'green',
+    CRM: 'orange',
+    Payouts: 'gray',
+  };
   const allMediaThumbs = [
     currentStore.Logo?.url && { key: 'logo', src: currentStore.Logo.url, alt: currentStore.Logo.alternativeText || 'Logo', label: 'Logo' },
     currentStore.Cover?.url && { key: 'cover', src: currentStore.Cover.url, alt: currentStore.Cover.alternativeText || 'Cover', label: 'Cover' },
@@ -239,28 +247,19 @@ export default function StoreOverview({
           ]}
         />
 
-        <Group justify="space-between" align="flex-start">
-          <div>
-          <Title order={1}>{currentStore.title || currentStore.slug}</Title>
-            <Text c="dimmed" mt={2}>
-            <span className="accent-blue">/tienda/{currentStore.slug}</span>
-            </Text>
-            <Text size="xs" c="dimmed" mt={4}>
-              A clean storefront view for visitors. Browse content exactly as your audience sees it, while owner tools stay available when authorized.
-            </Text>
-          </div>
-        <Stack gap="xs" align="flex-end">
-          <Badge variant="light" color={isPublished ? 'green' : 'gray'}>
-            {isPublished ? 'Published' : 'Draft'}
-          </Badge>
-          <Badge variant="light" color="cyan">
-            {isAuthorized ? 'Tendero' : 'Tienda'}
-          </Badge>
-          {latestUpdatedAt && (
-            <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
-          )}
-        </Stack>
-        </Group>
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
+          <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+            <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+              <Group gap="xs" wrap="wrap">
+                <Title order={1}>{currentStore.title || currentStore.slug}</Title>
+              </Group>
+              <Text c="dimmed" size="sm">
+                <span className="accent-blue">/tienda/{currentStore.slug}</span>
+              </Text>
+              <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
+            </Stack>
+          </Group>
+        </Paper>
 
       {statusNotice && (
         <Paper withBorder radius="md" p="md" bg="blue.0">
@@ -268,11 +267,11 @@ export default function StoreOverview({
         </Paper>
       )}
 
-        <Paper withBorder radius="md" p="md">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Stack gap="sm">
-          <Group justify="space-between" align="center">
+          <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text fw={600}>Store Snapshot</Text>
-            <Badge variant="light" color="yellow" leftSection={<IconSparkles size={12} />}>
+            <Badge variant="light" radius="xl" color="yellow" leftSection={<IconSparkles size={12} />}>
               Overview
             </Badge>
           </Group>
@@ -288,20 +287,22 @@ export default function StoreOverview({
               <Paper
                 key={tile.label}
                 withBorder
-                radius="md"
+                radius="lg"
                 p="sm"
-                bg="gray.0"
+                bg={tile.disabled ? 'gray.0' : 'white'}
                 component={tile.disabled ? 'div' : 'a'}
                 href={tile.disabled ? undefined : tile.href}
                 style={{
                   textDecoration: 'none',
                   opacity: tile.disabled ? 0.72 : 1,
                   cursor: tile.disabled ? 'not-allowed' : 'pointer',
+                  minHeight: 76,
+                  borderLeft: `3px solid var(--mantine-color-${overviewTileColors[tile.label] || 'gray'}-4)`,
                 }}
               >
                 <Group gap="xs" wrap="nowrap" justify="space-between" align="flex-start">
                   <Group gap="xs" wrap="nowrap">
-                    <ThemeIcon variant="light" radius="xl" color="gray">
+                    <ThemeIcon variant="light" radius="xl" color={overviewTileColors[tile.label] || 'gray'}>
                       <tile.icon size={14} />
                     </ThemeIcon>
                     <div>
@@ -380,7 +381,7 @@ export default function StoreOverview({
           </Stack>
         </Paper>
 
-        <Group>
+        <Group gap="xs" wrap="wrap">
           <Button
             component="a"
           href={`/${currentStore.slug}`}
@@ -432,11 +433,11 @@ export default function StoreOverview({
           )}
         </Group>
 
-        <Paper withBorder radius="md" p="md">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Stack gap="sm">
-            <Group justify="space-between" align="center">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
               <Text fw={600}><span className="accent-yellow">Latest</span> Articles</Text>
-              <Group gap="xs">
+              <Group gap="xs" wrap="wrap">
                 {isAuthorized && (
                   <Button
                     component="a"
@@ -493,11 +494,11 @@ export default function StoreOverview({
           </Stack>
         </Paper>
 
-        <Paper withBorder radius="md" p="md">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Stack gap="sm">
-            <Group justify="space-between" align="center">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text fw={600}><span className="accent-yellow">Static</span> Pages</Text>
-              <Group gap="xs">
+              <Group gap="xs" wrap="wrap">
                 {isAuthorized && (
                   <Button
                     component="a"
@@ -551,11 +552,11 @@ export default function StoreOverview({
           </Stack>
         </Paper>
 
-        <Paper withBorder radius="md" p="md">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Stack gap="sm">
-            <Group justify="space-between" align="center">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text fw={600}><span className="accent-yellow">Services &</span> Products</Text>
-              <Group gap="xs">
+              <Group gap="xs" wrap="wrap">
                 {isAuthorized && (
                   <Button
                     component="a"
@@ -613,11 +614,11 @@ export default function StoreOverview({
           </Stack>
         </Paper>
 
-        <Paper withBorder radius="md" p="md">
+        <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }}>
           <Stack gap="sm">
-            <Group justify="space-between" align="center">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
               <Text fw={600}><span className="accent-yellow">Upcoming</span> Events</Text>
-              <Group gap="xs">
+              <Group gap="xs" wrap="wrap">
                 {isAuthorized && (
                   <Button
                     component="a"

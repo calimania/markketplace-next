@@ -18,8 +18,9 @@ import {
   Textarea,
   Divider,
   Skeleton,
+  ThemeIcon,
 } from '@mantine/core';
-import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil } from '@tabler/icons-react';
+import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil, IconSparkles } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient, strapiClient } from '@/markket/api';
@@ -39,7 +40,7 @@ export default function MeHomePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const storesRetryCountRef = useRef(0);
-  const previewStores = stores.slice(0, 2);
+  const previewStores = [...stores].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 2);
 
   useEffect(() => {
     if (isLoading) return;
@@ -166,24 +167,31 @@ export default function MeHomePage() {
 
   return (
     <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface">
-      <Group justify="space-between" align="end" mb="xl">
-        <Stack gap={2}>
-          <Group gap="xs">
-            <IconUserCircle size={28} />
+      <Group justify="space-between" align="end" mb="xl" wrap="wrap" gap="sm">
+        <Stack gap={6}>
+          <Group gap="xs" wrap="wrap">
+            <ThemeIcon radius="xl" size={34} variant="light" color="pink">
+              <IconUserCircle size={20} />
+            </ThemeIcon>
             <Title order={1}>Me</Title>
+            <Badge variant="light" radius="xl" color="pink">Workspace</Badge>
           </Group>
-          <Text c="dimmed">Quick profile edits and fast access to your stores.<br /><span className="accent-blue-note">Everything you manage lives here.</span></Text>
+          <Text c="dimmed" maw={560}>
+            Quick profile edits, account links, and your latest stores in one calmer place.
+            <br />
+            <span className="accent-blue-note">Small screen friendly. Less noise, more doing.</span>
+          </Text>
         </Stack>
 
         <Group>
-          <Button variant="default" component={Link} href="/me/account" radius="xl">
-            Account Tabs
+          <Button variant="light" component={Link} href="/me/account" radius="xl" color="pink">
+            Account
           </Button>
         </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-        <Paper withBorder p="lg" radius="md" className="me-card me-card-enter">
+        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter" style={{ background: 'linear-gradient(180deg, #fff 0%, #fffafc 100%)' }}>
           {(isLoading || !profileLoaded) ? (
             <Stack gap="md">
               <Group justify="space-between" align="flex-start">
@@ -202,13 +210,16 @@ export default function MeHomePage() {
             </Stack>
           ) : (
             <>
-                <Group justify="space-between" align="flex-start" mb="md">
+                <Group justify="space-between" align="flex-start" mb="md" wrap="nowrap">
                   <div>
-                    <Title order={3}>Profile</Title>
+                    <Group gap="xs" mb={4} wrap="wrap">
+                      <Title order={3}>Profile</Title>
+                      <Badge variant="light" radius="xl" color="grape">You</Badge>
+                    </Group>
                     <Text mt="xs" c="dimmed">
                       {isEditingProfile
                         ? (!displayName ? 'Welcome! Fill in your name and a short bio to get started.' : 'Editing mode. Save when done.')
-                        : 'Tap edit to update name, bio, and avatar.'}
+                        : 'Update your name, bio, and avatar without leaving this page.'}
                     </Text>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -266,6 +277,7 @@ export default function MeHomePage() {
                         leftSection={<IconPencil size={15} />}
                         onClick={() => setIsEditingProfile(true)}
                         radius="xl"
+                        color="pink"
                       >
                         Edit Profile
                       </Button>
@@ -305,16 +317,19 @@ export default function MeHomePage() {
           )}
         </Paper>
 
-        <Paper withBorder p="lg" radius="md" className="me-card me-card-enter" style={{ minHeight: 360 }}>
+        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter" style={{ minHeight: 360, background: 'linear-gradient(180deg, #ffffff 0%, #f8fdff 100%)' }}>
           <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
             <Stack gap={2} style={{ minWidth: 0 }}>
               <Group gap="xs" align="center" wrap="wrap">
+                <ThemeIcon radius="xl" size={30} variant="light" color="cyan">
+                  <IconSparkles size={16} />
+                </ThemeIcon>
                 <Title order={3}>
                   <span className="accent-blue">Your</span> Stores
                 </Title>
                 <Badge variant="light" className="me-store-count">{stores.length}</Badge>
               </Group>
-              <Text mt="xs" c="dimmed">Click to manage</Text>
+              <Text mt="xs" c="dimmed">Open your latest spaces and jump back into editing.</Text>
             </Stack>
           </Group>
 
@@ -335,17 +350,18 @@ export default function MeHomePage() {
                   href="/me/store/new"
                   leftSection={<IconPlus size={16} />}
                   radius="xl"
+                  color="pink"
                 >
-                  Create Store
+                  Create Your First Store
                 </Button>
-              <Text c="dimmed">No stores yet. Hit Create Store to launch your first one.</Text>
+              <Text c="dimmed">No stores yet. Start one here and shape the public page later.</Text>
               </>
             )}
             {!isLoading && previewStores.map((store, index) => {
               const storeKey = `${store.documentId || store.slug || store.id || 'store'}-${index}`;
 
               return (
-                <Paper key={storeKey} withBorder p="sm" radius="sm" className="me-store-card">
+                <Paper key={storeKey} withBorder p="sm" radius="lg" className="me-store-card">
                   <Group justify="space-between" align="center">
                     <div>
                       <Text fw={700}>{store.title}</Text>
@@ -356,8 +372,10 @@ export default function MeHomePage() {
                       component={Link}
                       href={`/tienda/${store.slug}`}
                       radius="xl"
+                      variant="light"
+                      color="cyan"
                     >
-                      Open
+                      Open Studio
                     </Button>
                   </Group>
                 </Paper>
@@ -365,11 +383,12 @@ export default function MeHomePage() {
             })}
             {(stores.length > 2) && (
               <Button
-                variant="default"
+                variant="light"
                 component={Link}
                 href="/tienda"
                 leftSection={<IconBuildingStore size={16} />}
                 radius="xl"
+                color="grape"
               >
                 See All Stores
               </Button>
