@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Group, Stack, Text, ThemeIcon } from '@mantine/core';
-import { IconChevronRight, IconFileText, IconNews, IconPhoto, IconShoppingCart, IconCalendarEvent } from '@tabler/icons-react';
+import { IconChevronRight, IconFileText, IconNews, IconPhoto, IconShoppingCart, IconCalendarEvent, IconMusic } from '@tabler/icons-react';
 import { appendEmbedParamsToHref } from '@/app/utils/embed.query';
 
-type NavIcon = 'article' | 'page' | 'store' | 'product' | 'event';
+type NavIcon = 'article' | 'page' | 'store' | 'product' | 'event' | 'album';
 
 type NavTableItem = {
   key: string;
@@ -15,6 +15,8 @@ type NavTableItem = {
   subtitle?: string;
   href: string;
   icon?: NavIcon;
+  thumbnailUrl?: string;
+  thumbnailAlt?: string;
   ctaLabel?: string;
 };
 
@@ -28,6 +30,7 @@ function getIcon(icon?: NavIcon) {
   if (icon === 'page') return <IconFileText size={14} />;
   if (icon === 'product') return <IconShoppingCart size={14} />;
   if (icon === 'event') return <IconCalendarEvent size={14} />;
+  if (icon === 'album') return <IconMusic size={14} />;
   return <IconPhoto size={14} />;
 }
 
@@ -82,9 +85,26 @@ export default function NavTable({ items, emptyText = 'No items yet.' }: NavTabl
         >
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
             <Group wrap="nowrap" gap="sm" style={{ minWidth: 0 }}>
-              <ThemeIcon variant="light" size="sm" radius="xl" color="gray">
-                {getIcon(item.icon)}
-              </ThemeIcon>
+              {item.thumbnailUrl ? (
+                <img
+                  src={item.thumbnailUrl}
+                  alt={item.thumbnailAlt || item.title}
+                  width={36}
+                  height={36}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    objectFit: 'cover',
+                    border: '1px solid rgba(15, 23, 42, 0.12)',
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                  <ThemeIcon variant="light" size="sm" radius="xl" color="gray">
+                    {getIcon(item.icon)}
+                  </ThemeIcon>
+              )}
               <div style={{ minWidth: 0 }}>
                 <Text fw={600} size="sm" truncate>
                   {item.title}

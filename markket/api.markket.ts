@@ -130,7 +130,30 @@ export class markketClient {
       cache: 'no-store',
     });
 
-    return await response.json();
+    const responseText = await response.text();
+    let payload: any = {};
+
+    try {
+      payload = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      payload = {
+        message: responseText,
+      };
+    }
+
+    if (Array.isArray(payload)) {
+      return {
+        data: payload,
+        __ok: response.ok,
+        __httpStatus: response.status,
+      };
+    }
+
+    return {
+      ...(payload || {}),
+      __ok: response.ok,
+      __httpStatus: response.status,
+    };
   };
 
   public post = async (url: string, options: any) => {

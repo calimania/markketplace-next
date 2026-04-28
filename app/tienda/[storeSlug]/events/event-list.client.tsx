@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Event } from '@/markket/event';
 import { tiendaClient } from '@/markket/api.tienda';
+import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 
 type EventListClientProps = {
   storeSlug: string;
@@ -53,7 +54,7 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
         console.log('[EventListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'event', {
           token,
-          query: { sort: 'startDate:asc', pageSize: 200 },
+          query: TIENDA_CONTENT_LIST_QUERY.event,
         });
 
         console.log('[EventListClient] API response:', { response, hasData: !!response?.data });

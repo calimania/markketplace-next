@@ -1,33 +1,11 @@
 import { notFound } from 'next/navigation';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
-import { strapiClient } from '@/markket/api.strapi';
-import type { Event } from '@/markket/event';
 import EventEditorForm from '../../event.editor.form';
+import { findEvent } from '../../events.find';
 
 type TiendaEventEditProps = {
   params: Promise<{ storeSlug: string; itemId: string }>;
 };
-
-async function findEvent(itemId: string, storeSlug: string) {
-  const byDocumentId = await strapiClient.fetch<Event>({
-    contentType: 'events',
-    filters: {
-      documentId: itemId,
-      stores: {
-        slug: {
-          $eq: storeSlug,
-        },
-      },
-    },
-    populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores',
-    paginate: { page: 1, pageSize: 1 },
-  });
-
-  if (byDocumentId?.data?.[0]) return byDocumentId.data[0] as Event;
-
-  const bySlug = await strapiClient.getEventBySlug(itemId, storeSlug);
-  return bySlug?.data?.[0] as Event | undefined;
-}
 
 export default async function TiendaEventEditPage({ params }: TiendaEventEditProps) {
   const { storeSlug, itemId } = await params;
@@ -60,6 +38,7 @@ export default async function TiendaEventEditPage({ params }: TiendaEventEditPro
           sourceUrl: event.SEO?.metaUrl,
           startDate: event.startDate,
           endDate: event.endDate,
+          timezone: event.timezone,
           thumbnailUrl: event.Thumbnail?.url,
           socialImageUrl: event.SEO?.socialImage?.url,
           slides: event.Slides,

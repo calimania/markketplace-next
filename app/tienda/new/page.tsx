@@ -117,29 +117,52 @@ export default function TiendaNewPage() {
 
     try {
       const client = new markketClient();
-      const response = await client.post('/api/markket/store', {
+      const response = await client.post('/api/tienda/stores', {
         body: {
-          store: {
-            title,
-            slug,
-            Description: description,
-            URLS: [],
-            SEO: {
-              metaTitle: title,
-              metaDescription,
-              metaKeywords: title,
-            },
+          title,
+          slug,
+          Description: description,
+          URLS: [],
+          SEO: {
+            metaTitle: title,
+            metaDescription,
+            metaKeywords: title,
           },
         },
       });
 
-      if (response?.error) {
+      const created = response?.data;
+      const createdId = created?.id || created?.documentId;
+      const createdSlug =
+        created?.slug ||
+        created?.attributes?.slug ||
+        created?.data?.slug ||
+        created?.data?.attributes?.slug;
+      const hasCreatedStore = Boolean(createdId || createdSlug);
+
+      if (response?.__ok === false || (response?.__httpStatus && response.__httpStatus >= 400)) {
+        throw new Error(response?.details?.message || response?.error || `Could not create store (HTTP ${response?.__httpStatus || 'error'}).`);
+      }
+
+      if (!hasCreatedStore && response?.error) {
         throw new Error(response?.details?.message || response?.error || 'Could not create store.');
       }
 
-      const nextSlug = response?.data?.slug || slug;
+      const nextSlug = createdSlug || slug;
 
-      await fetchStores();
+      if (process.env.NODE_ENV === 'development') {
+        console.info('store.create.success', {
+          requestedSlug: slug,
+          returnedSlug: createdSlug,
+          documentId: created?.documentId,
+          id: created?.id,
+          redirectTo: `/tienda/${nextSlug}`,
+        });
+      }
+
+      fetchStores({ force: true }).catch((error) => {
+        console.warn('store.create.fetchStores.failed', error);
+      });
 
       notifications.show({
         title: 'Store created',
@@ -147,7 +170,7 @@ export default function TiendaNewPage() {
         color: 'green',
       });
 
-      router.push(`/tienda/${nextSlug}/store`);
+      router.replace(`/tienda/${nextSlug}?created=1`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not create store.';
       notifications.show({
@@ -201,7 +224,7 @@ export default function TiendaNewPage() {
                 <Title order={1}>Create Store</Title>
               </Group>
               <Text c="dimmed">
-                Start with the minimum: title and description. We will use the title for SEO and send you straight into the store editor to finish the rest.
+                Start with the minimum: title and description. We will use the title for SEO and send you straight into your new store overview so it is obvious the store was created.
               </Text>
             </div>
 
@@ -248,7 +271,7 @@ export default function TiendaNewPage() {
                       <IconSparkles size={16} />
                       <Text fw={600} size="sm">What happens next</Text>
                     </Group>
-                    <Text size="sm" c="dimmed">We create the store shell, copy the title into SEO.metaTitle, trim your description into SEO.metaDescription, and then open the store editor so you can add images, branding, and everything else.</Text>
+                    <Text size="sm" c="dimmed">We will create your store and take you straight to it, so you can review it and keep customizing right away.</Text>
                   </Stack>
                 </Paper>
 

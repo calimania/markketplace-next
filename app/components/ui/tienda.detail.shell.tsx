@@ -24,9 +24,18 @@ export default function TiendaDetailShell({
   actions,
   children,
 }: TiendaDetailShellProps) {
+  const hasMe = breadcrumbs.some((item) => item.label === 'Me');
+  const hasTienda = breadcrumbs.some((item) => item.label === 'Tienda');
+
+  const normalizedBreadcrumbs: BreadcrumbItem[] = [
+    ...(hasMe ? [] : [{ label: 'Me', href: '/me' }]),
+    ...(hasTienda ? [] : [{ label: 'Tienda', href: '/tienda' }]),
+    ...breadcrumbs,
+  ];
+
   return (
     <Stack gap="md">
-      <TinyBreadcrumbs items={breadcrumbs} />
+      <TinyBreadcrumbs items={normalizedBreadcrumbs} />
 
       <Group justify="space-between" align="end">
         <div>

@@ -31,6 +31,87 @@ type UploadField = 'Logo' | 'Favicon' | 'SEO.socialImage' | 'Cover' | 'Slides';
 type LoadingField = 'logo' | 'favicon' | 'social' | 'slides' | null;
 type SlideMedia = Store['Slides'][number];
 
+type UploadRule = {
+  maxWidth: number;
+  maxHeight: number;
+  targetBytes: number;
+  maxBytes: number;
+  helper: string;
+};
+
+const uploadRules: Record<UploadField, UploadRule> = {
+  Favicon: {
+    maxWidth: 96,
+    maxHeight: 96,
+    targetBytes: 48 * 1024,
+    maxBytes: 160 * 1024,
+    helper: 'Favicon is optimized to around 64-96 px and kept very small.',
+  },
+  Logo: {
+    maxWidth: 600,
+    maxHeight: 600,
+    targetBytes: 260 * 1024,
+    maxBytes: 900 * 1024,
+    helper: 'Logo is optimized up to 600x600 for crisp UI with lighter payload.',
+  },
+  Cover: {
+    maxWidth: 1600,
+    maxHeight: 900,
+    targetBytes: 650 * 1024,
+    maxBytes: 2 * 1024 * 1024,
+    helper: 'Cover is optimized for wide layouts and social cards.',
+  },
+  'SEO.socialImage': {
+    maxWidth: 1200,
+    maxHeight: 630,
+    targetBytes: 550 * 1024,
+    maxBytes: 1800 * 1024,
+    helper: 'Social image targets the standard 1200x630 preview size.',
+  },
+  Slides: {
+    maxWidth: 1600,
+    maxHeight: 1200,
+    targetBytes: 700 * 1024,
+    maxBytes: 2 * 1024 * 1024,
+    helper: 'Slides are auto-optimized to keep gallery loading snappy.',
+  },
+};
+
+const rasterMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number) {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, quality);
+  });
+}
+
+function loadImage(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to read image'));
+    };
+    img.src = url;
+  });
+}
+
+function withExtension(fileName: string, extension: string) {
+  const base = fileName.includes('.') ? fileName.slice(0, fileName.lastIndexOf('.')) : fileName;
+  return `${base}.${extension}`;
+}
+
 type MediaSlot = {
   id: string;
   label: string;
@@ -67,6 +148,15 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   }, [store.documentId, store.Slides]);
 
   const getSlideSlotId = (slide: SlideMedia, index: number) => `slide-${slide.documentId || slide.id || index}`;
+  const storeName = (store.title || store.slug || 'store').trim();
+
+  const fieldAltLabel = (field: UploadField) => {
+    if (field === 'Logo') return 'logo';
+    if (field === 'Favicon') return 'favicon';
+    if (field === 'Cover') return 'cover image';
+    if (field === 'SEO.socialImage') return 'social image';
+    return 'slide image';
+  };
 
   const slots: MediaSlot[] = [
     {
@@ -74,7 +164,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       label: 'Logo',
       field: 'Logo',
       src: store.Logo?.url,
-      alt: store.Logo?.alternativeText || 'Store logo',
+      alt: store.Logo?.alternativeText || `${storeName} logo`,
       mediaId: store.Logo?.id,
     },
     {
@@ -82,7 +172,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       label: 'Favicon',
       field: 'Favicon',
       src: store.Favicon?.url,
-      alt: store.Favicon?.alternativeText || 'Store favicon',
+      alt: store.Favicon?.alternativeText || `${storeName} favicon`,
       mediaId: store.Favicon?.id,
     },
     {
@@ -90,7 +180,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       label: 'Cover',
       field: 'Cover',
       src: store.Cover?.url,
-      alt: store.Cover?.alternativeText || 'Store cover',
+      alt: store.Cover?.alternativeText || `${storeName} cover image`,
       mediaId: store.Cover?.id,
     },
     {
@@ -98,7 +188,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       label: 'Social',
       field: 'SEO.socialImage',
       src: store.SEO?.socialImage?.url,
-      alt: store.SEO?.socialImage?.alternativeText || 'Store social image',
+      alt: store.SEO?.socialImage?.alternativeText || `${storeName} social image`,
       mediaId: store.SEO?.socialImage?.id,
     },
     ...draftSlides.slice(0, 8).map((slide, index) => ({
@@ -106,7 +196,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       label: `Slide ${index + 1}`,
       field: 'Slides' as UploadField,
       src: slide.formats?.small?.url || slide.url,
-      alt: slide.alternativeText || `Slide ${index + 1}`,
+      alt: slide.alternativeText || `${storeName} slide ${index + 1}`,
       isSlide: true,
       mediaId: slide.id,
     })),
@@ -120,6 +210,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   ];
 
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || slots[0];
+  const selectedRule = uploadRules[selectedSlot.field];
   const selectedSlideIndex = selectedSlot?.isSlide && selectedSlot.id !== 'slide-add'
     ? draftSlides.findIndex((slide, index) => getSlideSlotId(slide, index) === selectedSlot.id)
     : -1;
@@ -138,6 +229,80 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
     setAltText(selectedSlot?.alt || '');
   }, [selectedSlot?.id, selectedSlot?.alt]);
 
+  const optimizeForField = async (file: File, field: UploadField) => {
+    const rule = uploadRules[field];
+
+    if (!rasterMimeTypes.has(file.type)) {
+      if (file.size > rule.maxBytes) {
+        throw new Error(`${field} file is too large (${formatBytes(file.size)}). Max is ${formatBytes(rule.maxBytes)}.`);
+      }
+      return file;
+    }
+
+    const image = await loadImage(file);
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+
+    const scale = Math.min(1, rule.maxWidth / width, rule.maxHeight / height);
+    const nextWidth = Math.max(1, Math.round(width * scale));
+    const nextHeight = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = nextWidth;
+    canvas.height = nextHeight;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('Image processing is not available in this browser');
+    }
+
+    ctx.drawImage(image, 0, 0, nextWidth, nextHeight);
+
+    const preferredType = field === 'Favicon'
+      ? 'image/png'
+      : (file.type === 'image/jpeg' ? 'image/jpeg' : 'image/webp');
+    let quality = preferredType === 'image/png' ? undefined : 0.9;
+
+    let blob = await toBlob(canvas, preferredType, quality);
+
+    if (!blob) {
+      throw new Error('Could not prepare image for upload');
+    }
+
+    if (preferredType !== 'image/png') {
+      while (blob.size > rule.targetBytes && quality && quality > 0.45) {
+        quality = Number((quality - 0.08).toFixed(2));
+        blob = (await toBlob(canvas, preferredType, quality)) || blob;
+      }
+    }
+
+    if (blob.size > rule.maxBytes && preferredType === 'image/png' && field !== 'Favicon') {
+      let webpQuality = 0.88;
+      let webpBlob = await toBlob(canvas, 'image/webp', webpQuality);
+
+      while (webpBlob && webpBlob.size > rule.targetBytes && webpQuality > 0.45) {
+        webpQuality = Number((webpQuality - 0.08).toFixed(2));
+        webpBlob = (await toBlob(canvas, 'image/webp', webpQuality)) || webpBlob;
+      }
+
+      if (webpBlob) {
+        blob = webpBlob;
+      }
+    }
+
+    if (blob.size > rule.maxBytes) {
+      throw new Error(`${field} is still too large after optimization (${formatBytes(blob.size)}). Max is ${formatBytes(rule.maxBytes)}.`);
+    }
+
+    const extension = blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/png' ? 'png' : 'webp';
+    const optimized = new File([blob], withExtension(file.name, extension), {
+      type: blob.type,
+      lastModified: Date.now(),
+    });
+
+    return optimized;
+  };
+
   const handleUpload = async (file: File, field: UploadField) => {
     if (!store?.id) return;
 
@@ -150,16 +315,17 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
         throw new Error('Missing session token');
       }
 
+      const optimizedFile = await optimizeForField(file, field);
+
       const storeRef = store.documentId || store.slug || store.id;
-      const attachField = field === 'SEO.socialImage' ? 'Cover' : field;
       const uploadResult = await tiendaClient.uploadStoreMedia(storeRef, {
         token,
-        files: [file],
-        caption: altText.trim() || `${store.title || store.slug || 'Store'} ${field}`,
-        alternativeText: altText.trim() || `${store.title || store.slug || 'Store'} ${field}`,
+        files: [optimizedFile],
+        caption: altText.trim() || `${storeName} ${fieldAltLabel(field)}`,
+        alternativeText: altText.trim() || `${storeName} ${fieldAltLabel(field)}`,
         attach: {
           contentType: 'store',
-          field: attachField,
+          field,
           mode: field === 'Slides' ? 'append' : 'replace',
         },
       });
@@ -170,7 +336,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
       notifications.show({
         title: 'Success',
-        message: `Store ${field?.toLowerCase()} updated successfully`,
+        message: `${field} uploaded (${formatBytes(optimizedFile.size)})`,
         color: 'green',
       });
 
@@ -190,7 +356,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       console.error('Upload failed:', error);
       notifications.show({
         title: 'Error',
-        message: `Failed to upload ${field?.toLowerCase()}`,
+        message: error instanceof Error ? error.message : `Failed to upload ${field?.toLowerCase()}`,
         color: 'red',
       });
     } finally {
@@ -300,6 +466,19 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
           <Title order={4}>Store Media</Title>
           <Group gap="xs">
             {hasSlideDraftChanges && <Badge variant="light" color="orange">Slides not saved</Badge>}
+            {hasSlideDraftChanges && onSaveSlides && (
+              <Button
+                variant="light"
+                color="grape"
+                size="xs"
+                leftSection={<IconDeviceFloppy size={14} />}
+                onClick={saveSlides}
+                loading={savingSlides}
+                disabled={savingSlides}
+              >
+                Save Slides
+              </Button>
+            )}
             {loading && (
               <Badge variant="light" color="grape">Uploading...</Badge>
             )}
@@ -432,12 +611,16 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
                 <TextInput
                   label="Alt text"
-                  description="Used when you upload or replace this selected image."
+                  description={`Used when you upload or replace this selected image. ${selectedRule.helper}`}
                   placeholder={`Describe ${selectedSlot.label.toLowerCase()} image`}
                   value={altText}
                   onChange={(event) => setAltText(event.currentTarget.value)}
                   size="xs"
                 />
+
+                <Text size="xs" c="dimmed">
+                  Max upload budget for {selectedSlot.label}: {selectedRule.maxWidth}x{selectedRule.maxHeight} and about {formatBytes(selectedRule.maxBytes)}.
+                </Text>
 
                 <Group justify="space-between" align="center">
                   <Text size="xs" c="dimmed">Save alt text for this selected image.</Text>

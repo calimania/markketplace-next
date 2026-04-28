@@ -56,7 +56,7 @@ export default async function TiendaBlogItemPage({ params }: TiendaBlogItemPageP
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={Boolean(post.publishedAt)}
+            isPublished={String((post as any).status || '').toLowerCase() === 'published' || Boolean(post.publishedAt)}
           />
         </>
       }
@@ -69,13 +69,18 @@ export default async function TiendaBlogItemPage({ params }: TiendaBlogItemPageP
           storeRef={storeRef}
           contentType="article"
           itemDocumentId={itemDocumentId}
-          studioHref={`/tienda/${storeSlug}/snapshot`}
           slots={[
             {
-              label: 'Cover / Social',
-              field: 'SEO.socialImage',
+              label: 'Cover',
+              field: 'cover',
               src: post.cover?.url || post.cover?.formats?.medium?.url,
               alt: post.Title,
+            },
+            {
+              label: 'Social',
+              field: 'SEO.socialImage',
+              src: post.SEO?.socialImage?.url,
+              alt: post.SEO?.socialImage?.alternativeText || post.Title,
             },
           ]}
         />

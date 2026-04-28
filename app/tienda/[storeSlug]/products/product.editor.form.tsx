@@ -6,6 +6,7 @@ import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
+import { useStore } from '../store.provider';
 
 type ProductEditorFormProps = {
   storeSlug: string;
@@ -17,6 +18,7 @@ type ProductEditorFormProps = {
     description?: string;
     seoTitle?: string;
     seoDescription?: string;
+    sourceUrl?: string;
   };
 };
 
@@ -48,12 +50,17 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
   const [description, setDescription] = useState(initial?.description || '');
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
+  const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
-  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription });
+  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl });
   const [isDirty, setIsDirty] = useState(false);
 
-  const storeRef = useMemo(() => storeSlug, [storeSlug]);
+  const store = useStore();
+  const storeRef = useMemo(
+    () => store.documentId || store.slug || storeSlug,
+    [store.documentId, store.slug, storeSlug],
+  );
 
   useEffect(() => {
     if (!slugTouched) {
@@ -68,9 +75,10 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       || slug !== snap.slug
       || description !== snap.description
       || seoTitle !== snap.seoTitle
-      || seoDescription !== snap.seoDescription,
+      || seoDescription !== snap.seoDescription
+      || sourceUrl !== snap.sourceUrl,
     );
-  }, [name, slug, description, seoTitle, seoDescription]);
+  }, [name, slug, description, seoTitle, seoDescription, sourceUrl]);
 
   const handleSubmit = async () => {
     const token = readAuthToken();
@@ -98,6 +106,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       SEO: {
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
+        metaUrl: sourceUrl.trim() || undefined,
       },
     };
 
@@ -112,7 +121,30 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
       }
 
-      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription };
+      let responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
+
+      if (mode === 'edit' && !response?.data) {
+        const verification = await tiendaClient.getContent(storeRef, 'product', responseDocumentId, {
+          token,
+          query: { status: 'all' },
+        });
+
+        if (!verification || (verification?.status && verification.status >= 400) || !verification?.data) {
+          throw new Error('Save response was empty and verification failed. Please try saving again.');
+        }
+
+        const verifiedProduct = verification.data as { documentId?: string; Name?: string; slug?: string };
+        if (
+          (verifiedProduct?.Name && verifiedProduct.Name !== payload.Name)
+          || (verifiedProduct?.slug && verifiedProduct.slug !== payload.slug)
+        ) {
+          throw new Error('Save did not persist latest changes yet. Please try again.');
+        }
+
+        responseDocumentId = verifiedProduct.documentId || responseDocumentId;
+      }
+
+      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl };
       setIsDirty(false);
 
       notifications.show({
@@ -122,8 +154,11 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         autoClose: 3000,
       });
 
-      const responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
-      router.push(`/tienda/${storeSlug}/products/${responseDocumentId}`);
+      const destination = mode === 'new'
+        ? `/tienda/${storeSlug}/products/${responseDocumentId}?created=1`
+        : `/tienda/${storeSlug}/products/${responseDocumentId}`;
+
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       notifications.show({
@@ -180,9 +215,13 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         placeholder="SEO description (optional)"
       />
 
-      <Text size="xs" c="dimmed">
-        Cover, slides and social image are managed from the product preview Image Manager.
-      </Text>
+      <TextInput
+        label="External Purchase URL"
+        value={sourceUrl}
+        onChange={(e) => setSourceUrl(e.currentTarget.value)}
+        placeholder="https://example.com/buy"
+        description="Optional URL for external checkout or marketplace listing."
+      />
 
       <Group justify="space-between">
         <Button component="a" variant="subtle" href={`/tienda/${storeSlug}/products`}>

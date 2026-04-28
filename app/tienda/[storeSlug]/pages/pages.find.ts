@@ -22,13 +22,14 @@ async function findPageByField(field: 'documentId' | 'slug', itemId: string, sto
     contentType: 'pages',
     filters,
     status,
+    includeAuth: true,
     populate: 'SEO.socialImage,store',
     paginate: { page: 1, pageSize: 1 },
   });
 }
 
 export async function findPage(itemId: string, storeSlug?: string) {
-  const statusesToTry: PageStatus[] = ['all', 'draft', 'published'];
+  const statusesToTry: PageStatus[] = ['published', 'draft', 'all'];
 
   for (const status of statusesToTry) {
     const byDocumentId = await findPageByField('documentId', itemId, storeSlug, status);

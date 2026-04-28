@@ -125,16 +125,28 @@ function extractImagesFromContent(value: RichTextValue): StudioImage[] {
 
 function appendImageBlock(content: RichTextValue, media: StudioImage, fallbackAlt = 'Image'): RichTextValue {
   const blocks = Array.isArray(content) ? [...content] : [];
+  const imageName = media.name || fallbackAlt;
+  const imageAlt = media.alternativeText || fallbackAlt;
+  const imageWidth = typeof media.width === 'number' ? media.width : 0;
+  const imageHeight = typeof media.height === 'number' ? media.height : 0;
+  const imageFormats = media.formats || {};
 
   blocks.push({
     type: 'image',
     image: {
       url: media.url,
-      name: media.name || fallbackAlt,
-      alternativeText: media.alternativeText || fallbackAlt,
-      width: media.width || 0,
-      height: media.height || 0,
-      formats: media.formats as any,
+      name: imageName,
+      alternativeText: imageAlt,
+      width: imageWidth,
+      height: imageHeight,
+      formats: imageFormats as any,
+      hash: media.hash || '',
+      ext: media.ext || '',
+      mime: media.mime || '',
+      size: typeof media.size === 'number' ? media.size : 0,
+      provider: media.provider || 'local',
+      createdAt: media.createdAt || new Date().toISOString(),
+      updatedAt: media.updatedAt || new Date().toISOString(),
     },
     children: [{ type: 'text', text: '' }],
   });
@@ -290,7 +302,7 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
         attach: {
           contentType: 'page',
           itemId: itemDocumentId,
-          field: 'Cover',
+          field: 'SEO.socialImage',
           mode: 'replace',
         },
       });
@@ -400,6 +412,31 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
       }
 
+      // Some upstream update flows return 200/204 with an empty body.
+      // Verify persisted content to avoid false-positive "saved" UX.
+      let responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
+
+      if (mode === 'edit' && !response?.data) {
+        const verification = await tiendaClient.getContent(storeRef, 'page', responseDocumentId, {
+          token,
+          query: { status: 'all' },
+        });
+
+        if (!verification || (verification?.status && verification.status >= 400) || !verification?.data) {
+          throw new Error('Save response was empty and verification failed. Please try saving again.');
+        }
+
+        const verifiedPage = verification.data as { documentId?: string; Title?: string; slug?: string };
+        if (
+          (verifiedPage?.Title && verifiedPage.Title !== payload.Title)
+          || (verifiedPage?.slug && verifiedPage.slug !== payload.slug)
+        ) {
+          throw new Error('Save did not persist latest changes yet. Please try again.');
+        }
+
+        responseDocumentId = verifiedPage.documentId || responseDocumentId;
+      }
+
       savedSnapshotRef.current = { title, slug: nextSlug, seoTitle, seoDescription, content };
       setIsDirty(false);
       setIsSaved(true);
@@ -411,8 +448,11 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
         autoClose: 3000,
       });
 
-      const responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
-      router.push(`/tienda/${storeSlug}/pages/${responseDocumentId}`);
+      const destination = mode === 'new'
+        ? `/tienda/${storeSlug}/pages/${responseDocumentId}?created=1`
+        : `/tienda/${storeSlug}/pages/${responseDocumentId}`;
+
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       console.error('[PageEditorForm] save failed', error);

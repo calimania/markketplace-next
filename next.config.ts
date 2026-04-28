@@ -99,6 +99,7 @@ const nextConfig = {
       },
     ],
   },
+  turbopack: {},
 
 };
 

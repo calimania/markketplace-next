@@ -1,14 +1,15 @@
 'use client';
 
-import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box, Paper, Anchor } from "@mantine/core";
-import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft, IconCalendar, IconNews } from "@tabler/icons-react";
+import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box, Paper, Anchor, Menu, Avatar, UnstyledButton } from "@mantine/core";
+import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft, IconCalendar, IconNews, IconUser, IconDashboard, IconLogout, IconLogin } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useDisclosure } from '@mantine/hooks';
 import { Store } from '@/markket/store.d';
 import { StoreVisibility } from '@/markket/store.visibility.d';
 import { markketColors } from '@/markket/colors.config';
 import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
+import { useAuth } from '@/app/providers/auth.provider';
 import './store-navbar.css';
 
 function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visibility?: StoreVisibility | null; onNavigate?: () => void }) {
@@ -115,10 +116,15 @@ export function ClientLayout({
   const [opened, { toggle, close }] = useDisclosure();
   const embedded = useEmbeddedMode();
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
 
   const handleNavigation = () => {
     close();
   };
+
+  const storeInitial = (store?.title || store?.SEO?.metaTitle || store?.slug || 'S').charAt(0).toUpperCase();
+  const logoUrl = store?.Logo?.url;
 
   // Generate nav links for header
   const headerNavLinks = [
@@ -184,11 +190,31 @@ export function ClientLayout({
               />
               <Link href={`/${store?.slug}`} onClick={handleNavigation} style={{ textDecoration: 'none' }}>
                 <Group gap="sm">
-                  <img
-                    src={store?.Logo?.url}
-                    alt={store?.SEO?.metaTitle}
-                    style={{ height: '30px', width: 'auto' }}
-                  />
+                    {logoUrl ? (
+                      <img
+                        src={logoUrl}
+                        alt={store?.SEO?.metaTitle || store?.title || 'Store logo'}
+                        style={{ height: '30px', width: 'auto', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <Box
+                        style={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: 8,
+                          background: markketColors.gradients.hero,
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 14,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {storeInitial}
+                      </Box>
+                    )}
                   <Text size="lg" fw={600} visibleFrom="sm" c="dark">
                     {store?.title || store?.SEO?.metaTitle}
                   </Text>
@@ -214,6 +240,40 @@ export function ClientLayout({
                 </Button>
               ))}
             </Group>
+
+            {/* User Menu */}
+            <Menu shadow="md" width={180} position="bottom-end">
+              <Menu.Target>
+                <UnstyledButton style={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    src={user?.avatar?.url}
+                    size={32}
+                    radius="xl"
+                    style={{ cursor: 'pointer', border: `2px solid ${markketColors.neutral.lightGray}` }}
+                  >
+                    <IconUser size={16} />
+                  </Avatar>
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {user ? (
+                  <>
+                    <Menu.Label>{user.displayName || user.username || user.email}</Menu.Label>
+                    <Menu.Item leftSection={<IconDashboard size={14} />} onClick={() => router.push('/me')}>
+                      Dashboard
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item color="red" leftSection={<IconLogout size={14} />} onClick={() => logout()}>
+                      Sign out
+                    </Menu.Item>
+                  </>
+                ) : (
+                  <Menu.Item leftSection={<IconLogin size={14} />} onClick={() => router.push('/auth')}>
+                    Sign in
+                  </Menu.Item>
+                )}
+              </Menu.Dropdown>
+            </Menu>
           </Group>
         </Container>
         </AppShell.Header>
@@ -225,12 +285,30 @@ export function ClientLayout({
           {/* Store Branding */}
           <Box>
             <Group gap="sm" mb="xs" wrap="nowrap">
-              {store?.Logo?.url && (
+                {logoUrl ? (
                 <img
-                  src={store.Logo.url}
+                    src={logoUrl}
                   alt={store.SEO?.metaTitle || store.title}
                   style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
                 />
+                ) : (
+                  <Box
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      background: markketColors.gradients.hero,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {storeInitial}
+                  </Box>
               )}
               <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={700} truncate>

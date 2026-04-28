@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
-import { IconExternalLink, IconPhoto } from '@tabler/icons-react';
+import { IconExternalLink } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import Markdown from '@/app/components/ui/page.markdown';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
+import EventItemActions from '../event.item.actions';
+import EventDetailTabs from '../event.detail.tabs';
 import { findEvent } from '../events.find';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
@@ -66,21 +68,17 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
       actions={
         <>
           <SmartBackButton fallbackHref={`/tienda/${storeSlug}/events`} />
-          {/* <Button
-            component="a"
-            href={`/tienda/${storeSlug}/snapshot`}
-            variant="default"
-            leftSection={<IconPhoto size={16} />}
-          >
-            Media Studio
-          </Button> */}
-          <Button component="a" href={`/tienda/${storeSlug}/events/${editorId}/edit`}>
-            Edit
-          </Button>
+          <EventItemActions
+            storeSlug={storeSlug}
+            itemDocumentId={itemDocumentId}
+            editorId={editorId}
+            isPublished={String((event as any).status || '').toLowerCase() === 'published' || Boolean(event.publishedAt)}
+          />
         </>
       }
     >
-      <Stack gap="md">
+      <EventDetailTabs storeRef={storeRef} eventDocumentId={itemDocumentId} eventNumericId={event.id}>
+        <Stack gap="md">
         <Text c="dimmed">{event.SEO?.metaDescription || 'No summary yet.'}</Text>
 
         <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
@@ -94,8 +92,7 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
         <ContentMediaPreview
           storeRef={storeRef}
           contentType="event"
-          itemDocumentId={itemDocumentId}
-          studioHref={`/tienda/${storeSlug}/snapshot`}
+            itemDocumentId={itemDocumentId}
           slots={[
             {
               label: 'Thumbnail',
@@ -160,7 +157,7 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
           </>
         )}
 
-        {event.usd_price && event.usd_price > 0 && !event.SEO?.metaUrl && (
+          {event.usd_price != null && event.usd_price > 0 && !event.SEO?.metaUrl && (
           <>
             <Divider />
             <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-blue-0)">
@@ -177,6 +174,7 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
           </>
         )}
       </Stack>
+      </EventDetailTabs>
     </TiendaDetailShell>
   );
 }

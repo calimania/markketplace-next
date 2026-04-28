@@ -9,7 +9,7 @@ import { Markdown } from 'tiptap-markdown';
 import {
   Text, Paper, Tabs, Group, ActionIcon, Tooltip, TextInput, Button,
   Modal, Stack, FileButton, Progress, Image as MantineImage,
-  Box, SegmentedControl, Center, Loader
+  Box, SegmentedControl, Center, Loader, SimpleGrid
 } from '@mantine/core';
 import {
   IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
@@ -85,15 +85,21 @@ const ContentEditor = ({
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
-  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('url');
+  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload' | 'library'>('library');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadedImageData, setUploadedImageData] = useState<Record<string, unknown> | null>(null);
+  const [imageLibrary, setImageLibrary] = useState<'unsplash' | 'pexels'>('unsplash');
+  const [libraryQuery, setLibraryQuery] = useState('');
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryResults, setLibraryResults] = useState<string[]>([]);
 
   const uploadFile = async (file: File) => {
     try {
+      setImageError(null);
       setIsUploading(true);
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
@@ -138,14 +144,75 @@ const ContentEditor = ({
       }
     } catch (error) {
       console.error('Image upload failed:', error);
+      setImageError(error instanceof Error ? error.message : 'Image upload failed.');
       setUploadProgress(0);
       setIsUploading(false);
     }
   }
 
+  const importExternalImageToStrapi = async (sourceUrl: string, altText?: string) => {
+    const proxyUrl = `/api/markket/img?action=proxy&url=${encodeURIComponent(sourceUrl)}`;
+    const imageResponse = await fetch(proxyUrl);
+
+    if (!imageResponse.ok) {
+      throw new Error('Could not download the selected image URL.');
+    }
+
+    const blob = await imageResponse.blob();
+    const mime = blob.type || 'image/jpeg';
+    const extension = mime.split('/')[1] || 'jpg';
+    const fileNameBase = (altText || 'image')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'image';
+
+    const file = new File([blob], `${fileNameBase}.${extension}`, { type: mime });
+    const uploaded = await strapiClient.uploadImage(file, {
+      alternativeText: altText || fileNameBase,
+    });
+    const uploadedItem = uploaded?.[0];
+
+    if (!uploadedItem?.url) {
+      throw new Error('Could not import image into the media library.');
+    }
+
+    return {
+      url: uploadedItem.url,
+      data: uploadedItem as Record<string, unknown>,
+    };
+  };
+
   const handleFileUpload = (file: File | null) => {
     if (!file) return;
     uploadFile(file);
+  };
+
+  const searchImageLibrary = async () => {
+    try {
+      setLibraryLoading(true);
+      const endpoint = `/api/markket/img?action=${imageLibrary}&query=${encodeURIComponent(libraryQuery || '')}`;
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      const urls = Array.isArray(data?.urls) ? data.urls.filter(Boolean) : [];
+      setLibraryResults(urls);
+    } catch (error) {
+      console.error('library.search.failed', error);
+      setLibraryResults([]);
+    } finally {
+      setLibraryLoading(false);
+    }
+  };
+
+  const openImageModal = () => {
+    if (editor?.isActive('image')) {
+      const attrs = editor.getAttributes('image');
+      setImageUrl(typeof attrs?.src === 'string' ? attrs.src : '');
+      setImageAlt(typeof attrs?.alt === 'string' ? attrs.alt : '');
+      setImageUploadOption('url');
+    }
+
+    setImageModalOpen(true);
   };
 
   // Reset the file input when closing the modal
@@ -154,6 +221,9 @@ const ContentEditor = ({
     setPreviewUrl(null);
     setUploadProgress(0);
     setUploadedImageData(null);
+    setImageError(null);
+    setLibraryResults([]);
+    setLibraryLoading(false);
   };
 
   // Compute safe initial content once at mount.
@@ -280,18 +350,55 @@ const ContentEditor = ({
     }
   }, [editor, value, format]);
 
-  const handleInsertImage = () => {
+  const handleInsertImage = async () => {
     if (!editor || !imageUrl.trim()) return;
 
-    editor
-      .chain()
-      .focus()
-      .setImage({
-        src: imageUrl,
-        alt: imageAlt,
-        strapiImage: uploadedImageData ? JSON.stringify(uploadedImageData) : null,
-      })
-      .run();
+    setImageError(null);
+    let finalUrl = imageUrl.trim();
+    let finalImageData = uploadedImageData;
+
+    if (format === 'blocks' && !finalImageData) {
+      try {
+        setIsUploading(true);
+        const imported = await importExternalImageToStrapi(finalUrl, imageAlt);
+        finalUrl = imported.url;
+        finalImageData = imported.data;
+        setImageUrl(finalUrl);
+        setUploadedImageData(finalImageData);
+      } catch (error) {
+        console.error('Image import failed:', error);
+        setImageError(
+          error instanceof Error
+            ? error.message
+            : 'Could not import image. Try Upload Image instead.',
+        );
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
+    if (editor.isActive('image')) {
+      editor
+        .chain()
+        .focus()
+        .updateAttributes('image', {
+          src: finalUrl,
+          alt: imageAlt,
+          strapiImage: finalImageData ? JSON.stringify(finalImageData) : null,
+        })
+        .run();
+    } else {
+      editor
+        .chain()
+        .focus()
+        .setImage({
+          src: finalUrl,
+          alt: imageAlt,
+          strapiImage: finalImageData ? JSON.stringify(finalImageData) : null,
+        })
+        .run();
+    }
 
     // Reset form and close modal
     setImageUrl('');
@@ -303,9 +410,11 @@ const ContentEditor = ({
   // Handle modal close
   const handleCloseModal = () => {
     setImageModalOpen(false);
-    setImageUploadOption('url');
+    setImageUploadOption('library');
     setImageUrl('');
     setImageAlt('');
+    setImageError(null);
+    setLibraryQuery('');
     resetFileInput();
   };
 
@@ -360,7 +469,7 @@ const ContentEditor = ({
               {(format === 'markdown' || format === 'blocks') && (
                 <Tooltip label="Insert image">
                   <ActionIcon
-                    onClick={() => setImageModalOpen(true)}
+                    onClick={openImageModal}
                     variant="light"
                     color="blue"
                   >
@@ -414,7 +523,7 @@ const ContentEditor = ({
                   {(format === 'markdown' || format === 'blocks') && (
                     <ActionIcon
                       variant="subtle"
-                      onClick={() => setImageModalOpen(true)}
+                      onClick={openImageModal}
                       title="Insert image"
                     >
                       <IconPhotoPlus size={18} />
@@ -460,10 +569,11 @@ const ContentEditor = ({
         <Stack my="md">
           <SegmentedControl
             value={imageUploadOption}
-            onChange={(value) => setImageUploadOption(value as 'url' | 'upload')}
+            onChange={(value) => setImageUploadOption(value as 'url' | 'upload' | 'library')}
             data={[
               { label: 'Image URL', value: 'url' },
               { label: 'Upload Image', value: 'upload' },
+              { label: 'Library', value: 'library' },
             ]}
             fullWidth
           />
@@ -476,7 +586,7 @@ const ContentEditor = ({
                   <Loader size="sm" />
                 ) : (
                   <img
-                    src={imageUrl || 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/079a9ce3daa373036a6bc77c1739d424.png'}
+                      src={previewUrl || imageUrl || 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/079a9ce3daa373036a6bc77c1739d424.png'}
                     alt={imageAlt || "Preview"}
                     style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                     onError={(e) => {
@@ -498,29 +608,30 @@ const ContentEditor = ({
               leftSection={<IconLink size={16} />}
               data-autofocus
             />
-          ) : (
+          ) : imageUploadOption === 'upload' ? (
             <Stack my="xs">
               <Text size="sm" fw={500}>Upload Image</Text>
               <Paper
                 withBorder
                 p="md"
                 radius="md"
-                bg={previewUrl ? 'transparent' : 'var(--mantine-color-gray-0)'}
+                  bg="var(--mantine-color-gray-0)"
               >
-                  {!previewUrl ? (
-                    <Stack my="md" align="center" py={20}>
-                      <IconFileUpload size={32} opacity={0.5} />
-                      <div>
-                        <Text size="sm">
-                          Drag images here or click to select files
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          JPEG, PNG, GIF up to 5MB
-                        </Text>
-                      </div>
+                  <Stack my="md" align="center" py={12} gap="sm">
+                    <IconFileUpload size={28} opacity={0.5} />
+                    <div>
+                      <Text size="sm" ta="center">
+                        Select an image file
+                      </Text>
+                      <Text size="xs" c="dimmed" ta="center">
+                        JPEG, PNG, GIF, WEBP up to 5MB
+                      </Text>
+                    </div>
+
+                    <Group gap="xs">
                       <FileButton
                         onChange={handleFileUpload}
-                        accept="image/png,image/jpeg,image/gif"
+                        accept="image/png,image/jpeg,image/gif,image/webp"
                       >
                         {(props) => (
                           <Button
@@ -529,59 +640,107 @@ const ContentEditor = ({
                             leftSection={<IconUpload size={14} />}
                             {...props}
                           >
-                            Select file
+                            {imageFile ? 'Replace file' : 'Select file'}
                           </Button>
                         )}
                       </FileButton>
-                    </Stack>
-                  ) : (
-                      <Stack my="md">
-                    <Box pos="relative">
-                      <MantineImage
-                        src={previewUrl}
-                        alt="Preview"
-                        height={200}
-                        fit="contain"
-                        radius="md"
-                      />
-                      <ActionIcon
+
+                      {imageFile && (
+                        <Button
+                          variant="subtle"
                         color="red"
-                        variant="filled"
-                        radius="xl"
-                        size="sm"
-                        style={{ position: 'absolute', top: 5, right: 5 }}
+                          leftSection={<IconX size={14} />}
                         onClick={resetFileInput}
                       >
-                        <IconX size={14} />
-                      </ActionIcon>
-                    </Box>
-                        {uploadProgress > 0 && (
-                          <Stack mt="md">
-                            <Group justify="apart" m="md">
-                              <Text size="xs">Uploading...</Text>
-                              <Text size="xs" fw={500}>{uploadProgress}%</Text>
-                            </Group>
-                            <Progress
-                              value={uploadProgress}
-                              size="sm"
-                              color={uploadProgress === 100 ? 'green' : 'blue'}
-                              radius="xl"
-                            />
-                            {uploadProgress === 100 && (
-                              <Group m={5}>
-                                <IconCheck size={14} color="green" />
-                                <Text size="xs" c="green">Upload complete!</Text>
-                              </Group>
-                            )}
-                          </Stack>
+                          Clear
+                        </Button>
+                      )}
+                    </Group>
+
+                    {imageFile && (
+                      <Text size="sm" truncate fw={500}>
+                        {imageFile.name}
+                      </Text>
+                    )}
+
+                    {uploadProgress > 0 && (
+                      <Stack mt="md" w="100%">
+                        <Group justify="apart" m="md">
+                          <Text size="xs">Uploading...</Text>
+                          <Text size="xs" fw={500}>{uploadProgress}%</Text>
+                        </Group>
+                        <Progress
+                          value={uploadProgress}
+                          size="sm"
+                          color={uploadProgress === 100 ? 'green' : 'blue'}
+                          radius="xl"
+                        />
+                        {uploadProgress === 100 && (
+                          <Group m={5}>
+                            <IconCheck size={14} color="green" />
+                            <Text size="xs" c="green">Upload complete!</Text>
+                          </Group>
                         )}
-                    <Text size="sm" truncate fw={500}>
-                      {imageFile?.name}
-                    </Text>
+                      </Stack>
+                    )}
                   </Stack>
-                )}
-              </Paper>
-            </Stack>
+                </Paper>
+              </Stack>
+            ) : (
+              <Stack my="xs" gap="sm">
+                <SegmentedControl
+                  value={imageLibrary}
+                  onChange={(value) => setImageLibrary(value as 'unsplash' | 'pexels')}
+                  data={[
+                    { label: 'Unsplash', value: 'unsplash' },
+                    { label: 'Pexels', value: 'pexels' },
+                  ]}
+                  fullWidth
+                />
+
+                <Group align="flex-end" wrap="nowrap">
+                  <TextInput
+                    label="Search images"
+                    placeholder="e.g. artisan market, pottery, flowers"
+                    value={libraryQuery}
+                    onChange={(e) => setLibraryQuery(e.currentTarget.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <Button onClick={searchImageLibrary} loading={libraryLoading}>
+                    Search
+                  </Button>
+                </Group>
+
+                {libraryResults.length > 0 ? (
+                  <SimpleGrid cols={3} spacing="xs">
+                    {libraryResults.slice(0, 18).map((url, index) => (
+                      <Box
+                        key={`${url}-${index}`}
+                        component="button"
+                        type="button"
+                        onClick={() => {
+                          setImageUrl(url);
+                          setImageUploadOption('url');
+                          setUploadedImageData(null);
+                        }}
+                        style={{
+                          border: 0,
+                          padding: 0,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          borderRadius: 8,
+                          overflow: 'hidden',
+                        }}
+                        title="Use this image"
+                      >
+                        <MantineImage src={url} alt={`search-result-${index}`} h={90} fit="cover" radius="sm" />
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Text size="xs" c="dimmed">Search Unsplash or Pexels and click an image to use it.</Text>
+                  )}
+                </Stack>
           )}
 
           <TextInput
@@ -591,6 +750,11 @@ const ContentEditor = ({
             onChange={(e) => setImageAlt(e.currentTarget.value)}
             description="Add accessible description of the image content"
           />
+          {imageError && (
+            <Text size="xs" c="red">
+              {imageError}
+            </Text>
+          )}
           <Group align="right" mt="md">
             <Button variant="subtle" onClick={handleCloseModal}>
               Cancel
@@ -600,7 +764,7 @@ const ContentEditor = ({
               disabled={!imageUrl?.trim() || isUploading}
               leftSection={<IconPhotoPlus size={16} />}
             >
-              Insert Image
+              {editor?.isActive('image') ? 'Replace Image' : 'Insert Image'}
             </Button>
           </Group>
         </Stack>

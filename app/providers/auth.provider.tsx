@@ -30,6 +30,47 @@ interface AuthContextType {
   confirmed: () => boolean;
 }
 
+function normalizeStoresForDashboard(rawStores: Store[]): Store[] {
+  const byIdentity = new Map<string, Store>();
+
+  const isPublishedStore = (candidate: Store) => {
+    const status = String((candidate as Store & { status?: string }).status || '').toLowerCase();
+    if (status === 'published') return true;
+    if (status === 'draft') return false;
+
+    return Boolean(candidate.publishedAt);
+  };
+
+  for (const store of rawStores) {
+    const identity = String(store.documentId || store.slug || store.id || '').trim();
+    if (!identity) continue;
+
+    const current = byIdentity.get(identity);
+    if (!current) {
+      byIdentity.set(identity, store);
+      continue;
+    }
+
+    const candidateIsPublished = isPublishedStore(store);
+    const currentIsPublished = isPublishedStore(current);
+
+    if (candidateIsPublished && !currentIsPublished) {
+      byIdentity.set(identity, store);
+      continue;
+    }
+
+    if (candidateIsPublished === currentIsPublished) {
+      const candidateUpdated = new Date(store.updatedAt || 0).getTime();
+      const currentUpdated = new Date(current.updatedAt || 0).getTime();
+      if (candidateUpdated > currentUpdated) {
+        byIdentity.set(identity, store);
+      }
+    }
+  }
+
+  return Array.from(byIdentity.values());
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
@@ -158,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (Array.isArray(response?.data)) {
-          setStores(response.data);
+          setStores(normalizeStoresForDashboard(response.data as Store[]));
           lastStoresFetchAtRef.current = Date.now();
         } else {
           console.warn('Stores response missing data array:', response);
@@ -203,7 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Handle both direct stores and nested data.stores from API
         const storesArray = userData.stores || userData.data?.stores || [];
         if (storesArray.length > 0) {
-          setStores(storesArray);
+          setStores(normalizeStoresForDashboard(storesArray));
         }
       }
     } catch (error) {

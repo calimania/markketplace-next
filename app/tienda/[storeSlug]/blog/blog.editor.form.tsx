@@ -243,7 +243,7 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         attach: {
           contentType: 'article',
           itemId: itemDocumentId,
-          field: 'Cover',
+          field: 'SEO.socialImage',
           mode: 'replace',
         },
       });
@@ -336,6 +336,29 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
       }
 
+      let responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
+
+      if (mode === 'edit' && !response?.data) {
+        const verification = await tiendaClient.getContent(storeRef, 'article', responseDocumentId, {
+          token,
+          query: { status: 'all' },
+        });
+
+        if (!verification || (verification?.status && verification.status >= 400) || !verification?.data) {
+          throw new Error('Save response was empty and verification failed. Please try saving again.');
+        }
+
+        const verifiedArticle = verification.data as { documentId?: string; Title?: string; slug?: string };
+        if (
+          (verifiedArticle?.Title && verifiedArticle.Title !== payload.Title)
+          || (verifiedArticle?.slug && verifiedArticle.slug !== payload.slug)
+        ) {
+          throw new Error('Save did not persist latest changes yet. Please try again.');
+        }
+
+        responseDocumentId = verifiedArticle.documentId || responseDocumentId;
+      }
+
       savedSnapshotRef.current = { title, slug: nextSlug, seoTitle, seoDescription, content };
       setIsDirty(false);
 
@@ -346,8 +369,11 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         autoClose: 3000,
       });
 
-      const responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
-      router.push(`/tienda/${storeSlug}/blog/${responseDocumentId}`);
+      const destination = mode === 'new'
+        ? `/tienda/${storeSlug}/blog/${responseDocumentId}?created=1`
+        : `/tienda/${storeSlug}/blog/${responseDocumentId}`;
+
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       console.error('[BlogEditorForm] save failed', error);

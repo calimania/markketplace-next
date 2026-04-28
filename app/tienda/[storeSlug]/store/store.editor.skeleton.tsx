@@ -11,6 +11,7 @@ import type { URLItem } from '@/app/components/ui/form.input.urls';
 import RichTextContent from '@/app/components/ui/richtext.content';
 import { buildEditorMediaPreview } from '@/markket/richtext.smart';
 import type { Store } from '@/markket/store';
+import { markketplace } from '@/markket/config';
 
 type StoreEditorSkeletonProps = {
   store: Store;
@@ -24,6 +25,7 @@ type StoreEditorSkeletonProps = {
   draftUrls: URLItem[];
   draftSeoTitle: string;
   draftSeoDescription: string;
+  isPublished: boolean;
   onStartEditing: () => void;
   onCancelEditing: () => void;
   onSave: () => void;
@@ -47,6 +49,7 @@ export default function StoreEditorSkeleton({
   draftUrls,
   draftSeoTitle,
   draftSeoDescription,
+  isPublished,
   onStartEditing,
   onCancelEditing,
   onSave,
@@ -58,7 +61,7 @@ export default function StoreEditorSkeleton({
   onSeoDescriptionChange,
 }: StoreEditorSkeletonProps) {
   const activeSlug = isEditing ? (draftSlug || store.slug) : store.slug;
-  const publicHref = `/${activeSlug}`;
+  const publicHref = `${markketplace.markket_url}/${activeSlug}`;
   const mediaPreview = useMemo(() => buildEditorMediaPreview(draftDescription), [draftDescription]);
   const hasMediaPreview =
     !!mediaPreview.excerpt ||
@@ -70,6 +73,7 @@ export default function StoreEditorSkeleton({
     <Stack gap="md">
       <TinyBreadcrumbs
         items={[
+          { label: 'Me', href: '/me' },
           { label: 'Tienda', href: '/tienda' },
           { label: store.slug, href: `/tienda/${store.slug}` },
           { label: 'Store' },
@@ -86,7 +90,12 @@ export default function StoreEditorSkeleton({
             Manage store identity, storefront metadata, and the public URL people will actually visit.
           </Text>
         </div>
-        <Badge variant="light" color="cyan">Tendero</Badge>
+        <Group gap="xs">
+          <Badge variant="light" color={isPublished ? 'green' : 'gray'}>
+            {isPublished ? 'Published' : 'Draft'}
+          </Badge>
+          <Badge variant="light" color="cyan">Tendero</Badge>
+        </Group>
       </Group>
 
       <Group>
@@ -147,52 +156,13 @@ export default function StoreEditorSkeleton({
       >
         <Stack gap="sm">
           <Group justify="space-between" align="center">
-            <Text fw={600}>SEO</Text>
-            <Badge variant="light" color="grape">Simple fields</Badge>
-          </Group>
-          <Text c="dimmed" size="sm">
-            These are the first metadata controls for the storefront. Keep them short, descriptive, and aligned with what people should find.
-          </Text>
-
-          <TextInput
-            label="SEO Title"
-            value={draftSeoTitle}
-            onChange={(event) => onSeoTitleChange(event.currentTarget.value)}
-            readOnly={!isEditing}
-          />
-
-          <Textarea
-            label="SEO Description"
-            value={draftSeoDescription}
-            onChange={(event) => onSeoDescriptionChange(event.currentTarget.value)}
-            minRows={3}
-            autosize
-            readOnly={!isEditing}
-            description={`${draftSeoDescription.length}/160 characters`}
-          />
-
-          <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
-            <Stack gap={4}>
-              <Text size="sm" fw={600}>Search Preview</Text>
-              <Text size="sm" c="blue" fw={500}>{draftSeoTitle || draftTitle || store.title}</Text>
-              <Text size="xs" c="green">{publicHref}</Text>
-              <Text size="sm" c="dimmed">
-                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social previews.'}
-              </Text>
-            </Stack>
-          </Paper>
-        </Stack>
-      </Paper>
-
-      <Paper withBorder radius="md" p="md">
-        <Stack gap="sm">
-          <Group justify="space-between" align="center">
             <Text fw={600}>Identity</Text>
             <Badge variant="light" color="yellow">Step 1</Badge>
           </Group>
           <Text c="dimmed" size="sm">
             Start with the basic fields first. Title, slug, and description can be the first tienda-native editing milestone.
           </Text>
+
           <TextInput
             label="Store Title"
             value={draftTitle}
@@ -300,6 +270,62 @@ export default function StoreEditorSkeleton({
                 <Text size="xs" c="dimmed" mt={8}>Double-click this section to edit.</Text>
             </div>
           )}
+        </Stack>
+      </Paper>
+
+      <Paper
+        withBorder
+        radius="md"
+        p="md"
+        role={!isEditing ? 'button' : undefined}
+        tabIndex={!isEditing ? 0 : undefined}
+        onDoubleClick={!isEditing ? onStartEditing : undefined}
+        onKeyDown={!isEditing ? ((event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onStartEditing();
+          }
+        }) : undefined}
+        style={!isEditing ? { cursor: 'pointer' } : undefined}
+        aria-label={!isEditing ? 'Open edit mode from SEO section' : undefined}
+        title={!isEditing ? 'Double-click to edit' : undefined}
+      >
+        <Stack gap="sm">
+          <Group justify="space-between" align="center">
+            <Text fw={600}>SEO</Text>
+            <Badge variant="light" color="grape">Bottom section</Badge>
+          </Group>
+          <Text c="dimmed" size="sm">
+            Keep metadata concise and intentional. This block stays at the bottom to avoid jumping around while editing core content.
+          </Text>
+
+          <TextInput
+            label="SEO Title"
+            value={draftSeoTitle}
+            onChange={(event) => onSeoTitleChange(event.currentTarget.value)}
+            readOnly={!isEditing}
+          />
+
+          <Textarea
+            label="SEO Description"
+            value={draftSeoDescription}
+            onChange={(event) => onSeoDescriptionChange(event.currentTarget.value)}
+            minRows={4}
+            readOnly={!isEditing}
+            styles={{ input: { resize: 'none' } }}
+            description={`${draftSeoDescription.length}/160 characters`}
+          />
+
+          <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
+            <Stack gap={4}>
+              <Text size="sm" fw={600}>Search Preview</Text>
+              <Text size="sm" c="blue" fw={500}>{draftSeoTitle || draftTitle || store.title}</Text>
+              <Text size="xs" c="green">{publicHref}</Text>
+              <Text size="sm" c="dimmed">
+                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social previews.'}
+              </Text>
+            </Stack>
+          </Paper>
         </Stack>
       </Paper>
 

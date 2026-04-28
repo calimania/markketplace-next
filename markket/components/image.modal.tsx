@@ -33,7 +33,7 @@ const ImageModal = ({
   onToggleMode,
   disableReplace = false, // NEW PROP
 }: ImageModalProps) => {
-  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('upload');
+  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload'>('url');
   const [imageLibrary, setImageLibrary] = useState<'unsplash' | 'pexels'>('unsplash');
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
   const [imageAlt, setImageAlt] = useState(initialImageAlt);
@@ -48,6 +48,7 @@ const ImageModal = ({
 
   useEffect(() => {
     if (imageModalOpen) {
+      setImageUploadOption('url');
       setImageUrl(initialImageUrl);
       setImageAlt(initialImageAlt);
       setPreviewUrl('');

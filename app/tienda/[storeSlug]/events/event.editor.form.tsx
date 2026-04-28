@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Divider, Group, Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
+import { useStore } from '../store.provider';
 import type { Event } from '@/markket/event.d';
 
 type EventEditorFormProps = {
@@ -21,6 +22,7 @@ type EventEditorFormProps = {
     sourceUrl?: string;
     startDate?: string;
     endDate?: string;
+    timezone?: string;
     thumbnailUrl?: string;
     socialImageUrl?: string;
     slides?: Event['Slides'];
@@ -37,6 +39,28 @@ function readAuthToken() {
     return '';
   }
 }
+
+function browserTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+const POPULAR_TIMEZONES = [
+  'UTC',
+  'America/Bogota',
+  'America/Lima',
+  'America/Mexico_City',
+  'America/Los_Angeles',
+  'America/New_York',
+  'Europe/London',
+  'Europe/Madrid',
+  'Europe/Paris',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+];
 
 function slugify(value: string) {
   return value
@@ -64,6 +88,8 @@ function toIsoString(value: string) {
 
 export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initial }: EventEditorFormProps) {
   const router = useRouter();
+  const store = useStore();
+  const autoTimezone = browserTimezone();
 
   const [name, setName] = useState(initial?.name || '');
   const [slug, setSlug] = useState(initial?.slug || '');
@@ -73,11 +99,13 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl || '');
   const [startDateInput, setStartDateInput] = useState(toDatetimeLocalInput(initial?.startDate));
   const [endDateInput, setEndDateInput] = useState(toDatetimeLocalInput(initial?.endDate || new Date(Date.now() + 3600000).toISOString()));
+  const [timezone, setTimezone] = useState(initial?.timezone || autoTimezone);
+  const [showTimezoneEditor, setShowTimezoneEditor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
-  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput });
+  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone });
   const [isDirty, setIsDirty] = useState(false);
-  const storeRef = storeSlug;
+  const storeRef = store.documentId || store.slug || storeSlug;
 
   useEffect(() => {
     if (!slugTouched) {
@@ -95,9 +123,10 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       || seoDescription !== snap.seoDescription
       || sourceUrl !== snap.sourceUrl
       || startDateInput !== snap.startDateInput
-      || endDateInput !== snap.endDateInput,
+      || endDateInput !== snap.endDateInput
+      || timezone !== snap.timezone,
     );
-  }, [name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput]);
+  }, [name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone]);
 
   const handleSubmit = async () => {
     const token = readAuthToken();
@@ -137,6 +166,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       Description: description,
       startDate,
       endDate,
+      timezone: timezone.trim() || undefined,
       SEO: {
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
@@ -155,7 +185,30 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
       }
 
-      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput };
+      let responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
+
+      if (mode === 'edit' && !response?.data) {
+        const verification = await tiendaClient.getContent(storeRef, 'event', responseDocumentId, {
+          token,
+          query: { status: 'all' },
+        });
+
+        if (!verification || (verification?.status && verification.status >= 400) || !verification?.data) {
+          throw new Error('Save response was empty and verification failed. Please try saving again.');
+        }
+
+        const verifiedEvent = verification.data as { documentId?: string; Name?: string; slug?: string };
+        if (
+          (verifiedEvent?.Name && verifiedEvent.Name !== payload.Name)
+          || (verifiedEvent?.slug && verifiedEvent.slug !== payload.slug)
+        ) {
+          throw new Error('Save did not persist latest changes yet. Please try again.');
+        }
+
+        responseDocumentId = verifiedEvent.documentId || responseDocumentId;
+      }
+
+      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone };
       setIsDirty(false);
 
       notifications.show({
@@ -165,8 +218,11 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         autoClose: 3000,
       });
 
-      const responseDocumentId = response?.data?.documentId || itemDocumentId || nextSlug;
-      router.push(`/tienda/${storeSlug}/events/${responseDocumentId}`);
+      const destination = mode === 'new'
+        ? `/tienda/${storeSlug}/events/${responseDocumentId}?created=1`
+        : `/tienda/${storeSlug}/events/${responseDocumentId}`;
+
+      router.replace(destination);
       router.refresh();
     } catch (error) {
       notifications.show({
@@ -216,6 +272,44 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
           required
         />
       </Group>
+      <Group justify="space-between" align="end">
+        <Stack gap={2}>
+          <Text size="sm" fw={500}>Timezone</Text>
+          <Text size="sm" c="dimmed">Assumed from browser: {autoTimezone}</Text>
+        </Stack>
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={() => setShowTimezoneEditor((prev) => !prev)}
+        >
+          {showTimezoneEditor ? 'Hide timezone options' : 'Edit timezone'}
+        </Button>
+      </Group>
+
+      {showTimezoneEditor && (
+        <>
+          <Select
+            label="Timezone (Quick Pick)"
+            value={POPULAR_TIMEZONES.includes(timezone) ? timezone : null}
+            onChange={(value) => {
+              if (value) setTimezone(value);
+            }}
+            data={POPULAR_TIMEZONES.map((zone) => ({ value: zone, label: zone }))}
+            placeholder="Choose a common timezone"
+            searchable
+            clearable
+            description="Pick a common timezone, or set any IANA timezone manually below."
+          />
+
+          <TextInput
+            label="Timezone"
+            value={timezone}
+            onChange={(e) => setTimezone(e.currentTarget.value)}
+            placeholder="America/Los_Angeles"
+            description="Use IANA timezone (for example, America/Los_Angeles or Europe/Berlin)."
+          />
+        </>
+      )}
 
       <ContentEditor
         value={description}
@@ -251,6 +345,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       <Text size="xs" c="dimmed">
         Tip: Text edits happen here. Manage images and special media fields from the event preview page.
       </Text>
+
 
       <Group justify="space-between">
         <Button component="a" variant="subtle" href={`/tienda/${storeSlug}/events`}>

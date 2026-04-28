@@ -3,6 +3,31 @@ import { SEO } from "./seo.d";
 import { Store } from "./store.d";
 import { Tag } from "./tag.d";
 
+export interface RSVP {
+  id: number;
+  documentId: string;
+  name?: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string | null;
+  locale?: string;
+  approved?: boolean | null;
+  usd_price?: number | string | null;
+  sendgrid_contact_id?: string | null;
+  sendgrid_list_id?: string | null;
+  last_synced_at?: string | null;
+  sync_status?: 'pending' | 'synced' | 'failed';
+  user?: {
+    id?: number;
+    documentId?: string;
+    email?: string;
+    username?: string;
+  };
+  event?: Pick<Event, 'id' | 'documentId' | 'Name' | 'slug'>;
+  store?: Pick<Store, 'id' | 'documentId' | 'slug' | 'title'>;
+}
+
 export interface Event {
   id: number;
   documentId: string;
@@ -11,6 +36,7 @@ export interface Event {
   startDate: string;
   Slides: Slide[];
   endDate: string;
+  timezone?: string;
   Description: string;
   maxCapacity: number | null;
   amountSold: number | null;
