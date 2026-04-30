@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TextInput,
   Group,
@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { type Page, type Store } from '@/markket/index.d';
 import PageContent from '../ui/page.content';
 import { markketColors } from '@/markket/colors.config';
+import { useAuth } from '@/app/providers/auth.provider';
 
 interface MagicLinkForm {
   email: string;
@@ -37,6 +38,11 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState<{ success: boolean; error: string | null }>({ success: false, error: null });
   const router = useRouter();
+  const { maybe } = useAuth();
+
+  useEffect(() => {
+    if (maybe()) router.replace('/me');
+  }, [maybe, router]);
 
   const form = useForm<MagicLinkForm>({
     initialValues: {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Article } from '@/markket/article';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
+import { isPublished } from '@/markket/helpers.publication';
 
 type BlogListClientProps = {
   storeSlug: string;
@@ -27,10 +28,6 @@ function itemKey(post: Partial<Article>) {
   return String(post.documentId || post.id || post.slug || post.Title || Math.random());
 }
 
-function isPublished(post: Partial<Article>) {
-  return Boolean(post.publishedAt);
-}
-
 function sortByRecent(items: Article[]) {
   return [...items].sort((a, b) => {
     const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -41,6 +38,8 @@ function sortByRecent(items: Article[]) {
 
 export default function BlogListClient({ storeSlug, initialPosts }: BlogListClientProps) {
   const [posts, setPosts] = useState<Article[]>(sortByRecent(initialPosts || []));
+  const fetchedStoreSlugRef = useRef<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = readAuthToken();
@@ -48,6 +47,12 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
       console.log('[BlogListClient] No token in localStorage');
       return;
     }
+
+    if (fetchedStoreSlugRef.current === storeSlug) {
+      return;
+    }
+
+    fetchedStoreSlugRef.current = storeSlug;
 
     const loadAllContent = async () => {
       try {
@@ -71,8 +76,10 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           setPosts(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
+        fetchedStoreSlugRef.current = null;
         console.error('[BlogListClient] Failed to load posts:', error);
       }
+      setLoading(false);
     };
 
     loadAllContent();
@@ -89,6 +96,7 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
         return {
           key,
           title: post.Title || 'Untitled article',
+          publishedAt: post.publishedAt,
           subtitle: `${statusText} · ${formatDate(post.updatedAt || post.createdAt)} · ${post.documentId || post.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/blog/${post.documentId || post.slug}`,
           icon: 'article' as const,
@@ -97,5 +105,5 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
     [posts, storeSlug],
   );
 
-  return <NavTable emptyText="No articles yet." items={items} />;
+  return <NavTable emptyText="No articles yet." items={items} loading={loading} />;
 }

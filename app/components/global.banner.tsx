@@ -1,35 +1,25 @@
 'use client';
 
 import { Group, ActionIcon, Container, Paper, Anchor, Text } from '@mantine/core';
-import { IconHome, IconBuildingStore, IconArticle, IconUser } from '@tabler/icons-react';
+import { IconHome, IconBuildingStore, IconArticle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/app/providers/auth.provider';
-import { useEffect, useState } from 'react';
 import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 import { markketColors } from '@/markket/colors.config';
+import AccountButton from '@/app/components/ui/account.button';
 
 interface GlobalBannerProps {
   extraActions?: React.ReactNode;
 }
 
 export function GlobalBanner({ extraActions }: GlobalBannerProps) {
-  const { maybe } = useAuth();
-  const [isMaybe, setIsMaybe] = useState(false);
   const embedded = useEmbeddedMode();
   const pathname = usePathname();
 
   const storesActive = pathname?.startsWith('/stores');
   const blogActive = pathname?.startsWith('/blog');
 
-  useEffect(() => {
-    const ismaybe = maybe();
-    setIsMaybe(ismaybe);
-  }, [maybe]);
-
-  if (embedded) {
-    return null;
-  }
+  if (embedded) return null;
 
   return (
     <Paper
@@ -49,6 +39,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
             <ActionIcon
               component={Link}
               href="/"
+              prefetch={false}
               variant="subtle"
               size="md"
               aria-label="Home"
@@ -60,6 +51,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
             <Anchor
               component={Link}
               href="/stores"
+              prefetch={false}
               underline="never"
               style={{
                 display: 'flex',
@@ -79,6 +71,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
             <Anchor
               component={Link}
               href="/blog"
+              prefetch={false}
               underline="never"
               style={{
                 display: 'flex',
@@ -98,19 +91,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
 
           <Group gap="xs" align="center" wrap="nowrap">
             {extraActions}
-            {isMaybe && (
-              <ActionIcon
-                component={Link}
-                href="/me"
-                variant="light"
-                size="md"
-                radius="md"
-                aria-label="My workspace"
-                style={{ color: markketColors.rosa.main, background: markketColors.rosa.light }}
-              >
-                <IconUser size={16} />
-              </ActionIcon>
-            )}
+            <AccountButton />
           </Group>
         </Group>
       </Container>

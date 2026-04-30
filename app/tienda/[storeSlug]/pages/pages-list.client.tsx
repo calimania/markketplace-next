@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
+import { isPublished } from '@/markket/helpers.publication';
 
 type PagesListClientProps = {
   storeSlug: string;
@@ -27,10 +28,6 @@ function itemKey(page: Partial<Page>) {
   return String(page.documentId || page.id || page.slug || page.Title || Math.random());
 }
 
-function isPublished(page: Partial<Page>) {
-  return Boolean(page.publishedAt);
-}
-
 function sortByRecent(items: Page[]) {
   return [...items].sort((a, b) => {
     const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -41,6 +38,7 @@ function sortByRecent(items: Page[]) {
 
 export default function PagesListClient({ storeSlug, initialPages }: PagesListClientProps) {
   const [pages, setPages] = useState<Page[]>(sortByRecent(initialPages || []));
+  const fetchedStoreSlugRef = useRef<string | null>(null);
 
   useEffect(() => {
     const token = readAuthToken();
@@ -48,6 +46,12 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
       console.log('[PagesListClient] No token in localStorage');
       return;
     }
+
+    if (fetchedStoreSlugRef.current === storeSlug) {
+      return;
+    }
+
+    fetchedStoreSlugRef.current = storeSlug;
 
     const loadAllContent = async () => {
       try {
@@ -62,7 +66,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
         const merged = new Map<string, Page>();
         const allItems = Array.isArray(response?.data) ? (response.data as Page[]) : (Array.isArray(response) ? (response as Page[]) : []);
 
-        console.log('[PagesListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Title, published: !!p.publishedAt })) });
+        console.log('[PagesListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Title, published: !!p.publishedAt, p })) });
 
         if (allItems.length > 0) {
           allItems.forEach((page) => {
@@ -71,6 +75,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           setPages(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
+        fetchedStoreSlugRef.current = null;
         console.error('[PagesListClient] Failed to load pages:', error);
       }
     };

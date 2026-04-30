@@ -10,7 +10,12 @@ import Link from 'next/link';
 import PageContent from '@/app/components/ui/page.content';
 import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { RichTextValue, StoredRichText } from '@/markket/richtext';
+import { cache } from 'react';
 import './events.css';
+
+const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
+const getEventsPageCached = cache((slug: string) => strapiClient.getPage('events', slug));
+const getEventsCached = cache((slug: string) => strapiClient.getEvents(slug));
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
@@ -25,13 +30,13 @@ function getEventExcerpt(value?: string | RichTextValue | StoredRichText, max = 
 
 export async function generateMetadata({ params }: EventsPageProps) {
   const { slug } = await params;
-  const response = await strapiClient.getStore(slug);
+  const response = await getStoreCached(slug);
   const store = response?.data?.[0] as Store;
 
-  const pageResponse = await strapiClient.getPage('events', slug);
+  const pageResponse = await getEventsPageCached(slug);
   const page = pageResponse?.data?.[0] as Page;
 
-  const eventsResponse = await strapiClient.getEvents(slug);
+  const eventsResponse = await getEventsCached(slug);
   const events = (eventsResponse?.data || []) as Event[];
 
   const eventCount = events.length;
@@ -60,17 +65,17 @@ export async function generateMetadata({ params }: EventsPageProps) {
 
 export default async function StoreEventsPage({ params }: EventsPageProps) {
   const { slug } = await params;
-  const storeResponse = await strapiClient.getStore(slug);
+  const storeResponse = await getStoreCached(slug);
   const store = storeResponse?.data?.[0] as Store;
 
-  const response = await strapiClient.getPage('events', slug);
+  const response = await getEventsPageCached(slug);
   const eventPage = response?.data?.[0] as Page;
 
   if (!store) {
     notFound();
   }
 
-  const eventsResponse = await strapiClient.getEvents(slug);
+  const eventsResponse = await getEventsCached(slug);
   const events = (eventsResponse?.data || []) as Event[];
 
   return (

@@ -10,6 +10,7 @@ import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import EventItemActions from '../event.item.actions';
 import EventDetailTabs from '../event.detail.tabs';
 import { findEvent } from '../events.find';
+import { isPublished } from '@/markket/helpers.publication';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 
@@ -72,7 +73,7 @@ export default async function TiendaEventItemPage({ params }: TiendaEventItemPag
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={String((event as any).status || '').toLowerCase() === 'published' || Boolean(event.publishedAt)}
+            isPublished={isPublished(event)}
           />
         </>
       }

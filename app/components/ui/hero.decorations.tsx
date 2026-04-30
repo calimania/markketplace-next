@@ -1,0 +1,392 @@
+'use client';
+
+import type { CSSProperties, ElementType } from 'react';
+import { Box } from '@mantine/core';
+import { IconStar, IconSun, IconMoon, IconPlanet, IconSparkles } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
+
+type HeroShape = {
+  key: string;
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  width: number;
+  height: number;
+  border?: string;
+  background?: string;
+  borderRadius: number | string;
+  rotate: string;
+  opacity?: number;
+  animationClass?: string;
+  animationDelay?: string;
+  icon?: ElementType;
+  iconSize?: number;
+  iconColor?: string;
+  animationDuration?: string;
+  animationTimingFunction?: string;
+};
+
+const heroShapes: HeroShape[] = [
+  {
+    key: 'hero-stripes',
+    top: '-50%',
+    left: '-50%',
+    width: 200,
+    height: 200,
+    background: `repeating-linear-gradient(45deg, transparent, transparent 80px, ${markketColors.rosa.main}08 80px, ${markketColors.rosa.main}08 160px)`,
+    borderRadius: '0%',
+    rotate: '0deg',
+    opacity: 0.6,
+  },
+  {
+    key: 'hero-sun',
+    top: '6%',
+    left: '10%',
+    width: 44,
+    height: 44,
+    background: 'rgba(255, 214, 108, 0.16)',
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.98,
+    animationClass: 'hero-spark',
+    animationDelay: '0.1s',
+    icon: IconSun,
+    iconSize: 18,
+    iconColor: '#f9d56e',
+  },
+  {
+    key: 'hero-cyan-square-large',
+    top: '12%',
+    right: '8%',
+    width: 120,
+    height: 120,
+    border: `3px solid ${markketColors.sections.shop.main}40`,
+    borderRadius: 12,
+    rotate: '45deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0s',
+    animationDuration: '7.4s',
+  },
+  {
+    key: 'hero-cyan-square-small',
+    top: '13%',
+    right: '7%',
+    width: 118,
+    height: 118,
+    border: `3px solid ${markketColors.sections.shop.main}40`,
+    borderRadius: 12,
+    rotate: '45deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.8s',
+    animationDuration: '8.8s',
+  },
+  {
+    key: 'hero-moon',
+    top: '18%',
+    right: '18%',
+    width: 42,
+    height: 42,
+    background: 'rgba(255,255,255,0.18)',
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.95,
+    animationClass: 'hero-drift',
+    animationDelay: '0.25s',
+    animationDuration: '6.6s',
+    icon: IconMoon,
+    iconSize: 18,
+    iconColor: '#f8f1f1',
+  },
+  {
+    key: 'hero-pink-square-1',
+    top: '28%',
+    left: '12%',
+    width: 65,
+    height: 65,
+    border: `2px solid ${markketColors.rosa.main}35`,
+    borderRadius: 8,
+    rotate: '18deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.2s',
+    animationDuration: '7.2s',
+  },
+  {
+    key: 'hero-pink-square-2',
+    top: '26%',
+    left: '14%',
+    width: 69,
+    height: 69,
+    border: `2px solid ${markketColors.rosa.main}35`,
+    borderRadius: 8,
+    rotate: '18deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.4s',
+    animationDuration: '6.2s',
+  },
+  {
+    key: 'hero-planet',
+    top: '44%',
+    right: '22%',
+    width: 48,
+    height: 48,
+    background: 'rgba(0, 195, 163, 0.14)',
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.95,
+    animationClass: 'hero-drift',
+    animationDelay: '0.7s',
+    animationDuration: '9s',
+    icon: IconPlanet,
+    iconSize: 20,
+    iconColor: '#00c3a3',
+  },
+  {
+    key: 'hero-planet-2',
+    top: '55%',
+    left: '15%',
+    width: 36,
+    height: 36,
+    background: 'rgba(226, 88, 152, 0.14)',
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.92,
+    animationClass: 'hero-drift',
+    animationDelay: '0.5s',
+    animationDuration: '8.3s',
+    icon: IconPlanet,
+    iconSize: 16,
+    iconColor: '#e25898',
+  },
+  {
+    key: 'hero-green-square',
+    bottom: '18%',
+    left: '6%',
+    width: 85,
+    height: 85,
+    border: `3px solid ${markketColors.sections.events.main}35`,
+    borderRadius: 10,
+    rotate: '-12deg',
+    animationClass: 'hero-float',
+    animationDelay: '0.5s',
+    animationDuration: '6.2s',
+  },
+  {
+    key: 'hero-magenta-square',
+    bottom: '32%',
+    right: '18%',
+    width: 95,
+    height: 95,
+    border: `2px solid ${markketColors.sections.blog.main}30`,
+    borderRadius: 10,
+    rotate: '28deg',
+    animationClass: 'hero-pulse',
+    animationDelay: '0.6s',
+  },
+  {
+    key: 'hero-green-rect',
+    top: '18%',
+    right: '38%',
+    width: 110,
+    height: 50,
+    border: `2px solid ${markketColors.sections.events.main}28`,
+    borderRadius: 6,
+    rotate: '-8deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.3s',
+  },
+  {
+    key: 'hero-pink-glow',
+    top: '10%',
+    left: '42%',
+    width: 180,
+    height: 180,
+    background: `radial-gradient(circle, ${markketColors.rosa.main}24 0%, transparent 72%)`,
+    borderRadius: '50%',
+    rotate: '0deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.1s',
+    animationDuration: '12s',
+  },
+  {
+    key: 'hero-cyan-glow',
+    bottom: '8%',
+    right: '28%',
+    width: 150,
+    height: 150,
+    background: `radial-gradient(circle, ${markketColors.sections.shop.main}20 0%, transparent 70%)`,
+    borderRadius: '50%',
+    rotate: '0deg',
+    animationClass: 'hero-drift',
+    animationDelay: '0.3s',
+    animationDuration: '10s',
+  },
+  {
+    key: 'hero-cyan-dot',
+    top: '22%',
+    left: '58%',
+    width: 9,
+    height: 9,
+    background: markketColors.sections.blog.main,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.42,
+    animationClass: 'hero-drift',
+    animationDelay: '0.2s',
+    animationDuration: '7.5s',
+  },
+  {
+    key: 'hero-green-dot',
+    top: '68%',
+    right: '38%',
+    width: 7,
+    height: 7,
+    background: markketColors.sections.events.main,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.35,
+    animationClass: 'hero-drift',
+    animationDelay: '0.5s',
+    animationDuration: '6.8s',
+  },
+  {
+    key: 'hero-pink-dot',
+    top: '38%',
+    right: '12%',
+    width: 6,
+    height: 6,
+    background: markketColors.rosa.main,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.38,
+    animationClass: 'hero-drift',
+    animationDelay: '0.9s',
+    animationDuration: '5s',
+  },
+  {
+    key: 'hero-mini-star',
+    top: '34%',
+    left: '40%',
+    width: 12,
+    height: 12,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.88,
+    animationClass: 'hero-spark',
+    animationDelay: '0.3s',
+    animationDuration: '4.2s',
+    icon: IconStar,
+    iconSize: 12,
+    iconColor: markketColors.sections.blog.main,
+  },
+  {
+    key: 'hero-star-1',
+    top: '18%',
+    left: '22%',
+    width: 18,
+    height: 18,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.98,
+    animationClass: 'hero-spark',
+    animationDelay: '0.2s',
+    icon: IconStar,
+    iconSize: 14,
+    iconColor: markketColors.rosa.main,
+  },
+  {
+    key: 'hero-star-2',
+    top: '8%',
+    right: '16%',
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.9,
+    animationClass: 'hero-spark',
+    animationDelay: '0.5s',
+    animationDuration: '4.4s',
+    icon: IconStar,
+    iconSize: 16,
+    iconColor: markketColors.sections.shop.main,
+  },
+  {
+    key: 'hero-sparkles',
+    top: '30%',
+    right: '34%',
+    width: 22,
+    height: 22,
+    borderRadius: '50%',
+    rotate: '0deg',
+    opacity: 0.9,
+    animationClass: 'hero-spark',
+    animationDelay: '0.7s',
+    animationDuration: '4.8s',
+    icon: IconSparkles,
+    iconSize: 16,
+    iconColor: '#ffffff',
+  },
+  {
+    key: 'hero-shoot-star-2',
+    top: '64%',
+    left: '6%',
+    width: 14,
+    height: 14,
+    rotate: '12deg',
+    opacity: 0.82,
+    animationClass: 'hero-shoot',
+    animationDelay: '1.6s',
+    animationDuration: '8.3s',
+    icon: IconStar,
+    iconSize: 12,
+    iconColor: '#fff',
+    borderRadius: 0,
+  },
+];
+
+export function HeroDecorations() {
+  return (
+    <>
+      <Box
+        className="hero-starfield"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.16,
+          pointerEvents: 'none',
+        }}
+      />
+      {heroShapes.map((shape) => (
+        <Box
+          key={shape.key}
+          className={shape.animationClass}
+          style={{
+            position: 'absolute',
+            top: shape.top,
+            left: shape.left,
+            right: shape.right,
+            bottom: shape.bottom,
+            width: `${shape.width}px`,
+            height: `${shape.height}px`,
+            border: shape.border,
+            background: shape.background,
+            borderRadius: shape.borderRadius,
+            opacity: shape.opacity,
+            willChange: 'transform, opacity',
+            animationDelay: shape.animationDelay,
+            animationDuration: shape.animationDuration,
+            animationTimingFunction: shape.animationTimingFunction,
+            '--hero-rotate': shape.rotate,
+            display: shape.icon ? 'flex' : undefined,
+            alignItems: shape.icon ? 'center' : undefined,
+            justifyContent: shape.icon ? 'center' : undefined,
+          } as CSSProperties}
+        >
+          {shape.icon && (
+            <shape.icon size={shape.iconSize || 16} color={shape.iconColor} stroke={2} />
+          )}
+        </Box>
+      ))}
+    </>
+  );
+}

@@ -6,6 +6,7 @@ import { Button, Divider, Paper, Title } from '@mantine/core';
 import { useState } from 'react';
 import { IconHttpGet} from '@tabler/icons-react';
 import { CodeHighlight } from '@mantine/code-highlight';
+import '@mantine/code-highlight/styles.css';
 
 
 const PreviewRequests = () => {

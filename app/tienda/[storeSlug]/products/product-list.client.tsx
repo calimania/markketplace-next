@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Product } from '@/markket/product';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
+import { isPublished } from '@/markket/helpers.publication';
 
 type ProductListClientProps = {
   storeSlug: string;
@@ -27,10 +28,6 @@ function itemKey(product: Partial<Product>) {
   return String(product.documentId || product.id || product.slug || product.Name || Math.random());
 }
 
-function isPublished(product: Partial<Product>) {
-  return Boolean(product.publishedAt);
-}
-
 function sortByRecent(items: Product[]) {
   return [...items].sort((a, b) => {
     const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -41,6 +38,8 @@ function sortByRecent(items: Product[]) {
 
 export default function ProductListClient({ storeSlug, initialProducts }: ProductListClientProps) {
   const [products, setProducts] = useState<Product[]>(sortByRecent(initialProducts || []));
+  const fetchedStoreSlugRef = useRef<string | null>(null);
+  const [loading, setLoaading] = useState(true);
 
   useEffect(() => {
     const token = readAuthToken();
@@ -48,6 +47,12 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
       console.log('[ProductListClient] No token in localStorage');
       return;
     }
+
+    if (fetchedStoreSlugRef.current === storeSlug) {
+      return;
+    }
+
+    fetchedStoreSlugRef.current = storeSlug;
 
     const loadAllContent = async () => {
       try {
@@ -71,8 +76,10 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           setProducts(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
+        fetchedStoreSlugRef.current = null;
         console.error('[ProductListClient] Failed to load products:', error);
       }
+      setLoaading(false);
     };
 
     loadAllContent();
@@ -92,10 +99,11 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           subtitle: `${statusText} · ${formatDate(product.updatedAt || product.createdAt)} · ${product.slug}`,
           href: `/tienda/${storeSlug}/products/${product.documentId || product.slug}`,
           icon: 'product' as const,
+          thumbnailUrl: product.Thumbnail?.url || product?.SEO?.socialImage?.url || product?.Slides?.[0]?.url,
         };
       }),
     [products, storeSlug],
   );
 
-  return <NavTable emptyText="No products yet." items={items} />;
+  return <NavTable emptyText="No products yet." items={items} loading={loading} />;
 }

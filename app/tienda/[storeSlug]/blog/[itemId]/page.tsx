@@ -9,12 +9,14 @@ import { findBlogArticle } from '../blog.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PageContent from '@/app/components/ui/page.content';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
-import { strapiClient } from '@/markket/api.strapi';
-import type { Store } from '@/markket/store';
+import { isPublished } from '@/markket/helpers.publication';
 
 type TiendaBlogItemPageProps = {
   params: Promise<{ storeSlug: string; itemId: string }>;
 };
+
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: TiendaBlogItemPageProps): Promise<Metadata> {
   const { storeSlug, itemId } = await params;
@@ -27,17 +29,13 @@ export async function generateMetadata({ params }: TiendaBlogItemPageProps): Pro
 
 export default async function TiendaBlogItemPage({ params }: TiendaBlogItemPageProps) {
   const { storeSlug, itemId } = await params;
-  const [post, storeResponse] = await Promise.all([
-    findBlogArticle(itemId, storeSlug),
-    strapiClient.getStore(storeSlug),
-  ]);
+  const post = await findBlogArticle(itemId, storeSlug);
 
   if (!post) notFound();
 
-  const store = storeResponse?.data?.[0] as Store | undefined;
   const editorId = post.documentId || post.slug || itemId;
   const itemDocumentId = post.documentId || itemId;
-  const storeRef = store?.documentId || store?.slug || storeSlug;
+  const storeRef = storeSlug;
 
   return (
     <TiendaDetailShell
@@ -56,7 +54,7 @@ export default async function TiendaBlogItemPage({ params }: TiendaBlogItemPageP
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={String((post as any).status || '').toLowerCase() === 'published' || Boolean(post.publishedAt)}
+            isPublished={isPublished(post)}
           />
         </>
       }

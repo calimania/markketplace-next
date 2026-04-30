@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
-import { strapiClient } from '@/markket/api.strapi';
 import type { Article } from '@/markket/article';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 import BlogListClient from './blog.list.client';
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
 export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
   const { storeSlug } = await params;
 
-  const postsResponse = await strapiClient.getPosts({ page: 1, pageSize: 50 }, { sort: 'createdAt:desc' }, storeSlug);
-
-  const posts = (postsResponse?.data || []) as Article[];
+  const posts: Article[] = [];
 
   return (
     <TiendaListShell
@@ -32,6 +29,7 @@ export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
       subtitle={`Articles for ${storeSlug}`}
       routePath={`/tienda/${storeSlug}/blog`}
       sectionTitle="Articles"
+      tone="blog"
       actions={
         <>
             <Button

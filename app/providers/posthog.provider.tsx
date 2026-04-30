@@ -29,6 +29,8 @@ export function PostHogProvider({ children }: { children: JSX.Element }) {
         api_host: resolvePostHogHost(),
         ui_host: 'https://us.posthog.com',
         capture_pageview: false,
+        autocapture: true,
+        disable_surveys: true,
         person_profiles: 'identified_only',
       });
     } catch (error) {

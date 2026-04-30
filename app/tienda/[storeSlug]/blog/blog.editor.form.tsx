@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
-import { IconUpload } from '@tabler/icons-react';
 import { tiendaClient } from '@/markket/api.tienda';
 import { tiptapToStrapiBlocks } from '@/markket/richtext.transform';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
@@ -21,19 +20,7 @@ type BlogEditorFormProps = {
     content?: RichTextValue;
     seoTitle?: string;
     seoDescription?: string;
-    seoSocialImage?: StudioImage | null;
   };
-};
-
-type StudioImage = {
-  id?: string | number;
-  documentId?: string;
-  url: string;
-  name?: string;
-  alternativeText?: string;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
 };
 
 function readAuthToken() {
@@ -56,69 +43,7 @@ function slugify(value: string) {
     .replace(/-+/g, '-');
 }
 
-function pickMediaUrl(media: Partial<StudioImage> | undefined) {
-  if (!media) return '';
-  const formats = media.formats as Record<string, any> | undefined;
-  return formats?.medium?.url || formats?.small?.url || formats?.thumbnail?.url || media.url || '';
-}
 
-function normalizeStudioImage(value: any): StudioImage | null {
-  if (!value || typeof value !== 'object') return null;
-  const url = pickMediaUrl(value);
-  if (!url) return null;
-  return {
-    id: value.id,
-    documentId: value.documentId,
-    url: value.url || url,
-    name: value.name,
-    alternativeText: value.alternativeText,
-    width: value.width,
-    height: value.height,
-    formats: value.formats,
-  };
-}
-
-function mergeStudioImages(current: StudioImage[], incoming: StudioImage[]) {
-  const map = new Map<string, StudioImage>();
-  [...current, ...incoming].forEach((img) => {
-    const key = `${img.documentId || img.id || img.url}`;
-    map.set(key, img);
-  });
-  return Array.from(map.values());
-}
-
-function extractImagesFromContent(value: RichTextValue): StudioImage[] {
-  if (!Array.isArray(value)) return [];
-
-  const images: StudioImage[] = [];
-  value.forEach((block: any) => {
-    if (block?.type === 'image') {
-      const normalized = normalizeStudioImage(block.image || block);
-      if (normalized) images.push(normalized);
-    }
-  });
-
-  return images;
-}
-
-function appendImageBlock(content: RichTextValue, media: StudioImage, fallbackAlt = 'Image'): RichTextValue {
-  const blocks = Array.isArray(content) ? [...content] : [];
-
-  blocks.push({
-    type: 'image',
-    image: {
-      url: media.url,
-      name: media.name || fallbackAlt,
-      alternativeText: media.alternativeText || fallbackAlt,
-      width: media.width || 0,
-      height: media.height || 0,
-      formats: media.formats as any,
-    },
-    children: [{ type: 'text', text: '' }],
-  });
-
-  return blocks;
-}
 
 
 
@@ -131,13 +56,9 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
   const [content, setContent] = useState<RichTextValue>(initial?.content ?? '');
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
-  const [seoSocialImage, setSeoSocialImage] = useState<StudioImage | null>(initial?.seoSocialImage || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [isDirty, setIsDirty] = useState(false);
-  const [studioImages, setStudioImages] = useState<StudioImage[]>(() => extractImagesFromContent(initial?.content ?? ''));
-  const [isUploadingStudioImage, setIsUploadingStudioImage] = useState(false);
-  const [isUploadingSeoImage, setIsUploadingSeoImage] = useState(false);
   const savedSnapshotRef = useRef({ title, slug, seoTitle, seoDescription, content });
 
   const storeRef = useMemo(
@@ -163,118 +84,9 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
     }
   }, [title, slugTouched]);
 
-  useEffect(() => {
-    const imagesFromContent = extractImagesFromContent(content);
-    if (imagesFromContent.length === 0) return;
-    setStudioImages((current) => mergeStudioImages(current, imagesFromContent));
-  }, [content]);
 
-  const handleUploadToStudio = async (file: File | null) => {
-    if (!file) return;
-    const token = readAuthToken();
 
-    if (!token) {
-      notifications.show({ title: 'Session expired', message: 'Please sign in again to upload images.', color: 'red' });
-      return;
-    }
 
-    try {
-      setIsUploadingStudioImage(true);
-      const upload = await tiendaClient.uploadStoreMedia(storeRef, {
-        token,
-        files: [file],
-        alternativeText: title?.trim() || file.name,
-      });
-
-      if (!upload?.ok) {
-        throw new Error(upload?.message || upload?.text || 'Upload failed');
-      }
-
-      const uploaded = normalizeStudioImage(upload?.data?.[0]);
-      if (!uploaded) {
-        throw new Error('Upload succeeded but no image URL returned');
-      }
-
-      setStudioImages((current) => mergeStudioImages(current, [uploaded]));
-      setContent((current) => appendImageBlock(current, uploaded, uploaded.alternativeText || title || 'Article image'));
-
-      notifications.show({
-        title: 'Image uploaded',
-        message: 'Added to Article Media Studio and inserted into content.',
-        color: 'green',
-      });
-    } catch (error) {
-      notifications.show({
-        title: 'Upload failed',
-        message: error instanceof Error ? error.message : 'Please try again.',
-        color: 'red',
-      });
-    } finally {
-      setIsUploadingStudioImage(false);
-    }
-  };
-
-  const handleInsertFromStudio = (image: StudioImage) => {
-    setContent((current) => appendImageBlock(current, image, image.alternativeText || title || 'Article image'));
-    notifications.show({
-      title: 'Inserted image',
-      message: 'Image inserted at the end of article content.',
-      color: 'blue',
-      autoClose: 1600,
-    });
-  };
-
-  const handleUploadSeoSocialImage = async (file: File | null) => {
-    if (!file || !itemDocumentId) return;
-
-    const token = readAuthToken();
-
-    if (!token) {
-      notifications.show({ title: 'Session expired', message: 'Please sign in again to upload images.', color: 'red' });
-      return;
-    }
-
-    try {
-      setIsUploadingSeoImage(true);
-      const upload = await tiendaClient.uploadStoreMedia(storeRef, {
-        token,
-        files: [file],
-        alternativeText: seoTitle || title || file.name,
-        attach: {
-          contentType: 'article',
-          itemId: itemDocumentId,
-          field: 'SEO.socialImage',
-          mode: 'replace',
-        },
-      });
-
-      if (!upload?.ok) {
-        throw new Error(upload?.message || upload?.text || 'Upload failed');
-      }
-
-      const uploaded = normalizeStudioImage(upload?.data?.[0]);
-      if (!uploaded) {
-        throw new Error('Upload succeeded but no image URL returned');
-      }
-
-      setSeoSocialImage(uploaded);
-      setStudioImages((current) => mergeStudioImages(current, [uploaded]));
-
-      notifications.show({
-        title: 'SEO image updated',
-        message: 'Social image attached to this article.',
-        color: 'green',
-      });
-    } catch (error) {
-      notifications.show({
-        title: 'Upload failed',
-        message: error instanceof Error ? error.message : 'Please try again.',
-        color: 'red',
-      });
-    } finally {
-      setIsUploadingSeoImage(false);
-    }
-  };
 
   const handleSubmit = async () => {
     const token = readAuthToken();
@@ -407,6 +219,13 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         }}
         placeholder="article-slug"
         required
+        description={
+          slug ? (
+            <span style={{ fontFamily: 'monospace' }}>
+              /{storeSlug}/blog/<strong>{slug}</strong>
+            </span>
+          ) : undefined
+        }
       />
 
       <ContentEditor

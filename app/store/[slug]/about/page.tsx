@@ -12,6 +12,10 @@ import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from '@/markket/colors.config';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
+import { cache } from 'react';
+
+const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
+const getAboutPageCached = cache((slug: string) => strapiClient.getPage('about', slug));
 
 interface AboutPageProps {
   params: Promise<{ slug: string }>;
@@ -20,7 +24,7 @@ interface AboutPageProps {
 export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const response = await strapiClient.getPage('about', slug);
+  const response = await getAboutPageCached(slug);
   const page = response?.data?.[0] as Page;
 
   return generateSEOMetadata({
@@ -37,14 +41,14 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
 
 export default async function AboutPage({ params }: AboutPageProps) {
   const { slug } = await params;
-  const storeResponse = await strapiClient.getStore(slug);
+  const storeResponse = await getStoreCached(slug);
   const store = storeResponse?.data?.[0];
 
   if (!store) {
     notFound();
   }
 
-  const aboutPageResponse = await strapiClient.getPage('about', slug);
+  const aboutPageResponse = await getAboutPageCached(slug);
   const aboutPage = aboutPageResponse?.data?.[0];
 
   const pagesResponse = await strapiClient.getPages(slug);

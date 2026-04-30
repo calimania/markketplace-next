@@ -39,6 +39,7 @@ export default async function TiendaAlbumsPage({ params }: TiendaAlbumsPageProps
       subtitle={`Albums for ${storeSlug}`}
       routePath={`/tienda/${storeSlug}/albums`}
       sectionTitle="Albums"
+      tone="albums"
       actions={
         <Button component="a" href={`/tienda/${storeSlug}/albums/new`} leftSection={<IconPlus size={16} />}>
           New Album

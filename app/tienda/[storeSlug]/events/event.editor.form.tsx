@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button, Divider, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -86,10 +86,36 @@ function toIsoString(value: string) {
   return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString();
 }
 
+function getDefaultEventRange() {
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() + 7);
+  start.setHours(17, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setHours(19, 0, 0, 0);
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString(),
+  };
+}
+
+function isValidIanaTimezone(value: string) {
+  try {
+    if (!value.trim()) return true;
+    new Intl.DateTimeFormat('en-US', { timeZone: value.trim() }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initial }: EventEditorFormProps) {
   const router = useRouter();
   const store = useStore();
   const autoTimezone = browserTimezone();
+  const defaultRange = getDefaultEventRange();
 
   const [name, setName] = useState(initial?.name || '');
   const [slug, setSlug] = useState(initial?.slug || '');
@@ -97,8 +123,12 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
   const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl || '');
-  const [startDateInput, setStartDateInput] = useState(toDatetimeLocalInput(initial?.startDate));
-  const [endDateInput, setEndDateInput] = useState(toDatetimeLocalInput(initial?.endDate || new Date(Date.now() + 3600000).toISOString()));
+  const [startDateInput, setStartDateInput] = useState(
+    toDatetimeLocalInput(initial?.startDate || (mode === 'new' ? defaultRange.start : undefined)),
+  );
+  const [endDateInput, setEndDateInput] = useState(
+    toDatetimeLocalInput(initial?.endDate || (mode === 'new' ? defaultRange.end : new Date(Date.now() + 3600000).toISOString())),
+  );
   const [timezone, setTimezone] = useState(initial?.timezone || autoTimezone);
   const [showTimezoneEditor, setShowTimezoneEditor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,6 +136,8 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone });
   const [isDirty, setIsDirty] = useState(false);
   const storeRef = store.documentId || store.slug || storeSlug;
+  const normalizedTimezone = timezone.trim();
+  const hasTimezoneError = !isValidIanaTimezone(normalizedTimezone);
 
   useEffect(() => {
     if (!slugTouched) {
@@ -160,13 +192,22 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       return;
     }
 
+    if (hasTimezoneError) {
+      notifications.show({
+        title: 'Invalid timezone',
+        message: 'Use a valid IANA timezone, for example America/Los_Angeles or Europe/Berlin.',
+        color: 'orange',
+      });
+      return;
+    }
+
     const payload = {
       Name: name.trim(),
       slug: nextSlug,
       Description: description,
       startDate,
       endDate,
-      timezone: timezone.trim() || undefined,
+      timezone: normalizedTimezone || undefined,
       SEO: {
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
@@ -254,6 +295,13 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         }}
         placeholder="event-slug"
         required
+        description={
+          slug ? (
+            <span style={{ fontFamily: 'monospace' }}>
+              /{storeSlug}/events/<strong>{slug}</strong>
+            </span>
+          ) : undefined
+        }
       />
 
       <Group grow>
@@ -307,6 +355,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
             onChange={(e) => setTimezone(e.currentTarget.value)}
             placeholder="America/Los_Angeles"
             description="Use IANA timezone (for example, America/Los_Angeles or Europe/Berlin)."
+            error={hasTimezoneError ? 'Invalid timezone. Please use a valid IANA value.' : undefined}
           />
         </>
       )}
@@ -352,7 +401,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
           Cancel
         </Button>
 
-        <Button onClick={handleSubmit} loading={isSubmitting} disabled={!isDirty && mode === 'edit'}>
+        <Button onClick={handleSubmit} loading={isSubmitting} disabled={(!isDirty && mode === 'edit') || hasTimezoneError}>
           {mode === 'new' ? 'Create Event' : 'Save Changes'}
         </Button>
       </Group>

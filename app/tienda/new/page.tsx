@@ -241,7 +241,15 @@ export default function TiendaNewPage() {
                 <TextInput
                   label="Slug"
                   placeholder="casa-caliman"
-                  description="At least 5 chars. Lowercase letters, numbers, and dashes."
+                  description={
+                    form.values.slug ? (
+                      <span style={{ fontFamily: 'monospace' }}>
+                        markket.place/<strong>{form.values.slug}</strong>
+                        <span style={{ color: 'var(--mantine-color-dimmed)', margin: '0 6px' }}>·</span>
+                        /tienda/{form.values.slug}
+                      </span>
+                    ) : 'At least 5 chars. Lowercase letters, numbers, and dashes.'
+                  }
                   disabled={isSubmitting}
                   value={form.values.slug}
                   onChange={(event) => {

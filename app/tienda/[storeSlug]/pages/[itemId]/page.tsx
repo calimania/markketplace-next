@@ -9,6 +9,7 @@ import { findPage } from '../pages.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PageContent from '@/app/components/ui/page.content';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
+import { isPublished } from '@/markket/helpers.publication';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 
@@ -61,7 +62,7 @@ export default async function TiendaPageDetailPage({ params }: TiendaPageDetailP
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={String((page as any).status || '').toLowerCase() === 'published' || Boolean(page.publishedAt)}
+            isPublished={isPublished(page)}
           />
         </>
       }

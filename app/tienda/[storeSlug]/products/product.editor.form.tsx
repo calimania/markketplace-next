@@ -190,6 +190,13 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         }}
         placeholder="product-slug"
         required
+        description={
+          slug ? (
+            <span style={{ fontFamily: 'monospace' }}>
+              /{storeSlug}/products/<strong>{slug}</strong>
+            </span>
+          ) : undefined
+        }
       />
 
       <ContentEditor

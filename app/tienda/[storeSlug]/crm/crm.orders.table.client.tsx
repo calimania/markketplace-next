@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Badge, Center, Loader, Paper, ScrollArea, Stack, Table, Text } from '@mantine/core';
+import { Badge, Center, Loader, Paper, ScrollArea, Skeleton, Stack, Table, Text } from '@mantine/core';
 import type { CrmCustomer } from '@/markket/crm';
 
 type CrmOrdersTableClientProps = {
@@ -131,10 +131,17 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
 
   if (loading) {
     return (
-      <Paper withBorder radius="md" p="md">
-        <Center py="md">
-          <Loader size="sm" />
-        </Center>
+      <Paper withBorder radius="xl" p="md" style={{ background: 'linear-gradient(145deg, rgba(240,249,255,0.95) 0%, #ffffff 65%, rgba(252,231,243,0.82) 100%)' }}>
+        <Stack gap="sm">
+          <Center py={4}>
+            <Loader size="sm" />
+          </Center>
+          <Skeleton height={14} width={220} radius="sm" />
+          <Skeleton height={14} width={180} radius="sm" />
+          <Skeleton height={44} radius="md" />
+          <Skeleton height={44} radius="md" />
+          <Skeleton height={44} radius="md" />
+        </Stack>
       </Paper>
     );
   }

@@ -84,6 +84,7 @@ export default async function TiendaCrmPage({ params }: TiendaCrmPageProps) {
       subtitle={`Customer, newsletter, order, and RSVP touchpoints for ${storeSlug}`}
       routePath={`/tienda/${storeSlug}/crm`}
       sectionTitle="CRM Index"
+      tone="crm"
       actions={(
         <Button component="a" href={`/tienda/${storeSlug}`} variant="light" leftSection={<IconArrowLeft size={14} />}>
           Back To Overview

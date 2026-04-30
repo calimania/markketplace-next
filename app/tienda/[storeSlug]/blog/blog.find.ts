@@ -1,40 +1,29 @@
 import { strapiClient } from '@/markket/api.strapi';
 import type { Article } from '@/markket/article';
+import { cache } from 'react';
 
-type ArticleStatus = 'all' | 'draft' | 'published';
+export const findBlogArticle = cache(async (itemId: string, storeSlug: string) => {
+  const [byDocumentId, bySlug] = await Promise.all([
+    strapiClient.fetch<Article>({
+      contentType: 'articles',
+      filters: { documentId: { $eq: itemId }, store: { slug: { $eq: storeSlug } } },
+      status: 'all',
+      populate: 'SEO.socialImage,Tags,cover,store',
+      paginate: { page: 1, pageSize: 1 },
+      includeAuth: true,
+    }),
+    strapiClient.fetch<Article>({
+      contentType: 'articles',
+      filters: { slug: { $eq: itemId }, store: { slug: { $eq: storeSlug } } },
+      status: 'all',
+      populate: 'SEO.socialImage,Tags,cover,store',
+      paginate: { page: 1, pageSize: 1 },
+      includeAuth: true,
+    }),
+  ]);
 
-async function findArticleByField(
-  field: 'documentId' | 'slug',
-  itemId: string,
-  storeSlug: string,
-  status: ArticleStatus = 'all',
-) {
-  return strapiClient.fetch<Article>({
-    contentType: 'articles',
-    filters: {
-      [field]: { $eq: itemId },
-      store: { slug: { $eq: storeSlug } },
-    },
-    status,
-    populate: 'SEO.socialImage,Tags,cover,store',
-    paginate: { page: 1, pageSize: 1 },
-    includeAuth: true,
-  });
-}
-
-export async function findBlogArticle(itemId: string, storeSlug: string) {
-  const statusesToTry: ArticleStatus[] = ['published', 'draft', 'all'];
-
-  for (const status of statusesToTry) {
-    const byDocumentId = await findArticleByField('documentId', itemId, storeSlug, status);
-    if (byDocumentId?.data?.[0]) return byDocumentId.data[0] as Article;
-
-    const bySlug = await findArticleByField('slug', itemId, storeSlug, status);
-    if (bySlug?.data?.[0]) return bySlug.data[0] as Article;
-  }
-
-  return undefined;
-}
+  return (byDocumentId?.data?.[0] || bySlug?.data?.[0]) as Article | undefined;
+});
 
 export function contentBlocksToText(content: Article['Content']) {
   if (!Array.isArray(content)) return '';

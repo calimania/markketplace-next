@@ -542,6 +542,7 @@ export class StrapiClient {
     return this.fetch({
       contentType: 'articles',
       sort,
+      status: 'published',
       filters: {
         store: {
           slug: {
@@ -627,8 +628,10 @@ export class StrapiClient {
           },
         }
       },
+      status: 'published',
       populate: 'SEO.socialImage,Tags,cover,store',
       sort: 'createdAt:desc',
+      paginate: { page: 1, pageSize: 1 },
     });
   }
 
