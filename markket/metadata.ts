@@ -89,7 +89,7 @@ export async function generateSEOMetadata({
 
   const keywords = keywordsList.join(', ');
 
-  const canonical = entity?.SEO?.metaUrl || entity?.url || `/${slug}`;
+  const canonical = entity?.url || entity?.SEO?.metaUrl || `/${slug}`;
 
   return {
     title,

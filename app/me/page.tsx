@@ -20,7 +20,7 @@ import {
   Skeleton,
   ThemeIcon,
 } from '@mantine/core';
-import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil, IconSparkles } from '@tabler/icons-react';
+import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil, IconSparkles, IconChevronRight, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient, strapiClient } from '@/markket/api';
@@ -177,9 +177,9 @@ export default function MeHomePage() {
             <Badge variant="light" radius="xl" color="pink">Workspace</Badge>
           </Group>
           <Text c="dimmed" maw={560}>
-            Quick profile edits, account links, and your latest stores in one calmer place.
+            Tienda backend
             <br />
-            <span className="accent-blue-note">Small screen friendly. Less noise, more doing.</span>
+            <span className="accent-blue-note">Content & Settings</span>
           </Text>
         </Stack>
 
@@ -219,7 +219,7 @@ export default function MeHomePage() {
                     <Text mt="xs" c="dimmed">
                       {isEditingProfile
                         ? (!displayName ? 'Welcome! Fill in your name and a short bio to get started.' : 'Editing mode. Save when done.')
-                        : 'Update your name, bio, and avatar without leaving this page.'}
+                        : 'Update your name, bio, and avatar.'}
                     </Text>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -329,7 +329,7 @@ export default function MeHomePage() {
                 </Title>
                 <Badge variant="light" className="me-store-count">{stores.length}</Badge>
               </Group>
-              <Text mt="xs" c="dimmed">Open your latest spaces and jump back into editing.</Text>
+              <Text mt="xs" c="dimmed">Preview and edit</Text>
             </Stack>
           </Group>
 
@@ -359,26 +359,65 @@ export default function MeHomePage() {
             )}
             {!isLoading && previewStores.map((store, index) => {
               const storeKey = `${store.documentId || store.slug || store.id || 'store'}-${index}`;
+              const isPublished = String((store as { status?: string }).status || '').toLowerCase() === 'published'
+                || (String((store as { status?: string }).status || '').toLowerCase() !== 'draft' && Boolean(store.publishedAt));
 
               return (
-                <Paper key={storeKey} withBorder p="sm" radius="lg" className="me-store-card">
-                  <Group justify="space-between" align="center">
-                    <div>
-                      <Text fw={700}>{store.title}</Text>
-                      <Text size="sm" c="dimmed">/{store.slug}</Text>
-                    </div>
-                    <Button
-                      size="xs"
-                      component={Link}
-                      href={`/tienda/${store.slug}`}
-                      radius="xl"
-                      variant="light"
-                      color="cyan"
-                    >
-                      Open Studio
-                    </Button>
-                  </Group>
-                </Paper>
+                <Link
+                  key={storeKey}
+                  href={`/tienda/${store.slug}`}
+                  className="store-tile-link"
+                  aria-label={`Open studio for ${store.title || store.slug} (${isPublished ? 'Visible' : 'Hidden'})`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <Paper
+                    withBorder
+                    p="sm"
+                    radius="xs"
+                    className="me-store-card store-tile-card"
+                  >
+                    <Group justify="space-between" align="center" wrap="nowrap">
+                      <div style={{ minWidth: 0 }}>
+                        <Group gap="xs" align="center" wrap="wrap" mb={2}>
+                          <Text fw={700}>{store.title}</Text>
+                          <Badge
+                            variant="light"
+                            color={isPublished ? 'green' : 'gray'}
+                            title={isPublished ? 'Visible store' : 'Hidden draft store'}
+                          >
+                            <Group gap={4} wrap="nowrap">
+                              {isPublished ? <IconEye size={12} /> : <IconEyeOff size={12} />}
+                            </Group>
+                          </Badge>
+                        </Group>
+                        <Text
+                          size="sm"
+                          c="dimmed"
+                          style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace' }}
+                        >
+                          /{store.slug}
+                        </Text>
+                      </div>
+                      <Group
+                        gap={6}
+                        wrap="nowrap"
+                        className="store-tile-cta"
+                        style={{
+                          border: '1px solid rgba(0, 188, 212, 0.35)',
+                          color: '#00BCD4',
+                          background: '#fff',
+                          borderRadius: 10,
+                          padding: '6px 12px',
+                          flexShrink: 0,
+                        }}
+                        aria-hidden="true"
+                      >
+                        <Text size="xs" fw={700}>Open</Text>
+                        <IconChevronRight size={14} />
+                      </Group>
+                    </Group>
+                  </Paper>
+                </Link>
               );
             })}
             {(stores.length > 2) && (

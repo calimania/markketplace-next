@@ -7,6 +7,7 @@ import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import AlbumItemActions from '../album.item.actions';
 import { findAlbum } from '../albums.find';
+import { isPublished } from '@/markket/helpers.publication';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Store } from '@/markket/store';
 
@@ -54,7 +55,7 @@ export default async function TiendaAlbumItemPage({ params }: TiendaAlbumItemPag
             storeSlug={storeSlug}
             itemDocumentId={itemDocumentId}
             editorId={editorId}
-            isPublished={String((album as any).status || '').toLowerCase() === 'published' || Boolean(album.publishedAt)}
+            isPublished={isPublished(album)}
           />
         </>
       }

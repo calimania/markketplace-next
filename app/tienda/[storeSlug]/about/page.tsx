@@ -29,6 +29,7 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
       subtitle={`About/content pages for ${storeSlug}`}
       routePath={`/tienda/${storeSlug}/about`}
       sectionTitle="Pages"
+      tone="pages"
       actions={
         <>
             <Button

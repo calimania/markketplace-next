@@ -1,21 +1,64 @@
-import React from "react";
-import { Text } from "@mantine/core";
-import { IconWheat } from "@tabler/icons-react";
+'use client';
+
+import type { ElementType } from 'react';
+import { Paper, Stack, Box, Title, Text, rem } from '@mantine/core';
 
 interface FeatureCardProps {
-  icon?: React.ElementType;
+  icon?: ElementType;
   title: string;
   description: string;
+  color?: string;
+  index?: number;
 }
 
-export function FeatureCard({ icon, title, description }: FeatureCardProps) {
-  const Icon = icon || IconWheat;
-
+export function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+  color = '#00bcd4',
+  index = 0,
+}: FeatureCardProps) {
   return (
-    <div className="p-6 rounded-lg border border-gray-200 dark:border-gray-800 transition-all hover:border-blue-500">
-      <Icon className="text-blue-500 mb-4" size={32} />
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <Text c="dimmed">{description}</Text>
-    </div>
+    <Paper
+      withBorder
+      radius="lg"
+      p="xl"
+      style={{
+        borderColor: `${color}20`,
+        background: 'rgba(255,255,255,0.98)',
+        boxShadow: `0 18px 40px ${color}12`,
+        transition: 'transform 0.22s ease, box-shadow 0.22s ease',
+        animationDelay: `${index * 80}ms`,
+      }}
+      className="fade-in hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.08)]"
+    >
+      <Stack gap="md">
+        {Icon && (
+          <Box
+            style={{
+              width: rem(60),
+              height: rem(60),
+              borderRadius: rem(18),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: `${color}15`,
+            }}
+          >
+            <Icon size={28} color={color} stroke={2.2} />
+          </Box>
+        )}
+
+        <Title order={3} size="h4" style={{ color: '#111827' }}>
+          {title}
+        </Title>
+
+        <Text c="dimmed" style={{ lineHeight: 1.75 }}>
+          {description}
+        </Text>
+      </Stack>
+    </Paper>
   );
-};
+}
+
+export default FeatureCard;

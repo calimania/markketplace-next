@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Event } from '@/markket/event';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
+import { isPublished } from '@/markket/helpers.publication';
 
 type EventListClientProps = {
   storeSlug: string;
@@ -27,10 +28,6 @@ function itemKey(event: Partial<Event>) {
   return String(event.documentId || event.id || event.slug || event.Name || Math.random());
 }
 
-function isPublished(event: Partial<Event>) {
-  return Boolean(event.publishedAt);
-}
-
 function sortByDate(items: Event[]) {
   return [...items].sort((a, b) => {
     const aTime = new Date(a.startDate || 0).getTime();
@@ -41,6 +38,7 @@ function sortByDate(items: Event[]) {
 
 export default function EventListClient({ storeSlug, initialEvents }: EventListClientProps) {
   const [events, setEvents] = useState<Event[]>(sortByDate(initialEvents || []));
+  const fetchedStoreSlugRef = useRef<string | null>(null);
 
   useEffect(() => {
     const token = readAuthToken();
@@ -48,6 +46,12 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
       console.log('[EventListClient] No token in localStorage');
       return;
     }
+
+    if (fetchedStoreSlugRef.current === storeSlug) {
+      return;
+    }
+
+    fetchedStoreSlugRef.current = storeSlug;
 
     const loadAllContent = async () => {
       try {
@@ -71,6 +75,7 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           setEvents(sortByDate(Array.from(merged.values())));
         }
       } catch (error) {
+        fetchedStoreSlugRef.current = null;
         console.error('[EventListClient] Failed to load events:', error);
       }
     };

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Group, Stack, Text, ThemeIcon } from '@mantine/core';
+import { Group, Skeleton, Stack, Text, ThemeIcon } from '@mantine/core';
 import { IconChevronRight, IconFileText, IconNews, IconPhoto, IconShoppingCart, IconCalendarEvent, IconMusic } from '@tabler/icons-react';
 import { appendEmbedParamsToHref } from '@/app/utils/embed.query';
 
@@ -23,6 +23,7 @@ type NavTableItem = {
 type NavTableProps = {
   items: NavTableItem[];
   emptyText?: string;
+  loading?: boolean;
 };
 
 function getIcon(icon?: NavIcon) {
@@ -34,7 +35,7 @@ function getIcon(icon?: NavIcon) {
   return <IconPhoto size={14} />;
 }
 
-export default function NavTable({ items, emptyText = 'No items yet.' }: NavTableProps) {
+export default function NavTable({ items, emptyText = 'No items yet.', loading = false }: NavTableProps) {
   const router = useRouter();
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -67,7 +68,16 @@ export default function NavTable({ items, emptyText = 'No items yet.' }: NavTabl
     }, 170);
   };
 
-  if (items.length === 0) {
+  if (loading) {
+    return (
+      <>
+        <Skeleton height={58} radius="xl" />
+        <Skeleton height={58} radius="xl" />
+      </>
+    )
+  }
+
+  if (!items.length) {
     return <Text c="dimmed">{emptyText}</Text>;
   }
 
@@ -78,6 +88,7 @@ export default function NavTable({ items, emptyText = 'No items yet.' }: NavTabl
           key={`${item.key}-${index}`}
           href={item.href}
           className={`ui-nav-row${pressedKey === item.key ? ' is-pressed' : ''}`}
+          data-nav-icon={item.icon || 'store'}
           onPointerDown={() => setPressedKey(item.key)}
           onPointerCancel={() => setPressedKey(null)}
           onBlur={() => setPressedKey(null)}
@@ -110,7 +121,7 @@ export default function NavTable({ items, emptyText = 'No items yet.' }: NavTabl
                   {item.title}
                 </Text>
                 {!!item.subtitle && (
-                  <Text size="xs" c="dimmed" truncate>
+                  <Text size="xs" c="dimmed" truncate className="ui-nav-subtitle">
                     {item.subtitle}
                   </Text>
                 )}

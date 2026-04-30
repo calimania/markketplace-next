@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
+import '@mantine/tiptap/styles.css';
 import { useEditor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
@@ -13,7 +14,7 @@ import {
 } from '@mantine/core';
 import {
   IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
-  IconUpload, IconLink, IconX, IconCheck, IconFileUpload
+  IconUpload, IconLink, IconX, IconCheck, IconFileUpload, IconMaximize, IconMinimize
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
@@ -52,6 +53,7 @@ interface ContentEditorProps {
   error?: string;
   format?: 'markdown' | 'blocks' | 'html';
   onUploadImage?: (file: File, altText?: string) => Promise<string | undefined>;
+  allowFullscreen?: boolean;
 }
 
 const getEditorMarkdown = (editor: any): string => {
@@ -80,8 +82,11 @@ const ContentEditor = ({
   error,
   format = 'markdown',
   onUploadImage,
+  allowFullscreen = true,
 }: ContentEditorProps) => {
   const [activeTab, setActiveTab] = useState<string>('editor');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
@@ -96,6 +101,32 @@ const ContentEditor = ({
   const [libraryQuery, setLibraryQuery] = useState('');
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [libraryResults, setLibraryResults] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const media = window.matchMedia('(max-width: 768px)');
+    const sync = () => setIsCompactViewport(media.matches);
+    sync();
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', sync);
+      return () => media.removeEventListener('change', sync);
+    }
+
+    media.addListener(sync);
+    return () => media.removeListener(sync);
+  }, []);
+
+  useEffect(() => {
+    if (!isFullscreen || typeof document === 'undefined') return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
 
   const uploadFile = async (file: File) => {
     try {
@@ -448,7 +479,13 @@ const ContentEditor = ({
         withBorder={!error}
         p={0}
         style={{
-          border: error ? '1px solid var(--mantine-color-red-6)' : undefined
+          border: error ? '1px solid var(--mantine-color-red-6)' : undefined,
+          position: isFullscreen ? 'fixed' : 'relative',
+          inset: isFullscreen ? (isCompactViewport ? '8px' : '16px') : undefined,
+          zIndex: isFullscreen ? 400 : undefined,
+          background: isFullscreen ? '#fff' : undefined,
+          boxShadow: isFullscreen ? '0 22px 44px rgba(15, 23, 42, 0.22)' : undefined,
+          borderRadius: isFullscreen ? (isCompactViewport ? 10 : 14) : undefined,
         }}
       >
         <Tabs value={activeTab} onChange={(a) => setActiveTab(a as string)}>
@@ -476,13 +513,24 @@ const ContentEditor = ({
                     <IconPhoto size={16} />
                   </ActionIcon>
                 </Tooltip>)}
+              {allowFullscreen && (
+                <Tooltip label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen editor'}>
+                  <ActionIcon
+                    onClick={() => setIsFullscreen((prev) => !prev)}
+                    variant="light"
+                    color={isFullscreen ? 'pink' : 'gray'}
+                  >
+                    {isFullscreen ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
             </Group>
           </Group>
 
           <Tabs.Panel value="editor">
             <RichTextEditor
               editor={editor}
-              style={{ minHeight, border: 'none' }}
+              style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : minHeight, border: 'none' }}
             >
               {editor && (
                 <BubbleMenu editor={editor}>
@@ -493,7 +541,7 @@ const ContentEditor = ({
                   </RichTextEditor.ControlsGroup>
                 </BubbleMenu>
               )}
-              <RichTextEditor.Toolbar sticky stickyOffset={60}>
+              <RichTextEditor.Toolbar sticky stickyOffset={isFullscreen ? (isCompactViewport ? 6 : 12) : 60}>
                 <RichTextEditor.ControlsGroup>
                   <RichTextEditor.Bold />
                   <RichTextEditor.Italic />
@@ -539,12 +587,12 @@ const ContentEditor = ({
           <Tabs.Panel value="preview">
             <div
               className="blocks-content px-4 py-6"
-              style={{ minHeight }}
+              style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}
               dangerouslySetInnerHTML={{ __html: renderPreview() }}
             />
           </Tabs.Panel>
 
-          <Tabs.Panel value="markdown" style={{ minHeight }}>
+          <Tabs.Panel value="markdown" style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}>
             <pre className="px-4 py-6 font-mono text-sm whitespace-pre-wrap">
               {getEditorMarkdown(editor)}
             </pre>

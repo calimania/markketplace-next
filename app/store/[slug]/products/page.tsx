@@ -18,8 +18,12 @@ import {
 import { IconShoppingBag, IconMail } from '@tabler/icons-react';
 import StorePageHeader from "@/app/components/ui/store.page.header";
 import { markketColors } from '@/markket/colors.config';
+import { cache } from 'react';
 import './product-list.css';
 import './product-page-effects.css';
+
+const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
+const getProductsPageCached = cache((slug: string) => strapiClient.getPage('products', slug));
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -28,7 +32,7 @@ interface ProductPageProps {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+  const { data: [StoreProductPage] } = await getProductsPageCached(slug);
   const { data: products } = await strapiClient.getProducts({ page: 1, pageSize: 100 }, { filter: '', sort: '' }, slug);
 
   let page = StoreProductPage;
@@ -55,10 +59,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   });
 }; export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const storeResponse = await strapiClient.getStore(slug);
+  const storeResponse = await getStoreCached(slug);
   const store = storeResponse?.data?.[0];
 
-  const { data: [StoreProductPage] } = await strapiClient.getPage('products', slug);
+  const { data: [StoreProductPage] } = await getProductsPageCached(slug);
 
   let page = StoreProductPage;
   if (!page) {

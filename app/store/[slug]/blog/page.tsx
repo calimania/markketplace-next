@@ -11,6 +11,10 @@ import { IconArticle } from '@tabler/icons-react';
 import StorePageHeader from "@/app/components/ui/store.page.header";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from '@/markket/colors.config';
+import { cache } from 'react';
+
+const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
+const getBlogPageCached = cache((slug: string) => strapiClient.getPage('blog', slug));
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -18,11 +22,7 @@ interface BlogPageProps {
 
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
   const { slug } = await params;
-  let response;
-
-  if (slug) {
-    response = await strapiClient.getPage('blog', slug);
-  }
+  const response = slug ? await getBlogPageCached(slug) : undefined;
 
   const page = response?.data?.[0] as Page;
 
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
 
 export default async function StoreBlogPage({ params }: BlogPageProps) {
   const { slug } = await params;
-  const storeResponse = await strapiClient.getStore(slug);
+  const storeResponse = await getStoreCached(slug);
   const store = storeResponse?.data?.[0] as Store;
 
 
@@ -51,7 +51,7 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
     notFound();
   }
 
-  const blogResponse = await strapiClient.getPage('blog', slug);
+  const blogResponse = await getBlogPageCached(slug);
   const page = blogResponse?.data?.[0] as Page;
   const postsResponse = await strapiClient.getPosts({
     page: 1,

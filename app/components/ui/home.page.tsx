@@ -9,12 +9,16 @@ import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
   Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
+import { useState, useEffect } from 'react';
 import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from "@/markket/colors.config";
 import Link from "next/link";
 import { StoreCard } from "@/app/components/stores/card";
 import { stripMarkdown } from '@/markket/richtext.utils';
+import { useAuth } from '@/app/providers/auth.provider';
+import { HeroDecorations } from '@/app/components/ui/hero.decorations';
+import { FeatureCard } from '@/app/components/ui/feature.card';
 
 const features = [
   {
@@ -59,14 +63,14 @@ type HomePageProps = {
 };
 
 const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
-  const isLoggedIn = false;
-  const mounted = true;
-  const authLoading = false;
+  const { maybe, isLoading: authLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
-  // Strapi already filters to upcoming events via getCommunityEvents, but guard client-side too
+  useEffect(() => { setMounted(true); }, []);
+
+  const isLoggedIn = mounted && !authLoading && maybe();
   const eventsToDisplay = communityEvents.filter(e => Boolean(e?.startDate));
-
-  const resolvedIsLoggedIn = mounted && !authLoading && isLoggedIn;
+  const resolvedIsLoggedIn = isLoggedIn;
 
   return (
     <main className="min-h-screen">
@@ -88,218 +92,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
             opacity: 0.6,
           }}
         >
-          {/* Diagonal stripes animation */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '-50%',
-              left: '-50%',
-              width: '200%',
-              height: '200%',
-              background: `
-                repeating-linear-gradient(
-                  45deg,
-                  transparent,
-                  transparent 80px,
-                  ${markketColors.rosa.main}08 80px,
-                  ${markketColors.rosa.main}08 160px
-                )
-              `,
-              animation: 'none',
-            }}
-          />
-
-          {/* Geometric squares - random positions */}
-          {/* Cuadrado 1 - cyan */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '12%',
-              right: '8%',
-              width: 120,
-              height: 120,
-              border: `3px solid ${markketColors.sections.shop.main}40`,
-              borderRadius: 12,
-              transform: 'rotate(45deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Cuadrado 2 - rosa */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '28%',
-              left: '12%',
-              width: 65,
-              height: 65,
-              border: `2px solid ${markketColors.rosa.main}35`,
-              borderRadius: 8,
-              transform: 'rotate(18deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Cuadrado 3 - verde */}
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: '18%',
-              left: '6%',
-              width: 85,
-              height: 85,
-              border: `3px solid ${markketColors.sections.events.main}35`,
-              borderRadius: 10,
-              transform: 'rotate(-12deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Cuadrado 4 - magenta */}
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: '32%',
-              right: '18%',
-              width: 95,
-              height: 95,
-              border: `2px solid ${markketColors.sections.blog.main}30`,
-              borderRadius: 10,
-              transform: 'rotate(28deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Rectángulo 1 - verde */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '18%',
-              right: '38%',
-              width: 110,
-              height: 50,
-              border: `2px solid ${markketColors.sections.events.main}28`,
-              borderRadius: 6,
-              transform: 'rotate(-8deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Cuadrado 5 - cyan pequeño */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '65%',
-              left: '22%',
-              width: 55,
-              height: 55,
-              border: `2px solid ${markketColors.sections.shop.main}30`,
-              borderRadius: 6,
-              transform: 'rotate(35deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Rectángulo 2 - rosa */}
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: '42%',
-              right: '5%',
-              width: 75,
-              height: 40,
-              border: `2px solid ${markketColors.rosa.main}32`,
-              borderRadius: 5,
-              transform: 'rotate(15deg)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Glow blob - rosa */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '10%',
-              left: '42%',
-              width: 180,
-              height: 180,
-              borderRadius: '50%',
-              background: `radial-gradient(circle, ${markketColors.rosa.main}24 0%, transparent 72%)`,
-              filter: 'blur(2px)',
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Glow blob - cyan */}
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: '8%',
-              right: '28%',
-              width: 150,
-              height: 150,
-              borderRadius: '50%',
-              background: `radial-gradient(circle, ${markketColors.sections.shop.main}20 0%, transparent 70%)`,
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Spark dot 1 */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '22%',
-              left: '58%',
-              width: 9,
-              height: 9,
-              borderRadius: '50%',
-              background: markketColors.sections.blog.main,
-              opacity: 0.42,
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Spark dot 2 */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '68%',
-              right: '38%',
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: markketColors.sections.events.main,
-              opacity: 0.35,
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
-
-          {/* Spark dot 3 */}
-          <Box
-            style={{
-              position: 'absolute',
-              top: '38%',
-              right: '12%',
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              background: markketColors.rosa.main,
-              opacity: 0.38,
-              willChange: 'transform, opacity',
-              animation: 'none',
-            }}
-          />
+          <HeroDecorations />
         </Box>
 
         <Container size="lg" py={80}>
@@ -719,38 +512,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
             {features.map((feature, index) => (
-              <Paper
-                key={index}
-                radius="lg"
-                p={32}
-                style={{
-                  border: `1px solid ${markketColors.neutral.lightGray}`,
-                  transition: 'all 0.2s ease',
-                  cursor: 'default',
-                }}
-              >
-                <Stack gap={20}>
-                  <Box
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 12,
-                      background: `${feature.color}15`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <feature.icon size={30} color={feature.color} stroke={2} />
-                  </Box>
-                  <Title order={3} size="h3" style={{ color: markketColors.neutral.charcoal }}>
-                    {feature.title}
-                  </Title>
-                  <Text c="dimmed" style={{ lineHeight: 1.6 }}>
-                    {feature.description}
-                  </Text>
-                </Stack>
-              </Paper>
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                color={feature.color}
+                index={index}
+              />
             ))}
           </SimpleGrid>
         </Stack>

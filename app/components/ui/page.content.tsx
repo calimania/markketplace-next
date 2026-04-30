@@ -5,6 +5,7 @@ import { Page, ContentBlock } from "@/markket/page.d";
 import { Album, AlbumTrack } from '@/markket/album';
 import { Article } from '@/markket/article';
 import { CodeHighlight } from '@mantine/code-highlight';
+import '@mantine/code-highlight/styles.css';
 import type { StrapiBlockLinkChild, StrapiBlockTextChild } from '@/markket/richtext';
 
 interface PageContentProps {

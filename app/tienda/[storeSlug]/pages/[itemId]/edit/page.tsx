@@ -36,7 +36,6 @@ export default async function TiendaPageEditPage({ params }: TiendaPageEditProps
           content: page.Content as any,
           seoTitle: page.SEO?.metaTitle,
           seoDescription: page.SEO?.metaDescription,
-          seoSocialImage: page.SEO?.socialImage as any,
         }}
       />
     </TiendaDetailShell>

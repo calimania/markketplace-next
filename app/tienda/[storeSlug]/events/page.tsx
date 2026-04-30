@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Button } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
-import { strapiClient } from '@/markket/api.strapi';
 import type { Event } from '@/markket/event';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 import EventListClient from './event-list.client';
@@ -17,14 +16,7 @@ export const metadata: Metadata = {
 export default async function TiendaEventsPage({ params }: TiendaEventsPageProps) {
   const { storeSlug } = await params;
 
-  const eventsResponse = await strapiClient.getEvents(storeSlug);
-
-  const allEvents = ((eventsResponse?.data || []) as Event[])
-    .filter((event) => {
-      if (!event.startDate) return false;
-      const parsed = new Date(event.startDate);
-      return !Number.isNaN(parsed.getTime());
-    });
+  const allEvents: Event[] = [];
 
   return (
     <TiendaListShell
@@ -37,6 +29,7 @@ export default async function TiendaEventsPage({ params }: TiendaEventsPageProps
       subtitle={`Upcoming and past events for ${storeSlug}`}
       routePath={`/tienda/${storeSlug}/events`}
       sectionTitle="Events"
+      tone="events"
       actions={
         <>
           <Button component="a" href={`/tienda/${storeSlug}/events/new`} leftSection={<IconPlus size={16} />}>

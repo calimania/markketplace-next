@@ -7,6 +7,9 @@ type TiendaBlogEditPageProps = {
   params: Promise<{ storeSlug: string; itemId: string }>;
 };
 
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 export default async function TiendaBlogEditPage({ params }: TiendaBlogEditPageProps) {
   const { storeSlug, itemId } = await params;
   const post = await findBlogArticle(itemId, storeSlug);
@@ -35,7 +38,6 @@ export default async function TiendaBlogEditPage({ params }: TiendaBlogEditPageP
           content: post.Content,
           seoTitle: post.SEO?.metaTitle,
           seoDescription: post.SEO?.metaDescription,
-          seoSocialImage: post.SEO?.socialImage as any,
         }}
       />
     </TiendaDetailShell>

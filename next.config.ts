@@ -54,6 +54,26 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Long-lived cache for Next.js static assets (hashed filenames are content-addressed)
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache Next.js optimized images for 30 days
+        source: '/_next/image',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
+      },
     ];
   },
   // Rewrite clean URLs (/:slug) to internal file structure (/store/:slug)
@@ -89,12 +109,16 @@ const nextConfig = {
     ];
   },
   images: {
+    // Cache optimized images for 30 days in Next.js CDN/edge
+    minimumCacheTTL: 2592000,
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
+        // DigitalOcean Spaces CDN endpoint — prefer this for cached delivery
         protocol: 'https',
-        hostname: 'markketplace.nyc3.digitaloceanspaces.com',
+        hostname: 'markketplace.nyc3.cdn.digitaloceanspaces.com',
         port: '',
-        pathname: '/uploads/**',
+        pathname: '/**',
         search: '',
       },
     ],

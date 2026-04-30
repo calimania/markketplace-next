@@ -2,6 +2,7 @@
 
 import { Card, CardSection, Text, Badge, Group, Anchor, Box, Stack } from '@mantine/core';
 import { IconCalendar, IconArrowRight } from '@tabler/icons-react';
+import Link from 'next/link';
 import { Article } from '@/markket/article';
 import { markketColors } from '@/markket/colors.config';
 import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
@@ -23,32 +24,33 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
     || '';
 
   return (
-    <Card
-      shadow="none"
-      padding={0}
-      radius="xl"
-      withBorder
-      style={{
-        borderColor: markketColors.neutral.gray,
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.transform = 'translateY(-3px)';
-        el.style.boxShadow = `0 10px 28px ${markketColors.sections.blog.main}22`;
-        el.style.borderColor = `${markketColors.sections.blog.main}50`;
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.transform = '';
-        el.style.boxShadow = '';
-        el.style.borderColor = markketColors.neutral.gray;
-      }}
-    >
+    <Anchor href={linkHref} component={Link} underline="never" style={{ color: 'inherit', textDecoration: 'none', height: '100%', display: 'block' }}>
+      <Card
+        shadow="none"
+        padding={0}
+        radius="xl"
+        withBorder
+        style={{
+          borderColor: markketColors.neutral.gray,
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = 'translateY(-3px)';
+          el.style.boxShadow = `0 10px 28px ${markketColors.sections.blog.main}22`;
+          el.style.borderColor = `${markketColors.sections.blog.main}50`;
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = '';
+          el.style.boxShadow = '';
+          el.style.borderColor = markketColors.neutral.gray;
+        }}
+      >
       <CardSection style={{ height: 180, overflow: 'hidden', flexShrink: 0 }}>
         {coverUrl ? (
           <img
@@ -87,11 +89,9 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
           )}
         </Group>
 
-        <Anchor href={linkHref} underline="never" style={{ color: 'inherit' }}>
-          <Text fw={700} size="sm" lineClamp={2} style={{ lineHeight: 1.4, color: markketColors.neutral.charcoal }}>
-            {post.Title}
-          </Text>
-        </Anchor>
+        <Text fw={700} size="sm" lineClamp={2} style={{ lineHeight: 1.4, color: markketColors.neutral.charcoal }}>
+          {post.Title}
+        </Text>
 
         {excerpt && (
           <Text size="xs" c="dimmed" lineClamp={3} style={{ lineHeight: 1.6, flex: 1 }}>
@@ -106,16 +106,16 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
               {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </Text>
           </Group>
-          <Anchor
-            href={linkHref}
+          <Text
             size="xs"
             fw={600}
             style={{ color: markketColors.sections.blog.main, display: 'flex', alignItems: 'center', gap: 2 }}
           >
             Read <IconArrowRight size={12} />
-          </Anchor>
+          </Text>
         </Group>
       </Stack>
-    </Card>
+      </Card>
+    </Anchor>
   );
 };

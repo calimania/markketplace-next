@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { Container, Image, Stack, Text, Title } from '@mantine/core';
 import { Metadata } from 'next';
 import { strapiClient } from '@/markket/api.strapi';
@@ -5,6 +6,10 @@ import { Article } from '@/markket/article';
 import { generateSEOMetadata } from '@/markket/metadata';
 import PageContent from '@/app/components/ui/page.content';
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
+
+const getPost = cache((article_slug: string, slug: string) =>
+  strapiClient.getPost(article_slug, slug)
+);
 
 export interface BlogPageProps {
   params: Promise<{
@@ -16,10 +21,7 @@ export interface BlogPageProps {
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
   const { article_slug, slug } = await params;
 
-  let response;
-  if (article_slug && slug) {
-    response = await strapiClient.getPost(article_slug, slug);
-  }
+  const response = await getPost(article_slug, slug);
 
   const post = response?.data?.[0] as Article;
 
@@ -58,7 +60,7 @@ export default async function BlogPostPageContainer({
   const { article_slug, slug } = await params;
 
   const [postResponse, storeResponse, postsResponse] = await Promise.all([
-    strapiClient.getPost(article_slug, slug),
+    getPost(article_slug, slug),
     strapiClient.getStore(slug),
     strapiClient.getPosts({ page: 1, pageSize: 5 }, { sort: 'updatedAt:desc' }, slug),
   ]);

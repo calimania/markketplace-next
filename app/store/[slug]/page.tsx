@@ -22,6 +22,10 @@ import type { Product } from '@/markket/product';
 import type { Article } from '@/markket/article';
 import type { Event } from '@/markket/event';
 import type { Page } from '@/markket/page';
+import { cache } from 'react';
+
+const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
+const getHomePageCached = cache((slug: string) => strapiClient.getPage('home', slug));
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -68,7 +72,7 @@ function toAbsoluteUrl(path?: string): string | undefined {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const response = await strapiClient.getStore(slug);
+  const response = await getStoreCached(slug);
   const store = response?.data?.[0] as Store;
 
   return generateSEOMetadata({
@@ -95,8 +99,8 @@ export default async function StorePage({
   }
 
   const [response, pageQuery] = await Promise.all([
-    strapiClient.getStore(slug),
-    strapiClient.getPage('home', slug),
+    getStoreCached(slug),
+    getHomePageCached(slug),
   ]);
   const homePage = pageQuery?.data?.[0];
   const store = response?.data?.[0];
