@@ -3,7 +3,7 @@ import { tiendaCollectionPath, tiendaItemPath } from './tienda.endpoints';
 
 type TiendaRequestOptions = {
   token: string;
-  query?: Record<string, string | number | boolean | undefined | null>;
+  query?: Record<string, string | number | boolean | undefined | null | string[]>;
   body?: unknown;
   baseUrl?: string;
 };
@@ -30,6 +30,14 @@ function withQuery(path: string, query?: TiendaRequestOptions['query']) {
 
   Object.entries(query).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        params.append(key, String(item));
+      });
+      return;
+    }
+
     params.set(key, String(value));
   });
 

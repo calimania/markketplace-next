@@ -1,49 +1,8 @@
-import { strapiClient } from '@/markket/api.strapi';
 import type { Page } from '@/markket/page.d';
+import { findTiendaContent } from '../content.find';
 
-type PageStatus = 'all' | 'draft' | 'published';
-
-async function findPageByField(field: 'documentId' | 'slug', itemId: string, storeSlug?: string, status: PageStatus = 'all') {
-  const filters: Record<string, any> = {
-    [field]: {
-      $eq: itemId,
-    },
-  };
-
-  if (storeSlug) {
-    filters.store = {
-      slug: {
-        $eq: storeSlug,
-      },
-    };
-  }
-
-  return strapiClient.fetch<Page>({
-    contentType: 'pages',
-    filters,
-    status,
-    includeAuth: true,
-    populate: 'SEO.socialImage,store',
-    paginate: { page: 1, pageSize: 1 },
-  });
-}
-
-export async function findPage(itemId: string, storeSlug?: string) {
-  const statusesToTry: PageStatus[] = ['published', 'draft', 'all'];
-
-  for (const status of statusesToTry) {
-    const byDocumentId = await findPageByField('documentId', itemId, storeSlug, status);
-    if (byDocumentId?.data?.[0]) {
-      return byDocumentId.data[0] as Page;
-    }
-
-    const bySlug = await findPageByField('slug', itemId, storeSlug, status);
-    if (bySlug?.data?.[0]) {
-      return bySlug.data[0] as Page;
-    }
-  }
-
-  return undefined;
+export async function findPage(itemId: string, storeSlug: string, token: string) {
+  return findTiendaContent<Page>(storeSlug, 'page', itemId, token);
 }
 
 export function contentBlocksToText(content: Page['Content']) {

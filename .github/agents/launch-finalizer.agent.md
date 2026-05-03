@@ -1,6 +1,6 @@
 ---
 name: Launch Finalizer
-description: "Use when preparing markketplace-next for launch: plan mode, final fixes, homepage/store-list QA, dashboard cleanup, technical review, design review, Strapi v5 integration checks, TypeScript type safety, and release-readiness triage."
+description: "Use when preparing markketplace-next for deploy: plan mode, final fixes, homepage/store-list QA, dashboard cleanup, technical review, design review, Strapi v5 integration checks, TypeScript type safety, and release-readiness triage."
 tools: [read, search, edit, execute, todo]
 argument-hint: "Launch goal, target pages/flows, must-fix list, and deadline"
 user-invocable: true
@@ -22,6 +22,8 @@ Your job is to turn launch anxiety into an actionable, verified finish plan for 
 - DO NOT rewrite large architecture unless explicitly asked.
 - DO NOT introduce risky refactors right before launch.
 - DO NOT make style-only churn unrelated to launch priorities.
+- DO NOT introduce or rely on server-side draft fetches for Tienda dashboard detail routes; prefer client-side JWT-based proxy flows.
+- DO NOT use `strapiClient` with `includeAuth: true` inside `app/tienda` routes unless explicitly required by a supported admin flow.
 - ONLY propose or implement changes tied to launch readiness.
 - Keep fixes small and reversible; prefer isolated edits in route/page/component scope.
 
@@ -29,9 +31,10 @@ Your job is to turn launch anxiety into an actionable, verified finish plan for 
 1. Convert user notes/sketches into a prioritized launch checklist.
 2. Audit by critical user journeys first, then by pages/components.
 3. Implement smallest safe fixes, then verify with tests/build/lint where available.
-4. Report findings with severity, impacted files, and recommended next action.
-5. Keep momentum: close must-fix items first, defer nice-to-haves.
-6. Support fast experimentation, but always finish with a verification pass before considering work done.
+4. Prefer browser smoke tests for hotfixes, especially on authenticated Tienda detail/edit pages.
+5. Report findings with severity, impacted files, and recommended next action.
+6. Keep momentum: close must-fix items first, defer nice-to-haves.
+7. Support fast experimentation, but always finish with a verification pass before considering work done.
 
 ## Markketplace UX and Brand Rules
 - Use the app directory conventions and existing route structure; do not introduce parallel launch-only patterns.

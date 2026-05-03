@@ -1,29 +1,9 @@
-import { strapiClient } from '@/markket/api.strapi';
 import type { Article } from '@/markket/article';
-import { cache } from 'react';
+import { findTiendaContent } from '../content.find';
 
-export const findBlogArticle = cache(async (itemId: string, storeSlug: string) => {
-  const [byDocumentId, bySlug] = await Promise.all([
-    strapiClient.fetch<Article>({
-      contentType: 'articles',
-      filters: { documentId: { $eq: itemId }, store: { slug: { $eq: storeSlug } } },
-      status: 'all',
-      populate: 'SEO.socialImage,Tags,cover,store',
-      paginate: { page: 1, pageSize: 1 },
-      includeAuth: true,
-    }),
-    strapiClient.fetch<Article>({
-      contentType: 'articles',
-      filters: { slug: { $eq: itemId }, store: { slug: { $eq: storeSlug } } },
-      status: 'all',
-      populate: 'SEO.socialImage,Tags,cover,store',
-      paginate: { page: 1, pageSize: 1 },
-      includeAuth: true,
-    }),
-  ]);
-
-  return (byDocumentId?.data?.[0] || bySlug?.data?.[0]) as Article | undefined;
-});
+export async function findBlogArticle(itemId: string, storeSlug: string, token: string) {
+  return findTiendaContent<Article>(storeSlug, 'article', itemId, token);
+}
 
 export function contentBlocksToText(content: Article['Content']) {
   if (!Array.isArray(content)) return '';
