@@ -2,10 +2,12 @@
 
 // const BUILD_MODE = process.env.BUILD_MODE || 'static' || 'api';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
   basePath: '',
   async headers() {
-    return [
+    const baseHeaders = [
       {
         source: '/.well-known/apple-app-site-association',
         headers: [
@@ -54,6 +56,9 @@ const nextConfig = {
           },
         ],
       },
+    ];
+
+    const staticAssetHeaders = [
       {
         // Long-lived cache for Next.js static assets (hashed filenames are content-addressed)
         source: '/_next/static/:path*',
@@ -74,7 +79,10 @@ const nextConfig = {
           },
         ],
       },
+
     ];
+
+    return isProd ? [...baseHeaders, ...staticAssetHeaders] : baseHeaders;
   },
   // Rewrite clean URLs (/:slug) to internal file structure (/store/:slug)
   // This allows cleaner URLs like /horns instead of /store/horns
@@ -97,6 +105,16 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/me/tienda',
+        destination: '/tienda',
+        permanent: true,
+      },
+      {
+        source: '/me/tienda/:path*',
+        destination: '/tienda/:path*',
+        permanent: true,
+      },
+      {
         source: '/store/:slug',
         destination: '/:slug',
         permanent: true,
@@ -117,6 +135,14 @@ const nextConfig = {
         // DigitalOcean Spaces CDN endpoint — prefer this for cached delivery
         protocol: 'https',
         hostname: 'markketplace.nyc3.cdn.digitaloceanspaces.com',
+        port: '',
+        pathname: '/**',
+        search: '',
+      },
+      {
+        // DigitalOcean Spaces origin endpoint — used by CMS media URLs
+        protocol: 'https',
+        hostname: 'markketplace.nyc3.digitaloceanspaces.com',
         port: '',
         pathname: '/**',
         search: '',

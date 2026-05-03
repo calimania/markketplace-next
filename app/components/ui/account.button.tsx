@@ -3,6 +3,7 @@
 import { Avatar, Menu, UnstyledButton } from '@mantine/core';
 import { IconDashboard, IconLogin, IconLogout, IconUser } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketColors } from '@/markket/colors.config';
 
@@ -13,29 +14,41 @@ interface AccountButtonProps {
 export default function AccountButton({ size = 32 }: AccountButtonProps) {
   const { user, logout, maybe } = useAuth();
   const router = useRouter();
-  const isLoggedIn = maybe();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isLoggedIn = mounted && maybe();
+
+  const button = (
+    <UnstyledButton
+      aria-label="Account"
+      style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}
+    >
+      <Avatar
+        src={user?.avatar?.url}
+        size={size}
+        radius="xl"
+        style={{
+          cursor: 'pointer',
+          border: `2px solid ${isLoggedIn ? markketColors.rosa.main : markketColors.neutral.lightGray}`,
+          background: isLoggedIn ? markketColors.rosa.light : undefined,
+        }}
+      >
+        <IconUser size={size * 0.5} color={isLoggedIn ? markketColors.rosa.main : markketColors.neutral.darkGray} />
+      </Avatar>
+    </UnstyledButton>
+  );
+
+  if (!mounted) {
+    return button;
+  }
 
   return (
     <Menu shadow="md" width={180} position="bottom-end">
-      <Menu.Target>
-        <UnstyledButton
-          aria-label="Account"
-          style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}
-        >
-          <Avatar
-            src={user?.avatar?.url}
-            size={size}
-            radius="xl"
-            style={{
-              cursor: 'pointer',
-              border: `2px solid ${isLoggedIn ? markketColors.rosa.main : markketColors.neutral.lightGray}`,
-              background: isLoggedIn ? markketColors.rosa.light : undefined,
-            }}
-          >
-            <IconUser size={size * 0.5} color={isLoggedIn ? markketColors.rosa.main : markketColors.neutral.darkGray} />
-          </Avatar>
-        </UnstyledButton>
-      </Menu.Target>
+      <Menu.Target>{button}</Menu.Target>
 
       <Menu.Dropdown>
         {isLoggedIn && user ? (
