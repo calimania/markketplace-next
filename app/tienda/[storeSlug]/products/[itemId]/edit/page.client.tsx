@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Center, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import ProductEditorForm from '../../product.editor.form';
 import { findProduct } from '../../products.find';
@@ -55,11 +56,7 @@ export default function TiendaProductEditPageClient({ storeSlug, itemId }: Tiend
   }, [itemId, storeSlug]);
 
   if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading product editor…</Text>
-      </Center>
-    );
+    return <TiendaItemSkeleton />;
   }
 
   if (error || !product) {
@@ -102,6 +99,8 @@ export default function TiendaProductEditPageClient({ storeSlug, itemId }: Tiend
           description: product.Description || undefined,
           seoTitle: product.SEO?.metaTitle || undefined,
           seoDescription: product.SEO?.metaDescription || undefined,
+          seoSocialImageId: product.SEO?.socialImage?.id,
+          seoSocialImageDocumentId: product.SEO?.socialImage?.documentId,
         }}
       />
     </TiendaDetailShell>

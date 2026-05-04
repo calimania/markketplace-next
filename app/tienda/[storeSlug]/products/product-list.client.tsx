@@ -38,36 +38,20 @@ function sortByRecent(items: Product[]) {
 
 export default function ProductListClient({ storeSlug, initialProducts }: ProductListClientProps) {
   const [products, setProducts] = useState<Product[]>(sortByRecent(initialProducts || []));
-  const fetchedStoreSlugRef = useRef<string | null>(null);
   const [loading, setLoaading] = useState(true);
 
   useEffect(() => {
     const token = readAuthToken();
-    if (!token) {
-      console.log('[ProductListClient] No token in localStorage');
-      return;
-    }
-
-    if (fetchedStoreSlugRef.current === storeSlug) {
-      return;
-    }
-
-    fetchedStoreSlugRef.current = storeSlug;
+    if (!token) return;
 
     const loadAllContent = async () => {
       try {
-        console.log('[ProductListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'product', {
           token,
           query: TIENDA_CONTENT_LIST_QUERY.product,
         });
 
-        console.log('[ProductListClient] API response:', { response, hasData: !!response?.data });
-
-        const merged = new Map<string, Product>();
         const allItems = Array.isArray(response?.data) ? (response.data as Product[]) : (Array.isArray(response) ? (response as Product[]) : []);
-
-        console.log('[ProductListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Name, published: !!p.publishedAt })) });
 
         if (allItems.length > 0) {
           allItems.forEach((product) => {
@@ -76,7 +60,6 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           setProducts(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
-        fetchedStoreSlugRef.current = null;
         console.error('[ProductListClient] Failed to load products:', error);
       }
       setLoaading(false);

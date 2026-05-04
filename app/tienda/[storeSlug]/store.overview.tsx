@@ -419,7 +419,7 @@ export default function StoreOverview({
               loading={isSavingStatus}
               leftSection={isPublished ? <IconWorldOff size={16} /> : <IconWorld size={16} />}
             >
-              {isPublished ? 'Unpublish' : 'Publish'}
+              {isPublished ? 'Hide' : 'Publish'}
             </Button>
             <Button
               component="a"

@@ -20,6 +20,8 @@ type BlogEditorFormProps = {
     content?: RichTextValue;
     seoTitle?: string;
     seoDescription?: string;
+    seoSocialImageId?: number;
+    seoSocialImageDocumentId?: string;
   };
 };
 
@@ -126,6 +128,11 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       SEO: {
         metaTitle: (seoTitle || title).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
+        ...(initial?.seoSocialImageDocumentId
+          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
+          : initial?.seoSocialImageId
+            ? { socialImage: initial.seoSocialImageId }
+            : {}),
       },
     };
 
@@ -263,7 +270,7 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
 
       <Group justify="space-between">
         <Group>
-          <Button component="a" variant="subtle" href={`/tienda/${storeSlug}/blog`}>
+          <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/blog/${itemDocumentId}` : `/tienda/${storeSlug}/blog`}>
             Cancel
           </Button>
         </Group>

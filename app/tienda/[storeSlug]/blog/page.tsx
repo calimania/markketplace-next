@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Button } from '@mantine/core';
-import { IconListSearch, IconPlus } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import type { Article } from '@/markket/article';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 import BlogListClient from './blog.list.client';
@@ -31,19 +31,9 @@ export default async function TiendaBlogPage({ params }: TiendaBlogPageProps) {
       sectionTitle="Articles"
       tone="blog"
       actions={
-        <>
-            <Button
-              component="a"
-              href={`/tienda/${storeSlug}/blog`}
-              variant="default"
-              leftSection={<IconListSearch size={16} />}
-            >
-              Open Editor
-            </Button>
-            <Button component="a" href={`/tienda/${storeSlug}/blog/new`} leftSection={<IconPlus size={16} />}>
-              New Article
-            </Button>
-        </>
+        <Button component="a" href={`/tienda/${storeSlug}/blog/new`} leftSection={<IconPlus size={16} />}>
+          New Article
+        </Button>
       }
     >
       <BlogListClient storeSlug={storeSlug} initialPosts={posts} />

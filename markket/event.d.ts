@@ -45,7 +45,8 @@ export interface Event {
   slug: string;
   createdAt: string;
   updatedAt: string;
-  publishedAt: string;
+  publishedAt: string | null;
+  tiendaPublication?: { visibleStatus?: 'published' | 'draft' | 'unpublished'; publishedAt?: string | null };
   locale: string;
   SEO?: SEO;
   Tag?: Tag[];

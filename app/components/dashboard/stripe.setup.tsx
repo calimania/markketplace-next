@@ -76,7 +76,7 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
         throw new Error('Failed to create Stripe account');
       }
 
-      console.log('Stripe account created:', account);
+
 
       const linkResponse = await markket.stripeConnect('account_link', {
         account: account?.account,

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Center, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import BlogEditorForm from '../../blog.editor.form';
 import { findBlogArticle } from '../../blog.find';
@@ -55,11 +56,7 @@ export default function TiendaBlogEditPageClient({ storeSlug, itemId }: TiendaBl
   }, [itemId, storeSlug]);
 
   if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading article editor…</Text>
-      </Center>
-    );
+    return <TiendaItemSkeleton />;
   }
 
   if (error || !post) {
@@ -102,6 +99,8 @@ export default function TiendaBlogEditPageClient({ storeSlug, itemId }: TiendaBl
           content: post.Content,
           seoTitle: post.SEO?.metaTitle,
           seoDescription: post.SEO?.metaDescription,
+          seoSocialImageId: post.SEO?.socialImage?.id,
+          seoSocialImageDocumentId: post.SEO?.socialImage?.documentId,
         }}
       />
     </TiendaDetailShell>

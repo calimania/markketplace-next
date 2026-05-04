@@ -35,6 +35,10 @@ function getPopulateQuery(contentType: TiendaContentType) {
   return values.length > 0 ? { 'populate[]': values } : {};
 }
 
+function looksLikeDocumentId(value: string) {
+  return /^[a-z0-9]{16,}$/i.test(value) && !value.includes('-');
+}
+
 async function getContentById<T>(storeSlug: string, contentType: TiendaContentType, itemId: string, token: string) {
   const response = await tiendaClient.getContent(storeSlug, contentType, itemId, {
     token,
@@ -74,8 +78,15 @@ export async function findTiendaContent<T = Article | Page | Product | Event | A
 ) {
   if (!token) return undefined;
 
-  const byId = await getContentById<T>(storeSlug, contentType, itemId, token);
-  if (byId) return byId;
+  if (looksLikeDocumentId(itemId)) {
+    const byId = await getContentById<T>(storeSlug, contentType, itemId, token);
+    if (byId) return byId;
 
-  return getContentBySlug<T>(storeSlug, contentType, itemId, token);
+    return getContentBySlug<T>(storeSlug, contentType, itemId, token);
+  }
+
+  const bySlug = await getContentBySlug<T>(storeSlug, contentType, itemId, token);
+  if (bySlug) return bySlug;
+
+  return getContentById<T>(storeSlug, contentType, itemId, token);
 }

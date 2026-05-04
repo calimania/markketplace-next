@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Badge, Button, Center, Divider, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import { IconExternalLink, } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
@@ -10,7 +11,7 @@ import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import ProductItemActions from './product.item.actions';
 import { findProduct } from './products.find';
-import { isPublished } from '@/markket/helpers.publication';
+import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
 import { readTiendaAuthToken } from '../content.find';
 import type { Product } from '@/markket/product';
 
@@ -61,13 +62,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
     };
   }, [itemId, storeSlug]);
 
-  if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading product preview…</Text>
-      </Center>
-    );
-  }
+  if (loading) return <TiendaItemSkeleton />;
 
   if (error || !product) {
     return (
@@ -118,6 +113,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
             itemDocumentId={itemDocumentId}
             editorId={editorId}
             isPublished={isPublished(product)}
+            publishLabel={getPublishLabel(product)}
           />
         </>
       }

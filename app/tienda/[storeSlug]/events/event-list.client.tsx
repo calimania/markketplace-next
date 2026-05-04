@@ -38,35 +38,19 @@ function sortByDate(items: Event[]) {
 
 export default function EventListClient({ storeSlug, initialEvents }: EventListClientProps) {
   const [events, setEvents] = useState<Event[]>(sortByDate(initialEvents || []));
-  const fetchedStoreSlugRef = useRef<string | null>(null);
 
   useEffect(() => {
     const token = readAuthToken();
-    if (!token) {
-      console.log('[EventListClient] No token in localStorage');
-      return;
-    }
-
-    if (fetchedStoreSlugRef.current === storeSlug) {
-      return;
-    }
-
-    fetchedStoreSlugRef.current = storeSlug;
+    if (!token) return;
 
     const loadAllContent = async () => {
       try {
-        console.log('[EventListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'event', {
           token,
           query: TIENDA_CONTENT_LIST_QUERY.event,
         });
 
-        console.log('[EventListClient] API response:', { response, hasData: !!response?.data });
-
-        const merged = new Map<string, Event>();
         const allItems = Array.isArray(response?.data) ? (response.data as Event[]) : (Array.isArray(response) ? (response as Event[]) : []);
-
-        console.log('[EventListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Name, published: !!p.publishedAt })) });
 
         if (allItems.length > 0) {
           allItems.forEach((event) => {
@@ -75,7 +59,6 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           setEvents(sortByDate(Array.from(merged.values())));
         }
       } catch (error) {
-        fetchedStoreSlugRef.current = null;
         console.error('[EventListClient] Failed to load events:', error);
       }
     };

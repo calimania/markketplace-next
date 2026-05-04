@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Center, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import PagesEditorForm from '../../pages.editor.form';
 import { findPage } from '../../pages.find';
@@ -55,11 +56,7 @@ export default function TiendaPageEditPageClient({ storeSlug, itemId }: TiendaPa
   }, [itemId, storeSlug]);
 
   if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading page editor…</Text>
-      </Center>
-    );
+    return <TiendaItemSkeleton />;
   }
 
   if (error || !page) {
@@ -102,6 +99,8 @@ export default function TiendaPageEditPageClient({ storeSlug, itemId }: TiendaPa
           content: page.Content,
           seoTitle: page.SEO?.metaTitle,
           seoDescription: page.SEO?.metaDescription,
+          seoSocialImageId: page.SEO?.socialImage?.id,
+          seoSocialImageDocumentId: page.SEO?.socialImage?.documentId,
         }}
       />
     </TiendaDetailShell>

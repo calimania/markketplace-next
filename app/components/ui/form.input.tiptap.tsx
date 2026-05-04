@@ -272,7 +272,9 @@ const ContentEditor = ({
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: false, // Link added below with custom config (openOnClick, rel, target)
+      }),
       Markdown.configure({
         html: true,
         transformPastedText: true,

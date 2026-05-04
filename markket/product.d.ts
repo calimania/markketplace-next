@@ -77,7 +77,8 @@ export interface Product {
   SKU: string;
   createdAt: string;
   updatedAt: string;
-  publishedAt: string;
+  publishedAt: string | null;
+  tiendaPublication?: { visibleStatus?: 'published' | 'draft' | 'unpublished'; publishedAt?: string | null };
   locale: string;
   slug: string;
   documentId: string;

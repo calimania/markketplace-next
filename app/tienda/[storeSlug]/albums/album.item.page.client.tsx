@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Badge, Button, Center, Divider, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import AlbumItemActions from './album.item.actions';
 import { findAlbum } from './albums.find';
-import { isPublished } from '@/markket/helpers.publication';
+import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
 import { readTiendaAuthToken } from '../content.find';
 import type { Album } from '@/markket/album';
 
@@ -59,13 +60,7 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
     };
   }, [itemId, storeSlug]);
 
-  if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading album preview…</Text>
-      </Center>
-    );
-  }
+  if (loading) return <TiendaItemSkeleton />;
 
   if (error || !album) {
     return (
@@ -110,6 +105,7 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
             itemDocumentId={itemDocumentId}
             editorId={editorId}
             isPublished={isPublished(album)}
+            publishLabel={getPublishLabel(album)}
           />
         </>
       }

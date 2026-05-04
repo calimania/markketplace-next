@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Center, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import EventEditorForm from '../../event.editor.form';
 import { findEvent } from '../../events.find';
@@ -55,11 +56,7 @@ export default function TiendaEventEditPageClient({ storeSlug, itemId }: TiendaE
   }, [itemId, storeSlug]);
 
   if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading event editor…</Text>
-      </Center>
-    );
+    return <TiendaItemSkeleton />;
   }
 
   if (error || !event) {
@@ -102,6 +99,8 @@ export default function TiendaEventEditPageClient({ storeSlug, itemId }: TiendaE
           description: event.Description,
           seoTitle: event.SEO?.metaTitle,
           seoDescription: event.SEO?.metaDescription,
+          seoSocialImageId: event.SEO?.socialImage?.id,
+          seoSocialImageDocumentId: event.SEO?.socialImage?.documentId,
           startDate: event.startDate,
           endDate: event.endDate,
         }}

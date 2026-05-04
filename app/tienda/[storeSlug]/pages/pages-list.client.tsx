@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -38,35 +38,22 @@ function sortByRecent(items: Page[]) {
 
 export default function PagesListClient({ storeSlug, initialPages }: PagesListClientProps) {
   const [pages, setPages] = useState<Page[]>(sortByRecent(initialPages || []));
-  const fetchedStoreSlugRef = useRef<string | null>(null);
 
   useEffect(() => {
     const token = readAuthToken();
     if (!token) {
-      console.log('[PagesListClient] No token in localStorage');
       return;
     }
-
-    if (fetchedStoreSlugRef.current === storeSlug) {
-      return;
-    }
-
-    fetchedStoreSlugRef.current = storeSlug;
 
     const loadAllContent = async () => {
       try {
-        console.log('[PagesListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'page', {
           token,
           query: TIENDA_CONTENT_LIST_QUERY.page,
         });
 
-        console.log('[PagesListClient] API response:', { response, hasData: !!response?.data });
-
         const merged = new Map<string, Page>();
         const allItems = Array.isArray(response?.data) ? (response.data as Page[]) : (Array.isArray(response) ? (response as Page[]) : []);
-
-        console.log('[PagesListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Title, published: !!p.publishedAt, p })) });
 
         if (allItems.length > 0) {
           allItems.forEach((page) => {
@@ -75,7 +62,6 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           setPages(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
-        fetchedStoreSlugRef.current = null;
         console.error('[PagesListClient] Failed to load pages:', error);
       }
     };

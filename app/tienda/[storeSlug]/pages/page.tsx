@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Button } from '@mantine/core';
-import { IconListSearch, IconPlus } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import type { Page } from '@/markket/page.d';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
@@ -33,19 +33,9 @@ export default async function TiendaPagesPage({ params }: TiendaPagesPageProps) 
       sectionTitle="Pages"
       tone="pages"
       actions={
-        <>
-          <Button
-            component="a"
-            href={`/tienda/${storeSlug}/pages`}
-            variant="default"
-            leftSection={<IconListSearch size={16} />}
-          >
-            View All
-          </Button>
-          <Button component="a" href={`/tienda/${storeSlug}/pages/new`} leftSection={<IconPlus size={16} />}>
-            New Page
-          </Button>
-        </>
+        <Button component="a" href={`/tienda/${storeSlug}/pages/new`} leftSection={<IconPlus size={16} />}>
+          New Page
+        </Button>
       }
     >
       <PagesListClient storeSlug={storeSlug} initialPages={pages} />

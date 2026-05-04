@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Badge, Button, Center, Divider, Paper, Stack, Text } from '@mantine/core';
-import { IconEdit } from '@tabler/icons-react';
+import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import BlogItemActions from './blog.item.actions';
@@ -10,7 +10,7 @@ import { findBlogArticle } from './blog.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PageContent from '@/app/components/ui/page.content';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
-import { isPublished } from '@/markket/helpers.publication';
+import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
 import { readTiendaAuthToken } from '../content.find';
 import type { Article } from '@/markket/article';
 
@@ -61,13 +61,7 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
     };
   }, [itemId, storeSlug]);
 
-  if (loading) {
-    return (
-      <Center py="xl">
-        <Text c="dimmed">Loading article preview…</Text>
-      </Center>
-    );
-  }
+  if (loading) return <TiendaItemSkeleton />;
 
   if (error || !post) {
     return (
@@ -113,6 +107,7 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
             itemDocumentId={itemDocumentId}
             editorId={editorId}
             isPublished={isPublished(post)}
+            publishLabel={getPublishLabel(post)}
           />
         </>
       }
@@ -149,19 +144,8 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
           withBorder
           p="lg"
           radius="md"
-          style={{ background: 'var(--mantine-color-gray-0, #fafafa)', position: 'relative' }}
+          style={{ background: 'var(--mantine-color-gray-0, #fafafa)' }}
         >
-          <Button
-            component="a"
-            href={`/tienda/${storeSlug}/blog/${editorId}/edit`}
-            size="xs"
-            variant="light"
-            leftSection={<IconEdit size={13} />}
-            style={{ position: 'absolute', top: 12, right: 12 }}
-          >
-            Edit
-          </Button>
-
           {post.Content?.length ? (
             <PageContent params={{ post }} />
           ) : (
