@@ -50,6 +50,7 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           query: TIENDA_CONTENT_LIST_QUERY.event,
         });
 
+        const merged = new Map<string, Event>();
         const allItems = Array.isArray(response?.data) ? (response.data as Event[]) : (Array.isArray(response) ? (response as Event[]) : []);
 
         if (allItems.length > 0) {

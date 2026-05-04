@@ -51,6 +51,7 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           query: TIENDA_CONTENT_LIST_QUERY.product,
         });
 
+        const merged = new Map<string, Product>();
         const allItems = Array.isArray(response?.data) ? (response.data as Product[]) : (Array.isArray(response) ? (response as Product[]) : []);
 
         if (allItems.length > 0) {

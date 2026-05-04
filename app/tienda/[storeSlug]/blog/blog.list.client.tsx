@@ -51,6 +51,7 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           query: TIENDA_CONTENT_LIST_QUERY.article,
         });
 
+        const merged = new Map<string, Article>();
         const allItems = Array.isArray(response?.data) ? (response.data as Article[]) : (Array.isArray(response) ? (response as Article[]) : []);
 
         if (allItems.length > 0) {
