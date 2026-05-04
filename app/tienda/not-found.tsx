@@ -24,9 +24,9 @@ export default function TiendaNotFound() {
     <Stack gap="md" maw={780} mx="auto" my="xl" px="md">
       <Paper withBorder p="xl" radius="md">
         <Stack gap="sm">
-          <Title order={2}>This Tienda page does not exist</Title>
+          <Title order={2}>This page, product, event, or article does not exist</Title>
           <Text c="dimmed">
-            The route you opened could not be found. Jump back to a useful place below.
+            The item you opened could not be found. Use the links below to get back to your store content.
           </Text>
 
           <Group gap="sm" mt="sm">

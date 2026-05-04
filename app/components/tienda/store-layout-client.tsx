@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button, Center, Container, Paper, Stack, Text, ThemeIcon } from '@mantine/core';
+import { Button, Container, Paper, Skeleton, Stack, Text, ThemeIcon } from '@mantine/core';
 import { IconLock } from '@tabler/icons-react';
 import CompactBreadcrumbs from './compact-breadcrumbs';
 import type { Store } from '@/markket/store';
@@ -48,9 +48,29 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
 
   if (isLoading || ownershipLoading || !isConfirmed) {
     return (
-      <Center py="xl">
-        <Text c="dimmed" size="sm">Checking access...</Text>
-      </Center>
+      <>
+        <CompactBreadcrumbs storeSlug={store.slug} />
+        <Container size="md" py="xl">
+          <Stack gap="md">
+            <Paper withBorder radius="md" p="md">
+              <Stack gap="sm">
+                <Text c="dimmed" size="sm">Checking access...</Text>
+                <Skeleton height={14} width="45%" radius="xl" />
+                <Skeleton height={10} width="70%" radius="xl" />
+              </Stack>
+            </Paper>
+
+            <Paper withBorder radius="md" p="md">
+              <Stack gap="sm">
+                <Skeleton height={16} width="35%" radius="xl" />
+                <Skeleton height={12} radius="xl" />
+                <Skeleton height={12} width="85%" radius="xl" />
+                <Skeleton height={12} width="60%" radius="xl" />
+              </Stack>
+            </Paper>
+          </Stack>
+        </Container>
+      </>
     );
   }
 

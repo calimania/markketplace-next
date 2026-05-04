@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Badge, Box, Group, Stack, Text, Tooltip, rem } from '@mantine/core';
+import { useRef, useState, useEffect } from 'react';
+import { Badge, Box, Group, Loader, Stack, Text, Tooltip, rem } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -151,8 +151,13 @@ function MediaSlot({
   onUpload?: (field: string, url: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(slot.src);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (slot.src) setPreview(slot.src);
+  }, [slot.src]);
 
   const handleFile = async (file: File) => {
     if (slot.disabled) {
@@ -187,18 +192,11 @@ function MediaSlot({
       let lastErrorMessage = 'Upload failed';
 
       for (const attach of attachCandidates) {
-        console.log('[ContentMediaPreview] uploading with attach candidate:', attach);
         const candidateResult = await tiendaClient.uploadStoreMedia(storeRef, {
           token,
           files: [optimizedFile],
           alternativeText: slot.alt || slot.label,
           attach,
-        });
-
-        console.log('[ContentMediaPreview] upload result:', {
-          attach,
-          ok: candidateResult?.ok,
-          status: candidateResult?.status,
         });
 
         if (candidateResult?.ok) {
@@ -250,6 +248,10 @@ function MediaSlot({
       withArrow
     >
       <Box
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onTouchStart={() => setHovered(true)}
+        onTouchEnd={() => setTimeout(() => setHovered(false), 400)}
         onClick={() => {
           if (slot.disabled) {
             notifications.show({
@@ -276,8 +278,9 @@ function MediaSlot({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'border-color 0.15s, opacity 0.15s',
-          opacity: slot.disabled ? 0.7 : uploading ? 0.6 : 1,
+          transition: 'border-color 0.15s, opacity 0.15s, box-shadow 0.15s',
+          opacity: slot.disabled ? 0.7 : 1,
+          boxShadow: hovered && !slot.disabled && !uploading ? '0 0 0 2px ' + markketColors.sections.about.main : 'none',
         }}
       >
         {preview ? (
@@ -295,19 +298,49 @@ function MediaSlot({
           </Stack>
         )}
 
-        {/* upload hover overlay */}
-        <Box
-          style={{
-            position: 'absolute', inset: 0,
-            background: 'rgba(0,0,0,0.35)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: slot.disabled ? 1 : 0,
-            transition: 'opacity 0.15s',
-          }}
-          className="media-slot-overlay"
-        >
-          <IconUpload size={18} color="#fff" />
-        </Box>
+        {/* persistent corner badge — always visible on mobile as tap hint */}
+        {!uploading && !slot.disabled && (
+          <Box
+            style={{
+              position: 'absolute', bottom: rem(4), right: rem(4),
+              background: 'rgba(0,0,0,0.55)',
+              borderRadius: rem(4),
+              padding: `${rem(2)} ${rem(3)}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            <IconUpload size={10} color="#fff" />
+          </Box>
+        )}
+
+        {/* uploading spinner overlay */}
+        {uploading && (
+          <Box
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(0,0,0,0.55)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Loader size="sm" color="white" />
+          </Box>
+        )}
+
+        {/* hover upload cue (only when idle and not disabled) */}
+        {!uploading && !slot.disabled && hovered && (
+          <Box
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(0,0,0,0.45)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: rem(4),
+            }}
+          >
+            <IconUpload size={18} color="#fff" />
+            <Text size="xs" c="white" fw={600} style={{ fontSize: rem(9) }}>Upload</Text>
+          </Box>
+        )}
 
         <input
           ref={inputRef}
@@ -382,10 +415,6 @@ export default function ContentMediaPreview({
         ))}
       </Group>
 
-      <style>{`
-        .media-slot-overlay { opacity: 0 !important; }
-        [data-slot]:hover .media-slot-overlay { opacity: 1 !important; }
-      `}</style>
     </Stack>
   );
 }

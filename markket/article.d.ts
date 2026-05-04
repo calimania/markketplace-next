@@ -10,7 +10,8 @@ export interface Article {
   documentId: string;
   createdAt: string;
   updatedAt: string;
-  publishedAt: string;
+  publishedAt: string | null;
+  tiendaPublication?: { visibleStatus?: 'published' | 'draft' | 'unpublished'; publishedAt?: string | null };
   Tags?: Tag[];
   Content: ContentBlock[];
   store?: Store;

@@ -13,6 +13,7 @@ type ProductItemActionsProps = {
   itemDocumentId: string;
   editorId: string;
   isPublished?: boolean;
+  publishLabel?: string;
 };
 
 function readAuthToken() {
@@ -27,17 +28,23 @@ function readAuthToken() {
   }
 }
 
-export default function ProductItemActions({ storeSlug, itemDocumentId, editorId, isPublished = false }: ProductItemActionsProps) {
+export default function ProductItemActions({ storeSlug, itemDocumentId, editorId, isPublished = false, publishLabel = 'Publish' }: ProductItemActionsProps) {
   const router = useRouter();
   const store = useStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingPublish, setPendingPublish] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [optimisticPublished, setOptimisticPublished] = useState<boolean | null>(null);
+
+  const currentlyPublished = optimisticPublished !== null ? optimisticPublished : isPublished;
 
   const openModal = (nextPublished: boolean) => {
     setPendingPublish(nextPublished);
     setModalOpen(true);
   };
+
+  const showPublishAction = !currentlyPublished;
+  const showUnpublishAction = currentlyPublished;
 
   const onSetPublished = async () => {
     const token = readAuthToken();
@@ -68,7 +75,7 @@ export default function ProductItemActions({ storeSlug, itemDocumentId, editorId
       }
 
       notifications.show({
-        title: pendingPublish ? 'Published' : 'Unpublished',
+        title: pendingPublish ? 'Published' : 'Hidden',
         message: pendingPublish
           ? 'Product is now publicly visible.'
           : 'Product is now hidden from public view.',
@@ -76,6 +83,7 @@ export default function ProductItemActions({ storeSlug, itemDocumentId, editorId
         autoClose: 3000,
       });
 
+      setOptimisticPublished(pendingPublish);
       setModalOpen(false);
       router.refresh();
     } catch (error) {
@@ -102,18 +110,19 @@ export default function ProductItemActions({ storeSlug, itemDocumentId, editorId
         isPublishing={pendingPublish}
         contentType="product"
       />
-      <Button component="a" href={`/tienda/${storeSlug}/products/${editorId}/edit`}>
-        Edit
-      </Button>
-      {isPublished ? (
-        <Button color="orange" variant="light" onClick={() => openModal(false)}>
-          Unpublish
-        </Button>
-      ) : (
-        <Button color="green" variant="light" onClick={() => openModal(true)}>
-          Publish
+      {showPublishAction && (
+        <Button color="green" variant="light" size="sm" onClick={() => openModal(true)}>
+          {publishLabel}
         </Button>
       )}
+      {showUnpublishAction && (
+        <Button color="orange" variant="light" size="sm" onClick={() => openModal(false)}>
+          Hide
+        </Button>
+      )}
+      <Button component="a" href={`/tienda/${storeSlug}/products/${editorId}/edit`} variant="filled">
+        Edit
+      </Button>
     </>
   );
 }

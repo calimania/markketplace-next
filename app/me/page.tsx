@@ -343,20 +343,7 @@ export default function MeHomePage() {
                 <Text size="sm" c="dimmed">Loading stores...</Text>
               </Stack>
             )}
-            {!isLoading && stores.length === 0 && (
-              <>
-                <Button
-                  component={Link}
-                  href="/me/store/new"
-                  leftSection={<IconPlus size={16} />}
-                  radius="xl"
-                  color="pink"
-                >
-                  Create Your First Store
-                </Button>
-              <Text c="dimmed">No stores yet. Start one here and shape the public page later.</Text>
-              </>
-            )}
+
             {!isLoading && previewStores.map((store, index) => {
               const storeKey = `${store.documentId || store.slug || store.id || 'store'}-${index}`;
               const isPublished = String((store as { status?: string }).status || '').toLowerCase() === 'published'
@@ -420,7 +407,23 @@ export default function MeHomePage() {
                 </Link>
               );
             })}
-            {(stores.length > 2) && (
+            {!isLoading && stores.length < 2 && (
+              <>
+                <Button
+                  component={Link}
+                  href="/me/store/new"
+                  leftSection={<IconPlus size={16} />}
+                  radius="xl"
+                  color="pink"
+                >
+                  Create
+                  {stores.length === 0 ? ' Your First ' : ' Another '}
+                  Store
+                </Button>
+                <Text c="dimmed"></Text>
+              </>
+            )}
+            {(stores.length >= 2) && (
               <Button
                 variant="light"
                 component={Link}

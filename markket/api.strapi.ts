@@ -90,11 +90,11 @@ export class StrapiClient {
     let path = `api/${endpoint}/${id}`;
     if (endpoint === 'stores') {
       path = `api/tienda/${endpoint}/${id}`;
-      console.log('[COMPAT] Redirecting stores update to tienda endpoint');
+
     }
 
     const _url = new URL(path, this.baseUrl);
-    console.log('Updating record:', _url.toString());
+
 
     try {
       const response = await fetch(_url.toString(), {
@@ -115,7 +115,7 @@ export class StrapiClient {
 
   public delete = async (endpoint: string, id: string | number, options: any) => {
     const _url = new URL(`api/${endpoint}/${id}`, this.baseUrl);
-    console.log('deleting record:', _url.toString());
+
 
     try {
       const response = await fetch(_url.toString(), {
@@ -139,12 +139,12 @@ export class StrapiClient {
     let path = `api/${endpoint}`;
     if (endpoint === 'stores') {
       path = `api/tienda/${endpoint}`;
-      console.log('[COMPAT] Redirecting stores create to tienda endpoint');
+
     }
 
     const _url = new URL(path, this.baseUrl);
 
-    console.log('Creating record:', _url.toString());
+
     try {
       const response = await fetch(_url.toString(), {
         method: "POST",
@@ -319,7 +319,7 @@ export class StrapiClient {
 
     const url = this.buildUrl(options as EnhancedFetchOptions);
 
-    console.log(`url:${url}`);
+
 
     try {
       let authToken = options?.headers?.Authorization as string || '';
@@ -356,7 +356,7 @@ export class StrapiClient {
 
 
   public get = async (type: string, slug: string, store_slug = this.storeSlug) => {
-    console.log(`Get:${type}:${slug}`);
+
 
     return await this.fetch<Store>({
       contentType: type,

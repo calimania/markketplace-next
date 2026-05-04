@@ -22,6 +22,10 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
   const excerpt = post?.SEO?.metaDescription
     || stripMarkdown(richTextToPlainText(post?.Content))
     || '';
+  const publishedDate = post.publishedAt ? new Date(post.publishedAt) : null;
+  const publishedDateLabel = publishedDate && !Number.isNaN(publishedDate.getTime())
+    ? publishedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Draft';
 
   return (
     <Anchor href={linkHref} component={Link} underline="never" style={{ color: 'inherit', textDecoration: 'none', height: '100%', display: 'block' }}>
@@ -103,7 +107,7 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
           <Group gap={4}>
             <IconCalendar size={12} color={markketColors.neutral.mediumGray} />
             <Text size="xs" c="dimmed">
-              {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {publishedDateLabel}
             </Text>
           </Group>
           <Text

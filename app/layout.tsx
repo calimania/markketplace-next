@@ -103,7 +103,6 @@ export async function generateMetadata(): Promise<Metadata> {
 import '@mantine/core/styles.css';
 
 import {
-  ColorSchemeScript,
   MantineProvider,
   createTheme,
   mantineHtmlProps,
@@ -130,48 +129,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const embedBootstrapScript = `
-    (function () {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        var display = (params.get('display') || '').toLowerCase();
-        var navbar = (params.get('navbar') || '').toLowerCase();
-        var footer = (params.get('footer') || '').toLowerCase();
-        var breadcrumbs = (params.get('breadcrumbs') || params.get('crumbs') || '').toLowerCase();
-
-        var embedFromQuery =
-          display.indexOf('embed') === 0 ||
-          navbar === 'hide' ||
-          footer === 'hide';
-
-        if (embedFromQuery) {
-          document.documentElement.setAttribute('data-display-mode', 'embed');
-        } else {
-          document.documentElement.removeAttribute('data-display-mode');
-        }
-
-        if (breadcrumbs === 'hide') {
-          document.documentElement.setAttribute('data-breadcrumbs', 'hide');
-        } else {
-          document.documentElement.removeAttribute('data-breadcrumbs');
-        }
-
-        var raw = localStorage.getItem('markket.injected');
-        if (!raw) return;
-        var parsed = JSON.parse(raw || '{}');
-        if (parsed && parsed.embedded) {
-          document.documentElement.setAttribute('data-display-mode', 'embed');
-        }
-      } catch (_) {}
-    })();
-  `;
-
   return (
     <html lang="en" {...mantineHtmlProps}>
-      <head>
-        <ColorSchemeScript />
-        <script dangerouslySetInnerHTML={{ __html: embedBootstrapScript }} />
-      </head>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
         <AuthProvider>
           <PostHogProvider>

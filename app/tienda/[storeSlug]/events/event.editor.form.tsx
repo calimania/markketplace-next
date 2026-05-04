@@ -26,6 +26,8 @@ type EventEditorFormProps = {
     thumbnailUrl?: string;
     socialImageUrl?: string;
     slides?: Event['Slides'];
+    seoSocialImageId?: number;
+    seoSocialImageDocumentId?: string;
   };
 };
 
@@ -212,6 +214,11 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
         metaUrl: sourceUrl.trim() || undefined,
+        ...(initial?.seoSocialImageDocumentId
+          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
+          : initial?.seoSocialImageId
+            ? { socialImage: initial.seoSocialImageId }
+            : {}),
       },
     };
 
@@ -397,7 +404,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
 
 
       <Group justify="space-between">
-        <Button component="a" variant="subtle" href={`/tienda/${storeSlug}/events`}>
+        <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/events/${itemDocumentId}` : `/tienda/${storeSlug}/events`}>
           Cancel
         </Button>
 

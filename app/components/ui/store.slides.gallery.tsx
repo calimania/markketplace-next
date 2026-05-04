@@ -77,7 +77,6 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
           component="button"
           tabIndex={0}
           onClick={() => {
-            console.log('UnstyledButton clicked');
             setLightboxOpen(true);
           }}
           aria-label="Open full image"
@@ -95,15 +94,12 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
               backgroundColor: 'rgba(0,188,212,0.08)',
             }}
             onTouchStart={e => {
-              console.log('Box touch start');
               onTouchStart(e);
             }}
             onTouchMove={e => {
-              console.log('Box touch move');
               onTouchMove(e);
             }}
             onTouchEnd={e => {
-              console.log('Box touch end');
               onTouchEnd();
             }}
           />

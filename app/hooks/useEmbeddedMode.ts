@@ -91,13 +91,7 @@ function ensureInjectedStorageEventsPatched() {
 }
 
 export function useEmbeddedMode() {
-  const [embedded, setEmbedded] = useState<boolean>(() => {
-    if (typeof document !== 'undefined') {
-      return document.documentElement.getAttribute('data-display-mode') === 'embed';
-    }
-
-    return false;
-  });
+  const [embedded, setEmbedded] = useState<boolean>(false);
 
   useEffect(() => {
     ensureHistoryEventsPatched();

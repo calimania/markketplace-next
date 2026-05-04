@@ -11,7 +11,7 @@ const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplac
 
 const buildUrl = (path: string) => new URL(path, MARKKETPLACE_URL).toString();
 
-const toDate = (value?: string) => {
+const toDate = (value?: string | null) => {
   if (!value) return new Date();
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? new Date() : parsed;

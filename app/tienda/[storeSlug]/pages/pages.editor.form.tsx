@@ -23,6 +23,8 @@ type PageEditorFormProps = {
     content?: RichTextValue;
     seoTitle?: string;
     seoDescription?: string;
+    seoSocialImageId?: number;
+    seoSocialImageDocumentId?: string;
   };
 };
 
@@ -107,7 +109,7 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
 
   const handleCancel = () => {
     if (isDirty && !confirm('You have unsaved changes. Leave anyway?')) return;
-    router.push(`/tienda/${storeSlug}/pages`);
+    router.push(mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/pages/${itemDocumentId}` : `/tienda/${storeSlug}/pages`);
   };
 
   const handleSubmit = async () => {
@@ -143,6 +145,11 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       SEO: {
         metaTitle: (seoTitle || title).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
+        ...(initial?.seoSocialImageDocumentId
+          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
+          : initial?.seoSocialImageId
+            ? { socialImage: initial.seoSocialImageId }
+            : {}),
       },
     };
 

@@ -38,36 +38,21 @@ function sortByRecent(items: Article[]) {
 
 export default function BlogListClient({ storeSlug, initialPosts }: BlogListClientProps) {
   const [posts, setPosts] = useState<Article[]>(sortByRecent(initialPosts || []));
-  const fetchedStoreSlugRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = readAuthToken();
-    if (!token) {
-      console.log('[BlogListClient] No token in localStorage');
-      return;
-    }
-
-    if (fetchedStoreSlugRef.current === storeSlug) {
-      return;
-    }
-
-    fetchedStoreSlugRef.current = storeSlug;
+    if (!token) return;
 
     const loadAllContent = async () => {
       try {
-        console.log('[BlogListClient] Fetching content for store:', storeSlug);
         const response = await tiendaClient.listContent(storeSlug, 'article', {
           token,
           query: TIENDA_CONTENT_LIST_QUERY.article,
         });
 
-        console.log('[BlogListClient] API response:', { response, hasData: !!response?.data });
-
         const merged = new Map<string, Article>();
         const allItems = Array.isArray(response?.data) ? (response.data as Article[]) : (Array.isArray(response) ? (response as Article[]) : []);
-
-        console.log('[BlogListClient] Parsed items:', { count: allItems.length, items: allItems.map(p => ({ id: p.documentId, title: p.Title, published: !!p.publishedAt })) });
 
         if (allItems.length > 0) {
           allItems.forEach((post) => {
@@ -76,7 +61,6 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           setPosts(sortByRecent(Array.from(merged.values())));
         }
       } catch (error) {
-        fetchedStoreSlugRef.current = null;
         console.error('[BlogListClient] Failed to load posts:', error);
       }
       setLoading(false);

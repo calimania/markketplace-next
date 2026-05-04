@@ -19,6 +19,8 @@ type ProductEditorFormProps = {
     seoTitle?: string;
     seoDescription?: string;
     sourceUrl?: string;
+    seoSocialImageId?: number;
+    seoSocialImageDocumentId?: string;
   };
 };
 
@@ -107,6 +109,11 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
         metaUrl: sourceUrl.trim() || undefined,
+        ...(initial?.seoSocialImageDocumentId
+          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
+          : initial?.seoSocialImageId
+            ? { socialImage: initial.seoSocialImageId }
+            : {}),
       },
     };
 
@@ -231,7 +238,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       />
 
       <Group justify="space-between">
-        <Button component="a" variant="subtle" href={`/tienda/${storeSlug}/products`}>
+        <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/products/${itemDocumentId}` : `/tienda/${storeSlug}/products`}>
           Cancel
         </Button>
 

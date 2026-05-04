@@ -36,7 +36,6 @@ export default async function StoresPage() {
   const store = storeResponse.data?.[0];
   const stores = response?.data || [];
   const page = pageResponse?.data?.[0] as Page;
-  const storeCount = stores.length;
 
   return (
     <Container size="xl" pt={0} pb={{ base: 'xl', md: 60 }}>
@@ -99,7 +98,7 @@ export default async function StoresPage() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Discover {storeCount} Storefronts
+                  Discover
                 </Badge>
               </Group>
             </Stack>
