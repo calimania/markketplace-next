@@ -217,7 +217,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               </Stack>
             )}
 
-            {pastEvents.length > 0 && (
+            {upcomingEvents.length === 0 && pastEvents.length > 0 && (
               <Stack gap="md">
                 <Box
                   style={{

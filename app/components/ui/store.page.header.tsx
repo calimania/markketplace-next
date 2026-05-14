@@ -29,16 +29,42 @@ export default function StorePageHeader({
       style={{
         position: 'relative',
         overflow: 'hidden',
-        minHeight: 200,
+        minHeight: 220,
         display: 'flex',
-        alignItems: 'center',
-        background: hasCover
-          ? `linear-gradient(135deg, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.28) 100%), url(${backgroundImage}) center/cover no-repeat`
-          : markketColors.gradients.hero,
-        border: 'none',
+        alignItems: 'flex-start',
+        background: 'linear-gradient(145deg, rgba(245,246,247,0.98) 0%, rgba(255,255,255,0.98) 52%, rgba(239,241,243,0.96) 100%)',
+        border: `1px solid ${markketColors.neutral.lightGray}`,
+        boxShadow: '0 14px 30px rgba(15,23,42,0.06)',
       }}
     >
-      {/* Decorative blob */}
+      {hasCover && (
+        <>
+          <Box
+            style={{
+              position: 'absolute',
+              right: 12,
+              bottom: 12,
+              width: 'min(44%, 320px)',
+              height: '72%',
+              borderRadius: 18,
+              background: `url(${backgroundImage}) center/cover no-repeat`,
+              opacity: 0.42,
+            }}
+          />
+          <Box
+            style={{
+              position: 'absolute',
+              right: 12,
+              bottom: 12,
+              width: 'min(44%, 320px)',
+              height: '72%',
+              borderRadius: 18,
+              background: 'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(15,23,42,0.18) 100%)',
+            }}
+          />
+        </>
+      )}
+
       <Box
         style={{
           position: 'absolute',
@@ -47,23 +73,31 @@ export default function StorePageHeader({
           width: 200,
           height: 200,
           borderRadius: '50%',
-          background: 'rgba(255,255,255,0.07)',
+          background: 'rgba(15,23,42,0.06)',
           pointerEvents: 'none',
         }}
       />
 
-      <Stack align="center" gap="sm" style={{ position: 'relative', zIndex: 1, width: '100%' }}>
+      <Stack
+        align="flex-start"
+        gap="sm"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: hasCover ? 'min(100%, 620px)' : '100%',
+          paddingTop: 4,
+        }}
+      >
         <Box
           style={{
             width: 56,
             height: 56,
             borderRadius: 14,
-            background: hasCover ? 'rgba(255,255,255,0.18)' : `${iconColor}25`,
-            backdropFilter: hasCover ? 'blur(8px)' : undefined,
+            background: `${iconColor}20`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: iconColor,
           }}
         >
           {icon}
@@ -71,8 +105,8 @@ export default function StorePageHeader({
 
         <Title
           order={1}
-          ta="center"
-          c="white"
+          ta="left"
+          c={markketColors.neutral.charcoal}
           style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', fontWeight: 700, lineHeight: 1.2 }}
         >
           {title}
@@ -81,10 +115,9 @@ export default function StorePageHeader({
         {description && (
           <Text
             size="sm"
-            ta="center"
-            maw={560}
-            mx="auto"
-            c="rgba(255,255,255,0.85)"
+            ta="left"
+            maw={hasCover ? 540 : 620}
+            c={markketColors.neutral.darkGray}
             style={{ lineHeight: 1.6 }}
           >
             {description}

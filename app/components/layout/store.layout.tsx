@@ -1,7 +1,6 @@
 'use client';
 
 import { AppShell, Burger, Container, Group, Button, Text, Stack, Divider, Box, Paper, Anchor } from "@mantine/core";
-import { IconHome, IconShoppingCart, IconArticle, IconInfoCircle, IconArrowLeft, IconCalendar, IconNews } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useDisclosure } from '@mantine/hooks';
@@ -17,43 +16,31 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
   const pathname = usePathname();
   const navLinks = [
     {
-      href: `/${slug}`,
-      icon: <IconHome size={18} />,
-      label: 'Home',
-      show: visibility ? visibility.show_home : true,
-      color: markketColors.neutral.charcoal,
-    },
-    {
       href: `/${slug}/products`,
-      icon: <IconShoppingCart size={18} />,
       label: 'Products',
       show: visibility ? visibility.show_shop : true,
       color: markketColors.sections.shop.main,
     },
     {
       href: `/${slug}/blog`,
-      icon: <IconArticle size={18} />,
       label: 'Blog',
       show: visibility ? visibility.show_blog : true,
       color: markketColors.sections.blog.main,
     },
     {
       href: `/${slug}/events`,
-      icon: <IconCalendar size={18} />,
       label: 'Events',
       show: visibility ? visibility.show_events : true,
       color: markketColors.sections.events.main,
     },
     {
       href: `/${slug}/about`,
-      icon: <IconInfoCircle size={18} />,
       label: 'About',
       show: visibility ? visibility.show_about : true,
       color: markketColors.sections.about.main,
     },
     {
       href: `/${slug}/about/newsletter`,
-      icon: <IconNews size={18} />,
       label: 'Newsletter',
       show: visibility ? visibility.show_newsletter : true,
       color: markketColors.sections.newsletter.main,
@@ -68,12 +55,11 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
           <Link key={link.href} href={link.href} onClick={onNavigate}>
             <Button
               variant="subtle"
-              leftSection={<Box style={{ color: link.color }}>{link.icon}</Box>}
               fullWidth
               justify="flex-start"
               className="store-nav-btn"
               data-active={pathname === link.href ? 'true' : undefined}
-              style={{ color: markketColors.neutral.charcoal, fontWeight: 600 }}
+              style={{ color: pathname === link.href ? link.color : markketColors.neutral.charcoal, fontWeight: 600 }}
             >
               {link.label}
             </Button>
@@ -88,7 +74,6 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
           <Link href="/" onClick={onNavigate}>
             <Button
               variant="light"
-              leftSection={<IconArrowLeft size={18} />}
               fullWidth
               justify="flex-start"
               size="sm"
@@ -129,36 +114,25 @@ export function ClientLayout({
   // Generate nav links for header
   const headerNavLinks = [
     {
-      href: `/${store?.slug}`,
-      icon: <IconHome size={16} />,
-      label: 'Home',
-      show: visibility ? visibility.show_home : true,
-      color: markketColors.neutral.charcoal,
-    },
-    {
       href: `/${store?.slug}/products`,
-      icon: <IconShoppingCart size={16} />,
       label: 'Shop',
       show: visibility ? visibility.show_shop : true,
       color: markketColors.sections.shop.main,
     },
     {
       href: `/${store?.slug}/blog`,
-      icon: <IconArticle size={16} />,
       label: 'Blog',
       show: visibility ? visibility.show_blog : true,
       color: markketColors.sections.blog.main,
     },
     {
       href: `/${store?.slug}/events`,
-      icon: <IconCalendar size={16} />,
       label: 'Events',
       show: visibility ? visibility.show_events : true,
       color: markketColors.sections.events.main,
     },
     {
       href: `/${store?.slug}/about`,
-      icon: <IconInfoCircle size={16} />,
       label: 'About',
       show: visibility ? visibility.show_about : true,
       color: markketColors.sections.about.main,
@@ -231,10 +205,9 @@ export function ClientLayout({
                   href={link.href}
                   variant="subtle"
                   size="sm"
-                  leftSection={<Box style={{ color: link.color }}>{link.icon}</Box>}
                   className="store-header-link"
                   data-active={pathname === link.href ? 'true' : undefined}
-                  style={{ color: markketColors.neutral.charcoal, fontWeight: 600 }}
+                  style={{ color: pathname === link.href ? link.color : markketColors.neutral.charcoal, fontWeight: 600 }}
                 >
                   {link.label}
                 </Button>
@@ -253,7 +226,8 @@ export function ClientLayout({
         <Stack h="100%" gap="md">
           {/* Store Branding */}
           <Box>
-            <Group gap="sm" mb="xs" wrap="nowrap">
+              <Link href={`/${store?.slug}`} onClick={handleNavigation} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Group gap="sm" mb="xs" wrap="nowrap">
                 {logoUrl ? (
                 <img
                     src={logoUrl}
@@ -287,7 +261,8 @@ export function ClientLayout({
                     Explore Store
                 </Text>
               </Box>
-            </Group>
+                </Group>
+              </Link>
           </Box>
 
           {/* Navigation Links */}
@@ -323,7 +298,6 @@ export function ClientLayout({
                   <Button
                     variant="light"
                     color="gray"
-                    leftSection={<IconArrowLeft size={18} />}
                     radius="xl"
                   >
                     markkët homepage

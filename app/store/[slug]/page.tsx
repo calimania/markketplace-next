@@ -2,8 +2,7 @@
 import { strapiClient } from '@/markket/api.strapi';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Container, Title, Text, Stack, Paper, Box, Overlay, Button, Group, Badge, SimpleGrid } from "@mantine/core";
-import { IconShoppingCart, IconArticle, IconCalendar, IconHome, IconNews, IconMail, IconArrowRight, IconSparkles } from '@tabler/icons-react';
+import { Container, Title, Text, Stack, Paper, Box, Overlay, Group, Badge, SimpleGrid } from "@mantine/core";
 import PageContent from '@/app/components/ui/page.content';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import { StoreSectionLinks } from '@/app/components/ui/store.section.links';
@@ -145,7 +144,6 @@ export default async function StorePage({
   const showBlog = visibility ? visibility.show_blog : true;
   const showEvents = visibility ? visibility.show_events : true;
   const showAbout = visibility ? visibility.show_about : true;
-  const showNewsletter = visibility ? visibility.show_newsletter : true;
   const products = (productsResponse?.data || []) as Product[];
   const posts = (postsResponse?.data || []) as Article[];
   const events = (eventsResponse?.data || []) as Event[];
@@ -153,6 +151,11 @@ export default async function StorePage({
   const publishedProducts = products.filter((item) => isPublishedEntry(item));
   const publishedPosts = posts.filter((item) => isPublishedEntry(item));
   const publishedEvents = events.filter((item) => isPublishedEntry(item));
+  const now = new Date();
+  const upcomingEvents = publishedEvents.filter((e) => new Date(e.startDate) >= now).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  const pastEvents = publishedEvents.filter((e) => new Date(e.startDate) < now).sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+  const eventsToDisplay = upcomingEvents.length > 0 ? upcomingEvents : pastEvents;
+  const isShowingPastOnly = upcomingEvents.length === 0 && pastEvents.length > 0;
   const publishedPages = pages.filter((item) => isPublishedEntry(item));
   const slides = (store?.Slides || [])
     .map((slide) => ({
@@ -191,7 +194,7 @@ export default async function StorePage({
   );
   const hasHomePageBlocks = Boolean(homePage?.Content?.length);
 
-  const aboutPages = publishedPages.filter((page) => !['home', 'about', 'blog', 'products', 'events'].includes(page.slug || ''));
+  const aboutPages = publishedPages.filter((page) => !['home', 'about', 'blog', 'products', 'events', 'newsletter'].includes(page.slug || ''));
 
   const featuredProduct = publishedProducts[0];
   const featuredPost = publishedPosts[0];
@@ -200,26 +203,13 @@ export default async function StorePage({
     .find((event) => new Date(event.startDate).getTime() >= Date.now()) || publishedEvents[0];
   const featuredAbout = aboutPages[0];
   const heroImage = imageOrFallback(
+    slides[0]?.src,
     store?.Cover?.url,
     store?.SEO?.socialImage?.url,
-    slides[0]?.src,
     featuredProduct?.Thumbnail?.url,
     featuredPost?.cover?.url,
   );
-  const heroPrimaryAction = showShop && publishedProducts.length > 0
-    ? { href: `/${slug}/products`, label: 'Browse products' }
-    : showBlog && publishedPosts.length > 0
-      ? { href: `/${slug}/blog`, label: 'Read stories' }
-      : showEvents && publishedEvents.length > 0
-        ? { href: `/${slug}/events`, label: 'See events' }
-        : showAbout && aboutPages.length > 0
-          ? { href: `/${slug}/about`, label: 'Explore pages' }
-          : undefined;
-  const heroSecondaryAction = showAbout && aboutPages.length > 0
-    ? { href: `/${slug}/about`, label: 'About this store' }
-    : showBlog && publishedPosts.length > 0
-      ? { href: `/${slug}/blog`, label: 'Latest notes' }
-      : undefined;
+
   const signalCards = [
     {
       label: 'Products',
@@ -325,7 +315,6 @@ export default async function StorePage({
   const sectionLinks = [
     {
       url: `/${slug}/products`,
-      icon: <IconShoppingCart size={26} stroke={1.5} />,
       title: 'Shop',
       description: `${visibility?.content_summary?.products_count || 0} products`,
       show: showShop,
@@ -335,7 +324,6 @@ export default async function StorePage({
     },
     {
       url: `/${slug}/blog`,
-      icon: <IconArticle size={26} stroke={1.5} />,
       title: 'Blog',
       description: `${publishedPosts.length} articles`,
       show: showBlog,
@@ -345,7 +333,6 @@ export default async function StorePage({
     },
     {
       url: `/${slug}/events`,
-      icon: <IconCalendar size={26} stroke={1.5} />,
       title: 'Events',
       description: (() => {
         const upcoming = publishedEvents.filter((event) => new Date(event.startDate).getTime() >= Date.now()).length;
@@ -358,7 +345,6 @@ export default async function StorePage({
     },
     {
       url: `/${slug}/about`,
-      icon: <IconHome size={26} stroke={1.5} />,
       title: 'About',
       description: `${aboutPages.length} pages`,
       show: showAbout,
@@ -447,7 +433,7 @@ export default async function StorePage({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: 'radial-gradient(circle at top left, rgba(15,23,42,0.06), transparent 34%), radial-gradient(circle at top right, rgba(0,188,212,0.06), transparent 30%), linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,250,250,1) 100%)',
+              backgroundImage: 'radial-gradient(circle at top left, rgba(15,23,42,0.06), transparent 34%), radial-gradient(circle at top right, rgba(15,23,42,0.04), transparent 30%), linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,250,250,1) 100%)',
             }}
           />
           <Box
@@ -469,7 +455,7 @@ export default async function StorePage({
               left: '6%',
               width: 110,
               height: 110,
-              border: `2px dashed ${markketColors.sections.about.main}40`,
+              border: '2px dashed rgba(97, 97, 97, 0.28)',
               borderRadius: 18,
               transform: 'rotate(-14deg)',
             }}
@@ -482,7 +468,6 @@ export default async function StorePage({
                     size="lg"
                     radius="md"
                     variant="light"
-                    leftSection={<IconSparkles size={14} />}
                     style={{
                       background: 'rgba(15,23,42,0.06)',
                       color: markketColors.neutral.darkGray,
@@ -512,35 +497,6 @@ export default async function StorePage({
                   <StoreTabs urls={store.URLS} basePath={`/${slug}`} />
                 )}
 
-                {(heroPrimaryAction || heroSecondaryAction) && (
-                  <Group gap="xs" wrap="wrap">
-                    {heroPrimaryAction && (
-                      <Link href={heroPrimaryAction.href} style={{ textDecoration: 'none' }}>
-                        <Button
-                          radius="xl"
-                          size="sm"
-                          variant="light"
-                          rightSection={<IconArrowRight size={14} />}
-                          style={{
-                            background: `${markketColors.rosa.main}14`,
-                            color: markketColors.neutral.charcoal,
-                            border: `1px solid ${markketColors.rosa.main}33`,
-                          }}
-                        >
-                          {heroPrimaryAction.label}
-                        </Button>
-                      </Link>
-                    )}
-                    {heroSecondaryAction && (
-                      <Link href={heroSecondaryAction.href} style={{ textDecoration: 'none' }}>
-                        <Button variant="subtle" radius="xl" size="sm" c={markketColors.neutral.darkGray}>
-                          {heroSecondaryAction.label}
-                        </Button>
-                      </Link>
-                    )}
-                  </Group>
-                )}
-
               </Stack>
 
               <Stack gap="md">
@@ -566,63 +522,6 @@ export default async function StorePage({
                       opacity={heroImage ? 0.42 : 1}
                       zIndex={1}
                     />
-                    <Box
-                      pos="absolute"
-                      left={18}
-                      bottom={18}
-                      style={{
-                        zIndex: 2,
-                        width: 'min(100%, 240px)',
-                        borderRadius: 18,
-                        padding: 10,
-                        background: 'rgba(255,255,255,0.88)',
-                        backdropFilter: 'blur(10px)',
-                      }}
-                    >
-                      <Group gap="sm" wrap="nowrap" align="center">
-                        {store?.Logo?.url ? (
-                          <img
-                            src={store.Logo.url}
-                            alt={store.SEO?.metaTitle || store.title}
-                            width={64}
-                            height={64}
-                            style={{
-                              display: 'block',
-                              borderRadius: '14px',
-                              objectFit: 'contain',
-                              background: '#fff',
-                              padding: 6,
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            style={{
-                              width: 64,
-                              height: 64,
-                              borderRadius: 14,
-                              background: markketColors.gradients.hero,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '1.6rem',
-                              fontWeight: 800,
-                              color: 'white',
-                            }}
-                          >
-                            {(store.title || store.slug).charAt(0).toUpperCase()}
-                          </Box>
-                        )}
-                        <Stack gap={2} style={{ flex: 1 }}>
-                          <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.12em', color: markketColors.neutral.mediumGray }}>
-                            Identity
-                          </Text>
-                          <Text fw={700} lh={1.1}>{store?.title || store?.SEO?.metaTitle}</Text>
-                          <Text size="xs" c="dimmed" lineClamp={2}>
-                            {compact(store?.SEO?.metaDescription || descriptionText || 'Curated with care for people who connect with this brand.', 84)}
-                          </Text>
-                        </Stack>
-                      </Group>
-                    </Box>
                   </Box>
                 </Box>
 
@@ -661,7 +560,7 @@ export default async function StorePage({
                 style={{
                   borderRadius: 22,
                   padding: '16px',
-                  background: 'linear-gradient(135deg, rgba(246,248,250,0.94) 0%, rgba(255,255,255,0.98) 48%, rgba(244,248,252,0.92) 100%)',
+                  background: 'linear-gradient(135deg, rgba(246,246,247,0.94) 0%, rgba(255,255,255,0.98) 52%, rgba(242,243,245,0.92) 100%)',
                   boxShadow: '0 12px 28px rgba(15, 23, 42, 0.05)',
                 }}
               >
@@ -895,11 +794,11 @@ export default async function StorePage({
                   </Stack>
                 )}
 
-                {showEvents && publishedEvents.length > 0 && (
+                {showEvents && eventsToDisplay.length > 0 && (
                   <Stack gap="sm">
                     <Group justify="space-between" align="center">
                       <Text size="xs" tt="uppercase" fw={800} style={{ letterSpacing: '0.1em', color: markketColors.sections.events.main }}>
-                        Events
+                        {isShowingPastOnly ? 'Past Events' : 'Events'}
                       </Text>
                       <Link href={`/${slug}/events`} style={{ textDecoration: 'none' }}>
                         <Text size="sm" fw={700} style={{ color: markketColors.sections.events.main }}>View all</Text>
@@ -908,9 +807,9 @@ export default async function StorePage({
                     <Group
                       gap="md"
                       wrap="nowrap"
-                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory' }}
+                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory', opacity: isShowingPastOnly ? 0.7 : 1 }}
                     >
-                      {publishedEvents.slice(0, 6).map((event) => {
+                      {eventsToDisplay.slice(0, 6).map((event) => {
                         const image = imageOrFallback(
                           event?.Thumbnail?.formats?.medium?.url,
                           event?.Thumbnail?.formats?.small?.url,
@@ -925,7 +824,7 @@ export default async function StorePage({
                           <Link
                             key={event.documentId || event.id || event.slug}
                             href={`/${slug}/events/${event.slug}`}
-                            style={{ textDecoration: 'none', flex: railCardBasis(publishedEvents.length), scrollSnapAlign: 'start' }}
+                            style={{ textDecoration: 'none', flex: railCardBasis(eventsToDisplay.length), scrollSnapAlign: 'start' }}
                           >
                             <Paper
                               radius="xl"
@@ -955,6 +854,14 @@ export default async function StorePage({
                       })}
                     </Group>
                   </Stack>
+                )}
+
+                {slides.length > 0 && (
+                  <StoreSlidesGallery slides={slides} title="Visual Story" />
+                )}
+
+                {slides.length === 0 && storeImages.length > 0 && (
+                  <StoreSlidesGallery slides={storeImages} title="Gallery" />
                 )}
 
                 {showAbout && aboutPages.length > 0 && (
@@ -1016,15 +923,6 @@ export default async function StorePage({
                   </Stack>
                 )}
               </Stack>
-            )}
-
-
-            {slides.length > 0 && (
-              <StoreSlidesGallery slides={slides} />
-            )}
-
-            {slides.length === 0 && storeImages.length > 0 && (
-              <StoreSlidesGallery slides={storeImages} title="Gallery" />
             )}
 
             {shouldShowEmptyLaunchState && (
@@ -1093,7 +991,6 @@ export default async function StorePage({
             {sectionLinks.length > 0 && (
               <Stack gap="sm">
                 <Group justify="center" gap="xs">
-                  <IconSparkles size={18} color={markketColors.neutral.darkGray} />
                   <Text fw={600} ta="center" size="sm" tt="uppercase" style={{ letterSpacing: '0.08em', color: markketColors.neutral.mediumGray }}>
                     Quick links
                   </Text>
@@ -1103,63 +1000,7 @@ export default async function StorePage({
                 </Box>
               </Stack>
             )}
-
-
-
-
-
             {!!homePage?.albums?.length && <Albums albums={homePage.albums as Album[]} store_slug={store.slug} />}
-
-            {/* Newsletter CTA */}
-            {showNewsletter && (
-              <Paper
-                p="xl"
-                radius="xl"
-                style={{
-                  marginTop: 10,
-                  background: '#ffffff',
-                  boxShadow: '0 8px 24px rgba(15,23,42,0.05)',
-                }}
-              >
-                <Stack align="center" gap="md">
-                  <Box
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: '14px',
-                      background: markketColors.sections.newsletter.light,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <IconMail size={26} color={markketColors.sections.newsletter.main} stroke={1.5} />
-                  </Box>
-                  <Title order={3} ta="center" fw={600} c={markketColors.neutral.charcoal}>
-                    Keep in touch
-                  </Title>
-                  <Text size="sm" ta="center" maw={460} c={markketColors.neutral.mediumGray} lh={1.6}>
-                    Get a gentle note when new pieces, stories, or events are published.
-                  </Text>
-                  <Button
-                    component="a"
-                    href={`/${slug}/about/newsletter`}
-                    size="md"
-                    radius="xl"
-                    rightSection={<IconArrowRight size={16} />}
-                    style={{
-                      background: markketColors.neutral.charcoal,
-                      color: 'white',
-                      fontWeight: 600,
-                      border: 'none',
-                      boxShadow: '0 4px 16px rgba(15,23,42,0.18)',
-                    }}
-                  >
-                    Join updates
-                  </Button>
-                </Stack>
-              </Paper>
-            )}
           </Stack>
         </Container>
       </div>
