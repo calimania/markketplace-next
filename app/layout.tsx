@@ -130,7 +130,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en" data-scroll-behavior="smooth" {...mantineHtmlProps}>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
         <AuthProvider>
           <PostHogProvider>
