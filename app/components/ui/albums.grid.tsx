@@ -46,27 +46,18 @@ function AlbumCard({ album, store_slug }: AlbumCardProps) {
           flexDirection: 'column',
         }}
       >
-        <AspectRatio ratio={16 / 9} pos="relative" className="album-card-img-wrap" style={{ marginBottom: 0 }}>
-          <Box
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '12px',
-              overflow: 'hidden',
-            }}
-          >
-            <Image
-              src={album.cover?.url || album.SEO?.socialImage?.url}
-              alt={album.title}
-              fallbackSrc="https://placehold.co/800x450?text=Album"
-              style={{ objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%', display: 'block', transition: 'transform 0.3s ease' }}
-              className="album-card-img"
-            />
-            <Overlay
-              gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .45) 100%)"
-              opacity={1}
-            />
-          </Box>
+        <AspectRatio ratio={16 / 9} pos="relative" className="album-card-img-wrap" style={{ marginBottom: 0, borderRadius: '12px', overflow: 'hidden' }}>
+          <Image
+            src={album.cover?.url || album.SEO?.socialImage?.url}
+            alt={album.title}
+            fallbackSrc="https://placehold.co/800x450?text=Album"
+            style={{ objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%', display: 'block', transition: 'transform 0.3s ease' }}
+            className="album-card-img"
+          />
+          <Overlay
+            gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .45) 100%)"
+            opacity={1}
+          />
         </AspectRatio>
         <Box style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Title order={3} lineClamp={2} className="album-card-title" mt="md" size="h5" fw={700}>

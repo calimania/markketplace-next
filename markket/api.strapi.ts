@@ -90,7 +90,6 @@ export class StrapiClient {
     let path = `api/${endpoint}/${id}`;
     if (endpoint === 'stores') {
       path = `api/tienda/${endpoint}/${id}`;
-
     }
 
     const _url = new URL(path, this.baseUrl);
@@ -516,7 +515,7 @@ export class StrapiClient {
         },
       },
       paginate: { page: 1, pageSize: 10 },
-      populate: 'SEO.socialImage,store,albums,albums.cover,albums.SEO,albums.tracks'
+      populate: 'SEO.socialImage,store,albums,albums.cover,albums.SEO,albums.tracks,albums.tracks.media'
     });
   };
 
