@@ -203,11 +203,32 @@ export default async function StorePage({
     .find((event) => new Date(event.startDate).getTime() >= Date.now()) || publishedEvents[0];
   const featuredAbout = aboutPages[0];
   const heroImage = imageOrFallback(
+    store?.Logo?.url,
     slides[0]?.src,
+    slides[1]?.src,
+    slides[2]?.src,
+    store?.Cover?.formats?.large?.url,
+    store?.Cover?.formats?.medium?.url,
+    store?.Cover?.formats?.small?.url,
     store?.Cover?.url,
+    store?.SEO?.socialImage?.formats?.large?.url,
+    store?.SEO?.socialImage?.formats?.medium?.url,
+    store?.SEO?.socialImage?.formats?.small?.url,
     store?.SEO?.socialImage?.url,
     featuredProduct?.Thumbnail?.url,
+    featuredPost?.cover?.formats?.large?.url,
+    featuredPost?.cover?.formats?.medium?.url,
+    featuredPost?.cover?.formats?.small?.url,
     featuredPost?.cover?.url,
+    featuredEvent?.Thumbnail?.formats?.large?.url,
+    featuredEvent?.Thumbnail?.formats?.medium?.url,
+    featuredEvent?.Thumbnail?.formats?.small?.url,
+    featuredEvent?.Thumbnail?.url,
+    featuredAbout?.SEO?.socialImage?.formats?.large?.url,
+    featuredAbout?.SEO?.socialImage?.formats?.medium?.url,
+    featuredAbout?.SEO?.socialImage?.formats?.small?.url,
+    featuredAbout?.SEO?.socialImage?.url,
+    storeImages[0]?.src,
   );
 
   const signalCards = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Modal, Paper, Stack, Text, Title, UnstyledButton } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconZoomIn } from '@tabler/icons-react';
 import { markketColors } from '@/markket/colors.config';
@@ -22,6 +22,10 @@ export default function StoreSlidesGallery({ slides, title }: StoreSlidesGallery
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const selected = useMemo(() => slides[selectedIndex] || slides[0], [slides, selectedIndex]);
+
+  useEffect(() => {
+    setSelectedIndex(slides.length > 1 ? 1 : 0);
+  }, [slides]);
 
   const goPrevious = () => {
     setSelectedIndex((current) => (current <= 0 ? slides.length - 1 : current - 1));

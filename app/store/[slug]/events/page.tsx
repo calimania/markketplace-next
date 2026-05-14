@@ -217,14 +217,16 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               </Stack>
             )}
 
-            {upcomingEvents.length === 0 && pastEvents.length > 0 && (
+            {pastEvents.length > 0 && (
               <Stack gap="md">
-                <Box
-                  style={{
-                    borderTop: `2px solid ${markketColors.neutral.lightGray}`,
-                    paddingTop: 'md',
-                  }}
-                />
+                {upcomingEvents.length > 0 && (
+                  <Box
+                    style={{
+                      borderTop: `2px solid ${markketColors.neutral.lightGray}`,
+                      paddingTop: 'md',
+                    }}
+                  />
+                )}
 
                 <Group gap="xs" align="center">
                   <Badge
