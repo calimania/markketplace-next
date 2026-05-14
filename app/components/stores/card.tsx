@@ -4,6 +4,7 @@ import { Card, Text, Badge, Group, Box, Anchor } from '@mantine/core';
 import { IconArrowRight, IconMapPin } from '@tabler/icons-react';
 import { Store } from "@/markket/store.d";
 import { markketColors } from '@/markket/colors.config';
+import { markketplace } from '@/markket/config';
 
 export interface StoreCardProps {
   store: Store;
@@ -11,10 +12,21 @@ export interface StoreCardProps {
   featured?: boolean;
 }
 
-export function StoreCard({ store, featured }: StoreCardProps) {
+const hashString = (value: string) => {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+
+  return hash;
+};
+
+export function StoreCard({ store, idx, featured }: StoreCardProps) {
   const coverUrl = store.Cover?.formats?.small?.url || store.Cover?.formats?.thumbnail?.url || store.Cover?.url || store.SEO?.socialImage?.formats?.small?.url || store.SEO?.socialImage?.url;
   const logoUrl = store.Logo?.formats?.small?.url || store.Logo?.formats?.thumbnail?.url || store.Logo?.url;
   const description = store.SEO?.metaDescription || '';
+  const gradientIndex = hashString(store.slug || store.documentId || store.title || String(idx)) % markketplace.empty_gradients.length;
 
   return (
     <Anchor
@@ -55,7 +67,7 @@ export function StoreCard({ store, featured }: StoreCardProps) {
             height: featured ? 200 : 140,
             background: coverUrl
               ? `url(${coverUrl}) center/cover no-repeat`
-              : markketColors.gradients.hero,
+              : markketplace.empty_gradients[gradientIndex],
             position: 'relative',
             flexShrink: 0,
           }}

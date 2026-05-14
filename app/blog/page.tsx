@@ -1,8 +1,8 @@
 import { strapiClient } from '@/markket/api.strapi';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Metadata } from 'next';
-import { Container, Stack, Title, Text, Paper, Box, Badge, Group } from '@mantine/core';
-import { IconArticle, IconSparkles } from '@tabler/icons-react';
+import { Container, Stack, Title, Text, Paper, Box } from '@mantine/core';
+import { IconArticle } from '@tabler/icons-react';
 import { markketColors } from '@/markket/colors.config';
 import BlogFeed from './feed';
 import type { Article } from '@/markket/article';
@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     slug: 'blog',
     entity: { url: '/blog' },
     defaultTitle: 'Blog',
-    defaultDescription: 'Stories, updates, and ideas from creators across the Markket community.',
+    defaultDescription: 'Stories, updates, and ideas from the community.',
     keywords: ['blog', 'articles', 'stories', 'community', 'creators'],
     type: 'website',
   });
@@ -35,7 +35,7 @@ export default async function BlogDiscoveryPage() {
       <Stack gap="xl">
         {/* Hero */}
         <Paper
-          radius="xl"
+          radius="lg"
           p={{ base: 'lg', md: 48 }}
           style={{
             background: markketColors.gradients.hero,
@@ -76,17 +76,11 @@ export default async function BlogDiscoveryPage() {
               c="white"
               style={{ fontSize: 'clamp(1.6rem, 5vw, 2.8rem)', fontWeight: 800, lineHeight: 1.2 }}
             >
-              Community Stories
+              Stories
             </Title>
             <Text size="md" ta="center" c="rgba(255,255,255,0.85)" maw={480}>
-              Fresh writing from creators, makers, and builders across the Markket community.
+              Fresh writing from creators, makers, and builders from the community.
             </Text>
-            <Group gap="xs">
-              <Badge variant="light" radius="xl" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-                <IconSparkles size={12} style={{ marginRight: 4 }} />
-                {total} posts
-              </Badge>
-            </Group>
           </Stack>
         </Paper>
 
