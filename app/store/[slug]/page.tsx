@@ -22,6 +22,7 @@ import type { Article } from '@/markket/article';
 import type { Event } from '@/markket/event';
 import type { Page } from '@/markket/page';
 import { cache } from 'react';
+import './storefront-rails.css';
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getHomePageCached = cache((slug: string) => strapiClient.getPage('home', slug));
@@ -64,6 +65,17 @@ function railCardBasis(count: number) {
   if (count <= 2) return '0 0 320px';
   if (count <= 4) return '0 0 292px';
   return '0 0 270px';
+}
+
+function railCardOffset(index: number, count: number) {
+  if (index === 0 || count <= 1) return 0;
+
+  const denominator = Math.max(2, count - 1);
+  const progress = index / denominator;
+  const wave = Math.sin(progress * Math.PI);
+  const depth = 10 + Math.round(wave * 14);
+
+  return depth;
 }
 
 function toAbsoluteUrl(path?: string): string | undefined {
@@ -707,11 +719,13 @@ export default async function StorePage({
                       </Link>
                     </Group>
                     <Group
+                      align="flex-start"
                       gap="md"
                       wrap="nowrap"
-                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory' }}
+                      className="storefront-rail"
+                      style={{ overflowX: 'auto', paddingTop: 4, paddingBottom: 20, scrollSnapType: 'x mandatory' }}
                     >
-                      {publishedProducts.slice(0, 6).map((product) => {
+                      {publishedProducts.slice(0, 6).map((product, index) => {
                         const image = imageOrFallback(
                           product?.Thumbnail?.url,
                           product?.Slides?.[0]?.formats?.medium?.url,
@@ -724,7 +738,7 @@ export default async function StorePage({
                           <Link
                             key={product.documentId || product.id || product.slug}
                             href={`/${slug}/products/${product.slug}`}
-                            style={{ textDecoration: 'none', flex: railCardBasis(publishedProducts.length), scrollSnapAlign: 'start' }}
+                            style={{ textDecoration: 'none', flex: railCardBasis(publishedProducts.length), scrollSnapAlign: 'start', marginTop: railCardOffset(index, publishedProducts.length) }}
                           >
                             <Paper
                               radius="xl"
@@ -767,11 +781,13 @@ export default async function StorePage({
                       </Link>
                     </Group>
                     <Group
+                      align="flex-start"
                       gap="md"
                       wrap="nowrap"
-                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory' }}
+                      className="storefront-rail"
+                      style={{ overflowX: 'auto', paddingTop: 4, paddingBottom: 20, scrollSnapType: 'x mandatory' }}
                     >
-                      {publishedPosts.slice(0, 6).map((post) => {
+                      {publishedPosts.slice(0, 6).map((post, index) => {
                         const image = imageOrFallback(
                           post?.cover?.formats?.medium?.url,
                           post?.cover?.formats?.small?.url,
@@ -783,7 +799,7 @@ export default async function StorePage({
                           <Link
                             key={post.documentId || post.id || post.slug}
                             href={`/${slug}/blog/${post.slug}`}
-                            style={{ textDecoration: 'none', flex: railCardBasis(publishedPosts.length), scrollSnapAlign: 'start' }}
+                            style={{ textDecoration: 'none', flex: railCardBasis(publishedPosts.length), scrollSnapAlign: 'start', marginTop: railCardOffset(index, publishedPosts.length) }}
                           >
                             <Paper
                               radius="xl"
@@ -826,11 +842,13 @@ export default async function StorePage({
                       </Link>
                     </Group>
                     <Group
+                      align="flex-start"
                       gap="md"
                       wrap="nowrap"
-                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory', opacity: isShowingPastOnly ? 0.7 : 1 }}
+                      className="storefront-rail"
+                      style={{ overflowX: 'auto', paddingTop: 4, paddingBottom: 20, scrollSnapType: 'x mandatory', opacity: isShowingPastOnly ? 0.7 : 1 }}
                     >
-                      {eventsToDisplay.slice(0, 6).map((event) => {
+                      {eventsToDisplay.slice(0, 6).map((event, index) => {
                         const image = imageOrFallback(
                           event?.Thumbnail?.formats?.medium?.url,
                           event?.Thumbnail?.formats?.small?.url,
@@ -845,7 +863,7 @@ export default async function StorePage({
                           <Link
                             key={event.documentId || event.id || event.slug}
                             href={`/${slug}/events/${event.slug}`}
-                            style={{ textDecoration: 'none', flex: railCardBasis(eventsToDisplay.length), scrollSnapAlign: 'start' }}
+                            style={{ textDecoration: 'none', flex: railCardBasis(eventsToDisplay.length), scrollSnapAlign: 'start', marginTop: railCardOffset(index, eventsToDisplay.length) }}
                           >
                             <Paper
                               radius="xl"
@@ -896,11 +914,13 @@ export default async function StorePage({
                       </Link>
                     </Group>
                     <Group
+                      align="flex-start"
                       gap="md"
                       wrap="nowrap"
-                      style={{ overflowX: 'auto', paddingBottom: 6, scrollSnapType: 'x mandatory' }}
+                      className="storefront-rail"
+                      style={{ overflowX: 'auto', paddingTop: 4, paddingBottom: 20, scrollSnapType: 'x mandatory' }}
                     >
-                      {aboutPages.slice(0, 6).map((page) => {
+                      {aboutPages.slice(0, 6).map((page, index) => {
                         const image = imageOrFallback(
                           page?.SEO?.socialImage?.formats?.medium?.url,
                           page?.SEO?.socialImage?.formats?.small?.url,
@@ -912,7 +932,7 @@ export default async function StorePage({
                           <Link
                             key={page.documentId || page.id || page.slug}
                             href={`/${slug}/about/${page.slug}`}
-                            style={{ textDecoration: 'none', flex: railCardBasis(aboutPages.length), scrollSnapAlign: 'start' }}
+                            style={{ textDecoration: 'none', flex: railCardBasis(aboutPages.length), scrollSnapAlign: 'start', marginTop: railCardOffset(index, aboutPages.length) }}
                           >
                             <Paper
                               radius="xl"
