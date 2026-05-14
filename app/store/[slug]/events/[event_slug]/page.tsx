@@ -70,13 +70,17 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   }
 
   const eventsResponse = await strapiClient.getEventBySlug(event_slug, slug);
-
   const event = (eventsResponse?.data?.[0] || []) as Event;
   const startsAt = formatDateTime(event?.startDate);
   const endsAt = formatDateTime(event?.endDate);
+
+  const hasExternalRsvp = Boolean(event?.SEO?.metaUrl);
+  const canRsvpInternal = Boolean(event?.documentId || event?.id);
+
   const relatedEvents = ((eventsListResponse?.data || []) as Event[])
-    .filter((item) => item.slug !== event_slug)
-    .slice(0, 4)
+    .filter((item) => item.slug !== event_slug && new Date(item.startDate) >= new Date())
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 3)
     .map((item) => ({
       href: `/${slug}/events/${item.slug}`,
       label: item.Name || item.slug,
@@ -106,36 +110,45 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                   <Markdown content={event?.Description || ""} />
                 </div>
               </div>
+
+              <div className="mt-8 space-y-3">
+                {hasExternalRsvp && (
+                  <Button
+                    component="a"
+                    href={event.SEO?.metaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    fullWidth
+                    size="lg"
+                    radius="md"
+                    color="pink"
+                  >
+                    RSVP at {new URL(event.SEO.metaUrl).hostname}
+                  </Button>
+                )}
+
+                {canRsvpInternal && !hasExternalRsvp && (
+                  <RSVPModal
+                    eventId={event?.documentId || event?.id?.toString()}
+                    eventName={event?.Name}
+                    eventStartDate={event?.startDate}
+                    eventEndDate={event?.endDate}
+                    eventTimezone={event?.timezone}
+                    storeName={store?.title}
+                    storeSlug={slug}
+                    eventSlug={event_slug}
+                    storeDocumentId={store?.documentId}
+                  />
+                )}
+
+                {!hasExternalRsvp && !canRsvpInternal && (
+                  <p className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    RSVP options for this event are not available yet.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-
-          {event?.SEO?.metaUrl ? (
-            <Button
-              component="a"
-              href={event.SEO.metaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              fullWidth
-              size="lg"
-              mt="md"
-              radius="md"
-              color="pink"
-            >
-              RSVP at {new URL(event.SEO.metaUrl).hostname}
-            </Button>
-          ) : (
-            <RSVPModal
-              eventId={event?.documentId || event?.id?.toString()}
-              eventName={event?.Name}
-              eventStartDate={event?.startDate}
-              eventEndDate={event?.endDate}
-              eventTimezone={event?.timezone}
-              storeName={store?.title}
-              storeSlug={slug}
-              eventSlug={event_slug}
-              storeDocumentId={store?.documentId}
-            />
-          )}
 
           <StoreCrosslinks
             slug={slug}

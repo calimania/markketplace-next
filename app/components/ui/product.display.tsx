@@ -25,6 +25,8 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
     ...price,
     currency: price.Currency || "USD",
   })) || [];
+  const hasExternalPurchaseUrl = Boolean(product?.SEO?.metaUrl);
+  const hasCheckoutOptions = prices.some((price) => !price.hidden && Boolean(price.STRIPE_ID));
 
   return (
     <motion.div
@@ -98,7 +100,28 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
               transition={{ delay: 0.4 }}
               className="mt-8"
             >
-              <CheckoutModal prices={prices} product={product} store={store} />
+              <div className="space-y-3">
+                {hasExternalPurchaseUrl && (
+                  <a
+                    href={product.SEO?.metaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    Buy from external site
+                  </a>
+                )}
+
+                {hasCheckoutOptions && (
+                  <CheckoutModal prices={prices} product={product} store={store} />
+                )}
+
+                {!hasExternalPurchaseUrl && !hasCheckoutOptions && (
+                  <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    Purchase options are not available yet for this product.
+                  </p>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         </div>

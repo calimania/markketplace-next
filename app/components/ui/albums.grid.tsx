@@ -9,9 +9,11 @@ import {
   Container,
   Overlay,
   AspectRatio,
+  Box,
 } from '@mantine/core';
 import Link from 'next/link';
-import { IconUsers } from '@tabler/icons-react';
+import { IconMusic } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
 import './albums.grid.css';
 
 interface AlbumCardProps {
@@ -32,46 +34,65 @@ function AlbumCard({ album, store_slug }: AlbumCardProps) {
       <Card
         shadow="sm"
         padding="lg"
-        radius="md"
+        radius="xl"
         withBorder
-        className="album-card-neobrutal"
+        className="album-card"
         style={{
-          borderWidth: 3,
-          borderColor: '#222',
-          borderStyle: 'solid',
-          boxShadow: '6px 6px 0 #222',
-          background: '#fffbe6',
-          transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s, transform 0.2s',
+          border: `1px solid ${markketColors.neutral.lightGray}`,
+          background: '#fff',
+          transition: 'all 0.25s ease',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <AspectRatio ratio={16 / 9} pos="relative" className="album-card-img-wrap">
-          <Image
-            src={album.cover?.url || album.SEO?.socialImage?.url}
-            alt={album.title}
-            style={{ objectFit: 'cover', objectPosition: 'top', width: '100%', height: '100%', borderRadius: 0, display: 'block', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)' }}
-            className="album-card-img"
-          />
-          <Overlay
-            gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .85) 90%)"
-            opacity={0.5}
-          />
+        <AspectRatio ratio={16 / 9} pos="relative" className="album-card-img-wrap" style={{ marginBottom: 0 }}>
+          <Box
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '12px',
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              src={album.cover?.url || album.SEO?.socialImage?.url}
+              alt={album.title}
+              fallbackSrc="https://placehold.co/800x450?text=Album"
+              style={{ objectFit: 'cover', objectPosition: 'center', width: '100%', height: '100%', display: 'block', transition: 'transform 0.3s ease' }}
+              className="album-card-img"
+            />
+            <Overlay
+              gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .45) 100%)"
+              opacity={1}
+            />
+          </Box>
         </AspectRatio>
-        <Title order={3} lineClamp={2} className="album-card-title" mt="md">
-          {album.title}
-        </Title>
-        <Badge
-          leftSection={<IconUsers size={14} />}
-          variant="light"
-          mt="sm"
-          className="album-card-badge"
-        >
-          {album.tracks.length} tracks
-        </Badge>
-        {description && (
-          <Text size="sm" c="dimmed" mt="sm" className="album-card-desc">
-            {description}
-          </Text>
-        )}
+        <Box style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Title order={3} lineClamp={2} className="album-card-title" mt="md" size="h5" fw={700}>
+            {album.title}
+          </Title>
+          <Badge
+            leftSection={<IconMusic size={12} />}
+            size="sm"
+            radius="md"
+            variant="light"
+            mt="sm"
+            className="album-card-badge"
+            style={{
+              background: `${markketColors.sections.blog.main}20`,
+              color: markketColors.sections.blog.main,
+              border: `1px solid ${markketColors.sections.blog.main}44`,
+            }}
+          >
+            {album.tracks.length} track{album.tracks.length !== 1 ? 's' : ''}
+          </Badge>
+          {description && (
+            <Text size="sm" c={markketColors.neutral.mediumGray} mt="sm" className="album-card-desc" lineClamp={2} style={{ flex: 1 }}>
+              {description}
+            </Text>
+          )}
+        </Box>
       </Card>
     </Link>
   );

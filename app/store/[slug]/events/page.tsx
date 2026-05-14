@@ -77,6 +77,13 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
   const eventsResponse = await getEventsCached(slug);
   const events = (eventsResponse?.data || []) as Event[];
+  const now = new Date();
+  const upcomingEvents = events
+    .filter((e) => new Date(e.startDate) >= now)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  const pastEvents = events
+    .filter((e) => new Date(e.startDate) < now)
+    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
   return (
     <Container size="lg" py="xl">
@@ -91,109 +98,252 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
         />
 
         {events.length > 0 ? (
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-            {events.map((event) => {
-              const eventDate = new Date(event.startDate);
-              const isUpcoming = eventDate > new Date();
-              const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
-              const excerpt = getEventExcerpt(event.Description);
-
-              return (
-                <Link
-                  key={event.id}
-                  href={`/${slug}/events/${event.slug}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <Paper
-                    radius="lg"
+          <>
+            {upcomingEvents.length > 0 && (
+              <Stack gap="md">
+                <Group gap="xs" align="center">
+                  <Badge
+                    size="sm"
+                    radius="md"
                     style={{
-                      overflow: 'hidden',
-                      border: `1px solid ${markketColors.neutral.lightGray}`,
-                      transition: 'all 0.2s ease',
-                      cursor: 'pointer',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
+                      background: markketColors.sections.events.light,
+                      color: markketColors.sections.events.main,
+                      border: `1px solid ${markketColors.sections.events.main}44`,
                     }}
-                    className="event-card"
                   >
-                    {image ? (
-                      <Box
-                        style={{
-                          width: '100%',
-                          height: 200,
-                          backgroundImage: `url(${image})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          position: 'relative',
-                        }}
+                    {upcomingEvents.length} Upcoming
+                  </Badge>
+                </Group>
+
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+                  {upcomingEvents.map((event) => {
+                    const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const excerpt = getEventExcerpt(event.Description);
+
+                    return (
+                      <Link
+                        key={event.id}
+                        href={`/${slug}/events/${event.slug}`}
+                        style={{ textDecoration: 'none' }}
                       >
-                        {isUpcoming && (
-                          <Badge
-                            color={markketColors.sections.events.main}
-                            size="sm"
-                            style={{
-                              position: 'absolute',
-                              top: 12,
-                              right: 12,
-                            }}
-                          >
-                            Upcoming
-                          </Badge>
-                        )}
-                      </Box>
-                    ) : (
-                      <Box
-                        style={{
-                          width: '100%',
-                          height: 200,
-                          background: `linear-gradient(135deg, ${markketColors.sections.events.light} 0%, #ffffff 100%)`,
-                          borderBottom: `1px solid ${markketColors.sections.events.main}33`,
-                        }}
-                      />
-                    )}
-
-                    <Stack gap="sm" p="lg" style={{ flex: 1 }}>
-                      <Text size="lg" fw={600} c={markketColors.neutral.charcoal} lineClamp={2}>
-                        {event.Name}
-                      </Text>
-
-                      <Group gap="xs">
-                        <IconCalendar size={16} color={markketColors.neutral.mediumGray} />
-                        <Text size="sm" c={markketColors.neutral.mediumGray}>
-                          {eventDate.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </Text>
-                      </Group>
-
-                      {excerpt && (
-                        <Text
-                          size="sm"
-                          c={markketColors.neutral.mediumGray}
-                          lineClamp={3}
-                          style={{ flex: 1 }}
+                        <Paper
+                          radius="lg"
+                          style={{
+                            overflow: 'hidden',
+                            border: `1px solid ${markketColors.neutral.lightGray}`,
+                            transition: 'all 0.2s ease',
+                            cursor: 'pointer',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
+                          className="event-card"
                         >
-                          {excerpt}
-                        </Text>
-                      )}
+                          {image ? (
+                            <Box
+                              style={{
+                                width: '100%',
+                                height: 200,
+                                backgroundImage: `url(${image})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                position: 'relative',
+                              }}
+                            >
+                              <Badge
+                                color={markketColors.sections.events.main}
+                                size="sm"
+                                style={{
+                                  position: 'absolute',
+                                  top: 12,
+                                  right: 12,
+                                }}
+                              >
+                                Upcoming
+                              </Badge>
+                            </Box>
+                          ) : (
+                            <Box
+                              style={{
+                                width: '100%',
+                                height: 200,
+                                background: `linear-gradient(135deg, ${markketColors.sections.events.light} 0%, #ffffff 100%)`,
+                                borderBottom: `1px solid ${markketColors.sections.events.main}33`,
+                              }}
+                            />
+                          )}
 
-                      {event.SEO?.metaUrl && (
-                        <Group gap="xs" mt="auto">
-                          <IconMapPin size={14} color={markketColors.sections.events.main} />
-                          <Text size="xs" c={markketColors.sections.events.main} fw={500}>
-                            External Event
-                          </Text>
-                        </Group>
-                      )}
-                    </Stack>
-                  </Paper>
-                </Link>
-              );
-            })}
-          </SimpleGrid>
+                          <Stack gap="sm" p="lg" style={{ flex: 1 }}>
+                            <Text size="lg" fw={600} c={markketColors.neutral.charcoal} lineClamp={2}>
+                              {event.Name}
+                            </Text>
+
+                            <Group gap="xs">
+                              <IconCalendar size={16} color={markketColors.neutral.mediumGray} />
+                              <Text size="sm" c={markketColors.neutral.mediumGray}>
+                                {new Date(event.startDate).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </Text>
+                            </Group>
+
+                            {excerpt && (
+                              <Text
+                                size="sm"
+                                c={markketColors.neutral.mediumGray}
+                                lineClamp={3}
+                                style={{ flex: 1 }}
+                              >
+                                {excerpt}
+                              </Text>
+                            )}
+
+                            {event.SEO?.metaUrl && (
+                              <Group gap="xs" mt="auto">
+                                <IconMapPin size={14} color={markketColors.sections.events.main} />
+                                <Text size="xs" c={markketColors.sections.events.main} fw={500}>
+                                  External Event
+                                </Text>
+                              </Group>
+                            )}
+                          </Stack>
+                        </Paper>
+                      </Link>
+                    );
+                  })}
+                </SimpleGrid>
+              </Stack>
+            )}
+
+            {pastEvents.length > 0 && (
+              <Stack gap="md">
+                <Box
+                  style={{
+                    borderTop: `2px solid ${markketColors.neutral.lightGray}`,
+                    paddingTop: 'md',
+                  }}
+                />
+
+                <Group gap="xs" align="center">
+                  <Badge
+                    size="sm"
+                    radius="md"
+                    variant="outline"
+                    style={{
+                      borderColor: markketColors.neutral.mediumGray,
+                      color: markketColors.neutral.mediumGray,
+                    }}
+                  >
+                    {pastEvents.length} Past
+                  </Badge>
+                </Group>
+
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+                  {pastEvents.map((event) => {
+                    const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const excerpt = getEventExcerpt(event.Description);
+
+                    return (
+                      <Link
+                        key={event.id}
+                        href={`/${slug}/events/${event.slug}`}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Paper
+                          radius="lg"
+                          style={{
+                            overflow: 'hidden',
+                            border: `1px solid ${markketColors.neutral.lightGray}`,
+                            transition: 'all 0.2s ease',
+                            cursor: 'pointer',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            opacity: 0.75,
+                          }}
+                          className="event-card event-card--past"
+                        >
+                          {image ? (
+                            <Box
+                              style={{
+                                width: '100%',
+                                height: 200,
+                                backgroundImage: `url(${image})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                position: 'relative',
+                                filter: 'grayscale(40%)',
+                              }}
+                            >
+                              <Badge
+                                color="gray"
+                                size="sm"
+                                style={{
+                                  position: 'absolute',
+                                  top: 12,
+                                  right: 12,
+                                }}
+                              >
+                                Past
+                              </Badge>
+                            </Box>
+                          ) : (
+                            <Box
+                              style={{
+                                width: '100%',
+                                height: 200,
+                                background: `linear-gradient(135deg, ${markketColors.neutral.lightGray} 0%, ${markketColors.neutral.offWhite} 100%)`,
+                                borderBottom: `1px solid ${markketColors.neutral.mediumGray}33`,
+                              }}
+                            />
+                          )}
+
+                          <Stack gap="sm" p="lg" style={{ flex: 1 }}>
+                            <Text size="lg" fw={600} c={markketColors.neutral.charcoal} lineClamp={2}>
+                              {event.Name}
+                            </Text>
+
+                            <Group gap="xs">
+                              <IconCalendar size={16} color={markketColors.neutral.mediumGray} />
+                              <Text size="sm" c={markketColors.neutral.mediumGray}>
+                                {new Date(event.startDate).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </Text>
+                            </Group>
+
+                            {excerpt && (
+                              <Text
+                                size="sm"
+                                c={markketColors.neutral.mediumGray}
+                                lineClamp={3}
+                                style={{ flex: 1 }}
+                              >
+                                {excerpt}
+                              </Text>
+                            )}
+
+                            {event.SEO?.metaUrl && (
+                              <Group gap="xs" mt="auto">
+                                <IconMapPin size={14} color={markketColors.neutral.mediumGray} />
+                                <Text size="xs" c={markketColors.neutral.mediumGray} fw={500}>
+                                  External Event
+                                </Text>
+                              </Group>
+                            )}
+                          </Stack>
+                        </Paper>
+                      </Link>
+                    );
+                  })}
+                </SimpleGrid>
+              </Stack>
+            )}
+          </>
         ) : (
           <Paper
             p="xl"
