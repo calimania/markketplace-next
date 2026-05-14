@@ -90,19 +90,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns {JSX.Element}
  */
 export default async function Home() {
-  const [{ data: [store] }, { data: [page] }, communityPostsResponse, storesResponse, communityPagesResponse, communityEventsResponse, communityProductsResponse] = await Promise.all([
+  const EXCLUDED_PAGE_SLUGS = ['about', 'newsletter', 'products', 'events', 'blog', 'contact'];
+
+  const [{ data: [store] }, { data: [page] }, storesResponse, communityPostsResponse, communityEventsResponse, communityPagesResponse, communityProductsResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getPage('home'),
+    strapiClient.getStores({ page: 1, pageSize: 12 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
     strapiClient.getCommunityPosts({ page: 1, pageSize: 12 }, { sort: 'publishedAt:desc' }),
-    strapiClient.getStores({ page: 1, pageSize: 8 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
-    strapiClient.getCommunityPages({ page: 1, pageSize: 12 }, { sort: 'updatedAt:desc' }),
     strapiClient.getCommunityEvents({ page: 1, pageSize: 12 }, { sort: 'startDate:asc' }),
+    strapiClient.getCommunityPages({ page: 1, pageSize: 24 }, { sort: 'createdAt:desc' }),
     strapiClient.getCommunityProducts({ page: 1, pageSize: 12 }, { sort: 'updatedAt:desc' }),
   ]);
 
   const communityPosts = prioritizeWithImage((communityPostsResponse?.data || []) as Article[], articleHasImage);
   const featuredStores = prioritizeWithImage((storesResponse?.data || []) as Store[], storeHasImage);
-  const communityPages = prioritizeWithImage((communityPagesResponse?.data || []) as Page[], pageHasImage);
+  const allPages = (communityPagesResponse?.data || []) as Page[];
+  const communityPages = prioritizeWithImage(
+    allPages.filter(p => !EXCLUDED_PAGE_SLUGS.includes((p as any)?.slug || '')),
+    pageHasImage,
+  );
   const communityEvents = prioritizeWithImage((communityEventsResponse?.data || []) as Event[], eventHasImage);
   const communityProducts = prioritizeWithImage((communityProductsResponse?.data || []) as Product[], productHasImage);
 
