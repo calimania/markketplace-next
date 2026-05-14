@@ -99,10 +99,12 @@ export default function TiendaEventEditPageClient({ storeSlug, itemId }: TiendaE
           description: event.Description,
           seoTitle: event.SEO?.metaTitle,
           seoDescription: event.SEO?.metaDescription,
+          sourceUrl: event.SEO?.metaUrl,
           seoSocialImageId: event.SEO?.socialImage?.id,
           seoSocialImageDocumentId: event.SEO?.socialImage?.documentId,
           startDate: event.startDate,
           endDate: event.endDate,
+          timezone: event.timezone,
         }}
       />
     </TiendaDetailShell>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   TextInput,
   PasswordInput,
@@ -30,7 +30,13 @@ interface LoginForm {
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, confirmed, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!confirmed()) return;
+    router.replace('/me');
+  }, [confirmed, isLoading, router]);
 
   const form = useForm<LoginForm>({
     initialValues: {

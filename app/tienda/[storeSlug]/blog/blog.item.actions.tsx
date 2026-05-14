@@ -57,8 +57,8 @@ export default function BlogItemActions({ storeSlug, itemDocumentId, editorId, i
 
     const storeRef = store.documentId || store.slug || storeSlug;
     const publishPayload = pendingPublish
-      ? { status: 'published', publishedAt: new Date().toISOString(), publishNow: true }
-      : { status: 'draft', publishedAt: null, unpublishNow: true };
+      ? { publishNow: true }
+      : { saveAsDraft: true, unpublishNow: true };
     setLoading(true);
 
     try {

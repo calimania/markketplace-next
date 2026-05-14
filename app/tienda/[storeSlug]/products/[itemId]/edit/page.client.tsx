@@ -99,6 +99,7 @@ export default function TiendaProductEditPageClient({ storeSlug, itemId }: Tiend
           description: product.Description || undefined,
           seoTitle: product.SEO?.metaTitle || undefined,
           seoDescription: product.SEO?.metaDescription || undefined,
+          sourceUrl: product.SEO?.metaUrl || undefined,
           seoSocialImageId: product.SEO?.socialImage?.id,
           seoSocialImageDocumentId: product.SEO?.socialImage?.documentId,
         }}

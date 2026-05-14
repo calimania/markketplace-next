@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button, Container, Paper, Skeleton, Stack, Text, ThemeIcon } from '@mantine/core';
 import { IconLock } from '@tabler/icons-react';
@@ -24,18 +24,49 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
   const router = useRouter();
   const pathname = usePathname();
   const { confirmed, isLoading, stores, fetchStores } = useAuth();
+  const [ownershipResolved, setOwnershipResolved] = useState(false);
 
   const isConfirmed = confirmed();
   const isAuthorized = useMemo(() => {
     return stores.some((candidate) => candidate.slug === store.slug || candidate.documentId === store.documentId);
   }, [stores, store.documentId, store.slug]);
 
-  const ownershipLoading = isConfirmed && stores.length === 0;
+  const ownershipLoading = isConfirmed && !ownershipResolved;
 
   useEffect(() => {
-    if (!isLoading && isConfirmed && stores.length === 0) {
-      fetchStores({ force: true });
+    let active = true;
+
+    if (!isConfirmed) {
+      setOwnershipResolved(false);
+      return () => {
+        active = false;
+      };
     }
+
+    if (isLoading) {
+      return () => {
+        active = false;
+      };
+    }
+
+    const resolveOwnership = async () => {
+      if (stores.length > 0) {
+        if (active) setOwnershipResolved(true);
+        return;
+      }
+
+      try {
+        await fetchStores({ force: true });
+      } finally {
+        if (active) setOwnershipResolved(true);
+      }
+    };
+
+    resolveOwnership();
+
+    return () => {
+      active = false;
+    };
   }, [fetchStores, isConfirmed, isLoading, stores.length]);
 
   useEffect(() => {
