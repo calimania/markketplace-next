@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Center, Loader, Button, Stack, Group, Card, Box, Badge } from '@mantine/core';
 import { IconArrowDown, IconArrowRight, IconCalendar } from '@tabler/icons-react';
 import type { Article } from '@/markket/article';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import { markketColors } from '@/markket/colors.config';
 
 interface BlogFeedProps {
@@ -67,7 +68,12 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
           const prefix = storeSlug ? `${storeSlug}/blog` : 'docs';
           const isFeatured = index === 0;
           const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
-          const excerpt = post?.SEO?.metaDescription || post?.Content?.[0]?.children?.[0]?.text || 'Read the full story.';
+          const firstChild = post?.Content?.[0]?.children?.[0];
+          const rawExcerpt = post?.SEO?.metaDescription
+            || stripMarkdown(richTextToPlainText(post?.Content))
+            || ('text' in (firstChild || {}) ? (firstChild as { text?: string }).text : undefined)
+            || 'Read the full story.';
+          const excerpt = rawExcerpt.slice(0, 200).trim() + (rawExcerpt.length > 200 ? '…' : '');
           const publishedDate = post.publishedAt ? new Date(post.publishedAt) : null;
           const publishedDateLabel = publishedDate && !Number.isNaN(publishedDate.getTime())
             ? publishedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })

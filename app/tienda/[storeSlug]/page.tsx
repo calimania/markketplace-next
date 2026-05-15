@@ -14,9 +14,10 @@ type TiendaStorePageProps = {
   params: Promise<{ storeSlug: string }>;
 };
 
-export const metadata: Metadata = {
-  title: 'Overview',
-};
+export async function generateMetadata({ params }: TiendaStorePageProps): Promise<Metadata> {
+  const { storeSlug } = await params;
+  return { title: `Overview · ${storeSlug}` };
+}
 
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;

@@ -7,6 +7,8 @@ import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 import { isPublished } from '@/markket/helpers.publication';
+import { readTiendaAuthToken, parseTiendaResponse, getTiendaItemKey } from '@/markket/helpers.tienda';
+import { resolvePagePreviewHref } from '@/markket/helpers.preview';
 
 type PagesListClientProps = {
   storeSlug: string;
@@ -96,6 +98,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           title: page.Title || 'Untitled page',
           subtitle: `${statusText} · ${formatDate(page.updatedAt || page.createdAt)} · ${page.documentId || page.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/pages/${page.documentId || page.slug}`,
+          previewHref: resolvePagePreviewHref(storeSlug, page.slug || ''),
           icon: 'page' as const,
         };
       }),

@@ -1,5 +1,6 @@
 import type { TiendaContentType, TiendaItemId, TiendaRef } from './tienda.endpoints';
 import { tiendaCollectionPath, tiendaItemPath } from './tienda.endpoints';
+import { markketplace } from './config';
 
 type TiendaRequestOptions = {
   token: string;
@@ -51,16 +52,33 @@ function withQuery(path: string, query?: TiendaRequestOptions['query']) {
   return queryString ? `${path}?${queryString}` : path;
 }
 
+function resolveBaseUrl(baseUrl?: string) {
+  if (baseUrl && baseUrl.trim()) {
+    return baseUrl.replace(/\/$/, '');
+  }
+
+  if (typeof window === 'undefined') {
+    return (markketplace.app_url || '').replace(/\/$/, '');
+  }
+
+  return '';
+}
+
+function resolveRequestUrl(path: string, baseUrl?: string) {
+  return `${resolveBaseUrl(baseUrl)}${path}`;
+}
+
 async function tiendaFetch(method: string, path: string, options: TiendaRequestOptions) {
-  const { token, body, baseUrl = '' } = options;
+  const { token, body, baseUrl } = options;
+  const requestUrl = resolveRequestUrl(path, baseUrl);
 
   if (!token) {
     throw new Error('Missing JWT token for Tienda request');
   }
 
-  console.log(`[tiendaFetch] ${method} ${baseUrl}${path}`, body ? { bodyKeys: Object.keys(body), body } : {});
+  console.log(`[tiendaFetch] ${method} ${requestUrl}`, body ? { bodyKeys: Object.keys(body), body } : {});
 
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await fetch(requestUrl, {
     method,
     cache: method === 'GET' ? 'no-store' : 'default',
     headers: {
@@ -93,7 +111,7 @@ async function tiendaFetch(method: string, path: string, options: TiendaRequestO
 }
 
 async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
-  const { token, files, caption, alternativeText, fileInfo, attach, baseUrl = '' } = options;
+  const { token, files, caption, alternativeText, fileInfo, attach, baseUrl } = options;
 
   if (!token) {
     throw new Error('Missing JWT token for Tienda upload request');
@@ -126,7 +144,7 @@ async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
     console.log('[tiendaUpload] attach:', attach);
   }
 
-  const url = `${baseUrl}/api/tienda/stores/${ref}/upload`;
+  const url = resolveRequestUrl(`/api/tienda/stores/${ref}/upload`, baseUrl);
   console.log('[tiendaUpload] uploading', files.length, 'file(s) to', url);
 
   const response = await fetch(url, {

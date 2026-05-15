@@ -56,6 +56,7 @@ export function getTiendaResponseStatus(response: unknown): number | null {
  * Generate stable key for list items
  * Handles multiple identifier formats
  */
-export function getTiendaItemKey(item: { documentId?: string | number; id?: string | number; slug?: string; [key: string]: unknown }): string {
+export function getTiendaItemKey(item: { documentId?: string | number; id?: string | number; slug?: string }): string {
   return String(item.documentId || item.id || item.slug || Math.random());
 }
+

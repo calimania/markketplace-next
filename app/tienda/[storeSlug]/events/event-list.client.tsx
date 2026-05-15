@@ -96,6 +96,7 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           title: event.Name || 'Untitled event',
           subtitle: `${statusText} · ${formatDate(event.startDate)} · ${event.slug}`,
           href: `/tienda/${storeSlug}/events/${event.documentId || event.slug}`,
+          previewHref: `/${storeSlug}/events/${event.slug}`,
           icon: 'event' as const,
         };
       }),

@@ -92,6 +92,7 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           title: product.Name || 'Untitled product',
           subtitle: `${statusText} · ${formatDate(product.updatedAt || product.createdAt)} · ${product.slug}`,
           href: `/tienda/${storeSlug}/products/${product.documentId || product.slug}`,
+          previewHref: `/${storeSlug}/products/${product.slug}`,
           icon: 'product' as const,
           thumbnailUrl: product.Thumbnail?.url || product?.SEO?.socialImage?.url || product?.Slides?.[0]?.url,
         };

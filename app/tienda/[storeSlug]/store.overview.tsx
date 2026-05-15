@@ -622,7 +622,7 @@ export default function StoreOverview({
           )}
         </Group>
 
-      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'latest')} keepMounted={false} className="tienda-panel tienda-overview-tabs">
+      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'latest')} keepMounted={false} className="tienda-overview-tabs">
         <Tabs.List
           style={{
             overflowX: 'auto',
@@ -685,35 +685,35 @@ export default function StoreOverview({
         </Tabs.Panel>
 
         <Tabs.Panel value="crm" pt="md">
-          <Stack gap="md">
-            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-              <Text fw={600}>CRM</Text>
-              <Button disabled component="a" href={`/tienda/${store.slug}/crm`} variant="light" leftSection={<IconUsers size={14} />}>
-                Open CRM
-              </Button>
-            </Group>
-            <Paper withBorder radius="xs" p="md" className="tienda-panel">
+          <Paper withBorder radius="lg" p="md" className="tienda-panel">
+            <Stack gap="sm">
+              <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+                <Text fw={600}><span className="accent-orange">CRM</span></Text>
+                <Button component="a" href={`/tienda/${store.slug}/crm`} variant="light" leftSection={<IconUsers size={14} />}>
+                  Open CRM
+                </Button>
+              </Group>
               <Text size="sm" c="dimmed">
-                Your subscribers and customers will appear here
+                Your subscribers and customers will appear here.
               </Text>
-            </Paper>
-          </Stack>
+            </Stack>
+          </Paper>
         </Tabs.Panel>
 
         <Tabs.Panel value="payouts" pt="md">
-          <Stack gap="md">
-            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-              <Text fw={600}>Payouts</Text>
-              <Button component="a" disabled href={`/tienda/${store.slug}/payouts`} variant="light" leftSection={<IconCreditCard size={14} />}>
-                Open Payouts
-              </Button>
-            </Group>
-            <Paper withBorder radius="xs" p="md" className="tienda-panel">
+          <Paper withBorder radius="lg" p="md" className="tienda-panel">
+            <Stack gap="sm">
+              <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+                <Text fw={600}>Payouts</Text>
+                <Button component="a" disabled href={`/tienda/${store.slug}/payouts`} variant="light" leftSection={<IconCreditCard size={14} />}>
+                  Open Payouts
+                </Button>
+              </Group>
               <Text size="sm" c="dimmed">
                 Activate Stripe Connect here when you are ready. Once it is live, your payout information will show up here.
               </Text>
-            </Paper>
-          </Stack>
+            </Stack>
+          </Paper>
         </Tabs.Panel>
       </Tabs>
       </Stack>

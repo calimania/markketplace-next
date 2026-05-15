@@ -21,6 +21,34 @@ interface EventsPageProps {
   params: Promise<{ slug: string }>;
 }
 
+function hasValidTimeZone(value?: string) {
+  if (!value) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function formatEventDate(value?: string, timeZone?: string) {
+  if (!value) return 'Date TBD';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+
+  if (hasValidTimeZone(timeZone)) {
+    options.timeZone = timeZone;
+  }
+
+  return new Intl.DateTimeFormat('en-US', options).format(parsed);
+}
+
 function getEventExcerpt(value?: string | RichTextValue | StoredRichText, max = 120): string {
   if (!value) return '';
   const plain = stripMarkdown(richTextToPlainText(value));
@@ -79,10 +107,10 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const events = (eventsResponse?.data || []) as Event[];
   const now = new Date();
   const upcomingEvents = events
-    .filter((e) => new Date(e.startDate) >= now)
+    .filter((e) => new Date(e.startDate).getTime() >= now.getTime())
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   const pastEvents = events
-    .filter((e) => new Date(e.startDate) < now)
+    .filter((e) => new Date(e.startDate).getTime() < now.getTime())
     .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
   return (
@@ -181,11 +209,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                             <Group gap="xs">
                               <IconCalendar size={16} color={markketColors.neutral.mediumGray} />
                               <Text size="sm" c={markketColors.neutral.mediumGray}>
-                                {new Date(event.startDate).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
+                                {formatEventDate(event.startDate, event.timezone)}
                               </Text>
                             </Group>
 
@@ -310,11 +334,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                             <Group gap="xs">
                               <IconCalendar size={16} color={markketColors.neutral.mediumGray} />
                               <Text size="sm" c={markketColors.neutral.mediumGray}>
-                                {new Date(event.startDate).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
+                                {formatEventDate(event.startDate, event.timezone)}
                               </Text>
                             </Group>
 

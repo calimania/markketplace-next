@@ -5,6 +5,7 @@ import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import { Container, Button } from "@mantine/core";
 import { EventImageGallery } from "@/app/components/events/event.gallery.image";
+import EventSchedule from "@/app/components/events/event.schedule.client";
 import RSVPModal from "@/app/components/events/event.rsvp.modal";
 import Markdown from "@/app/components/ui/page.markdown";
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
@@ -13,11 +14,35 @@ interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
 }
 
-function formatDateTime(value?: string) {
+function hasValidTimeZone(value?: string) {
+  if (!value) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function formatDateTime(value?: string, timezone?: string) {
   if (!value) return 'Not set';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString();
+
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  };
+
+  if (hasValidTimeZone(timezone)) {
+    options.timeZone = timezone;
+    options.timeZoneName = 'short';
+  }
+
+  return new Intl.DateTimeFormat('en-US', options).format(parsed);
 }
 
 export async function generateMetadata({ params }: EventsPageProps) {
@@ -29,7 +54,7 @@ export async function generateMetadata({ params }: EventsPageProps) {
   const event = eventResponse?.data?.[0] as Event;
 
   const eventName = event?.Name || 'Event';
-  const eventDate = event?.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+  const eventDate = event?.startDate ? formatDateTime(event.startDate, event?.timezone) : '';
   const location = '';
 
   const description = event?.Description
@@ -71,8 +96,6 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
 
   const eventsResponse = await strapiClient.getEventBySlug(event_slug, slug);
   const event = (eventsResponse?.data?.[0] || []) as Event;
-  const startsAt = formatDateTime(event?.startDate);
-  const endsAt = formatDateTime(event?.endDate);
 
   const hasExternalRsvp = Boolean(event?.SEO?.metaUrl);
   const canRsvpInternal = Boolean(event?.documentId || event?.id);
@@ -99,11 +122,11 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                 {event.Name}
               </h1>
 
-              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <p className="text-sm font-semibold text-gray-900">Schedule</p>
-                <p className="text-sm text-gray-700">Starts: {startsAt}</p>
-                <p className="text-sm text-gray-700">Ends: {endsAt}</p>
-              </div>
+              <EventSchedule
+                startDate={event?.startDate}
+                endDate={event?.endDate}
+                timezone={event?.timezone}
+              />
 
               <div className="mt-6">
                 <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
@@ -123,7 +146,7 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
                     radius="md"
                     color="pink"
                   >
-                    RSVP at {new URL(event.SEO.metaUrl).hostname}
+                    RSVP at {event.SEO?.metaUrl ? new URL(event.SEO.metaUrl).hostname : event.SEO?.metaUrl}
                   </Button>
                 )}
 

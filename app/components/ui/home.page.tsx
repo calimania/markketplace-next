@@ -137,7 +137,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
         }}
       >
         <Container size="lg">
-          <Grid align="center" gutter={48}>
+          <Grid gap={{ base: 'xl', md: 'xl' }}>
             <GridCol span={{ base: 12, md: 7 }}>
               <Stack gap={16}>
                 <SectionLabel num="01" label="Platform" />

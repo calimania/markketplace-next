@@ -343,6 +343,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.id) return;
     if (!shouldPrefetchStores(pathname)) return;
 
+    const isTiendaPath = pathname.startsWith('/tienda');
+
     const forceRefreshRoute = (reason: 'pageshow' | 'popstate') => {
       const now = Date.now();
       // Guard against rapid duplicate lifecycle events on browser restore/back.

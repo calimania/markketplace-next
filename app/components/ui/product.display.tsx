@@ -10,6 +10,50 @@ import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
 import { Title } from "@mantine/core";
 
+type GalleryImage = {
+  id: string | number;
+  url: string;
+  alternativeText?: string | null;
+  formats?: Slide['formats'];
+};
+
+function buildProductGallery(product: Product): GalleryImage[] {
+  const gallery: GalleryImage[] = [];
+  const seen = new Set<string>();
+
+  const push = (candidate?: Partial<GalleryImage> | null, fallbackId?: string) => {
+    const url = candidate?.url;
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    gallery.push({
+      id: candidate?.id || fallbackId || url,
+      url,
+      alternativeText: candidate?.alternativeText,
+      formats: candidate?.formats,
+    });
+  };
+
+  push(product?.Thumbnail ? {
+    id: 'thumbnail',
+    url: product.Thumbnail.url,
+    alternativeText: product.Thumbnail.alternativeText,
+    formats: undefined,
+  } : null, 'thumbnail');
+
+  push(product?.SEO?.socialImage ? {
+    id: 'social',
+    url: product.SEO.socialImage.url,
+    alternativeText: product.SEO.socialImage.alternativeText,
+    formats: product.SEO.socialImage.formats as Slide['formats'],
+  } : null, 'social');
+
+  (product?.Slides || []).forEach((slide, index) => {
+    push(slide, `slide-${index}`);
+  });
+
+  return gallery;
+}
+
 /**
  * ProductDisplay Component
  * Displays a product with image gallery, description, and checkout options
@@ -20,7 +64,8 @@ import { Title } from "@mantine/core";
  * - Markdown support for descriptions
  */
 export default function ProductDisplay({ product, page, store }: { product: Product, page?: Page, store?: Store }) {
-  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides?.[0]);
+  const gallery = buildProductGallery(product);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | undefined>(gallery[0]);
   const prices: Price[] = product.PRICES?.map((price) => ({
     ...price,
     currency: price.Currency || "USD",
@@ -54,19 +99,19 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
             <MainImage title={product.Name} image={selectedImage} />
           </motion.div>
 
-          {product.Slides && product.Slides.length > 1 && (
+          {gallery.length > 1 && (
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="mt-4 grid grid-cols-6 gap-2"
             >
-              {product.Slides.map((slide) => (
+              {gallery.map((slide) => (
                 <SlideImage
                   key={slide.id}
                   slide={slide}
                   onClick={() => setSelectedImage(slide)}
-                  isSelected={selectedImage.id === slide.id}
+                  isSelected={selectedImage?.id === slide.id}
                 />
               ))}
             </motion.div>
@@ -161,7 +206,7 @@ function ProductPrice({ prices }: { prices: Price[] }) {
 };
 
 function SlideImage({ slide, onClick, isSelected }: {
-  slide: Slide;
+  slide: GalleryImage;
   onClick: () => void;
   isSelected: boolean;
 }) {
@@ -185,7 +230,7 @@ function SlideImage({ slide, onClick, isSelected }: {
   );
 }
 
-export const MainImage = ({ image, title }: { image: Slide; title: string }) => {
+export const MainImage = ({ image, title }: { image?: GalleryImage; title: string }) => {
   return (
     <div className="relative h-full">
       {image?.url ? (

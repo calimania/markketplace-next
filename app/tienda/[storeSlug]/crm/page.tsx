@@ -10,9 +10,10 @@ type TiendaCrmPageProps = {
   params: Promise<{ storeSlug: string }>;
 };
 
-export const metadata: Metadata = {
-  title: 'CRM',
-};
+export async function generateMetadata({ params }: TiendaCrmPageProps): Promise<Metadata> {
+  const { storeSlug } = await params;
+  return { title: `CRM · ${storeSlug}` };
+}
 
 type CrmSection = {
   id: string;

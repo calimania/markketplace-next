@@ -93,6 +93,7 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           publishedAt: post.publishedAt,
           subtitle: `${statusText} · ${formatDate(post.updatedAt || post.createdAt)} · ${post.documentId || post.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/blog/${post.documentId || post.slug}`,
+          previewHref: `/${storeSlug}/blog/${post.slug}`,
           icon: 'article' as const,
         };
       }),

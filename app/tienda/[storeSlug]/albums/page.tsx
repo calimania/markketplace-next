@@ -10,9 +10,10 @@ type TiendaAlbumsPageProps = {
   params: Promise<{ storeSlug: string }>;
 };
 
-export const metadata: Metadata = {
-  title: 'Albums',
-};
+export async function generateMetadata({ params }: TiendaAlbumsPageProps): Promise<Metadata> {
+  const { storeSlug } = await params;
+  return { title: `Albums · ${storeSlug}` };
+}
 
 export default async function TiendaAlbumsPage({ params }: TiendaAlbumsPageProps) {
   const { storeSlug } = await params;

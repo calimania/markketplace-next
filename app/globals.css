@@ -560,6 +560,25 @@ textarea:disabled {
     background-color: #fff6fb;
 }
 
+.ui-nav-preview-btn {
+  color: var(--mantine-color-dark-3) !important;
+  border: 1px solid var(--mantine-color-gray-3) !important;
+  background: #fff !important;
+  border-radius: 999px !important;
+  transition: transform 140ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ui-nav-preview-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(228, 0, 124, 0.42) !important;
+  background: #fff6fb !important;
+  box-shadow: 0 2px 8px rgba(228, 0, 124, 0.16);
+}
+
+.ui-nav-preview-btn:focus-visible {
+  outline: 2px solid rgba(228, 0, 124, 0.45);
+  outline-offset: 2px;
+}
 @media (min-width: 768px) {
 
   .ui-nav-row:hover,
@@ -901,7 +920,7 @@ textarea:disabled {
     transform: none;
     box-shadow: none;
     }
-    
+
     .tech-vhs-surface .mantine-Skeleton-root::after {
       animation: none;
 }

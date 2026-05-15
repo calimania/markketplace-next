@@ -113,6 +113,10 @@ function isValidIanaTimezone(value: string) {
   }
 }
 
+function normalizeTimezone(value?: string) {
+  return (value || '').trim();
+}
+
 export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initial }: EventEditorFormProps) {
   const router = useRouter();
   const store = useStore();
@@ -138,8 +142,16 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone });
   const [isDirty, setIsDirty] = useState(false);
   const storeRef = store.documentId || store.slug || storeSlug;
-  const normalizedTimezone = timezone.trim();
+  const normalizedTimezone = normalizeTimezone(timezone);
+  const initialTimezone = normalizeTimezone(initial?.timezone);
+  const browserTimezoneValue = normalizeTimezone(autoTimezone);
   const hasTimezoneError = !isValidIanaTimezone(normalizedTimezone);
+  const hasTimezoneMismatch = Boolean(
+    normalizedTimezone
+    && browserTimezoneValue
+    && normalizedTimezone !== browserTimezoneValue,
+  );
+  const looksLegacyUtc = normalizedTimezone === 'UTC' && browserTimezoneValue && browserTimezoneValue !== 'UTC';
 
   useEffect(() => {
     if (!slugTouched) {
@@ -331,6 +343,10 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         <Stack gap={2}>
           <Text size="sm" fw={500}>Timezone</Text>
           <Text size="sm" c="dimmed">Assumed from browser: {autoTimezone}</Text>
+          <Text size="xs" c="dimmed">Stored timezone: {normalizedTimezone || 'Not set'}</Text>
+          {mode === 'edit' && initialTimezone && (
+            <Text size="xs" c="dimmed">Originally saved: {initialTimezone}</Text>
+          )}
         </Stack>
         <Button
           variant="subtle"
@@ -340,6 +356,28 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
           {showTimezoneEditor ? 'Hide timezone options' : 'Edit timezone'}
         </Button>
       </Group>
+
+      {looksLegacyUtc && (
+        <Group justify="space-between" align="center" style={{ padding: '8px 10px', border: '1px solid #ffd8a8', borderRadius: 8, background: '#fff9db' }}>
+          <Text size="sm" c="orange.9">
+            This event is currently set to UTC. If this should follow your local timezone, switch to {browserTimezoneValue}.
+          </Text>
+          <Button size="xs" color="orange" variant="light" onClick={() => setTimezone(browserTimezoneValue)}>
+            Use {browserTimezoneValue}
+          </Button>
+        </Group>
+      )}
+
+      {!looksLegacyUtc && hasTimezoneMismatch && (
+        <Group justify="space-between" align="center" style={{ padding: '8px 10px', border: '1px solid #cfe8ff', borderRadius: 8, background: '#eef7ff' }}>
+          <Text size="sm" c="blue.9">
+            Display timezone differs from your browser ({browserTimezoneValue}). This is OK if intentional.
+          </Text>
+          <Button size="xs" color="blue" variant="light" onClick={() => setTimezone(browserTimezoneValue)}>
+            Match browser
+          </Button>
+        </Group>
+      )}
 
       {showTimezoneEditor && (
         <>
