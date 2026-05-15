@@ -8,6 +8,12 @@ type TiendaRequestOptions = {
   baseUrl?: string;
 };
 
+type TiendaOverviewListOptions = {
+  token: string;
+  baseUrl?: string;
+  queries?: Partial<Record<'article' | 'page' | 'product' | 'event', TiendaRequestOptions['query']>>;
+};
+
 type TiendaUploadOptions = {
   token: string;
   files: File[];
@@ -56,6 +62,7 @@ async function tiendaFetch(method: string, path: string, options: TiendaRequestO
 
   const response = await fetch(`${baseUrl}${path}`, {
     method,
+    cache: method === 'GET' ? 'no-store' : 'default',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -164,9 +171,34 @@ async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
 }
 
 export const tiendaClient = {
+  async getStore(ref: TiendaRef, options: TiendaRequestOptions) {
+    const primaryPath = withQuery(`/api/tienda/stores/${ref}`, options.query);
+    const primaryResponse = await tiendaFetch('GET', primaryPath, options);
+
+    if ((primaryResponse as { status?: number } | null)?.status === 404) {
+      const aliasPath = withQuery(`/api/tienda/${ref}`, options.query);
+      return tiendaFetch('GET', aliasPath, options);
+    }
+
+    return primaryResponse;
+  },
+
   listContent(ref: TiendaRef, contentType: TiendaContentType, options: TiendaRequestOptions) {
     const path = withQuery(tiendaCollectionPath(ref, contentType), options.query);
     return tiendaFetch('GET', path, options);
+  },
+
+  async listOverviewContent(ref: TiendaRef, options: TiendaOverviewListOptions) {
+    const { token, baseUrl, queries } = options;
+
+    const [article, page, product, event] = await Promise.all([
+      this.listContent(ref, 'article', { token, baseUrl, query: queries?.article }),
+      this.listContent(ref, 'page', { token, baseUrl, query: queries?.page }),
+      this.listContent(ref, 'product', { token, baseUrl, query: queries?.product }),
+      this.listContent(ref, 'event', { token, baseUrl, query: queries?.event }),
+    ]);
+
+    return { article, page, product, event };
   },
 
   createContent(ref: TiendaRef, contentType: TiendaContentType, data: unknown, options: TiendaRequestOptions) {

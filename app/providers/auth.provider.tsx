@@ -71,6 +71,14 @@ function normalizeStoresForDashboard(rawStores: Store[]): Store[] {
   return Array.from(byIdentity.values());
 }
 
+function readStoresFromPayload(payload: any): Store[] | null {
+  if (Array.isArray(payload?.data)) return payload.data as Store[];
+  if (Array.isArray(payload?.data?.data)) return payload.data.data as Store[];
+  if (Array.isArray(payload?.stores)) return payload.stores as Store[];
+  if (Array.isArray(payload)) return payload as Store[];
+  return null;
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
@@ -97,7 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [stores, setStores] = useState<Store[]>([]);
   const storesRequestInFlightRef = useRef<Promise<void> | null>(null);
+  const storesRequestStartedAtRef = useRef(0);
+  const storesRequestAbortRef = useRef<AbortController | null>(null);
+  const storesRequestAbortReasonRef = useRef<'superseded' | 'timeout' | null>(null);
+  const storesRequestSeqRef = useRef(0);
   const lastStoresFetchAtRef = useRef(0);
+  const lastStoresRevalidateAtRef = useRef(0);
+  const lastRouterRefreshAtRef = useRef(0);
   const hasPrefetchedStoresRef = useRef(false);
 
   const getStorage = useCallback((): Storage | null => {
@@ -187,30 +201,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Prevent rapid duplicate calls from StrictMode and multiple consumers.
     if (!options?.force && now - lastStoresFetchAtRef.current < 10_000) return;
 
-    if (storesRequestInFlightRef.current) {
+    if (storesRequestInFlightRef.current && !options?.force) {
       return storesRequestInFlightRef.current;
     }
+
+    if (options?.force && storesRequestInFlightRef.current) {
+      const requestAgeMs = now - storesRequestStartedAtRef.current;
+      // Reuse fresh in-flight requests to avoid rapid cancel/restart loops on swipe-back.
+      if (requestAgeMs < 4_000) {
+        return storesRequestInFlightRef.current;
+      }
+
+      storesRequestAbortReasonRef.current = 'superseded';
+      storesRequestAbortRef.current?.abort();
+    }
+
+    const requestSeq = ++storesRequestSeqRef.current;
+    const requestAbortController = new AbortController();
+    storesRequestAbortRef.current = requestAbortController;
+    const timeoutId = typeof window === 'undefined'
+      ? null
+      : window.setTimeout(() => {
+        storesRequestAbortReasonRef.current = 'timeout';
+        requestAbortController.abort();
+      }, 15_000);
 
     const run = async () => {
       try {
         const client = new markketClient();
         const response = await client.fetch('/api/markket/store', {
-          cache: 'no-store'
+          cache: 'no-store',
+          signal: requestAbortController.signal,
         });
 
-        if (Array.isArray(response?.data)) {
-          setStores(normalizeStoresForDashboard(response.data as Store[]));
+        const resolvedStores = readStoresFromPayload(response);
+        if (Array.isArray(resolvedStores)) {
+          setStores(normalizeStoresForDashboard(resolvedStores));
           lastStoresFetchAtRef.current = Date.now();
         } else {
-          console.warn('Stores response missing data array:', response);
+          // Keep current store state instead of degrading to empty when payload is transiently malformed.
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Stores response missing data array:', {
+              status: (response as any)?.__httpStatus || (response as any)?.status,
+              keys: Object.keys((response || {}) as Record<string, unknown>),
+            });
+          }
         }
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[auth.fetchStores] request aborted', {
+              reason: storesRequestAbortReasonRef.current || 'unknown',
+              requestSeq,
+              forced: Boolean(options?.force),
+            });
+          }
+          return;
+        }
         console.error('Failed to fetch stores:', error);
       } finally {
-        storesRequestInFlightRef.current = null;
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
+        if (storesRequestAbortRef.current === requestAbortController) {
+          storesRequestAbortRef.current = null;
+          storesRequestAbortReasonRef.current = null;
+        }
+        if (storesRequestSeqRef.current === requestSeq) {
+          storesRequestInFlightRef.current = null;
+          storesRequestStartedAtRef.current = 0;
+        }
       }
     };
 
+    storesRequestStartedAtRef.current = Date.now();
     storesRequestInFlightRef.current = run();
     return storesRequestInFlightRef.current;
   }, [maybe]);
@@ -265,6 +329,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user?.id) return;
     if (!shouldPrefetchStores(pathname)) return;
+    const isTiendaPath = pathname.startsWith('/tienda');
 
     // Force fetch the very first time user becomes available to avoid being
     // blocked by the cooldown when the /me redirect effect already called
@@ -273,6 +338,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     hasPrefetchedStoresRef.current = true;
     fetchStores(isFirst ? { force: true } : undefined);
   }, [fetchStores, pathname, shouldPrefetchStores, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    if (!shouldPrefetchStores(pathname)) return;
+
+    const forceRefreshRoute = (reason: 'pageshow' | 'popstate') => {
+      const now = Date.now();
+      // Guard against rapid duplicate lifecycle events on browser restore/back.
+      if (now - lastRouterRefreshAtRef.current < 1_500) return;
+      lastRouterRefreshAtRef.current = now;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[auth.fetchStores] router.refresh', { reason, pathname });
+      }
+
+      router.refresh();
+    };
+
+    const revalidateStores = () => {
+      if (document.visibilityState === 'hidden') return;
+
+      const now = Date.now();
+      // Avoid rapid duplicate fetches when browser emits multiple restore events.
+      if (now - lastStoresRevalidateAtRef.current < 1200) return;
+      lastStoresRevalidateAtRef.current = now;
+
+      fetchStores();
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      revalidateStores();
+      if (event.persisted && !isTiendaPath) {
+        forceRefreshRoute('pageshow');
+      }
+    };
+
+    const handlePopState = () => {
+      revalidateStores();
+      if (!isTiendaPath) {
+        forceRefreshRoute('popstate');
+      }
+    };
+
+    window.addEventListener('focus', revalidateStores);
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('popstate', handlePopState);
+    document.addEventListener('visibilitychange', revalidateStores);
+
+    return () => {
+      window.removeEventListener('focus', revalidateStores);
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('visibilitychange', revalidateStores);
+    };
+  }, [fetchStores, pathname, router, shouldPrefetchStores, user?.id]);
 
   const refreshUser = useCallback(async () => {
     await verifyAndRefreshUser();

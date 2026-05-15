@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -38,6 +39,7 @@ function sortByRecent(items: Page[]) {
 
 export default function PagesListClient({ storeSlug, initialPages }: PagesListClientProps) {
   const [pages, setPages] = useState<Page[]>(sortByRecent(initialPages || []));
+  const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {
     const token = readAuthToken();
@@ -71,9 +73,21 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const sortedPages = useMemo(() => {
+    if (sortMode === 'alpha') {
+      return [...pages].sort((a, b) => (a.Title || '').localeCompare(b.Title || ''));
+    }
+
+    if (sortMode === 'alpha-desc') {
+      return [...pages].sort((a, b) => (b.Title || '').localeCompare(a.Title || ''));
+    }
+
+    return sortByRecent(pages);
+  }, [pages, sortMode]);
+
   const items = useMemo(
     () =>
-      pages.map((page) => {
+      sortedPages.map((page) => {
         const key = itemKey(page);
         const statusText = isPublished(page) ? 'Published' : 'Draft';
 
@@ -85,8 +99,22 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           icon: 'page' as const,
         };
       }),
-    [pages, storeSlug],
+    [sortedPages, storeSlug],
   );
 
-  return <NavTable emptyText="No pages yet." items={items} />;
+  return (
+    <Stack gap="xs">
+      <SegmentedControl
+        size="xs"
+        value={sortMode}
+        onChange={(value) => setSortMode(value as 'recent' | 'alpha' | 'alpha-desc')}
+        data={[
+          { label: 'Recent', value: 'recent' },
+          { label: 'A-Z', value: 'alpha' },
+          { label: 'Z-A', value: 'alpha-desc' },
+        ]}
+      />
+      <NavTable emptyText="No pages yet." items={items} />
+    </Stack>
+  );
 }

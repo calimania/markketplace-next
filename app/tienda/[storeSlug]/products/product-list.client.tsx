@@ -1,32 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Product } from '@/markket/product';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 import { isPublished } from '@/markket/helpers.publication';
+import { readTiendaAuthToken, parseTiendaResponse, getTiendaItemKey } from '@/markket/helpers.tienda';
 
 type ProductListClientProps = {
   storeSlug: string;
   initialProducts: Product[];
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
-
-function itemKey(product: Partial<Product>) {
-  return String(product.documentId || product.id || product.slug || product.Name || Math.random());
-}
 
 function sortByRecent(items: Product[]) {
   return [...items].sort((a, b) => {
@@ -38,11 +24,17 @@ function sortByRecent(items: Product[]) {
 
 export default function ProductListClient({ storeSlug, initialProducts }: ProductListClientProps) {
   const [products, setProducts] = useState<Product[]>(sortByRecent(initialProducts || []));
-  const [loading, setLoaading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {
-    const token = readAuthToken();
-    if (!token) return;
+    let isMounted = true;
+
+    const token = readTiendaAuthToken();
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     const loadAllContent = async () => {
       try {
@@ -51,30 +43,48 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           query: TIENDA_CONTENT_LIST_QUERY.product,
         });
 
-        const merged = new Map<string, Product>();
-        const allItems = Array.isArray(response?.data) ? (response.data as Product[]) : (Array.isArray(response) ? (response as Product[]) : []);
+        if (!isMounted) return;
 
-        if (allItems.length > 0) {
-          allItems.forEach((product) => {
-            merged.set(itemKey(product), product);
-          });
-          setProducts(sortByRecent(Array.from(merged.values())));
+        const allItems = parseTiendaResponse<Product>(response);
+
+        if (allItems && allItems.length > 0) {
+          setProducts(sortByRecent(allItems));
+        } else {
+          setProducts([]);
         }
       } catch (error) {
         console.error('[ProductListClient] Failed to load products:', error);
+        if (isMounted) setProducts([]);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoaading(false);
     };
 
     loadAllContent();
+
+    return () => {
+      isMounted = false;
+    };
   }, [storeSlug]);
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const sortedProducts = useMemo(() => {
+    if (sortMode === 'alpha') {
+      return [...products].sort((a, b) => (a.Name || '').localeCompare(b.Name || ''));
+    }
+
+    if (sortMode === 'alpha-desc') {
+      return [...products].sort((a, b) => (b.Name || '').localeCompare(a.Name || ''));
+    }
+
+    return sortByRecent(products);
+  }, [products, sortMode]);
+
   const items = useMemo(
     () =>
-      products.map((product) => {
-        const key = itemKey(product);
+      sortedProducts.map((product) => {
+        const key = getTiendaItemKey(product);
         const statusText = isPublished(product) ? 'Published' : 'Draft';
 
         return {
@@ -86,8 +96,22 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           thumbnailUrl: product.Thumbnail?.url || product?.SEO?.socialImage?.url || product?.Slides?.[0]?.url,
         };
       }),
-    [products, storeSlug],
+    [sortedProducts, storeSlug],
   );
 
-  return <NavTable emptyText="No products yet." items={items} loading={loading} />;
+  return (
+    <Stack gap="xs">
+      <SegmentedControl
+        size="xs"
+        value={sortMode}
+        onChange={(value) => setSortMode(value as 'recent' | 'alpha' | 'alpha-desc')}
+        data={[
+          { label: 'Recent', value: 'recent' },
+          { label: 'A-Z', value: 'alpha' },
+          { label: 'Z-A', value: 'alpha-desc' },
+        ]}
+      />
+      <NavTable emptyText="No products yet." items={items} loading={loading} />
+    </Stack>
+  );
 }

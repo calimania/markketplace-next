@@ -1,32 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Event } from '@/markket/event';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 import { isPublished } from '@/markket/helpers.publication';
+import { readTiendaAuthToken, parseTiendaResponse, getTiendaItemKey } from '@/markket/helpers.tienda';
 
 type EventListClientProps = {
   storeSlug: string;
   initialEvents: Event[];
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
-
-function itemKey(event: Partial<Event>) {
-  return String(event.documentId || event.id || event.slug || event.Name || Math.random());
-}
 
 function sortByDate(items: Event[]) {
   return [...items].sort((a, b) => {
@@ -38,10 +24,17 @@ function sortByDate(items: Event[]) {
 
 export default function EventListClient({ storeSlug, initialEvents }: EventListClientProps) {
   const [events, setEvents] = useState<Event[]>(sortByDate(initialEvents || []));
+  const [loading, setLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<'date' | 'recent' | 'alpha'>('date');
 
   useEffect(() => {
-    const token = readAuthToken();
-    if (!token) return;
+    let isMounted = true;
+
+    const token = readTiendaAuthToken();
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     const loadAllContent = async () => {
       try {
@@ -50,29 +43,52 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           query: TIENDA_CONTENT_LIST_QUERY.event,
         });
 
-        const merged = new Map<string, Event>();
-        const allItems = Array.isArray(response?.data) ? (response.data as Event[]) : (Array.isArray(response) ? (response as Event[]) : []);
+        if (!isMounted) return;
 
-        if (allItems.length > 0) {
-          allItems.forEach((event) => {
-            merged.set(itemKey(event), event);
-          });
-          setEvents(sortByDate(Array.from(merged.values())));
+        const allItems = parseTiendaResponse<Event>(response);
+
+        if (allItems && allItems.length > 0) {
+          setEvents(sortByDate(allItems));
+        } else {
+          setEvents([]);
         }
       } catch (error) {
         console.error('[EventListClient] Failed to load events:', error);
+        if (isMounted) setEvents([]);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
 
     loadAllContent();
+
+    return () => {
+      isMounted = false;
+    };
   }, [storeSlug]);
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const sortedEvents = useMemo(() => {
+    if (sortMode === 'recent') {
+      return [...events].sort((a, b) => {
+        const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return bTime - aTime;
+      });
+    }
+
+    if (sortMode === 'alpha') {
+      return [...events].sort((a, b) => (a.Name || '').localeCompare(b.Name || ''));
+    }
+
+    return sortByDate(events);
+  }, [events, sortMode]);
+
   const items = useMemo(
     () =>
-      events.map((event) => {
-        const key = itemKey(event);
+      sortedEvents.map((event) => {
+        const key = getTiendaItemKey(event);
         const statusText = isPublished(event) ? 'Published' : 'Draft';
 
         return {
@@ -83,8 +99,22 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
           icon: 'event' as const,
         };
       }),
-    [events, storeSlug],
+    [sortedEvents, storeSlug],
   );
 
-  return <NavTable emptyText="No events yet." items={items} />;
+  return (
+    <Stack gap="xs">
+      <SegmentedControl
+        size="xs"
+        value={sortMode}
+        onChange={(value) => setSortMode(value as 'date' | 'recent' | 'alpha')}
+        data={[
+          { label: 'Upcoming', value: 'date' },
+          { label: 'Recent', value: 'recent' },
+          { label: 'A-Z', value: 'alpha' },
+        ]}
+      />
+      <NavTable emptyText="No events yet." items={items} loading={loading} />
+    </Stack>
+  );
 }

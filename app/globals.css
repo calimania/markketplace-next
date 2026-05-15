@@ -647,31 +647,117 @@ textarea:disabled {
   opacity: 0.92;
 }
 
+/* Tech-VHS surface language for /me and /tienda */
+.tech-vhs-surface {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  --tech-dot-spacing: 96px;
+  --tech-dot-size: 1.6px;
+}
+
+.tech-vhs-surface :where(.mantine-Paper-root,
+  .mantine-Button-root,
+  .mantine-Badge-root,
+  .mantine-SegmentedControl-root,
+  .mantine-Avatar-root,
+  .mantine-ThemeIcon-root,
+  .mantine-Input-input,
+  .mantine-Textarea-input) {
+  border-radius: 0 !important;
+}
+
+.tech-vhs-surface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle,
+      rgba(0, 152, 220, 0.16) 0,
+      rgba(0, 152, 220, 0.16) var(--tech-dot-size),
+      transparent calc(var(--tech-dot-size) + 0.2px)),
+    radial-gradient(circle at 20% 12%, rgba(0, 152, 220, 0.04), transparent 32%),
+    repeating-linear-gradient(to bottom,
+      rgba(15, 23, 42, 0.008) 0px,
+      rgba(15, 23, 42, 0.008) 1px,
+      transparent 1px,
+      transparent 6px);
+  background-size:
+    var(--tech-dot-spacing) var(--tech-dot-spacing),
+    auto,
+    auto,
+    auto;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+}
+
+.tech-vhs-surface::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.98) 100%);
+}
 /* /me page polish */
 .me-surface {
   animation: fadeIn 320ms ease-out;
 }
 
 .me-card {
-  background: linear-gradient(180deg, #ffffff, #fffefe);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
+.me-card::before,
+.me-store-card::before,
+.tienda-panel::before,
+.tienda-kpi-tile::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 0;
+  background: linear-gradient(180deg, rgba(0, 152, 220, 0.04) 0%, rgba(0, 152, 220, 0.26) 50%, rgba(0, 152, 220, 0.08) 100%);
+  pointer-events: none;
+  opacity: 0.75;
+}
 .me-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  border-color: rgba(228, 0, 124, 0.22);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    border-color: rgba(0, 152, 220, 0.18);
 }
 
 .me-store-card {
+  position: relative;
+    overflow: hidden;
   transition: transform 140ms ease, border-color 160ms ease, background-color 160ms ease;
 }
 
 .me-store-card:hover {
   transform: translateX(2px);
-  border-color: rgba(0, 188, 212, 0.32);
-  background-color: #fcfeff;
+  border-color: rgba(0, 152, 220, 0.2);
+    background-color: #ffffff;
 }
 
 .me-store-count {
@@ -680,13 +766,121 @@ textarea:disabled {
 }
 
 .me-card-enter {
-  animation: fadeIn 420ms ease-out;
+  animation: meCardRise 420ms ease-out;
 }
 
 .me-loading-enter {
   animation: fadeIn 240ms ease-out;
 }
 
+.tienda-panel {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+}
+
+.tienda-panel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  border-color: rgba(0, 152, 220, 0.18);
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab {
+  color: #111827;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-top: 3px solid transparent;
+  border-radius: 0;
+  font-weight: 600;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab[data-active] {
+  background: #ffffff;
+  color: #111827;
+  border-color: rgba(15, 23, 42, 0.16);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab[data-accent='yellow'][data-active] {
+  border-top-color: var(--mantine-color-yellow-5);
+  color: var(--mantine-color-yellow-9);
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab[data-accent='orange'][data-active] {
+  border-top-color: var(--mantine-color-orange-5);
+  color: var(--mantine-color-orange-9);
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab[data-accent='gray'][data-active] {
+  border-top-color: var(--mantine-color-gray-5);
+  color: var(--mantine-color-gray-9);
+}
+
+.tienda-overview-tabs .mantine-Tabs-tab:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.tienda-kpi-tile {
+  position: relative;
+  overflow: hidden;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.tienda-kpi-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.tech-vhs-surface .mantine-Skeleton-root {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(100deg, #f1f5f9 0%, #f8fafc 45%, #eef2f7 100%);
+}
+
+.tech-vhs-surface .mantine-Skeleton-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.7) 48%, transparent 100%);
+  transform: translateX(-110%);
+  animation: meSkeletonSweep 1.35s ease-in-out infinite;
+}
+
+.tech-vhs-surface .mantine-Title-root,
+.tech-vhs-surface .mantine-Badge-label,
+.tech-vhs-surface .mantine-Button-label {
+  font-family: ui-monospace, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  letter-spacing: 0.01em;
+}
+
+.tech-vhs-surface .mantine-Text-root[data-size='xs'],
+.tech-vhs-surface .mantine-Text-root[data-size='sm'] {
+  font-family: ui-monospace, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  letter-spacing: 0.01em;
+}
+
+@keyframes meCardRise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes meSkeletonSweep {
+  100% {
+    transform: translateX(110%);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
 
   .me-surface,
@@ -698,10 +892,19 @@ textarea:disabled {
   .me-card,
   .me-card:hover,
   .me-store-card,
-  .me-store-card:hover {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .me-store-card:hover,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .tienda-panel,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .tienda-panel:hover,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .tienda-kpi-tile,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .tienda-kpi-tile:hover {
     transition: none;
     transform: none;
-  }
+    box-shadow: none;
+    }
+    
+    .tech-vhs-surface .mantine-Skeleton-root::after {
+      animation: none;
+}
 }
 /* Subtle section dividers with accent */
 .section-divider {

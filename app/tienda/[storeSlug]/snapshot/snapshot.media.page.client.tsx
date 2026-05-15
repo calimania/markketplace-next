@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Group, Paper, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { IconArrowLeft, IconPhoto, IconSparkles } from '@tabler/icons-react';
+import Link from 'next/link';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import StoreMedia from '@/app/components/ui/store.media';
 import { useAuth } from '@/app/providers/auth.provider';
@@ -21,12 +22,16 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
   const [isRefreshing, setIsRefreshing] = useState(false);
   const client = new markketClient();
   const isConfirmed = confirmed();
-  const ownershipLoading = isLoading || (isConfirmed && stores.length === 0);
+  const hasKnownStore = Boolean(store.slug || contextStore.slug);
+  const ownershipLoading = isLoading && !hasKnownStore;
 
   const isAuthorized = useMemo(() => {
     if (!isConfirmed) return false;
+    if (stores.length === 0) {
+      return store.slug === storeSlug || contextStore.slug === storeSlug;
+    }
     return stores.some((candidate) => candidate.slug === storeSlug || candidate.documentId === store.documentId);
-  }, [isConfirmed, stores, storeSlug, store.documentId]);
+  }, [isConfirmed, stores, storeSlug, store.documentId, store.slug, contextStore.slug]);
 
   useEffect(() => {
     if (!isConfirmed) return;
@@ -172,7 +177,7 @@ export default function StoreSnapshotMediaClientPage({ storeSlug }: StoreSnapsho
             <Badge variant="light" color="yellow" leftSection={<IconSparkles size={12} />}>
               Store Snapshot
             </Badge>
-            <Button component="a" href={`/tienda/${storeSlug}`} variant="default" leftSection={<IconArrowLeft size={14} />}>
+            <Button component={Link} href={`/tienda/${storeSlug}`} variant="default" leftSection={<IconArrowLeft size={14} />}>
               Back
             </Button>
           </Group>

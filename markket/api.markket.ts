@@ -5,6 +5,7 @@ type fetchOptions = {
   headers?: any;
   body?: any;
   cache?: any;
+  signal?: AbortSignal;
 };
 
 export type _validImageRef = 'common.SEO' | 'api::store.store' | 'api::page.page' | 'api::album.album' | 'api::album.track' | 'api::event.event' | 'api::product.product' | 'api::article.article';

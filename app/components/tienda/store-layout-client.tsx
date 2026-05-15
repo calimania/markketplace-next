@@ -31,7 +31,8 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     return stores.some((candidate) => candidate.slug === store.slug || candidate.documentId === store.documentId);
   }, [stores, store.documentId, store.slug]);
 
-  const ownershipLoading = isConfirmed && !ownershipResolved;
+  const ownershipLoading = false;
+  const shouldShowUnauthorized = isConfirmed && ownershipResolved && stores.length > 0 && !isAuthorized;
 
   useEffect(() => {
     let active = true;
@@ -81,22 +82,29 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     return (
       <>
         <CompactBreadcrumbs storeSlug={store.slug} />
-        <Container size="md" py="xl">
+        <Container size="md" py="xl" className="tech-vhs-surface">
           <Stack gap="md">
-            <Paper withBorder radius="md" p="md">
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
               <Stack gap="sm">
-                <Text c="dimmed" size="sm">Checking access...</Text>
-                <Skeleton height={14} width="45%" radius="xl" />
-                <Skeleton height={10} width="70%" radius="xl" />
+                <Skeleton height={14} width="38%" radius={0} />
+                <Skeleton height={10} width="64%" radius={0} />
               </Stack>
             </Paper>
 
-            <Paper withBorder radius="md" p="md">
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
               <Stack gap="sm">
-                <Skeleton height={16} width="35%" radius="xl" />
-                <Skeleton height={12} radius="xl" />
-                <Skeleton height={12} width="85%" radius="xl" />
-                <Skeleton height={12} width="60%" radius="xl" />
+                <Skeleton height={16} width="28%" radius={0} />
+                <Skeleton height={11} radius={0} />
+                <Skeleton height={11} width="88%" radius={0} />
+                <Skeleton height={11} width="62%" radius={0} />
+              </Stack>
+            </Paper>
+
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
+              <Stack gap="xs">
+                <Skeleton height={12} width="22%" radius={0} />
+                <Skeleton height={56} radius={0} />
+                <Skeleton height={56} radius={0} />
               </Stack>
             </Paper>
           </Stack>
@@ -105,9 +113,9 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     );
   }
 
-  if (!isAuthorized) {
+  if (shouldShowUnauthorized) {
     return (
-      <Container size="sm" py="xl">
+      <Container size="sm" py="xl" className="tech-vhs-surface">
         <Paper withBorder radius="md" p="xl">
           <Stack align="center" gap="sm">
             <ThemeIcon size={52} radius="xl" variant="light" color="red">
@@ -127,7 +135,7 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
   return (
     <>
       <CompactBreadcrumbs storeSlug={store.slug} />
-      <Container size="md" py="xl">
+      <Container size="md" py="xl" className="tech-vhs-surface">
         <Stack gap="md">
           {children}
         </Stack>

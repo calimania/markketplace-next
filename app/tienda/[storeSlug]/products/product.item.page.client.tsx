@@ -20,6 +20,15 @@ type TiendaProductItemPageClientProps = {
   itemId: string;
 };
 
+function externalHostLabel(value?: string) {
+  if (!value) return 'external link';
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return 'external link';
+  }
+}
+
 export default function TiendaProductItemPageClient({ storeSlug, itemId }: TiendaProductItemPageClientProps) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +97,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
 
   const editorId = product.documentId || product.slug || itemId;
   const itemDocumentId = product.documentId || itemId;
+  const externalHost = externalHostLabel(product.SEO?.metaUrl);
   const slideSlots = (product.Slides || []).map((slide, index) => ({
     label: `Slide ${index + 1}`,
     field: 'Slides',
@@ -182,7 +192,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
               fullWidth
               rightSection={<IconExternalLink size={16} />}
             >
-              Buy at {new URL(product.SEO.metaUrl).hostname}
+              Buy at {externalHost}
             </Button>
           </>
         )}
