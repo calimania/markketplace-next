@@ -103,7 +103,7 @@ export default function TiendaNewPage() {
     }
 
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/me/store/new');
     }
   }, [confirmed, isLoading, router]);
 
@@ -203,6 +203,10 @@ export default function TiendaNewPage() {
         </Stack>
       </Container>
     );
+  }
+
+  if (!confirmed()) {
+    return null;
   }
 
   return (

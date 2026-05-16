@@ -1,6 +1,7 @@
 import { Badge, Box, Card, Group, Stack, Text, rem } from '@mantine/core';
 import Link from 'next/link';
 import type { Store } from '@/markket/store.d';
+import { markketColors } from '@/markket/colors.config';
 
 type StoreCrosslinkItem = {
   href: string;
@@ -15,16 +16,40 @@ type StoreCrosslinksProps = {
 };
 
 const sectionLinks = [
-  { key: 'about', label: 'About', href: (slug: string) => `/${slug}/about`, color: 'cyan' },
-  { key: 'blog', label: 'Blog', href: (slug: string) => `/${slug}/blog`, color: 'pink' },
-  { key: 'products', label: 'Products', href: (slug: string) => `/${slug}/products`, color: 'blue' },
-  { key: 'events', label: 'Events', href: (slug: string) => `/${slug}/events`, color: 'green' },
+  {
+    key: 'about',
+    label: 'About',
+    href: (slug: string) => `/${slug}/about`,
+    color: markketColors.sections.about.main,
+    light: markketColors.sections.about.light,
+  },
+  {
+    key: 'blog',
+    label: 'Blog',
+    href: (slug: string) => `/${slug}/blog`,
+    color: markketColors.sections.blog.main,
+    light: markketColors.sections.blog.light,
+  },
+  {
+    key: 'products',
+    label: 'Products',
+    href: (slug: string) => `/${slug}/products`,
+    color: markketColors.sections.shop.main,
+    light: markketColors.sections.shop.light,
+  },
+  {
+    key: 'events',
+    label: 'Events',
+    href: (slug: string) => `/${slug}/events`,
+    color: markketColors.sections.events.main,
+    light: markketColors.sections.events.light,
+  },
 ] as const;
 
 export default function StoreCrosslinks({ slug, store, items = [], currentSection }: StoreCrosslinksProps) {
   const heroImage = store?.Logo?.url || store?.SEO?.socialImage?.url || store?.Cover?.url;
   const title = store?.title || slug;
-  const description = store?.SEO?.metaDescription || 'Discover more from this store.';
+  const description = store?.SEO?.metaDescription || 'Explore more sections from this storefront.';
 
   return (
     <Box mt="xl" pt="xl" style={{ borderTop: '1px solid rgba(148, 163, 184, 0.25)' }}>
@@ -68,7 +93,14 @@ export default function StoreCrosslinks({ slug, store, items = [], currentSectio
 
           <Group gap="xs" wrap="wrap">
             <Link href={`/${slug}`} style={{ textDecoration: 'none' }}>
-              <Badge size="lg" radius="md" variant="filled" color="dark">Store Home</Badge>
+              <Badge
+                size="lg"
+                radius="md"
+                variant="filled"
+                style={{ background: markketColors.neutral.charcoal, color: '#fff' }}
+              >
+                Store Home
+              </Badge>
             </Link>
             {sectionLinks.map((section) => (
               <Link key={section.key} href={section.href(slug)} style={{ textDecoration: 'none' }}>
@@ -76,7 +108,18 @@ export default function StoreCrosslinks({ slug, store, items = [], currentSectio
                   size="lg"
                   radius="md"
                   variant={currentSection === section.key ? 'filled' : 'light'}
-                  color={section.color}
+                  style={
+                    currentSection === section.key
+                      ? {
+                        background: section.color,
+                        color: '#fff',
+                      }
+                      : {
+                        background: section.light,
+                        color: section.color,
+                        border: `1px solid ${section.color}33`,
+                      }
+                  }
                 >
                   {section.label}
                 </Badge>

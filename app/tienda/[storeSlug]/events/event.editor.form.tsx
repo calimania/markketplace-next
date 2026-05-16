@@ -73,7 +73,79 @@ function slugify(value: string) {
     .replace(/-+/g, '-');
 }
 
-function toDatetimeLocalInput(value?: string) {
+function getDateTimePartsInTimezone(date: Date, timeZone: string) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const find = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value;
+
+  const year = Number(find('year'));
+  const month = Number(find('month'));
+  const day = Number(find('day'));
+  const hour = Number(find('hour'));
+  const minute = Number(find('minute'));
+  const second = Number(find('second'));
+
+  if ([year, month, day, hour, minute, second].some((value) => Number.isNaN(value))) {
+    return null;
+  }
+
+  return { year, month, day, hour, minute, second };
+}
+
+function timezoneOffsetMs(date: Date, timeZone: string) {
+  const parts = getDateTimePartsInTimezone(date, timeZone);
+  if (!parts) return 0;
+
+  const utcFromTimezoneView = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
+
+  return utcFromTimezoneView - date.getTime();
+}
+
+function parseDatetimeLocal(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+
+  if ([year, month, day, hour, minute].some((part) => Number.isNaN(part))) {
+    return null;
+  }
+
+  return { year, month, day, hour, minute };
+}
+
+function toDatetimeLocalInput(value?: string, timezone?: string) {
+  if (value && timezone && isValidIanaTimezone(timezone)) {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      const parts = getDateTimePartsInTimezone(parsed, timezone);
+      if (parts) {
+        return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`;
+      }
+    }
+  }
+
   const parsed = value ? new Date(value) : new Date();
   if (Number.isNaN(parsed.getTime())) {
     const fallback = new Date();
@@ -83,13 +155,51 @@ function toDatetimeLocalInput(value?: string) {
   return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}T${String(parsed.getHours()).padStart(2, '0')}:${String(parsed.getMinutes()).padStart(2, '0')}`;
 }
 
-function toIsoString(value: string) {
+function toIsoString(value: string, timezone?: string) {
+  const localParts = parseDatetimeLocal(value);
+  if (!localParts) return '';
+
+  if (timezone && isValidIanaTimezone(timezone)) {
+    const utcGuess = new Date(Date.UTC(
+      localParts.year,
+      localParts.month - 1,
+      localParts.day,
+      localParts.hour,
+      localParts.minute,
+      0,
+      0,
+    ));
+
+    const offset = timezoneOffsetMs(utcGuess, timezone);
+    return new Date(utcGuess.getTime() - offset).toISOString();
+  }
+
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString();
 }
 
-function getDefaultEventRange() {
+function getDefaultEventRange(timezone?: string) {
   const now = new Date();
+  const timezoneToUse = timezone && isValidIanaTimezone(timezone) ? timezone : undefined;
+
+  if (timezoneToUse) {
+    const nowParts = getDateTimePartsInTimezone(now, timezoneToUse);
+    if (nowParts) {
+      const nextWeekUtc = new Date(Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day + 7, 17, 0, 0, 0));
+      const nextWeekParts = getDateTimePartsInTimezone(nextWeekUtc, timezoneToUse);
+
+      if (nextWeekParts) {
+        const startLocal = `${nextWeekParts.year}-${String(nextWeekParts.month).padStart(2, '0')}-${String(nextWeekParts.day).padStart(2, '0')}T17:00`;
+        const endLocal = `${nextWeekParts.year}-${String(nextWeekParts.month).padStart(2, '0')}-${String(nextWeekParts.day).padStart(2, '0')}T19:00`;
+
+        return {
+          start: toIsoString(startLocal, timezoneToUse),
+          end: toIsoString(endLocal, timezoneToUse),
+        };
+      }
+    }
+  }
+
   const start = new Date(now);
   start.setDate(now.getDate() + 7);
   start.setHours(17, 0, 0, 0);
@@ -121,7 +231,8 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const router = useRouter();
   const store = useStore();
   const autoTimezone = browserTimezone();
-  const defaultRange = getDefaultEventRange();
+  const initialTimezoneValue = normalizeTimezone(initial?.timezone) || autoTimezone;
+  const defaultRange = getDefaultEventRange(initialTimezoneValue);
 
   const [name, setName] = useState(initial?.name || '');
   const [slug, setSlug] = useState(initial?.slug || '');
@@ -130,12 +241,12 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
   const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl || '');
   const [startDateInput, setStartDateInput] = useState(
-    toDatetimeLocalInput(initial?.startDate || (mode === 'new' ? defaultRange.start : undefined)),
+    toDatetimeLocalInput(initial?.startDate || (mode === 'new' ? defaultRange.start : undefined), initialTimezoneValue),
   );
   const [endDateInput, setEndDateInput] = useState(
-    toDatetimeLocalInput(initial?.endDate || (mode === 'new' ? defaultRange.end : new Date(Date.now() + 3600000).toISOString())),
+    toDatetimeLocalInput(initial?.endDate || (mode === 'new' ? defaultRange.end : new Date(Date.now() + 3600000).toISOString()), initialTimezoneValue),
   );
-  const [timezone, setTimezone] = useState(initial?.timezone || autoTimezone);
+  const [timezone, setTimezone] = useState(initialTimezoneValue);
   const [showTimezoneEditor, setShowTimezoneEditor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
@@ -193,8 +304,8 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       return;
     }
 
-    const startDate = toIsoString(startDateInput);
-    const endDate = toIsoString(endDateInput);
+    const startDate = toIsoString(startDateInput, normalizedTimezone);
+    const endDate = toIsoString(endDateInput, normalizedTimezone);
 
     if (!startDate || !endDate) {
       notifications.show({ title: 'Date required', message: 'Please provide valid start and end dates.', color: 'orange' });

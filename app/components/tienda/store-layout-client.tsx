@@ -75,7 +75,7 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     if (isConfirmed) return;
 
     const next = encodeURIComponent(pathname || `/tienda/${store.slug}`);
-    router.replace(`/auth?next=${next}`);
+    router.replace(`/auth/login?next=${next}`);
   }, [isConfirmed, isLoading, pathname, router, store.slug]);
 
   if (isLoading || ownershipLoading || !isConfirmed) {

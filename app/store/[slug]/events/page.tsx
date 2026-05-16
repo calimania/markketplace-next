@@ -178,17 +178,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                                 position: 'relative',
                               }}
                             >
-                              <Badge
-                                color={markketColors.sections.events.main}
-                                size="sm"
-                                style={{
-                                  position: 'absolute',
-                                  top: 12,
-                                  right: 12,
-                                }}
-                              >
-                                Upcoming
-                              </Badge>
+                              <></>
                             </Box>
                           ) : (
                             <Box

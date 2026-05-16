@@ -3,12 +3,16 @@ import { Store } from "@/markket/store.d";
 import { strapiClient } from "@/markket/api.strapi";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
-import { Container, Button } from "@mantine/core";
+import { Container, Button, Paper, SimpleGrid, Stack, Text, Badge, Group } from "@mantine/core";
 import { EventImageGallery } from "@/app/components/events/event.gallery.image";
 import EventSchedule from "@/app/components/events/event.schedule.client";
 import RSVPModal from "@/app/components/events/event.rsvp.modal";
 import Markdown from "@/app/components/ui/page.markdown";
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
+import StorePageHeader from '@/app/components/ui/store.page.header';
+import { IconCalendarEvent } from '@tabler/icons-react';
+import { markketColors } from '@/markket/colors.config';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 
 interface EventsPageProps {
   params: Promise<{ slug: string; event_slug: string }>;
@@ -43,6 +47,22 @@ function formatDateTime(value?: string, timezone?: string) {
   }
 
   return new Intl.DateTimeFormat('en-US', options).format(parsed);
+}
+
+function toExcerpt(value?: string, max = 180) {
+  if (!value) return '';
+  const plain = stripMarkdown(richTextToPlainText(value));
+  if (!plain) return '';
+  return plain.length > max ? `${plain.slice(0, max - 1)}...` : plain;
+}
+
+function getHostLabel(url?: string) {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
 }
 
 export async function generateMetadata({ params }: EventsPageProps) {
@@ -95,10 +115,16 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   }
 
   const eventsResponse = await strapiClient.getEventBySlug(event_slug, slug);
-  const event = (eventsResponse?.data?.[0] || []) as Event;
+  const event = eventsResponse?.data?.[0] as Event | undefined;
+
+  if (!event) {
+    notFound();
+  }
 
   const hasExternalRsvp = Boolean(event?.SEO?.metaUrl);
   const canRsvpInternal = Boolean(event?.documentId || event?.id);
+  const externalHostLabel = getHostLabel(event?.SEO?.metaUrl);
+  const excerpt = event?.SEO?.metaDescription || toExcerpt(event?.Description, 220);
 
   const relatedEvents = ((eventsListResponse?.data || []) as Event[])
     .filter((item) => item.slug !== event_slug && new Date(item.startDate) >= new Date())
@@ -110,77 +136,103 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
     }));
 
   return (
-    <Container size="xl" py="xl">
-      <main className="lg:px-8 product-page px-4 py-12 sm:px-6">
-        <div className="mx-auto w-full">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start items-start gap-4">
-            <div className="flex flex-col">
-              <EventImageGallery event={event} />
-            </div>
-            <div className="lg:mt-0 mt-10 px-4 sm:mt-16 sm:px-0">
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-                {event.Name}
-              </h1>
+    <Container size="lg" py="xl">
+      <Stack gap="xl">
+        <StorePageHeader
+          icon={<IconCalendarEvent size={48} />}
+          title={event?.Name || `${store?.title} Event`}
+          description={excerpt || `Event details for ${store?.title || 'this store'}.`}
+          backgroundImage={event?.SEO?.socialImage?.url || event?.Thumbnail?.url || store?.Cover?.url}
+          iconColor={markketColors.sections.events.main}
+        />
 
-              <EventSchedule
-                startDate={event?.startDate}
-                endDate={event?.endDate}
-                timezone={event?.timezone}
-              />
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          <EventImageGallery event={event} />
 
-              <div className="mt-6">
-                <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
-                  <Markdown content={event?.Description || ""} />
-                </div>
+          <Stack gap="md">
+            <Group gap="xs">
+              <Badge
+                radius="sm"
+                variant="light"
+                style={{
+                  background: markketColors.sections.events.light,
+                  color: markketColors.sections.events.main,
+                }}
+              >
+                Event
+              </Badge>
+              {hasExternalRsvp && (
+                <Badge radius="sm" variant="outline" color="gray">External RSVP</Badge>
+              )}
+            </Group>
+
+            <EventSchedule
+              startDate={event?.startDate}
+              endDate={event?.endDate}
+              timezone={event?.timezone}
+            />
+
+            <Paper withBorder radius="lg" p="lg" style={{ borderColor: `${markketColors.sections.events.main}22` }}>
+              <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
+                <Markdown content={event?.Description || ""} />
               </div>
+            </Paper>
 
-              <div className="mt-8 space-y-3">
-                {hasExternalRsvp && (
-                  <Button
-                    component="a"
-                    href={event.SEO?.metaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    fullWidth
-                    size="lg"
-                    radius="md"
-                    color="pink"
-                  >
-                    RSVP at {event.SEO?.metaUrl ? new URL(event.SEO.metaUrl).hostname : event.SEO?.metaUrl}
-                  </Button>
-                )}
+            <Stack gap="sm" mt="xs">
+              {hasExternalRsvp && (
+                <Button
+                  component="a"
+                  href={event.SEO?.metaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  fullWidth
+                  size="lg"
+                  radius="md"
+                  color="pink"
+                >
+                  RSVP at {externalHostLabel}
+                </Button>
+              )}
 
-                {canRsvpInternal && !hasExternalRsvp && (
-                  <RSVPModal
-                    eventId={event?.documentId || event?.id?.toString()}
-                    eventName={event?.Name}
-                    eventStartDate={event?.startDate}
-                    eventEndDate={event?.endDate}
-                    eventTimezone={event?.timezone}
-                    storeName={store?.title}
-                    storeSlug={slug}
-                    eventSlug={event_slug}
-                    storeDocumentId={store?.documentId}
-                  />
-                )}
+              {canRsvpInternal && !hasExternalRsvp && (
+                <RSVPModal
+                  eventId={event?.documentId || event?.id?.toString()}
+                  eventName={event?.Name}
+                  eventStartDate={event?.startDate}
+                  eventEndDate={event?.endDate}
+                  eventTimezone={event?.timezone}
+                  storeName={store?.title}
+                  storeSlug={slug}
+                  eventSlug={event_slug}
+                  storeDocumentId={store?.documentId}
+                />
+              )}
 
-                {!hasExternalRsvp && !canRsvpInternal && (
-                  <p className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                    RSVP options for this event are not available yet.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+              {!hasExternalRsvp && !canRsvpInternal && (
+                <Text
+                  size="sm"
+                  style={{
+                    border: `1px dashed ${markketColors.neutral.mediumGray}`,
+                    borderRadius: 12,
+                    background: markketColors.neutral.offWhite,
+                    padding: '12px 14px',
+                    color: markketColors.neutral.darkGray,
+                  }}
+                >
+                  RSVP options for this event are not available yet.
+                </Text>
+              )}
+            </Stack>
+          </Stack>
+        </SimpleGrid>
 
-          <StoreCrosslinks
-            slug={slug}
-            store={store}
-            currentSection="events"
-            items={relatedEvents}
-          />
-        </div>
-      </main>
+        <StoreCrosslinks
+          slug={slug}
+          store={store}
+          currentSection="events"
+          items={relatedEvents}
+        />
+      </Stack>
     </Container>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Article } from '@/markket/article';
@@ -24,7 +24,7 @@ function sortByRecent(items: Article[]) {
 
 export default function BlogListClient({ storeSlug, initialPosts }: BlogListClientProps) {
   const [posts, setPosts] = useState<Article[]>(sortByRecent(initialPosts || []));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState((initialPosts || []).length === 0);
   const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {

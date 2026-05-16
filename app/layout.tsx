@@ -7,6 +7,7 @@ import '@/app/styles/main.scss';
 import { AuthProvider } from '@/app/providers/auth.provider';
 import { PostHogProvider } from '@/app/providers/posthog.provider';
 import { GlobalBanner } from '@/app/components/global.banner';
+import OpenBrowserButton from '@/app/components/ui/open.browser.button';
 import EmbedQueryPropagator from '@/app/components/embed.query.propagator';
 import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
@@ -138,6 +139,7 @@ export default function RootLayout({
               <Notifications position="top-right" zIndex={1000} />
               <EmbedQueryPropagator />
               <GlobalBanner />
+              <OpenBrowserButton />
               {children}
             </MantineProvider>
           </PostHogProvider>

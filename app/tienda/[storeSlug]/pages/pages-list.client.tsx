@@ -15,22 +15,6 @@ type PagesListClientProps = {
   initialPages: Page[];
 };
 
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
-
-function itemKey(page: Partial<Page>) {
-  return String(page.documentId || page.id || page.slug || page.Title || Math.random());
-}
-
 function sortByRecent(items: Page[]) {
   return [...items].sort((a, b) => {
     const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -41,11 +25,13 @@ function sortByRecent(items: Page[]) {
 
 export default function PagesListClient({ storeSlug, initialPages }: PagesListClientProps) {
   const [pages, setPages] = useState<Page[]>(sortByRecent(initialPages || []));
+  const [loading, setLoading] = useState((initialPages || []).length === 0);
   const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {
-    const token = readAuthToken();
+    const token = readTiendaAuthToken();
     if (!token) {
+      setLoading(false);
       return;
     }
 
@@ -57,16 +43,20 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
         });
 
         const merged = new Map<string, Page>();
-        const allItems = Array.isArray(response?.data) ? (response.data as Page[]) : (Array.isArray(response) ? (response as Page[]) : []);
+        const allItems = parseTiendaResponse<Page>(response) || [];
 
         if (allItems.length > 0) {
           allItems.forEach((page) => {
-            merged.set(itemKey(page), page);
+            merged.set(getTiendaItemKey(page), page);
           });
           setPages(sortByRecent(Array.from(merged.values())));
+        } else {
+          setPages([]);
         }
       } catch (error) {
         console.error('[PagesListClient] Failed to load pages:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -90,7 +80,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
   const items = useMemo(
     () =>
       sortedPages.map((page) => {
-        const key = itemKey(page);
+        const key = getTiendaItemKey(page);
         const statusText = isPublished(page) ? 'Published' : 'Draft';
 
         return {
@@ -117,7 +107,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           { label: 'Z-A', value: 'alpha-desc' },
         ]}
       />
-      <NavTable emptyText="No pages yet." items={items} />
+      <NavTable emptyText="No pages yet." items={items} loading={loading} />
     </Stack>
   );
 }

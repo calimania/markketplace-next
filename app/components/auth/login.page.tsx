@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   TextInput,
   PasswordInput,
@@ -16,7 +16,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconLock, IconSparkles, IconX } from '@tabler/icons-react';
 import { markketColors } from '@/markket/colors.config';
 
@@ -29,14 +29,56 @@ interface LoginForm {
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const oauthHydratedRef = useRef(false);
   const router = useRouter();
-  const { login, confirmed, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const { login, confirmed, isLoading, refreshUser } = useAuth();
+
+  const resolveNextPath = () => {
+    const next = searchParams.get('next');
+    if (!next) return '/me';
+
+    try {
+      const decoded = decodeURIComponent(next);
+      if (decoded.startsWith('/')) return decoded;
+      return '/me';
+    } catch {
+      return '/me';
+    }
+  };
+
+  const nextPath = resolveNextPath();
 
   useEffect(() => {
     if (isLoading) return;
     if (!confirmed()) return;
-    router.replace('/me');
-  }, [confirmed, isLoading, router]);
+    router.replace(nextPath);
+  }, [confirmed, isLoading, nextPath, router]);
+
+  useEffect(() => {
+    const oauthJwt = searchParams.get('jwt');
+    if (!oauthJwt) return;
+    if (oauthHydratedRef.current) return;
+    oauthHydratedRef.current = true;
+
+    const hydrateOauthSession = async () => {
+      try {
+        localStorage.setItem('markket.auth', JSON.stringify({ jwt: oauthJwt }));
+        await refreshUser();
+        router.replace(nextPath);
+      } catch {
+        notifications.show({
+          title: 'Authentication failed',
+          message: 'Could not complete sign in. Please try again.',
+          color: 'red',
+          icon: <IconX size="1.1rem" />,
+          autoClose: 3500,
+        });
+      }
+    };
+
+    hydrateOauthSession();
+  }, [nextPath, refreshUser, router, searchParams]);
 
   const form = useForm<LoginForm>({
     initialValues: {
@@ -93,7 +135,7 @@ export default function LoginPage() {
         autoClose: 800,
       });
 
-      router.push('/dashboard');
+      router.replace(nextPath);
     } catch (error: any) {
       console.warn({ error });
       notifications.show({
@@ -198,10 +240,10 @@ export default function LoginPage() {
                   component="button"
                   type="button"
                   c="dimmed"
-                  onClick={() => router.push('/auth')}
+                  onClick={() => router.push('/')}
                   size="xs"
                 >
-                  Back to auth
+                  Back home
                 </Anchor>
               </Group>
 

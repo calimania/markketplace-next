@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const STRAPI_URL = process.env.NEXT_PUBLIC_MARKKET_API;
 
     if (!code) {
-      return NextResponse.redirect(new URL('/auth?error=no_code', request.url));
+      return NextResponse.redirect(new URL('/auth/login?error=no_code', request.url));
     }
 
     const tokenResponse = await fetch(`${STRAPI_URL}/api/auth/github/callback?code=${code}`, {
@@ -26,10 +26,10 @@ export async function GET(request: Request) {
     const data = await tokenResponse.json();
 
     if (!data.jwt || !data.user) {
-      return NextResponse.redirect(new URL('/auth?error=auth_failed', request.url));
+      return NextResponse.redirect(new URL('/auth/login?error=auth_failed', request.url));
     }
 
-    return NextResponse.redirect(new URL(`auth?jwt=${data.jwt}`, request.url));
+    return NextResponse.redirect(new URL(`/auth/login?jwt=${encodeURIComponent(data.jwt)}`, request.url));
   } catch (error) {
     console.error('GitHub callback error:', error);
 
@@ -41,6 +41,6 @@ export async function GET(request: Request) {
       }
     });
 
-    return NextResponse.redirect(new URL('/auth?error=unknown', request.url));
+    return NextResponse.redirect(new URL('/auth/login?error=unknown', request.url));
   }
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Event } from '@/markket/event';
@@ -24,7 +24,7 @@ function sortByDate(items: Event[]) {
 
 export default function EventListClient({ storeSlug, initialEvents }: EventListClientProps) {
   const [events, setEvents] = useState<Event[]>(sortByDate(initialEvents || []));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState((initialEvents || []).length === 0);
   const [sortMode, setSortMode] = useState<'date' | 'recent' | 'alpha'>('date');
 
   useEffect(() => {
@@ -110,7 +110,7 @@ export default function EventListClient({ storeSlug, initialEvents }: EventListC
         value={sortMode}
         onChange={(value) => setSortMode(value as 'date' | 'recent' | 'alpha')}
         data={[
-          { label: 'Upcoming', value: 'date' },
+          { label: 'By date', value: 'date' },
           { label: 'Recent', value: 'recent' },
           { label: 'A-Z', value: 'alpha' },
         ]}

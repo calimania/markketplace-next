@@ -17,7 +17,7 @@ export default function MeAccountPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/me/account');
     }
   }, [confirmed, isLoading, router]);
 
@@ -27,6 +27,10 @@ export default function MeAccountPage() {
         <Text c="dimmed">Checking your session...</Text>
       </Container>
     );
+  }
+
+  if (!confirmed()) {
+    return null;
   }
 
   return (

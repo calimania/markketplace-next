@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Product } from '@/markket/product';
@@ -24,7 +24,7 @@ function sortByRecent(items: Product[]) {
 
 export default function ProductListClient({ storeSlug, initialProducts }: ProductListClientProps) {
   const [products, setProducts] = useState<Product[]>(sortByRecent(initialProducts || []));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState((initialProducts || []).length === 0);
   const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {

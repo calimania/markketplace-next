@@ -1,4 +1,4 @@
-export const EMBED_QUERY_KEYS = ['display', 'navbar', 'footer', 'breadcrumbs', 'crumbs'] as const;
+export const EMBED_QUERY_KEYS = ['display', 'navbar', 'footer', 'breadcrumbs', 'crumbs', 'embed', 'bmed'] as const;
 
 export function getCurrentEmbedParams(): URLSearchParams {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -42,4 +42,29 @@ export function appendEmbedParamsToHref(href: string, embedParams = getCurrentEm
   });
 
   return `${url.pathname}${url.search}${url.hash}`;
+}
+
+export function getNonEmbedHref(href: string): string {
+  if (typeof window === 'undefined') return href;
+  if (!href) return href;
+
+  if (
+    href.startsWith('mailto:') ||
+    href.startsWith('tel:') ||
+    href.startsWith('javascript:')
+  ) {
+    return href;
+  }
+
+  const url = new URL(href, window.location.origin);
+
+  EMBED_QUERY_KEYS.forEach((key) => {
+    url.searchParams.delete(key);
+  });
+
+  if (url.origin === window.location.origin) {
+    return `${url.pathname}${url.search}${url.hash}`;
+  }
+
+  return url.toString();
 }

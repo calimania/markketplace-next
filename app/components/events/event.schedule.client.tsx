@@ -1,6 +1,7 @@
 'use client';
 
-import { Text } from '@mantine/core';
+import { Badge, Paper, Stack, Text } from '@mantine/core';
+import { markketColors } from '@/markket/colors.config';
 
 type EventScheduleProps = {
   startDate?: string;
@@ -50,9 +51,14 @@ function formatDateTime(value: string | undefined, timeZone: string) {
 
 export default function EventSchedule({ startDate, endDate, timezone }: EventScheduleProps) {
   const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
+  const normalizedBrowserTimeZone = browserTimeZone.toLowerCase();
+  const browserLooksGenericUtc = normalizedBrowserTimeZone === 'utc' || normalizedBrowserTimeZone === 'etc/utc';
+  const fallbackTimeZone = !browserLooksGenericUtc && isValidTimeZone(browserTimeZone)
+    ? browserTimeZone
+    : 'America/New_York';
   const resolvedTimeZone = isValidTimeZone(timezone)
     ? timezone!
-    : (isValidTimeZone(browserTimeZone) ? browserTimeZone : 'America/New_York');
+    : fallbackTimeZone;
 
   const startsAt = formatDateTime(startDate, resolvedTimeZone);
   const endsAt = formatDateTime(endDate, resolvedTimeZone);
@@ -61,13 +67,31 @@ export default function EventSchedule({ startDate, endDate, timezone }: EventSch
   const usingBrowserFallback = !isValidTimeZone(timezone);
 
   return (
-    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-      <p className="text-sm font-semibold text-gray-900">Schedule</p>
-      <p className="text-sm text-gray-700">Starts: {startsAt}</p>
-      <p className="text-sm text-gray-700">Ends: {endsAt}</p>
-      <Text size="xs" c="dimmed" mt={6}>
-        Timezone: {timezoneLabel}{usingBrowserFallback ? ' (from your browser)' : ''}
-      </Text>
-    </div>
+    <Paper
+      withBorder
+      radius="lg"
+      p="md"
+      mt="md"
+      style={{ borderColor: `${markketColors.sections.events.main}33`, background: '#fff' }}
+    >
+      <Stack gap={8}>
+        <Badge
+          variant="light"
+          radius="sm"
+          style={{
+            width: 'fit-content',
+            background: markketColors.sections.events.light,
+            color: markketColors.sections.events.main,
+          }}
+        >
+          Schedule
+        </Badge>
+        <Text size="sm" fw={600} c={markketColors.neutral.charcoal}>Starts: {startsAt}</Text>
+        <Text size="sm" c={markketColors.neutral.darkGray}>Ends: {endsAt}</Text>
+        <Text size="xs" c="dimmed" mt={2}>
+          Timezone: {timezoneLabel}{usingBrowserFallback ? ' (from your browser)' : ''}
+        </Text>
+      </Stack>
+    </Paper>
   );
 }

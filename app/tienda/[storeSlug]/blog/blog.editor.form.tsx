@@ -9,6 +9,7 @@ import { tiptapToStrapiBlocks } from '@/markket/richtext.transform';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { RichTextValue } from '@/markket/richtext';
+import { readTiendaAuthToken } from '@/markket/helpers.tienda';
 
 type BlogEditorFormProps = {
   storeSlug: string;
@@ -24,17 +25,6 @@ type BlogEditorFormProps = {
     seoSocialImageDocumentId?: string;
   };
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
 
 function slugify(value: string) {
   return value
@@ -91,7 +81,7 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
 
 
   const handleSubmit = async () => {
-    const token = readAuthToken();
+    const token = readTiendaAuthToken();
 
     if (!token) {
       notifications.show({
@@ -139,17 +129,9 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
     try {
       setIsSubmitting(true);
 
-      console.log('[BlogEditorForm] sending', mode === 'new' ? 'POST' : 'PUT', {
-        storeRef,
-        itemDocumentId,
-        payloadKeys: Object.keys(payload),
-      });
-
       const response = mode === 'new'
         ? await tiendaClient.createContent(storeRef, 'article', payload, { token })
         : await tiendaClient.updateContent(storeRef, 'article', itemDocumentId || '', payload, { token });
-
-      console.log('[BlogEditorForm] response', response);
 
       if (!response || (response?.status && response.status >= 400)) {
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
@@ -195,10 +177,9 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       router.replace(destination);
       router.refresh();
     } catch (error) {
-      console.error('[BlogEditorForm] save failed', error);
       notifications.show({
         title: 'Save failed',
-        message: error instanceof Error ? error.message : 'Could not save article. Check console for details.',
+        message: error instanceof Error ? error.message : 'Could not save article.',
         color: 'red',
         autoClose: 8000,
       });

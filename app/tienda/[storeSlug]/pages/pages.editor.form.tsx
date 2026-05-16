@@ -12,6 +12,7 @@ import { tiptapToStrapiBlocks } from '@/markket/richtext.transform';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { RichTextValue } from '@/markket/richtext';
+import { readTiendaAuthToken } from '@/markket/helpers.tienda';
 
 type PageEditorFormProps = {
   storeSlug: string;
@@ -27,17 +28,6 @@ type PageEditorFormProps = {
     seoSocialImageDocumentId?: string;
   };
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
 
 function slugify(value: string) {
   return value
@@ -86,12 +76,15 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
     const dirtySeoDesc = seoDescription !== snap.seoDescription;
     const dirtyContent = JSON.stringify(content) !== JSON.stringify(snap.content);
 
-    setIsDirty(dirtyTitle || dirtySlug || dirtySeoTitle || dirtySeoDesc || dirtyContent);
-  }, [title, slug, seoTitle, seoDescription, content]);
+    const nextDirty = dirtyTitle || dirtySlug || dirtySeoTitle || dirtySeoDesc || dirtyContent;
+    setIsDirty(nextDirty);
+    if (nextDirty && isSaved) {
+      setIsSaved(false);
+    }
+  }, [title, slug, seoTitle, seoDescription, content, isSaved]);
 
   // Track content changes (no-op now, dirty is handled by effect above)
   const handleContentChange = (value: RichTextValue) => {
-    console.log('[PageEditorForm] content changed', { valueType: typeof value, isArray: Array.isArray(value), length: Array.isArray(value) ? value.length : String(value).length });
     setContent(value);
   };
 
@@ -113,9 +106,7 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
   };
 
   const handleSubmit = async () => {
-    const token = readAuthToken();
-
-    console.log('[PageEditorForm] handleSubmit fired', { mode, storeRef, itemDocumentId, hasToken: !!token });
+    const token = readTiendaAuthToken();
 
     if (!token) {
       notifications.show({
@@ -153,25 +144,12 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       },
     };
 
-    console.log('[PageEditorForm] payload about to send', {
-      Title: payload.Title,
-      slug: payload.slug,
-      contentType: typeof payload.Content,
-      contentLength: Array.isArray(payload.Content) ? payload.Content.length : String(payload.Content).length,
-      contentSample: Array.isArray(payload.Content) ? payload.Content.slice(0, 1) : payload.Content,
-      SEO: payload.SEO
-    });
-
     try {
       setIsSubmitting(true);
-
-      console.log('[PageEditorForm] sending', mode === 'new' ? 'POST' : 'PUT', { storeRef, itemDocumentId, payloadKeys: Object.keys(payload) });
 
       const response = mode === 'new'
         ? await tiendaClient.createContent(storeRef, 'page', payload, { token })
         : await tiendaClient.updateContent(storeRef, 'page', itemDocumentId || '', payload, { token });
-
-      console.log('[PageEditorForm] response', response);
 
       if (!response || (response?.status && response.status >= 400)) {
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
@@ -220,10 +198,9 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       router.replace(destination);
       router.refresh();
     } catch (error) {
-      console.error('[PageEditorForm] save failed', error);
       notifications.show({
         title: 'Save failed',
-        message: error instanceof Error ? error.message : 'Could not save page. Check console for details.',
+        message: error instanceof Error ? error.message : 'Could not save page.',
         color: 'red',
         autoClose: 8000,
       });

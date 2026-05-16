@@ -57,7 +57,7 @@ export default function MeStoresPage() {
     if (isLoading) return;
 
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/tienda');
       return;
     }
 
@@ -74,6 +74,10 @@ export default function MeStoresPage() {
     fetchStores({ force: true })
       .finally(() => setIsStoresHydrating(false));
   }, [confirmed, fetchStores, isLoading, router, stores.length]);
+
+  if (!isLoading && !confirmed()) {
+    return null;
+  }
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;

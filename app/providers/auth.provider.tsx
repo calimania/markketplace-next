@@ -152,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storage = getStorage();
     storage?.removeItem('markket.auth');
     clearDraftStorage();
-    router.push(`/auth?next=${next}`);
+    router.push(`/auth/login?next=${encodeURIComponent(next)}`);
   }
 
   const readLocalStorage = () => {
@@ -284,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storage = getStorage();
     storage?.removeItem('markket.auth');
     clearDraftStorage();
-    router.push('/auth/');
+    router.push('/');
   }, [clearDraftStorage, getStorage, router]);
 
   const verifyAndRefreshUser = useCallback(async () => {

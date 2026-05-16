@@ -60,7 +60,7 @@ export default function MeHomePage() {
     if (isLoading) return;
 
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/me');
       return;
     }
 
@@ -171,6 +171,10 @@ export default function MeHomePage() {
       event.target.value = '';
     }
   };
+
+  if (!isLoading && !confirmed()) {
+    return null;
+  }
 
   return (
     <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface tech-vhs-surface">

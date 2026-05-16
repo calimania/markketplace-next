@@ -25,9 +25,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     setIsMaybe(!!_string);
 
     if (!_string) {
-      router.push('/auth/ ');
+      router.replace('/auth/login');
     }
-  }, [isMaybe, router]);
+  }, [router]);
 
   return isMaybe ? <>{children}</> : <SKKELETRON />;
 };

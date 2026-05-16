@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Paper, Title, Text, Button, Group, ThemeIcon } from '@mantine/core';
-import { IconCheck, IconX, IconMailStar, IconHome } from '@tabler/icons-react';
+import { IconCheck, IconX, IconMailStar, IconExternalLink } from '@tabler/icons-react';
 import { markketClient } from '@/markket/api.markket';
 import { markketColors } from '@/markket/colors.config';
+import { getNonEmbedHref } from '@/app/utils/embed.query';
 
 type Props = {
   code: string;
@@ -13,12 +14,20 @@ type Props = {
 
 export default function MagicCodeHandler({ code }: Props) {
   const router = useRouter();
-  const [status, setStatus] = useState<'ready' | 'loading' | 'success' | 'error'>('ready');
-  const [message, setMessage] = useState('Tap verify when you are ready to sign in on this device.');
+  const verifyRequestedRef = useRef(false);
+  const [status, setStatus] = useState<'loading' | 'error'>('loading');
+  const [message, setMessage] = useState('Please wait while we verify your magic link.');
+
+  const openInBrowser = () => {
+    if (typeof window === 'undefined') return;
+    const cleanHref = getNonEmbedHref(window.location.href);
+    window.open(cleanHref, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
-    setStatus('ready');
-    setMessage('Tap verify when you are ready to sign in on this device.');
+    if (!code || verifyRequestedRef.current) return;
+    verifyRequestedRef.current = true;
+    void handleMagicLogin();
   }, [code]);
 
   async function handleMagicLogin() {
@@ -34,9 +43,7 @@ export default function MagicCodeHandler({ code }: Props) {
         localStorage.setItem('markket.auth', JSON.stringify({
           jwt, id: user.id, username: user.username, email: user.email,
         }));
-
-        setStatus('success');
-        setMessage('Your session is ready. Continue to your workspace.');
+        router.replace('/me');
         return;
       }
 
@@ -61,11 +68,6 @@ export default function MagicCodeHandler({ code }: Props) {
         style={{ boxShadow: '0 16px 32px rgba(0,0,0,0.08)' }}
       >
         <Group justify="center" mb="md">
-          {status === 'success' && (
-            <ThemeIcon size={64} radius="xl" variant="gradient" gradient={{ from: markketColors.sections.shop.main, to: markketColors.rosa.main, deg: 135 }}>
-              <IconMailStar size={32} />
-            </ThemeIcon>
-          )}
           {status === 'error' && (
             <ThemeIcon size={64} radius="xl" variant="light" color="pink">
               <IconX size={32} />
@@ -76,50 +78,28 @@ export default function MagicCodeHandler({ code }: Props) {
               <IconCheck size={32} />
             </ThemeIcon>
           )}
-          {status === 'ready' && (
-            <ThemeIcon size={64} radius="xl" variant="gradient" gradient={{ from: markketColors.sections.shop.main, to: markketColors.rosa.main, deg: 135 }}>
-              <IconMailStar size={32} />
-            </ThemeIcon>
-          )}
         </Group>
         <Title ta="center" fw={900} mb="xs">
-          {status === 'ready' && 'Verify Magic Link'}
           {status === 'loading' && 'Logging you in...'}
-          {status === 'success' && 'Welcome!'}
           {status === 'error' && 'Something went wrong'}
         </Title>
         <Text ta="center" c="dimmed" mb="lg">
           {message}
         </Text>
 
-        {status === 'ready' && (
-          <Group grow>
-            <Button
-              fullWidth
-              size="lg"
-              h={52}
-              fw={700}
-              radius="xl"
-              leftSection={<IconCheck size={18} />}
-              variant="gradient"
-              gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
-              onClick={handleMagicLogin}
-            >
-              Verify and Sign In
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              h={52}
-              fw={700}
-              radius="xl"
-              variant="default"
-              onClick={() => router.replace('/auth/magic')}
-            >
-              Request New Link
-            </Button>
-          </Group>
-        )}
+        <Button
+          fullWidth
+          size="md"
+          h={44}
+          fw={600}
+          radius="xl"
+          mb="md"
+          variant="outline"
+          leftSection={<IconExternalLink size={16} />}
+          onClick={openInBrowser}
+        >
+          Open in Safari or your default browser
+        </Button>
 
         {status === 'error' && (
           <Button
@@ -135,28 +115,6 @@ export default function MagicCodeHandler({ code }: Props) {
           >
             Back to Magic Link
           </Button>
-        )}
-        {status === 'success' && (
-          <Group grow mt="md">
-            <Button
-              variant="light"
-              radius="xl"
-              style={{ color: markketColors.sections.shop.main, background: markketColors.sections.shop.light }}
-              leftSection={<IconHome size={16} />}
-              onClick={() => router.push('/me')}
-            >
-              My Profile
-            </Button>
-            <Button
-              leftSection={<IconCheck size={16} />}
-              radius="xl"
-              variant="gradient"
-              gradient={{ from: markketColors.sections.shop.main, to: markketColors.rosa.main, deg: 135 }}
-              onClick={() => router.push('/tienda/new')}
-            >
-              Create Store
-            </Button>
-          </Group>
         )}
       </Paper>
     </Container>

@@ -41,6 +41,30 @@ const pickSmallestImage = (...values: Array<string | undefined | null>) => {
   return values.find((value): value is string => Boolean(value));
 };
 
+const hasValidTimeZone = (value?: string) => {
+  if (!value) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const formatEventDate = (value?: string, timeZone?: string) => {
+  if (!value) return 'TBD';
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'TBD';
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    ...(hasValidTimeZone(timeZone) ? { timeZone } : {}),
+  }).format(parsed);
+};
+
 type HomePageProps = {
   store?: Store;
   page?: Page;
@@ -191,12 +215,12 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                     <div>
                       <SectionLabel num="02" label="Blog" color={markketColors.sections.blog.main} />
                       <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
-                        Latest Posts
+                        Latest Stories
                       </Title>
                       <Text c="dimmed">Fresh writing from creators across the community.</Text>
                     </div>
                     <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                      See All Posts
+                      See all stories
                     </Button>
                   </Group>
 
@@ -281,7 +305,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                               fw={500}
                               style={{ color: markketColors.sections.blog.main, marginTop: rem(4) }}
                             >
-                              Read Post →
+                              Read story →
                             </Text>
                           </Stack>
                         </Card>
@@ -312,9 +336,9 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               <div>
                 <SectionLabel num="03" label="Events" color={markketColors.sections.events.main} />
                 <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
-                  Participate
+                  Join upcoming events
                 </Title>
-                <Text c="dimmed">Workshops, webinars, and meetups</Text>
+                <Text c="dimmed">Workshops, launches, and meetups from community stores.</Text>
               </div>
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
@@ -337,14 +361,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                   );
                   const storeSlug = (event as any)?.stores?.[0]?.slug;
                   const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
-                  const eventDate = event.startDate
-                    ? new Intl.DateTimeFormat('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      timeZone: 'UTC',
-                    }).format(new Date(event.startDate))
-                    : 'TBD';
+                  const eventDate = formatEventDate(event.startDate, event.timezone);
 
                   return (
                     <Card
@@ -413,7 +430,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                           fw={500}
                           style={{ color: markketColors.sections.events.main, marginTop: 'auto' }}
                         >
-                          Learn More →
+                          View event →
                         </Text>
                       </Stack>
                     </Card>
@@ -594,7 +611,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
                   From the Community
                 </Title>
-                <Text c="dimmed">Fixed content about the creators</Text>
+                <Text c="dimmed">Evergreen pages from creators, studios, and brands.</Text>
               </div>
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">

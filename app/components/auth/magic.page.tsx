@@ -18,12 +18,13 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconMailStar, IconSparkles } from '@tabler/icons-react';
+import { IconCheck, IconExternalLink, IconMailStar, IconSparkles } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { type Page, type Store } from '@/markket/index.d';
 import PageContent from '../ui/page.content';
 import { markketColors } from '@/markket/colors.config';
 import { useAuth } from '@/app/providers/auth.provider';
+import { getNonEmbedHref } from '@/app/utils/embed.query';
 
 interface MagicLinkForm {
   email: string;
@@ -41,6 +42,12 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
   const router = useRouter();
   const { confirmed, isLoading } = useAuth();
   const redirectTarget = store?.slug ? `/store/${store.slug}` : '/';
+
+  const openInBrowser = () => {
+    if (typeof window === 'undefined') return;
+    const cleanHref = getNonEmbedHref(window.location.href);
+    window.open(cleanHref, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -205,6 +212,18 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                     h={58}
                     fw={700}
                     radius="xl"
+                    variant="outline"
+                    leftSection={<IconExternalLink size={18} />}
+                    onClick={openInBrowser}
+                  >
+                    Open in Safari or your default browser
+                  </Button>
+                  <Button
+                    fullWidth
+                    size="lg"
+                    h={58}
+                    fw={700}
+                    radius="xl"
                     variant="light"
                     onClick={() => router.replace(redirectTarget)}
                   >
@@ -269,6 +288,19 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                       gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
                     >
                       Send Magic Link
+                    </Button>
+
+                    <Button
+                      fullWidth
+                      size="md"
+                      h={46}
+                      fw={600}
+                      radius="xl"
+                      variant="outline"
+                      leftSection={<IconExternalLink size={16} />}
+                      onClick={openInBrowser}
+                    >
+                      Open this page in Safari or your default browser
                     </Button>
 
                     {state.error && (

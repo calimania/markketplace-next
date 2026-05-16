@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
+import { readTiendaAuthToken } from '@/markket/helpers.tienda';
 
 type ProductEditorFormProps = {
   storeSlug: string;
@@ -23,17 +24,6 @@ type ProductEditorFormProps = {
     seoSocialImageDocumentId?: string;
   };
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
 
 function slugify(value: string) {
   return value
@@ -83,7 +73,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
   }, [name, slug, description, seoTitle, seoDescription, sourceUrl]);
 
   const handleSubmit = async () => {
-    const token = readAuthToken();
+    const token = readTiendaAuthToken();
 
     if (!token) {
       notifications.show({ title: 'Session expired', message: 'Please sign in again.', color: 'red' });
