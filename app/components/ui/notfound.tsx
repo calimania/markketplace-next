@@ -4,11 +4,6 @@ import { Container, Title, Text, Button, Group, Paper, Stack, Box, Badge } from 
 import { IconHomeStar, IconArrowLeft } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { strapiClient } from '@/markket/api.strapi';
-import { markketplace } from '@/markket/config';
-import { Page } from '@/markket';
-import { useEffect, useState, useCallback } from 'react';
-import PageContent from '@/app/components/ui/page.content';
 import Image from 'next/image';
 import { markketColors } from '@/markket/colors.config';
 import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
@@ -16,21 +11,6 @@ import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 export default function NotFound() {
   const router = useRouter();
   const embedded = useEmbeddedMode();
-  const [page, setPage] = useState({} as Page);
-  const [loading, setLoading] = useState(true);
-
-  const fetchPage = useCallback(async () => {
-    try {
-      const response = await strapiClient.getPage('404', markketplace.slug);
-      setPage(response?.data?.[0] as Page);
-    } finally {
-      setLoading(false);
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchPage();
-  }, [fetchPage]);
 
   return (
     <Box
@@ -80,24 +60,14 @@ export default function NotFound() {
               404
             </Title>
 
-            {page?.Title && (
-              <Title order={2} size="h2" style={{ color: markketColors.neutral.charcoal }}>
-                {page.Title}
+            <Stack gap="sm" maw={560}>
+              <Title order={2} size={embedded ? 'h3' : 'h2'} style={{ color: markketColors.neutral.charcoal }}>
+                This page has moved or no longer exists
               </Title>
-            )}
-
-            {page?.Content && <PageContent params={{ page }} />}
-
-            {!loading && !page?.Content && (
-              <Stack gap="sm" maw={560}>
-                <Title order={2} size={embedded ? 'h3' : 'h2'} style={{ color: markketColors.neutral.charcoal }}>
-                  This page has moved or no longer exists
-                </Title>
-                <Text size={embedded ? 'sm' : 'md'} c="dimmed" style={{ lineHeight: 1.65 }}>
-                  The link may be outdated, or the content was unpublished. Use the actions below to return to a safe route.
-                </Text>
-              </Stack>
-            )}
+              <Text size={embedded ? 'sm' : 'md'} c="dimmed" style={{ lineHeight: 1.65 }}>
+                The link may be outdated, or the content was unpublished. Use the actions below to return to a safe route.
+              </Text>
+            </Stack>
 
             <Group justify="center" gap="md" mt={embedded ? 2 : 'sm'}>
               <Button
@@ -128,7 +98,7 @@ export default function NotFound() {
               )}
             </Group>
 
-            {!embedded && page?.SEO?.socialImage?.url && (
+            {!embedded && (
               <Paper
                 mt="sm"
                 radius="md"
@@ -138,10 +108,10 @@ export default function NotFound() {
                 }}
               >
                 <Image
-                  src={page.SEO.socialImage.url}
-                  width={page.SEO.socialImage.width || 600}
-                  height={page.SEO.socialImage.height || 400}
-                  alt={page.SEO.socialImage.alternativeText || 'Page not found'}
+                  src="https://markketplace.nyc3.digitaloceanspaces.com/uploads/58cff8804c9937ac807737bd8e713acd.png"
+                  width={1200}
+                  height={630}
+                  alt="Page not found"
                   style={{ display: 'block' }}
                 />
               </Paper>
