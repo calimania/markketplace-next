@@ -711,13 +711,13 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
               </Button>
               <Button
                 component="a"
-                href="/stores"
+                href="/about"
                 size="lg"
                 radius="md"
                 variant="outline"
                 style={{ borderColor: 'rgba(255,255,255,0.6)', color: 'white' }}
               >
-                Browse stores
+                About & Policies
               </Button>
             </Group>
           </Stack>

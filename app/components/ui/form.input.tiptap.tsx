@@ -388,7 +388,10 @@ const ContentEditor = ({
 
     if (currentContent !== value) {
       const parsedMarkdown = markdownToHtml(editor, value as string);
-      editor.commands.setContent(parsedMarkdown, false, { preserveWhitespace: 'full' });
+      editor.commands.setContent(parsedMarkdown, {
+        emitUpdate: false,
+        parseOptions: { preserveWhitespace: 'full' },
+      });
     }
   }, [editor, value, format]);
 
