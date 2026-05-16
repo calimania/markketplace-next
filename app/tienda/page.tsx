@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Badge, Container, Title, Text, Paper, Stack, Group, Button, Skeleton } from '@mantine/core';
+import { Badge, Container, Title, Text, Paper, Stack, Group, Button, Skeleton, SegmentedControl } from '@mantine/core';
 import { IconArrowLeft, IconChevronRight, IconEye, IconEyeOff, IconPlus } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
@@ -27,30 +27,62 @@ export default function MeStoresPage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
   const [isStoresHydrating, setIsStoresHydrating] = useState(true);
+  const [sortMode, setSortMode] = useState<'alpha' | 'recent'>('alpha');
+  const [visibilityMode, setVisibilityMode] = useState<'all' | 'published' | 'draft'>('all');
 
   const uniqueStores = stores
     .filter((store, index, array) => {
       const identity = store.documentId || store.slug;
       if (!identity) return true;
       return array.findIndex((candidate) => (candidate.documentId || candidate.slug) === identity) === index;
-    })
-    .sort((a, b) => (a.title || a.slug || '').localeCompare(b.title || b.slug || ''));
+    });
+
+  const visibleStores = uniqueStores.filter((store) => {
+    if (visibilityMode === 'all') return true;
+    const published = isStorePublished(store as StoreStatusShape);
+    return visibilityMode === 'published' ? published : !published;
+  });
+
+  const sortedStores = [...visibleStores].sort((a, b) => {
+    if (sortMode === 'recent') {
+      const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      return bTime - aTime;
+    }
+
+    return (a.title || a.slug || '').localeCompare(b.title || b.slug || '');
+  });
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/tienda');
+      return;
+    }
+
+    if (stores.length > 0) {
+      // Reuse existing data immediately (e.g. browser back-swipe) and refresh in background.
+      setIsStoresHydrating(false);
+      fetchStores().catch((error) => {
+        console.error('Failed to refresh stores in background:', error);
+      });
       return;
     }
 
     setIsStoresHydrating(true);
-    fetchStores()
+    fetchStores({ force: true })
       .finally(() => setIsStoresHydrating(false));
-  }, [confirmed, fetchStores, router]);
+  }, [confirmed, fetchStores, isLoading, router, stores.length]);
+
+  if (!isLoading && !confirmed()) {
+    return null;
+  }
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
 
-    const statusSnapshot = uniqueStores.map((store) => {
+    const statusSnapshot = sortedStores.map((store) => {
       const typed = store as StoreStatusShape;
       return {
         slug: store.slug,
@@ -64,10 +96,10 @@ export default function MeStoresPage() {
     if (statusSnapshot.length > 0) {
       console.table(statusSnapshot);
     }
-  }, [uniqueStores]);
+  }, [sortedStores]);
 
   return (
-    <Container size="md" py="xl">
+    <Container size="md" py="xl" className="tech-vhs-surface">
       <Stack gap="md" mb="lg">
         <TinyBreadcrumbs
           items={[
@@ -91,6 +123,33 @@ export default function MeStoresPage() {
             <Button component={Link} href="/me/store/new" leftSection={<IconPlus size={16} />}>
               Create Store
             </Button>
+          </Group>
+        </Group>
+
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+          <Text size="sm" c="dimmed">
+            {sortedStores.length} store{sortedStores.length === 1 ? '' : 's'}
+          </Text>
+          <Group gap="xs" wrap="wrap">
+            <SegmentedControl
+              size="xs"
+              value={visibilityMode}
+              onChange={(value) => setVisibilityMode(value as 'all' | 'published' | 'draft')}
+              data={[
+                { label: 'All', value: 'all' },
+                { label: 'Published', value: 'published' },
+                { label: 'Draft', value: 'draft' },
+              ]}
+            />
+            <SegmentedControl
+              size="xs"
+              value={sortMode}
+              onChange={(value) => setSortMode(value as 'alpha' | 'recent')}
+              data={[
+                { label: 'A-Z', value: 'alpha' },
+                { label: 'Recent', value: 'recent' },
+              ]}
+            />
           </Group>
         </Group>
       </Stack>
@@ -120,7 +179,7 @@ export default function MeStoresPage() {
             </Stack>
           </Paper>
         )}
-        {!isLoading && !isStoresHydrating && uniqueStores.length === 0 && (
+        {!isLoading && !isStoresHydrating && sortedStores.length === 0 && (
           <Paper
             withBorder
             p="lg"
@@ -141,7 +200,7 @@ export default function MeStoresPage() {
             </Stack>
           </Paper>
         )}
-        {!isLoading && !isStoresHydrating && uniqueStores.map((store, index) => (
+        {!isLoading && !isStoresHydrating && sortedStores.map((store, index) => (
           <Link
             key={store.documentId || `${store.slug || 'store'}-${index}`}
             href={`/tienda/${store.slug}`}

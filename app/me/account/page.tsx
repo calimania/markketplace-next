@@ -11,17 +11,30 @@ import SecuritySettings from '@/app/components/dashboard/settings.security';
 
 export default function MeAccountPage() {
   const router = useRouter();
-  const { confirmed } = useAuth();
+  const { confirmed, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
+    if (isLoading) return;
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/me/account');
     }
-  }, [confirmed, router]);
+  }, [confirmed, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <Container size="md" py="xl" className="tech-vhs-surface">
+        <Text c="dimmed">Checking your session...</Text>
+      </Container>
+    );
+  }
+
+  if (!confirmed()) {
+    return null;
+  }
 
   return (
-    <Container size="md" py="xl">
+    <Container size="md" py="xl" className="tech-vhs-surface">
       <Group justify="space-between" mb="lg">
         <Stack gap={2}>
           <Title order={1}>Account</Title>

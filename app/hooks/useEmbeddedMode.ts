@@ -10,10 +10,16 @@ function readEmbedFromQuery(): boolean | undefined {
   const display = (params.get('display') || '').trim().toLowerCase();
   const navbar = (params.get('navbar') || '').trim().toLowerCase();
   const footer = (params.get('footer') || '').trim().toLowerCase();
+  const embed = (params.get('embed') || params.get('bmed') || '').trim().toLowerCase();
 
   if (display) {
     if (display.startsWith('embed')) return true;
     if (display === 'full' || display === 'default' || display === 'web' || display === 'show') return false;
+  }
+
+  if (embed) {
+    if (['1', 'true', 'yes', 'on', 'embed'].includes(embed)) return true;
+    if (['0', 'false', 'no', 'off'].includes(embed)) return false;
   }
 
   if (navbar === 'hide' || footer === 'hide') return true;

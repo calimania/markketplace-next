@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Paper, Title, Text, Button, Group, ThemeIcon } from '@mantine/core';
-import { IconCheck, IconX, IconMailStar, IconHome } from '@tabler/icons-react';
+import { IconCheck, IconX, IconMailStar, IconExternalLink } from '@tabler/icons-react';
 import { markketClient } from '@/markket/api.markket';
 import { markketColors } from '@/markket/colors.config';
+import { getNonEmbedHref } from '@/app/utils/embed.query';
 
 type Props = {
   code: string;
@@ -13,50 +14,50 @@ type Props = {
 
 export default function MagicCodeHandler({ code }: Props) {
   const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
+  const verifyRequestedRef = useRef(false);
+  const [status, setStatus] = useState<'loading' | 'error'>('loading');
+  const [message, setMessage] = useState('Please wait while we verify your magic link.');
+
+  const openInBrowser = () => {
+    if (typeof window === 'undefined') return;
+    const cleanHref = getNonEmbedHref(window.location.href);
+    window.open(cleanHref, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
-    const markket = new markketClient();
-    const redirectToMagicForm = () => {
-      router.replace('/auth/magic');
-    };
-
-    async function handleMagicLogin() {
-      setStatus('loading');
-      setMessage('Please wait while we log you in.');
-
-      try {
-        const result = await markket.verifyMagicCode(code);
-        const { jwt, user } = result;
-
-        if (jwt && user?.id) {
-          localStorage.setItem('markket.auth', JSON.stringify({
-            jwt, id: user.id, username: user.username, email: user.email,
-          }));
-
-          setStatus('success');
-          setMessage('You are logged in. Taking you to your workspace...');
-          window.location.replace('/me');
-          return;
-        }
-
-        setStatus('error');
-        setMessage('Login did not return a valid session. Please try again.');
-        setTimeout(redirectToMagicForm, 900);
-      } catch (err) {
-        setStatus('error');
-        setMessage(
-          err && typeof err === 'object' && 'message' in err
-            ? (err.message as string)
-            : 'Oops! Something went wrong.',
-        );
-        setTimeout(redirectToMagicForm, 900);
-      }
-    }
-
-    handleMagicLogin();
+    if (!code || verifyRequestedRef.current) return;
+    verifyRequestedRef.current = true;
+    void handleMagicLogin();
   }, [code]);
+
+  async function handleMagicLogin() {
+    const markket = new markketClient();
+    setStatus('loading');
+    setMessage('Please wait while we verify your magic link.');
+
+    try {
+      const result = await markket.verifyMagicCode(code);
+      const { jwt, user } = result;
+
+      if (jwt && user?.id) {
+        localStorage.setItem('markket.auth', JSON.stringify({
+          jwt, id: user.id, username: user.username, email: user.email,
+        }));
+        router.replace('/me');
+        return;
+      }
+
+      setStatus('error');
+      setMessage('Login did not return a valid session. Please request a new magic link.');
+    } catch (err) {
+      setStatus('error');
+      setMessage(
+        err && typeof err === 'object' && 'message' in err
+          ? (err.message as string)
+          : 'This magic link could not be verified. Please request a new one.',
+      );
+    }
+  }
 
   return (
     <Container size={420} py={80}>
@@ -67,11 +68,6 @@ export default function MagicCodeHandler({ code }: Props) {
         style={{ boxShadow: '0 16px 32px rgba(0,0,0,0.08)' }}
       >
         <Group justify="center" mb="md">
-          {status === 'success' && (
-            <ThemeIcon size={64} radius="xl" variant="gradient" gradient={{ from: markketColors.sections.shop.main, to: markketColors.rosa.main, deg: 135 }}>
-              <IconMailStar size={32} />
-            </ThemeIcon>
-          )}
           {status === 'error' && (
             <ThemeIcon size={64} radius="xl" variant="light" color="pink">
               <IconX size={32} />
@@ -85,13 +81,26 @@ export default function MagicCodeHandler({ code }: Props) {
         </Group>
         <Title ta="center" fw={900} mb="xs">
           {status === 'loading' && 'Logging you in...'}
-          {status === 'success' && 'Welcome!'}
           {status === 'error' && 'Something went wrong'}
         </Title>
         <Text ta="center" c="dimmed" mb="lg">
-          {status === 'loading' && 'Please wait while we verify your magic link.'}
-          {status !== 'loading' && message}
+          {message}
         </Text>
+
+        <Button
+          fullWidth
+          size="md"
+          h={44}
+          fw={600}
+          radius="xl"
+          mb="md"
+          variant="outline"
+          leftSection={<IconExternalLink size={16} />}
+          onClick={openInBrowser}
+        >
+          Open in Safari or your default browser
+        </Button>
+
         {status === 'error' && (
           <Button
             fullWidth
@@ -106,28 +115,6 @@ export default function MagicCodeHandler({ code }: Props) {
           >
             Back to Magic Link
           </Button>
-        )}
-        {status === 'success' && (
-          <Group grow mt="md">
-            <Button
-              variant="light"
-              radius="xl"
-              style={{ color: markketColors.sections.shop.main, background: markketColors.sections.shop.light }}
-              leftSection={<IconHome size={16} />}
-              onClick={() => router.push('/me')}
-            >
-              My Profile
-            </Button>
-            <Button
-              leftSection={<IconCheck size={16} />}
-              radius="xl"
-              variant="gradient"
-              gradient={{ from: markketColors.sections.shop.main, to: markketColors.rosa.main, deg: 135 }}
-              onClick={() => router.push('/tienda/new')}
-            >
-              Create Store
-            </Button>
-          </Group>
         )}
       </Paper>
     </Container>

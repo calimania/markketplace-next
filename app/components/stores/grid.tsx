@@ -1,3 +1,5 @@
+'use client';
+
 import { SimpleGrid } from '@mantine/core';
 import { StoreCard, type StoreCardProps } from './card';
 

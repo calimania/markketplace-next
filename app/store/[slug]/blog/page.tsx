@@ -1,4 +1,4 @@
-import { Container, Text, Stack, SimpleGrid, Paper, Group, Badge } from "@mantine/core";
+import { Container, Text, Stack, SimpleGrid, Paper, Group, Badge, Box, Title } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
 import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
@@ -11,7 +11,9 @@ import { IconArticle } from '@tabler/icons-react';
 import StorePageHeader from "@/app/components/ui/store.page.header";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from '@/markket/colors.config';
-import { cache } from 'react';
+import { cache, } from 'react';
+import Link from 'next/link';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getBlogPageCached = cache((slug: string) => strapiClient.getPage('blog', slug));
@@ -61,6 +63,15 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   }, slug);
 
   const posts = postsResponse?.data || [] as Article[];
+  const featuredPost = posts[0] as Article | undefined;
+  const remainingPosts = posts.slice(1);
+  const featuredImage = featuredPost?.cover?.formats?.large?.url
+    || featuredPost?.cover?.formats?.medium?.url
+    || featuredPost?.cover?.url
+    || featuredPost?.SEO?.socialImage?.url;
+  const featuredExcerpt = featuredPost
+    ? (featuredPost?.SEO?.metaDescription || stripMarkdown(richTextToPlainText(featuredPost?.Content)) || '').slice(0, 240)
+    : '';
 
   const description = page?.SEO?.metaDescription || `Blog posts for ${store?.title || store?.SEO?.metaTitle}`;
 
@@ -85,16 +96,59 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
         )}
 
         {posts.length > 0 ? (
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-            {posts.map((post, index) => (
-              <BlogPostCard
-                key={(post as Article)?.id}
-                post={post as Article}
-                prefix={`${slug}/blog`}
-                imageLoading={index === 0 ? 'eager' : 'lazy'}
-              />
-            ))}
-          </SimpleGrid>
+          <Stack gap="xl">
+            {featuredPost && (
+              <Paper withBorder radius="xl" style={{ overflow: 'hidden', borderColor: `${markketColors.sections.blog.main}33` }}>
+                <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
+                  <Box
+                    style={{
+                      minHeight: 280,
+                      background: featuredImage
+                        ? `url(${featuredImage}) center/cover no-repeat`
+                        : `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #ffffff 100%)`,
+                    }}
+                  />
+                  <Stack gap="md" p="xl" justify="center">
+                    <Badge size="sm" radius="xl" variant="light" style={{ width: 'fit-content', background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}>
+                      Featured Story
+                    </Badge>
+                    <Title order={2} style={{ color: markketColors.neutral.charcoal }}>
+                      {featuredPost.Title}
+                    </Title>
+                    {featuredExcerpt && (
+                      <Text c="dimmed" size="sm" style={{ lineHeight: 1.7 }}>
+                        {featuredExcerpt}{featuredExcerpt.length >= 240 ? '...' : ''}
+                      </Text>
+                    )}
+                    <Link
+                      href={`/${slug}/blog/${featuredPost.slug}`}
+                      style={{
+                        color: markketColors.sections.blog.main,
+                        width: 'fit-content',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Read feature
+                    </Link>
+                  </Stack>
+                </SimpleGrid>
+              </Paper>
+            )}
+
+            {remainingPosts.length > 0 && (
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+                {remainingPosts.map((post) => (
+                  <BlogPostCard
+                    key={(post as Article)?.id}
+                    post={post as Article}
+                    prefix={`${slug}/blog`}
+                    imageLoading="lazy"
+                  />
+                ))}
+              </SimpleGrid>
+            )}
+          </Stack>
         ) : (
             <Paper
               withBorder

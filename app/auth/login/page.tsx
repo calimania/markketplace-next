@@ -1,5 +1,6 @@
 import LoginPage from '@/app/components/auth/login.page';
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { strapiClient } from '@/markket/api.strapi';
 import { Page } from '@/markket/page';
@@ -19,4 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 };
 
-export default LoginPage;
+export default function LoginPageRoute() {
+  return (
+    <Suspense fallback={<div />}>
+      <LoginPage />
+    </Suspense>
+  );
+}

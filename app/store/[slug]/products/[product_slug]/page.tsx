@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
+import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 
 interface ProductSlugPageProps {
   params: Promise<{ slug: string; product_slug: string }>;
@@ -16,10 +17,13 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
   const { data } = await strapiClient.getProduct(product_slug, slug);
   const product = data?.[0] as Product;
   const productName = product?.Name || 'Product';
-  const price = product?.usd_price ? `$${product.usd_price}` : '';
-  const description = product?.Description
-    ? product.Description.substring(0, 150).replace(/<[^>]*>/g, '')
-    : `${productName}${price ? ' - ' + price : ''}. Available now.`;
+  const price = typeof product?.usd_price === 'number' && product.usd_price > 0
+    ? `$${(product.usd_price / 100).toFixed(2)}`
+    : '';
+  const plainDescription = stripMarkdown(richTextToPlainText(product?.Description as string));
+  const description = product?.SEO?.metaDescription
+    || (plainDescription ? (plainDescription.length > 150 ? `${plainDescription.slice(0, 149)}...` : plainDescription) : '')
+    || `${productName}${price ? ' - ' + price : ''}. Available now.`;
 
   return generateSEOMetadata({
     slug,

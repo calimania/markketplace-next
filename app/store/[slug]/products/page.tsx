@@ -82,13 +82,17 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const products = productsResponse?.data || [];
 
   const title = StoreProductPage?.Title || `${store?.title} Products`;
+  const description =
+    page?.SEO?.metaDescription ||
+    store?.SEO?.metaDescription ||
+    `Discover the latest collection from ${store?.title || 'this storefront'}, from signature pieces to fresh arrivals.`;
 
   return (
     <Container size="lg" py="xl">
       <StorePageHeader
         icon={<IconShoppingBag size={48} />}
         title={title}
-        description="Discover the current collection from this storefront, from signature pieces to fresh arrivals."
+        description={description}
         page={page}
         backgroundImage={page?.SEO?.socialImage?.url || store?.SEO?.socialImage?.url || store?.Cover?.url}
         iconColor={markketColors.sections.shop.main}

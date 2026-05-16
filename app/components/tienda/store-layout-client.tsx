@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button, Container, Paper, Skeleton, Stack, Text, ThemeIcon } from '@mantine/core';
 import { IconLock } from '@tabler/icons-react';
@@ -24,18 +24,50 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
   const router = useRouter();
   const pathname = usePathname();
   const { confirmed, isLoading, stores, fetchStores } = useAuth();
+  const [ownershipResolved, setOwnershipResolved] = useState(false);
 
   const isConfirmed = confirmed();
   const isAuthorized = useMemo(() => {
     return stores.some((candidate) => candidate.slug === store.slug || candidate.documentId === store.documentId);
   }, [stores, store.documentId, store.slug]);
 
-  const ownershipLoading = isConfirmed && stores.length === 0;
+  const ownershipLoading = false;
+  const shouldShowUnauthorized = isConfirmed && ownershipResolved && stores.length > 0 && !isAuthorized;
 
   useEffect(() => {
-    if (!isLoading && isConfirmed && stores.length === 0) {
-      fetchStores({ force: true });
+    let active = true;
+
+    if (!isConfirmed) {
+      setOwnershipResolved(false);
+      return () => {
+        active = false;
+      };
     }
+
+    if (isLoading) {
+      return () => {
+        active = false;
+      };
+    }
+
+    const resolveOwnership = async () => {
+      if (stores.length > 0) {
+        if (active) setOwnershipResolved(true);
+        return;
+      }
+
+      try {
+        await fetchStores({ force: true });
+      } finally {
+        if (active) setOwnershipResolved(true);
+      }
+    };
+
+    resolveOwnership();
+
+    return () => {
+      active = false;
+    };
   }, [fetchStores, isConfirmed, isLoading, stores.length]);
 
   useEffect(() => {
@@ -43,29 +75,36 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     if (isConfirmed) return;
 
     const next = encodeURIComponent(pathname || `/tienda/${store.slug}`);
-    router.replace(`/auth?next=${next}`);
+    router.replace(`/auth/login?next=${next}`);
   }, [isConfirmed, isLoading, pathname, router, store.slug]);
 
   if (isLoading || ownershipLoading || !isConfirmed) {
     return (
       <>
         <CompactBreadcrumbs storeSlug={store.slug} />
-        <Container size="md" py="xl">
+        <Container size="md" py="xl" className="tech-vhs-surface">
           <Stack gap="md">
-            <Paper withBorder radius="md" p="md">
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
               <Stack gap="sm">
-                <Text c="dimmed" size="sm">Checking access...</Text>
-                <Skeleton height={14} width="45%" radius="xl" />
-                <Skeleton height={10} width="70%" radius="xl" />
+                <Skeleton height={14} width="38%" radius={0} />
+                <Skeleton height={10} width="64%" radius={0} />
               </Stack>
             </Paper>
 
-            <Paper withBorder radius="md" p="md">
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
               <Stack gap="sm">
-                <Skeleton height={16} width="35%" radius="xl" />
-                <Skeleton height={12} radius="xl" />
-                <Skeleton height={12} width="85%" radius="xl" />
-                <Skeleton height={12} width="60%" radius="xl" />
+                <Skeleton height={16} width="28%" radius={0} />
+                <Skeleton height={11} radius={0} />
+                <Skeleton height={11} width="88%" radius={0} />
+                <Skeleton height={11} width="62%" radius={0} />
+              </Stack>
+            </Paper>
+
+            <Paper withBorder radius="md" p="md" className="tienda-panel">
+              <Stack gap="xs">
+                <Skeleton height={12} width="22%" radius={0} />
+                <Skeleton height={56} radius={0} />
+                <Skeleton height={56} radius={0} />
               </Stack>
             </Paper>
           </Stack>
@@ -74,9 +113,9 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     );
   }
 
-  if (!isAuthorized) {
+  if (shouldShowUnauthorized) {
     return (
-      <Container size="sm" py="xl">
+      <Container size="sm" py="xl" className="tech-vhs-surface">
         <Paper withBorder radius="md" p="xl">
           <Stack align="center" gap="sm">
             <ThemeIcon size={52} radius="xl" variant="light" color="red">
@@ -96,7 +135,7 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
   return (
     <>
       <CompactBreadcrumbs storeSlug={store.slug} />
-      <Container size="md" py="xl">
+      <Container size="md" py="xl" className="tech-vhs-surface">
         <Stack gap="md">
           {children}
         </Stack>

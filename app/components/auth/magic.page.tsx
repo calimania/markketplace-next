@@ -18,12 +18,13 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconMailStar, IconSparkles } from '@tabler/icons-react';
+import { IconCheck, IconExternalLink, IconMailStar, IconSparkles } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { type Page, type Store } from '@/markket/index.d';
 import PageContent from '../ui/page.content';
 import { markketColors } from '@/markket/colors.config';
 import { useAuth } from '@/app/providers/auth.provider';
+import { getNonEmbedHref } from '@/app/utils/embed.query';
 
 interface MagicLinkForm {
   email: string;
@@ -37,12 +38,51 @@ interface MagicLinkPageProps {
 export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState<{ success: boolean; error: string | null }>({ success: false, error: null });
+  const [redirectIn, setRedirectIn] = useState<number | null>(null);
   const router = useRouter();
-  const { maybe } = useAuth();
+  const { confirmed, isLoading } = useAuth();
+  const redirectTarget = store?.slug ? `/store/${store.slug}` : '/';
+
+  const openInBrowser = () => {
+    if (typeof window === 'undefined') return;
+    const cleanHref = getNonEmbedHref(window.location.href);
+    window.open(cleanHref, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
-    if (maybe()) router.replace('/me');
-  }, [maybe, router]);
+    if (isLoading) return;
+    if (!confirmed()) return;
+    router.replace('/me');
+  }, [confirmed, isLoading, router]);
+
+  useEffect(() => {
+    if (!state.success) {
+      setRedirectIn(null);
+      return;
+    }
+
+    setRedirectIn(4);
+
+    const countdownInterval = window.setInterval(() => {
+      setRedirectIn((prev) => {
+        if (prev === null) return prev;
+        if (prev <= 1) {
+          window.clearInterval(countdownInterval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    const redirectTimer = window.setTimeout(() => {
+      router.replace(redirectTarget);
+    }, 4000);
+
+    return () => {
+      window.clearInterval(countdownInterval);
+      window.clearTimeout(redirectTimer);
+    };
+  }, [redirectTarget, router, state.success]);
 
   const form = useForm<MagicLinkForm>({
     initialValues: {
@@ -158,11 +198,37 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                   <Text ta="center" maw={360} style={{ color: markketColors.neutral.darkGray, lineHeight: 1.7 }}>
                     We emailed you a magic link. Tap it from your phone or this browser to sign in — no password needed.
                   </Text>
+                  <Text size="sm" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
+                    Redirecting you in {redirectIn ?? 4}s so this tab can close out cleanly.
+                  </Text>
                   <Text size="xs" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
                     Can't find it? Check your spam folder.
                   </Text>
                 </Stack>
                 <Stack w="100%" gap="sm">
+                  <Button
+                    fullWidth
+                    size="lg"
+                    h={58}
+                    fw={700}
+                    radius="xl"
+                    variant="outline"
+                    leftSection={<IconExternalLink size={18} />}
+                    onClick={openInBrowser}
+                  >
+                    Open in Safari or your default browser
+                  </Button>
+                  <Button
+                    fullWidth
+                    size="lg"
+                    h={58}
+                    fw={700}
+                    radius="xl"
+                    variant="light"
+                    onClick={() => router.replace(redirectTarget)}
+                  >
+                    Go Now
+                  </Button>
                   <Button
                     fullWidth
                     size="lg"
@@ -222,6 +288,19 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                       gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
                     >
                       Send Magic Link
+                    </Button>
+
+                    <Button
+                      fullWidth
+                      size="md"
+                      h={46}
+                      fw={600}
+                      radius="xl"
+                      variant="outline"
+                      leftSection={<IconExternalLink size={16} />}
+                      onClick={openInBrowser}
+                    >
+                      Open this page in Safari or your default browser
                     </Button>
 
                     {state.error && (

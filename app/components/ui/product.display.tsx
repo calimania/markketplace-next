@@ -8,7 +8,60 @@ import Markdown from '@/app/components/ui/page.markdown';
 import { motion } from 'framer-motion';
 import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
-import { Title } from "@mantine/core";
+import { Box, Modal, Title, UnstyledButton } from "@mantine/core";
+
+type GalleryImage = {
+  id: string | number;
+  url: string;
+  alternativeText?: string | null;
+  formats?: Slide['formats'];
+};
+
+function buildProductGallery(product: Product): GalleryImage[] {
+  const gallery: GalleryImage[] = [];
+  const seen = new Set<string>();
+
+  const push = (candidate?: Partial<GalleryImage> | null, fallbackId?: string) => {
+    const url = candidate?.url;
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    gallery.push({
+      id: candidate?.id || fallbackId || url,
+      url,
+      alternativeText: candidate?.alternativeText,
+      formats: candidate?.formats,
+    });
+  };
+
+  push(product?.Thumbnail ? {
+    id: 'thumbnail',
+    url: product.Thumbnail.url,
+    alternativeText: product.Thumbnail.alternativeText,
+    formats: undefined,
+  } : null, 'thumbnail');
+
+  push(product?.SEO?.socialImage ? {
+    id: 'social',
+    url: product.SEO.socialImage.url,
+    alternativeText: product.SEO.socialImage.alternativeText,
+    formats: product.SEO.socialImage.formats as Slide['formats'],
+  } : null, 'social');
+
+  (product?.Slides || []).forEach((slide, index) => {
+    push(slide, `slide-${index}`);
+  });
+
+  return gallery;
+}
+
+function externalHostLabel(value?: string) {
+  if (!value) return 'external site';
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return 'external site';
+  }
+}
 
 /**
  * ProductDisplay Component
@@ -20,11 +73,16 @@ import { Title } from "@mantine/core";
  * - Markdown support for descriptions
  */
 export default function ProductDisplay({ product, page, store }: { product: Product, page?: Page, store?: Store }) {
-  const [selectedImage, setSelectedImage] = useState<Slide>(product.Slides?.[0]);
+  const gallery = buildProductGallery(product);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | undefined>(gallery[0]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const prices: Price[] = product.PRICES?.map((price) => ({
     ...price,
     currency: price.Currency || "USD",
   })) || [];
+  const hasExternalPurchaseUrl = Boolean(product?.SEO?.metaUrl);
+  const externalHost = externalHostLabel(product?.SEO?.metaUrl);
+  const hasCheckoutOptions = prices.some((price) => !price.hidden && Boolean(price.STRIPE_ID));
 
   return (
     <motion.div
@@ -49,22 +107,29 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
             layoutId="main-image"
             className="aspect-w-4 aspect-h-3 sm:aspect-w-3 sm:aspect-h-2 rounded-lg overflow-hidden bg-gray-100"
           >
-            <MainImage title={product.Name} image={selectedImage} />
+            <UnstyledButton
+              component="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="Open product image"
+              style={{ display: 'block', width: '100%', height: '100%', cursor: 'zoom-in' }}
+            >
+              <MainImage title={product.Name} image={selectedImage} />
+            </UnstyledButton>
           </motion.div>
 
-          {product.Slides && product.Slides.length > 1 && (
+          {gallery.length > 1 && (
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="mt-4 grid grid-cols-6 gap-2"
             >
-              {product.Slides.map((slide) => (
+              {gallery.map((slide) => (
                 <SlideImage
                   key={slide.id}
                   slide={slide}
                   onClick={() => setSelectedImage(slide)}
-                  isSelected={selectedImage.id === slide.id}
+                  isSelected={selectedImage?.id === slide.id}
                 />
               ))}
             </motion.div>
@@ -98,7 +163,28 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
               transition={{ delay: 0.4 }}
               className="mt-8"
             >
-              <CheckoutModal prices={prices} product={product} store={store} />
+              <div className="space-y-3">
+                {hasExternalPurchaseUrl && (
+                  <a
+                    href={product.SEO?.metaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-sm font-medium text-sky-600 underline-offset-2 transition hover:text-sky-700 hover:underline"
+                  >
+                    Preview on {externalHost}
+                  </a>
+                )}
+
+                {hasCheckoutOptions && (
+                  <CheckoutModal prices={prices} product={product} store={store} />
+                )}
+
+                {!hasExternalPurchaseUrl && !hasCheckoutOptions && (
+                  <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    Purchase options are not available yet for this product.
+                  </p>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         </div>
@@ -116,6 +202,33 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
           </div>
         </motion.div>
       )}
+
+      <Modal
+        opened={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        centered
+        size="90vw"
+        title={selectedImage?.alternativeText || product.Name}
+        styles={{
+          content: { background: '#05080f' },
+          header: { background: '#05080f' },
+          title: { color: '#ffffff' },
+          close: { color: '#ffffff' },
+        }}
+      >
+        <Box
+          style={{
+            width: '100%',
+            height: 'min(80vh, 860px)',
+            backgroundImage: `url(${selectedImage?.formats?.large?.url || selectedImage?.url || ''})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: 12,
+            backgroundColor: '#0b1220',
+          }}
+        />
+      </Modal>
     </motion.div>
   );
 };
@@ -138,7 +251,7 @@ function ProductPrice({ prices }: { prices: Price[] }) {
 };
 
 function SlideImage({ slide, onClick, isSelected }: {
-  slide: Slide;
+  slide: GalleryImage;
   onClick: () => void;
   isSelected: boolean;
 }) {
@@ -162,7 +275,7 @@ function SlideImage({ slide, onClick, isSelected }: {
   );
 }
 
-export const MainImage = ({ image, title }: { image: Slide; title: string }) => {
+export const MainImage = ({ image, title }: { image?: GalleryImage; title: string }) => {
   return (
     <div className="relative h-full">
       {image?.url ? (

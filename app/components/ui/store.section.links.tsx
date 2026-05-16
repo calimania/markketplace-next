@@ -5,7 +5,6 @@ import { markketColors } from '@/markket/colors.config';
 
 type SectionLink = {
   url: string;
-  icon: React.ReactNode;
   title: string;
   description: string;
   color: string;
@@ -49,21 +48,17 @@ export function StoreSectionLinks({ links, borderColor }: StoreSectionLinksProps
               el.style.borderColor = borderColor;
             }}
           >
-            <Stack gap="xs" align="center">
+            <Stack gap={8} align="flex-start">
               <Box
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: '14px',
-                  background: link.bgColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: 40,
+                  height: 2,
+                  borderRadius: 999,
+                  background: link.color,
+                  opacity: 0.7,
                 }}
-              >
-                <Box style={{ color: link.color }}>{link.icon}</Box>
-              </Box>
-              <Text fw={600} size="sm" ta="center" style={{ color: '#424242' }}>
+              />
+              <Text fw={650} size="sm" ta="left" style={{ color: '#424242' }}>
                 {link.title}
               </Text>
               <Badge

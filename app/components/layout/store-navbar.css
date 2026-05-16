@@ -6,22 +6,22 @@
 
 @keyframes markket-glow-breathe {
   0% {
-    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.06);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   }
 
   50% {
-    box-shadow: 0 10px 26px rgba(0, 188, 212, 0.12);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
   }
 
   100% {
-    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.06);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   }
 }
 
 .store-shell-navbar {
   background:
-    radial-gradient(circle at top right, rgba(228, 0, 124, 0.08), transparent 30%),
-    linear-gradient(180deg, #fff 0%, #fafafa 100%);
+    radial-gradient(circle at top right, rgba(15, 23, 42, 0.08), transparent 34%),
+      linear-gradient(180deg, #ffffff 0%, #f6f6f7 100%);
   border-right: 1px solid rgba(224, 224, 224, 0.9);
 }
 
@@ -33,24 +33,24 @@
 }
 .store-nav-btn {
   background: rgba(255, 255, 255, 0.86) !important;
-    color: #424242 !important;
+    color: inherit !important;
   }
-  
+
   .store-nav-btn:hover,
   .store-nav-btn:focus-visible,
   .store-header-link:hover,
   .store-header-link:focus-visible {
     background: #fff !important;
-    border-color: rgba(228, 0, 124, 0.16) !important;
-    box-shadow: 0 8px 20px rgba(228, 0, 124, 0.08);
+    border-color: rgba(15, 23, 42, 0.16) !important;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
   }
-  
+
   .store-nav-btn[data-active='true'],
   .store-header-link[data-active='true'] {
-    background: linear-gradient(135deg, rgba(228, 0, 124, 0.12), rgba(0, 188, 212, 0.08)) !important;
-    border-color: rgba(228, 0, 124, 0.2) !important;
-    box-shadow: 0 10px 26px rgba(228, 0, 124, 0.08);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.02)) !important;
+      border-color: rgba(15, 23, 42, 0.2) !important;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
     animation: markket-glow-breathe 3.2s ease-in-out infinite;
 }
 .store-nav-home {
@@ -63,5 +63,5 @@
 .store-nav-home:hover,
 .store-nav-home:focus-visible {
   background: #fff !important;
-  border-color: rgba(0, 188, 212, 0.2) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
 }

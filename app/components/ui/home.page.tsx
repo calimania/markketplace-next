@@ -1,23 +1,19 @@
 'use client';
 
 import {
-  IconRocket, IconBuildingStore, IconShoppingCart,
+  IconRocket, IconBuildingStore,
   IconArticle, IconSparkles, IconArrowRight,
-  IconCheck, IconStars, IconFileText, IconCalendar, IconPackage,
+  IconCalendar, IconPackage,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
-  Paper, Box, rem, Badge, Card, CardSection, Grid, GridCol
+  Box, rem, Badge, Card, CardSection, Grid, GridCol
 } from "@mantine/core";
-import { useState, useEffect } from 'react';
 import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from "@/markket/colors.config";
-import Link from "next/link";
-import { StoreCard } from "@/app/components/stores/card";
 import { stripMarkdown } from '@/markket/richtext.utils';
-import { useAuth } from '@/app/providers/auth.provider';
-import { HeroDecorations } from '@/app/components/ui/hero.decorations';
+import { StorefrontCarousel } from '@/app/components/ui/storefront.carousel';
 import { FeatureCard } from '@/app/components/ui/feature.card';
 
 const features = [
@@ -41,15 +37,32 @@ const features = [
   },
 ];
 
-const benefits = [
-  "Free & easy quickstart",
-  "Blog, events & subscribers",
-  "Growing extensibility",
-  "Simplified dashboards",
-];
-
 const pickSmallestImage = (...values: Array<string | undefined | null>) => {
   return values.find((value): value is string => Boolean(value));
+};
+
+const hasValidTimeZone = (value?: string) => {
+  if (!value) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const formatEventDate = (value?: string, timeZone?: string) => {
+  if (!value) return 'TBD';
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'TBD';
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    ...(hasValidTimeZone(timeZone) ? { timeZone } : {}),
+  }).format(parsed);
 };
 
 type HomePageProps = {
@@ -62,327 +75,133 @@ type HomePageProps = {
   communityProducts?: Product[];
 };
 
+const SectionLabel = ({ num, label, color }: { num: string; label: string; color?: string }) => (
+  <Text
+    size="xs"
+    fw={600}
+    mb={4}
+    style={{
+      fontFamily: 'monospace',
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: color || markketColors.neutral.mediumGray,
+    }}
+  >
+    {num} — {label}
+  </Text>
+);
+
 const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
-  const { maybe, isLoading: authLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
-
-  const isLoggedIn = mounted && !authLoading && maybe();
   const eventsToDisplay = communityEvents.filter(e => Boolean(e?.startDate));
-  const resolvedIsLoggedIn = isLoggedIn;
 
   return (
-    <main className="min-h-screen">
-      <Box
-        style={{
-          background: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          borderBottom: `1px solid ${markketColors.neutral.lightGray}`,
-        }}
-      >
-        <Box
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.6,
-          }}
-        >
-          <HeroDecorations />
-        </Box>
-
-        <Container size="lg" py={80}>
-          <div>
-            <Stack gap={48} align="center" style={{ position: 'relative', zIndex: 1 }}>
-              <Badge
-                size="lg"
-                radius="md"
-                variant="light"
-                leftSection={<IconStars size={16} />}
-                style={{
-                  background: markketColors.neutral.offWhite,
-                  color: markketColors.rosa.main,
-                  border: `1px solid ${markketColors.rosa.main}20`,
-                }}
-              >
-                Comercio Ëlectrónico
-              </Badge>
-
-              <Title
-                order={1}
-                ta="center"
-                mb={32}
-                style={{
-                  fontSize: 'clamp(2rem, 8vw, 4rem)',
-                  fontWeight: 900,
-                  background: `linear-gradient(135deg, ${markketColors.neutral.charcoal} 0%, ${markketColors.neutral.darkGray} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {store?.SEO?.metaTitle || 'Markkët'}
-                <br />
-                <span style={{
-                  background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}>
-                  Content Manager
-                </span>
-              </Title>
-
-              <Text
-                size="xl"
-                ta="center"
-                maw={700}
-                mx="auto"
-                style={{
-                  color: markketColors.neutral.darkGray,
-                  lineHeight: 1.6,
-                  fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-                }}
-              >
-                {store?.SEO?.metaDescription ||
-                  'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
-              </Text>
-
-              <Group gap={16} mt={32} justify="center" wrap="wrap">
-                <Button
-                  component="a"
-                  href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
-                  size="lg"
-                  radius="md"
-                  suppressHydrationWarning
-                  leftSection={<IconSparkles size={20} />}
-                  style={{
-                    background: resolvedIsLoggedIn
-                      ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
-                      : markketColors.rosa.main,
-                    color: 'white',
-                    fontWeight: 600,
-                    boxShadow: `0 4px 14px ${markketColors.rosa.main}30`,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                  className="transform hover:scale-105 transition-transform"
-                >
-                  {resolvedIsLoggedIn && (
-                    <Box
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: '-100%',
-                        width: '100%',
-                        height: '100%',
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                        animation: 'shimmer 3s infinite',
-                      }}
-                    />
-                  )}
-                  <span style={{ position: 'relative', zIndex: 1 }}>
-                    {resolvedIsLoggedIn ? 'Open Workspace' : 'Create Your Store'}
-                  </span>
-                </Button>
-
-                <Button
-                  component="a"
-                  href="/stores"
-                  size="lg"
-                  radius="md"
-                  variant="outline"
-                  leftSection={<IconShoppingCart size={20} />}
-                  style={{
-                    color: markketColors.neutral.charcoal,
-                    borderColor: markketColors.neutral.mediumGray,
-                  }}
-                  className="transform hover:scale-105 transition-transform"
-                >
-                  Explore Stores
-                </Button>
-              </Group>
-            </Stack>
-          </div>
-        </Container>
-      </Box>
-
-      {/* Featured stores */}
-      {featuredStores.length > 0 && (
-        <Container size="lg" py={60}>
+    <main>
+      {/* ── 00 — STORES ─────────────────────────────────────── */}
+      <Box py={60} style={{ borderBottom: `1px solid ${markketColors.neutral.lightGray}` }}>
+        <Container size="lg">
           <Stack gap={32}>
             <Group justify="space-between" align="flex-end">
-              <div>
-                <Badge
-                  size="lg"
-                  radius="md"
-                  variant="light"
-                  leftSection={<IconBuildingStore size={14} />}
-                  style={{ background: markketColors.sections.shop.light, color: markketColors.sections.shop.main, marginBottom: rem(8) }}
+              <Box>
+                <SectionLabel num="00" label="Stores" color={markketColors.sections.shop.main} />
+                <Title
+                  order={2}
+                  style={{
+                    fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+                    fontWeight: 800,
+                    letterSpacing: '-0.025em',
+                    color: markketColors.neutral.charcoal,
+                  }}
                 >
-                  Active Stores
-                </Badge>
-                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
                   Discover Creators
                 </Title>
-              </div>
-              <Button component="a" href="/stores" variant="outline" size="sm" radius="xl" rightSection={<IconArrowRight size={14} />}>
+              </Box>
+              <Button
+                component="a"
+                href="/stores"
+                variant="subtle"
+                size="sm"
+                rightSection={<IconArrowRight size={14} />}
+                style={{ color: markketColors.neutral.darkGray }}
+              >
                 All stores
               </Button>
             </Group>
 
-            {/* First two featured, larger */}
-            {featuredStores.length >= 2 && (
-              <Grid gap="lg">
-                {featuredStores.slice(0, 2).map((s, i) => (
-                  <GridCol key={s.id} span={{ base: 12, sm: 6 }}>
-                    <StoreCard store={s} idx={i} featured />
-                  </GridCol>
-                ))}
-              </Grid>
-            )}
-
-            {/* Remaining stores smaller */}
-            {featuredStores.length > 2 && (
-              <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
-                {featuredStores.slice(2, 6).map((s, i) => (
-                  <StoreCard key={s.id} store={s} idx={i + 2} />
-                ))}
-              </SimpleGrid>
-            )}
-
-            {/* Edge case: only one store */}
-            {featuredStores.length === 1 && (
-              <Grid gap="lg">
-                <GridCol span={{ base: 12, sm: 6 }}>
-                  <StoreCard store={featuredStores[0]} idx={0} featured />
-                </GridCol>
-              </Grid>
+            {featuredStores.length > 0 ? (
+              <StorefrontCarousel stores={featuredStores} />
+            ) : (
+                <Box
+                  style={{
+                    borderRadius: 20,
+                    border: `1px dashed ${markketColors.neutral.mediumGray}`,
+                    padding: rem(48),
+                    textAlign: 'center',
+                  }}
+                >
+                <Text c="dimmed" mb="md">No stores yet — be the first!</Text>
+                <Button
+                  component="a"
+                  href="/auth/magic"
+                  style={{ background: markketColors.rosa.main, color: 'white' }}
+                >
+                  Create your store
+                </Button>
+              </Box>
             )}
           </Stack>
         </Container>
-      )}
+      </Box>
 
-
-      <Box py={80} style={{ background: markketColors.neutral.offWhite }}>
+      {/* ── 01 — PLATFORM ───────────────────────────────────── */}
+      <Box
+        py={64}
+        style={{
+          background: markketColors.neutral.offWhite,
+          borderBottom: `1px solid ${markketColors.neutral.lightGray}`,
+        }}
+      >
         <Container size="lg">
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={48}>
-            <Stack gap={32} justify="center">
-              <Badge
-                size="lg"
-                radius="md"
-                variant="light"
-                leftSection={<IconCheck size={16} />}
-                style={{
-                  background: markketColors.rosa.light,
-                  color: markketColors.rosa.main,
-                  width: 'fit-content',
-                }}
-              >
-                Built for Creators
-              </Badge>
-
-              <Title order={2} size={rem(38)} style={{ color: markketColors.neutral.charcoal, lineHeight: 1.2 }}>
-                {page?.Title || 'Grow your audience and sales'}
-              </Title>
-
-              <Stack gap="md">
-                {benefits.map((benefit, index) => (
-                  <Group key={index} gap="sm">
-                    <Box
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: '50%',
-                        background: markketColors.sections.events.light,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <IconCheck size={16} color={markketColors.sections.events.main} stroke={3} />
-                    </Box>
-                    <Text size="lg" style={{ color: markketColors.neutral.darkGray }}>
-                      {benefit}
-                    </Text>
-                  </Group>
-                ))}
+          <Grid gap={{ base: 'xl', md: 'xl' }}>
+            <GridCol span={{ base: 12, md: 7 }}>
+              <Stack gap={16}>
+                <SectionLabel num="01" label="Platform" />
+                <Title
+                  order={2}
+                  style={{
+                    fontSize: 'clamp(2rem, 5vw, 3.25rem)',
+                    fontWeight: 900,
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.08,
+                    color: markketColors.neutral.charcoal,
+                  }}
+                >
+                  {store?.SEO?.metaTitle || 'Markkët'}
+                  <br />
+                  <span style={{ color: markketColors.rosa.main }}>Content Manager</span>
+                </Title>
               </Stack>
-
-              <Group mt="md">
-                <Button
-                  component="a"
-                  href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
-                  size="lg"
-                  radius="md"
-                  suppressHydrationWarning
-                  leftSection={<IconArrowRight size={20} />}
-                  style={{
-                    background: markketColors.rosa.main,
-                    color: 'white',
-                  }}
-                >
-                  {resolvedIsLoggedIn ? 'Open Workspace' : 'Get Started Free'}
-                </Button>
-
-                <Button
-                  component="a"
-                  href="/blog"
-                  size="lg"
-                  radius="md"
-                  variant="subtle"
-                  leftSection={<IconArticle size={20} />}
-                  style={{
-                    color: markketColors.neutral.darkGray,
-                  }}
-                >
-                  Discover Stories
-                </Button>
-              </Group>
-            </Stack>
-
-            <Box
-              style={{
-                borderRadius: 16,
-                overflow: 'hidden',
-                border: `1px solid ${markketColors.neutral.lightGray}`,
-                background: store?.Logo?.url ? 'white' : markketColors.neutral.offWhite,
-                minHeight: rem(300),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {store?.Logo?.url ? (
-                <img
-                  src={pickSmallestImage(
-                    store?.Logo?.formats?.small?.url,
-                    store?.Logo?.formats?.thumbnail?.url,
-                    store?.Logo?.url,
-                  )}
-                  alt={store.SEO?.metaTitle || 'Markket'}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                  decoding="async"
-                />
-              ) : (
-                <Stack gap="sm" align="center">
-                  <IconBuildingStore size={64} color={markketColors.neutral.mediumGray} />
-                  <Text size="lg" fw={600} c="dimmed">Your Store Here</Text>
-                  <Text size="sm" c="dimmed" ta="center" maw={220}>
-                    Launch your store and it&apos;ll appear right here.
-                  </Text>
-                </Stack>
-              )}
-            </Box>
-          </SimpleGrid>
+            </GridCol>
+            <GridCol span={{ base: 12, md: 5 }}>
+              <Stack gap={24}>
+                <Text style={{ color: markketColors.neutral.darkGray, lineHeight: 1.65, fontSize: '1.05rem' }}>
+                  {store?.SEO?.metaDescription ||
+                    'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
+                </Text>
+                <Group gap={12} wrap="wrap">
+                  <Button
+                    component="a"
+                    href="/auth/magic"
+                    size="md"
+                    radius="md"
+                    leftSection={<IconSparkles size={16} />}
+                    style={{ background: markketColors.rosa.main, color: 'white' }}
+                  >
+                    Create your store
+                  </Button>
+                </Group>
+              </Stack>
+            </GridCol>
+          </Grid>
         </Container>
       </Box>
 
@@ -394,25 +213,14 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 <Stack gap={32}>
                   <Group justify="space-between" align="flex-end">
                     <div>
-                      <Badge
-                        size="lg"
-                        radius="md"
-                        variant="light"
-                        style={{
-                          background: markketColors.sections.blog.light,
-                          color: markketColors.sections.blog.main,
-                          marginBottom: rem(12),
-                        }}
-                      >
-                        Community Feed
-                      </Badge>
+                      <SectionLabel num="02" label="Blog" color={markketColors.sections.blog.main} />
                       <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
-                        Latest Blog Posts
+                        Latest Stories
                       </Title>
                       <Text c="dimmed">Fresh writing from creators across the community.</Text>
                     </div>
                     <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                      See All Posts
+                      See all stories
                     </Button>
                   </Group>
 
@@ -497,7 +305,7 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                               fw={500}
                               style={{ color: markketColors.sections.blog.main, marginTop: rem(4) }}
                             >
-                              Read Post →
+                              Read story →
                             </Text>
                           </Stack>
                         </Card>
@@ -510,42 +318,174 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
           )}
 
 
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
-            {features.map((feature, index) => (
-              <FeatureCard
-                key={feature.title}
-                icon={feature.icon}
-                title={feature.title}
-                description={feature.description}
-                color={feature.color}
-                index={index}
-              />
-            ))}
-          </SimpleGrid>
         </Stack>
       </Container>
 
 
+      {/* ── 03 — EVENTS ──────────────────────────────────── */}
+      {eventsToDisplay.length > 0 && (
+        <Box
+          py={80}
+          style={{
+            background: `${markketColors.sections.events.light}80`,
+            borderTop: `1px solid ${markketColors.neutral.lightGray}`,
+          }}
+        >
+          <Container size="lg">
+            <Stack gap={32}>
+              <div>
+                <SectionLabel num="03" label="Events" color={markketColors.sections.events.main} />
+                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
+                  Join upcoming events
+                </Title>
+                <Text c="dimmed">Workshops, launches, and meetups from community stores.</Text>
+              </div>
+
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                {eventsToDisplay.slice(0, 6).map((event: Event) => {
+                  const thumbnailUrl = pickSmallestImage(
+                    event?.Thumbnail?.formats?.thumbnail?.url,
+                    event?.Thumbnail?.formats?.small?.url,
+                    event?.Thumbnail?.formats?.medium?.url,
+                    event?.Thumbnail?.url,
+                    event?.Slides?.[0]?.formats?.thumbnail?.url,
+                    event?.Slides?.[0]?.formats?.small?.url,
+                    event?.Slides?.[0]?.formats?.medium?.url,
+                    event?.Slides?.[0]?.url,
+                    event?.SEO?.socialImage?.formats?.thumbnail?.url,
+                    event?.SEO?.socialImage?.formats?.small?.url,
+                    event?.SEO?.socialImage?.url,
+                    (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
+                    (event as any)?.stores?.[0]?.Logo?.formats?.small?.url,
+                    (event as any)?.stores?.[0]?.Logo?.url,
+                  );
+                  const storeSlug = (event as any)?.stores?.[0]?.slug;
+                  const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
+                  const eventDate = formatEventDate(event.startDate, event.timezone);
+
+                  return (
+                    <Card
+                      key={event.documentId || event.id}
+                      withBorder
+                      radius="lg"
+                      padding={0}
+                      component="a"
+                      href={href}
+                      aria-label={`Learn more about event ${event.Name}`}
+                      style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        borderColor: markketColors.neutral.lightGray,
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                        textDecoration: 'none',
+                        transition: 'transform 0.15s, box-shadow 0.15s',
+                      }}
+                      className="hover:scale-[1.02]"
+                    >
+                      <CardSection>
+                        {thumbnailUrl ? (
+                          <img
+                            src={thumbnailUrl}
+                            alt={event.Name}
+                            style={{ width: '100%', height: rem(170), objectFit: 'cover' }}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <Box
+                            style={{
+                                height: rem(170),
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                                background: markketColors.sections.events.light,
+                                color: markketColors.sections.events.main,
+                            }}
+                          >
+                            <Box style={{ textAlign: 'center' }}>
+                                <IconCalendar size={30} />
+                                <Text size="sm" fw={500}>Event</Text>
+                            </Box>
+                          </Box>
+                        )}
+                      </CardSection>
+
+                      <Stack gap="sm" p="md" style={{ flex: 1 }}>
+                        <Group gap="xs">
+                          <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
+                          {(event as any)?.stores?.[0]?.title && (
+                            <Text size="xs" style={{ color: markketColors.neutral.darkGray }}>{(event as any).stores[0].title}</Text>
+                          )}
+                        </Group>
+
+                        <Title order={3} size="h4" style={{ lineHeight: 1.25 }}>{event.Name}</Title>
+                        <Text size="sm" style={{ color: markketColors.neutral.darkGray, flex: 1 }} lineClamp={2}>
+                          {event?.SEO?.metaDescription || 'Join us for this event'}
+                        </Text>
+
+                        <Text
+                          size="sm"
+                          fw={500}
+                          style={{ color: markketColors.sections.events.main, marginTop: 'auto' }}
+                        >
+                          View event →
+                        </Text>
+                      </Stack>
+                    </Card>
+                  );
+                })}
+              </SimpleGrid>
+            </Stack>
+          </Container>
+        </Box>
+      )}
+
+      {/* ── 05 — FEATURES ───────────────────────────────── */}
       {communityProducts.length > 0 && (
-        <Container size="lg" py={80}>
-          <div>
+        <Box
+          py={60}
+          style={{
+            background: markketColors.neutral.offWhite,
+          }}
+        >
+          <Container size="lg">
+            <Stack gap={28}>
+              <Box mb={4}>
+                <SectionLabel num="05" label="Features" />
+              </Box>
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
+                {features.map((feature, index) => (
+                  <FeatureCard
+                    key={feature.title}
+                    icon={feature.icon}
+                    title={feature.title}
+                    description={feature.description}
+                    color={feature.color}
+                    index={index}
+                  />
+                ))}
+              </SimpleGrid>
+            </Stack>
+          </Container>
+        </Box>
+      )}
+
+      {/* ── 06 — SHOP ───────────────────────────────────── */}
+      {communityProducts.length > 0 && (
+        <Box
+          py={72}
+          style={{
+            background: `${markketColors.sections.shop.light}54`,
+          }}
+        >
+          <Container size="lg">
             <Stack gap={32}>
               <Group justify="space-between" align="flex-end">
                 <div>
-                  <Badge
-                    size="lg"
-                    radius="md"
-                    variant="light"
-                    leftSection={<IconPackage size={14} />}
-                    style={{
-                      background: markketColors.sections.shop.light,
-                      color: markketColors.sections.shop.main,
-                      marginBottom: rem(12),
-                    }}
-                  >
-                    Products
-                  </Badge>
-                  <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
+                  <SectionLabel num="06" label="Shop" color={markketColors.sections.shop.main} />
+                  <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
                     Shop Community Picks
                   </Title>
                   <Text c="dimmed">Featured products from active stores.</Text>
@@ -600,17 +540,17 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                         ) : (
                           <Box
                             style={{
-                              height: rem(190),
+                                height: rem(190),
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              background: markketColors.sections.shop.light,
-                              color: markketColors.sections.shop.main,
+                                background: markketColors.sections.shop.light,
+                                color: markketColors.sections.shop.main,
                             }}
                           >
                             <Box style={{ textAlign: 'center' }}>
-                              <IconPackage size={32} />
-                              <Text size="sm" fw={500}>Product</Text>
+                                <IconPackage size={32} />
+                                <Text size="sm" fw={500}>Product</Text>
                             </Box>
                           </Box>
                         )}
@@ -645,42 +585,34 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 })}
               </SimpleGrid>
             </Stack>
-          </div>
-        </Container>
+          </Container>
+        </Box>
       )}
 
-
       {page?.Content && (
-        <Container size="lg" py={80}>
+        <Container size="lg" py={60}>
           <PageContent params={{ page }} />
         </Container>
       )}
 
+      {/* ── 04 — PAGES ──────────────────────────────────── */}
       {communityPages.length > 0 && (
-        <Container size="lg" py={80}>
-          <div>
+        <Box
+          py={80}
+          style={{
+            background: markketColors.neutral.offWhite,
+            borderTop: `1px solid ${markketColors.neutral.lightGray}`,
+          }}
+        >
+          <Container size="lg">
             <Stack gap={32}>
-              <Group justify="space-between" align="flex-end">
-                <div>
-                  <Badge
-                    size="lg"
-                    radius="md"
-                    variant="light"
-                    leftSection={<IconFileText size={14} />}
-                    style={{
-                      background: markketColors.sections.about.light,
-                      color: markketColors.sections.about.main,
-                      marginBottom: rem(12),
-                    }}
-                  >
-                    Pages Feed
-                  </Badge>
-                  <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
-                    From the Community
-                  </Title>
-                  <Text c="dimmed">Fixed content about the creators</Text>
-                </div>
-              </Group>
+              <div>
+                <SectionLabel num="04" label="Pages" color={markketColors.sections.about.main} />
+                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
+                  From the Community
+                </Title>
+                <Text c="dimmed">Evergreen pages from creators, studios, and brands.</Text>
+              </div>
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                 {communityPages.slice(0, 6).map((p) => {
@@ -747,239 +679,46 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 })}
               </SimpleGrid>
             </Stack>
-          </div>
-        </Container>
+          </Container>
+        </Box>
       )}
 
-
-      <Box py={60} style={{ background: markketColors.neutral.offWhite, borderTop: `1px solid ${markketColors.neutral.lightGray}` }}>
-        <Container size="lg">
-          <Stack gap={32} align="center">
-            <Text size="sm" c="dimmed" ta="center" fw={500} style={{ letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Powered By
-            </Text>
-            <Group gap={50} justify="center" wrap="wrap">
-              <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">Stripe</Text>
-              </Box>
-              <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">Strapi</Text>
-              </Box>
-              <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">DigitalOcean</Text>
-              </Box>
-              <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">SendGrid</Text>
-              </Box>
-              <Box style={{ opacity: 0.6, transition: 'opacity 0.2s', cursor: 'pointer' }} className="hover:opacity-100">
-                <Text size="xl" fw={600} c="dimmed">Vim</Text>
-              </Box>
-            </Group>
-          </Stack>
-        </Container>
-      </Box>
-
-
-      {eventsToDisplay.length > 0 && (
-        <Container size="lg" py={80}>
-          <div>
-            <Stack gap={32}>
-              <Group justify="space-between" align="flex-end">
-                <div>
-                  <Badge
-                    size="lg"
-                    radius="md"
-                    variant="light"
-                    leftSection={<IconCalendar size={14} />}
-                    style={{
-                      background: markketColors.sections.events.light,
-                      color: markketColors.sections.events.main,
-                      marginBottom: rem(12),
-                    }}
-                  >
-                    Upcoming Events
-                  </Badge>
-                  <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
-                    Participate
-                  </Title>
-                  <Text c="dimmed">Workshops, webinars, and meetups </Text>
-                </div>
-              </Group>
-
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {eventsToDisplay.slice(0, 6).map((event: Event) => {
-                  const thumbnailUrl = pickSmallestImage(
-                    event?.Thumbnail?.formats?.thumbnail?.url,
-                    event?.Thumbnail?.formats?.small?.url,
-                    event?.Thumbnail?.formats?.medium?.url,
-                    event?.Thumbnail?.url,
-                    event?.Slides?.[0]?.formats?.thumbnail?.url,
-                    event?.Slides?.[0]?.formats?.small?.url,
-                    event?.Slides?.[0]?.formats?.medium?.url,
-                    event?.Slides?.[0]?.url,
-                    event?.SEO?.socialImage?.formats?.thumbnail?.url,
-                    event?.SEO?.socialImage?.formats?.small?.url,
-                    event?.SEO?.socialImage?.url,
-                    (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
-                    (event as any)?.stores?.[0]?.Logo?.formats?.small?.url,
-                    (event as any)?.stores?.[0]?.Logo?.url,
-                  );
-                  const storeSlug = (event as any)?.stores?.[0]?.slug;
-                  const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
-                  const eventDate = event.startDate
-                    ? new Intl.DateTimeFormat('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      timeZone: 'UTC',
-                    }).format(new Date(event.startDate))
-                    : 'TBD';
-
-                  return (
-                    <Card
-                      key={event.documentId || event.id}
-                      withBorder
-                      radius="lg"
-                      padding={0}
-                      component="a"
-                      href={href}
-                      aria-label={`Learn more about event ${event.Name}`}
-                      style={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        borderColor: markketColors.neutral.lightGray,
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                        textDecoration: 'none',
-                        transition: 'transform 0.15s, box-shadow 0.15s',
-                      }}
-                      className="hover:scale-[1.02]"
-                    >
-                      <CardSection>
-                        {thumbnailUrl ? (
-                          <img
-                            src={thumbnailUrl}
-                            alt={event.Name}
-                            style={{ width: '100%', height: rem(170), objectFit: 'cover' }}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <Box
-                            style={{
-                              height: rem(170),
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: markketColors.sections.events.light,
-                              color: markketColors.sections.events.main,
-                            }}
-                          >
-                            <Box style={{ textAlign: 'center' }}>
-                              <IconCalendar size={30} />
-                              <Text size="sm" fw={500}>Event</Text>
-                            </Box>
-                          </Box>
-                        )}
-                      </CardSection>
-
-                      <Stack gap="sm" p="md" style={{ flex: 1 }}>
-                        <Group gap="xs">
-                          <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
-                          {(event as any)?.stores?.[0]?.title && (
-                            <Text size="xs" style={{ color: markketColors.neutral.darkGray }}>{(event as any).stores[0].title}</Text>
-                          )}
-                        </Group>
-
-                        <Title order={3} size="h4" style={{ lineHeight: 1.25 }}>{event.Name}</Title>
-                        <Text size="sm" style={{ color: markketColors.neutral.darkGray, flex: 1 }} lineClamp={2}>
-                          {event?.SEO?.metaDescription || 'Join us for this event'}
-                        </Text>
-
-                        <Text
-                          size="sm"
-                          fw={500}
-                          style={{ color: markketColors.sections.events.main, marginTop: 'auto' }}
-                        >
-                          Learn More →
-                        </Text>
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </SimpleGrid>
-            </Stack>
-          </div>
-        </Container>
-      )}
-
+      {/* ── CTA ─────────────────────────────────────────── */}
       <Box
         py={80}
-        suppressHydrationWarning
         style={{
-          background: isLoggedIn
-            ? `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`
-            : `linear-gradient(135deg, ${markketColors.sections.shop.main} 0%, ${markketColors.sections.blog.main} 100%)`,
+          background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`,
+          borderTop: `1px solid rgba(255,255,255,0.08)`,
         }}
       >
         <Container size="md">
-          <Stack gap={32} align="center">
-            <Title
-              order={2}
-              ta="center"
-              size={rem(42)}
-              style={{ color: 'white', lineHeight: 1.2 }}
-            >
-              {isLoggedIn ? 'Welcome Back!' : 'Ready to Launch?'}
+          <Stack gap={24} align="center">
+            <Title order={2} ta="center" size={rem(36)} style={{ color: 'white', lineHeight: 1.2 }}>
+              Ready to Launch?
             </Title>
-            <Text
-              size="xl"
-              ta="center"
-              style={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.6 }}
-            >
-              {isLoggedIn
-                ? 'Manage your store, add products, and grow your business'
-                : 'Join creators and businesses already selling on Markket'}
+            <Text size="lg" ta="center" style={{ color: 'rgba(255,255,255,0.9)' }}>
+              Join creators and businesses already selling on Markkët
             </Text>
-            <Button
-              component="a"
-              href={resolvedIsLoggedIn ? '/me' : '/auth/magic'}
-              size="xl"
-              radius="md"
-              suppressHydrationWarning
-              leftSection={<IconSparkles size={24} />}
-              style={{
-                background: 'white',
-                color: isLoggedIn ? markketColors.rosa.main : markketColors.sections.shop.main,
-                fontWeight: 600,
-                fontSize: rem(18),
-                height: rem(60),
-                paddingLeft: rem(40),
-                paddingRight: rem(40),
-              }}
-            >
-              {resolvedIsLoggedIn ? 'Open Workspace' : 'Start Your Free Store'}
-            </Button>
-
-            <Group gap="lg" mt="md">
-              <Link href="/stores" style={{ textDecoration: 'none' }}>
-                <Text size="lg" style={{ color: 'white', textDecoration: 'underline' }}>
-                  Browse Stores
-                </Text>
-              </Link>
-              {mounted && !isLoggedIn && (
-                <Link href="/docs" style={{ textDecoration: 'none' }}>
-                  <Text size="lg" style={{ color: 'white', textDecoration: 'underline' }}>
-                    Documentation
-                  </Text>
-                </Link>
-              )}
-              <Link href="/newsletter" style={{ textDecoration: 'none' }}>
-                <Text size="lg" style={{ color: 'white', textDecoration: 'underline' }}>
-                  Newsletter
-                </Text>
-              </Link>
+            <Group gap={16} justify="center" wrap="wrap">
+              <Button
+                component="a"
+                href="/auth/magic"
+                size="lg"
+                radius="md"
+                style={{ background: 'white', color: markketColors.rosa.main, fontWeight: 600 }}
+              >
+                Create your store
+              </Button>
+              <Button
+                component="a"
+                href="/about"
+                size="lg"
+                radius="md"
+                variant="outline"
+                style={{ borderColor: 'rgba(255,255,255,0.6)', color: 'white' }}
+              >
+                About & Policies
+              </Button>
             </Group>
           </Stack>
         </Container>
@@ -989,3 +728,4 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 }
 
 export default HomePage;
+

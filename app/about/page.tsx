@@ -1,0 +1,154 @@
+import { Badge, Box, Container, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import Link from 'next/link';
+import { strapiClient } from '@/markket/api.strapi';
+import { markketplace } from '@/markket/config';
+import { generateSEOMetadata } from '@/markket/metadata';
+import type { Metadata } from 'next';
+import type { Page } from '@/markket/page';
+import PageContent from '@/app/components/ui/page.content';
+import { markketColors } from '@/markket/colors.config';
+
+const PLATFORM_SLUG = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || markketplace.slug || 'next';
+const SYSTEM_PAGE_SLUGS = new Set(['home', 'about', 'blog', 'products', 'events']);
+const INTERNAL_PAGE_HINTS = [
+  'login',
+  'auth',
+  'dashboard',
+  'navigation',
+  'crm',
+  'receipt',
+  'notification',
+  'account',
+  'code',
+  'comms-disclosure-internal',
+];
+
+type PublicationEntry = {
+  publishedAt?: string | null;
+  tiendaPublication?: { visibleStatus?: string | null };
+};
+
+const isPublishedEntry = (entry: PublicationEntry): boolean => {
+  const visibleStatus = entry?.tiendaPublication?.visibleStatus;
+  if (visibleStatus) {
+    return visibleStatus === 'published';
+  }
+
+  if (typeof entry?.publishedAt === 'string') {
+    return entry.publishedAt.length > 0;
+  }
+
+  return Boolean(entry?.publishedAt);
+};
+
+const isInternalPage = (page: Page): boolean => {
+  const slug = (page?.slug || '').toLowerCase();
+  const title = (page?.Title || '').toLowerCase();
+  const combined = `${slug} ${title}`;
+
+  return INTERNAL_PAGE_HINTS.some((hint) => combined.includes(hint));
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const response = await strapiClient.getPage('about', PLATFORM_SLUG);
+  const page = response?.data?.[0] as Page | undefined;
+
+  return generateSEOMetadata({
+    slug: 'about',
+    entity: {
+      url: '/about',
+      SEO: page?.SEO,
+      Title: page?.Title,
+    },
+    type: 'website',
+    defaultTitle: 'About',
+    defaultDescription: 'About Markketplace, including terms, policies, and platform pages.',
+  });
+}
+
+export default async function PlatformAboutPage() {
+  const [storeResponse, aboutResponse, pagesResponse] = await Promise.all([
+    strapiClient.getStore(PLATFORM_SLUG),
+    strapiClient.getPage('about', PLATFORM_SLUG),
+    strapiClient.getPages(PLATFORM_SLUG),
+  ]);
+
+  const store = storeResponse?.data?.[0];
+  const aboutPage = aboutResponse?.data?.[0] as Page | undefined;
+  const allPages = (pagesResponse?.data || []) as Page[];
+
+  const cmsPages = allPages
+    .filter((page) => page?.slug && !SYSTEM_PAGE_SLUGS.has(page.slug))
+    .filter((page) => isPublishedEntry(page as PublicationEntry))
+    .filter((page) => !isInternalPage(page))
+    .sort((a, b) => (a?.Title || '').localeCompare(b?.Title || ''));
+
+  const title = aboutPage?.Title || 'About Markketplace';
+  const description = aboutPage?.SEO?.metaDescription
+    || store?.SEO?.metaDescription
+    || 'Learn about Markketplace and browse our platform pages.';
+
+  return (
+    <Container size="lg" py="xl">
+      <Stack gap="xl">
+        <Box
+          style={{
+            borderRadius: 20,
+            padding: '32px 24px',
+            background: `linear-gradient(135deg, ${markketColors.sections.about.light} 0%, #ffffff 70%)`,
+            border: `1px solid ${markketColors.sections.about.main}33`,
+          }}
+        >
+          <Stack gap="sm">
+            <Badge
+              variant="light"
+              radius="xl"
+              style={{ background: markketColors.sections.about.light, color: markketColors.sections.about.main, width: 'fit-content' }}
+            >
+              Markketplace
+            </Badge>
+            <Title order={1}>{title}</Title>
+            <Text c="dimmed" maw={760}>{description}</Text>
+          </Stack>
+        </Box>
+
+        {aboutPage ? (
+          <Paper withBorder radius="xl" p={{ base: 'md', sm: 'xl' }}>
+            <PageContent params={{ page: aboutPage }} />
+          </Paper>
+        ) : null}
+
+        {cmsPages.length > 0 ? (
+          <Stack gap="md">
+            <Title order={2} size="h3">Pages from CMS</Title>
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+              {cmsPages.map((page) => (
+                <Link key={page.documentId || page.id || page.slug} href={`/about/${page.slug}`} style={{ textDecoration: 'none' }}>
+                  <Paper
+                    withBorder
+                    radius="lg"
+                    p="md"
+                    style={{
+                      height: '100%',
+                      borderColor: `${markketColors.sections.about.main}2f`,
+                      background: `linear-gradient(140deg, ${markketColors.sections.about.light} 0%, #ffffff 80%)`,
+                    }}
+                  >
+                    <Stack gap={6}>
+                      <Text fw={700} style={{ color: markketColors.neutral.charcoal }}>
+                        {page.Title || page.slug}
+                      </Text>
+                      <Text size="sm" c="dimmed" lineClamp={3}>
+                        {page?.SEO?.metaDescription || 'Open this page from CMS content.'}
+                      </Text>
+                    </Stack>
+                  </Paper>
+                </Link>
+              ))}
+            </SimpleGrid>
+          </Stack>
+        ) : null}
+      </Stack>
+    </Container>
+  );
+}

@@ -27,6 +27,15 @@ function formatDateTime(value?: string) {
   return parsed.toLocaleString();
 }
 
+function externalHostLabel(value?: string) {
+  if (!value) return 'external link';
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return 'external link';
+  }
+}
+
 export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaEventItemPageClientProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +107,20 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
   const storeRef = storeSlug;
   const startsAt = formatDateTime(event.startDate);
   const endsAt = formatDateTime(event.endDate);
+  const externalHost = externalHostLabel(event.SEO?.metaUrl);
+  const refreshEventAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextEvent = await findEvent(itemId, storeSlug, token);
+      if (nextEvent) {
+        setEvent(nextEvent);
+      }
+    } catch (err) {
+      console.error('Tienda event media refresh error', err);
+    }
+  };
   const slideSlots = (event.Slides || []).map((slide, index) => ({
     label: `Slide ${index + 1}`,
     field: 'Slides',
@@ -144,6 +167,9 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
             storeRef={storeRef}
             contentType="event"
             itemDocumentId={itemDocumentId}
+            onUpload={() => {
+              void refreshEventAfterUpload();
+            }}
             slots={[
               {
                 label: 'Thumbnail',
@@ -201,7 +227,7 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
                 fullWidth
                 rightSection={<IconExternalLink size={16} />}
               >
-                RSVP at {new URL(event.SEO.metaUrl).hostname}
+                RSVP at {externalHost}
               </Button>
             </>
           )}

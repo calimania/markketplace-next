@@ -214,8 +214,7 @@ const ImageManager = ({ store, singular, item, refresh }: ImageManagerProps) => 
             setModalState({ open: false });
           }, 300);
         }}
-        onInsert={() => setModalState({ open: false })}
-        onToggleMode={() => setModalState((s) => ({ ...s, mode: s.mode === 'preview' ? 'replace' : 'preview' }))}
+
       />
     </Paper>
   );

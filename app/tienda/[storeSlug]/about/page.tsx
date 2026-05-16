@@ -1,6 +1,7 @@
 import { Button } from '@mantine/core';
 import { IconListSearch, IconPlus } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
+import { resolvePagePreviewHref } from '@/markket/helpers.preview';
 import type { Page } from '@/markket/page';
 import NavTable from '@/app/components/ui/nav.table';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
@@ -32,17 +33,18 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
       tone="pages"
       actions={
         <>
-            <Button
-              component="a"
-              href={`/tienda/${storeSlug}/pages`}
-              variant="default"
-              leftSection={<IconListSearch size={16} />}
-            >
-              Open Editor
-            </Button>
-            <Button component="a" href={`/tienda/${storeSlug}/pages/new`} leftSection={<IconPlus size={16} />}>
-              New Page
-            </Button>
+          <Button
+            component="a"
+            href={`/${storeSlug}/about`}
+            variant="default"
+            leftSection={<IconListSearch size={16} />}
+            target="_blank"
+          >
+            Open in Markket
+          </Button>
+          <Button component="a" href={`/tienda/${storeSlug}/pages/new`} leftSection={<IconPlus size={16} />}>
+            New Page
+          </Button>
         </>
       }
     >
@@ -53,7 +55,8 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
           title: page.Title || 'Untitled page',
           subtitle: `${formatDate(page.createdAt)} · ${page.slug}`,
           href: `/tienda/${storeSlug}/about/${page.documentId || page.slug}`,
-          icon: 'page',
+          previewHref: resolvePagePreviewHref(storeSlug, page.slug || ''),
+          icon: 'page' as const,
         }))}
       />
     </TiendaListShell>

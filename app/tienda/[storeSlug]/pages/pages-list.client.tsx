@@ -1,32 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { SegmentedControl, Stack } from '@mantine/core';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Page } from '@/markket/page.d';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY } from '../content.list.queries';
 import { isPublished } from '@/markket/helpers.publication';
+import { readTiendaAuthToken, parseTiendaResponse, getTiendaItemKey } from '@/markket/helpers.tienda';
+import { resolvePagePreviewHref } from '@/markket/helpers.preview';
 
 type PagesListClientProps = {
   storeSlug: string;
   initialPages: Page[];
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : null;
-    return parsed?.jwt || '';
-  } catch {
-    return '';
-  }
-}
-
-function itemKey(page: Partial<Page>) {
-  return String(page.documentId || page.id || page.slug || page.Title || Math.random());
-}
 
 function sortByRecent(items: Page[]) {
   return [...items].sort((a, b) => {
@@ -38,10 +25,13 @@ function sortByRecent(items: Page[]) {
 
 export default function PagesListClient({ storeSlug, initialPages }: PagesListClientProps) {
   const [pages, setPages] = useState<Page[]>(sortByRecent(initialPages || []));
+  const [loading, setLoading] = useState((initialPages || []).length === 0);
+  const [sortMode, setSortMode] = useState<'recent' | 'alpha' | 'alpha-desc'>('recent');
 
   useEffect(() => {
-    const token = readAuthToken();
+    const token = readTiendaAuthToken();
     if (!token) {
+      setLoading(false);
       return;
     }
 
@@ -53,16 +43,20 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
         });
 
         const merged = new Map<string, Page>();
-        const allItems = Array.isArray(response?.data) ? (response.data as Page[]) : (Array.isArray(response) ? (response as Page[]) : []);
+        const allItems = parseTiendaResponse<Page>(response) || [];
 
         if (allItems.length > 0) {
           allItems.forEach((page) => {
-            merged.set(itemKey(page), page);
+            merged.set(getTiendaItemKey(page), page);
           });
           setPages(sortByRecent(Array.from(merged.values())));
+        } else {
+          setPages([]);
         }
       } catch (error) {
         console.error('[PagesListClient] Failed to load pages:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -71,10 +65,22 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const sortedPages = useMemo(() => {
+    if (sortMode === 'alpha') {
+      return [...pages].sort((a, b) => (a.Title || '').localeCompare(b.Title || ''));
+    }
+
+    if (sortMode === 'alpha-desc') {
+      return [...pages].sort((a, b) => (b.Title || '').localeCompare(a.Title || ''));
+    }
+
+    return sortByRecent(pages);
+  }, [pages, sortMode]);
+
   const items = useMemo(
     () =>
-      pages.map((page) => {
-        const key = itemKey(page);
+      sortedPages.map((page) => {
+        const key = getTiendaItemKey(page);
         const statusText = isPublished(page) ? 'Published' : 'Draft';
 
         return {
@@ -82,11 +88,26 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           title: page.Title || 'Untitled page',
           subtitle: `${statusText} · ${formatDate(page.updatedAt || page.createdAt)} · ${page.documentId || page.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/pages/${page.documentId || page.slug}`,
+          previewHref: resolvePagePreviewHref(storeSlug, page.slug || ''),
           icon: 'page' as const,
         };
       }),
-    [pages, storeSlug],
+    [sortedPages, storeSlug],
   );
 
-  return <NavTable emptyText="No pages yet." items={items} />;
+  return (
+    <Stack gap="xs">
+      <SegmentedControl
+        size="xs"
+        value={sortMode}
+        onChange={(value) => setSortMode(value as 'recent' | 'alpha' | 'alpha-desc')}
+        data={[
+          { label: 'Recent', value: 'recent' },
+          { label: 'A-Z', value: 'alpha' },
+          { label: 'Z-A', value: 'alpha-desc' },
+        ]}
+      />
+      <NavTable emptyText="No pages yet." items={items} loading={loading} />
+    </Stack>
+  );
 }

@@ -91,11 +91,11 @@ const nextConfig = {
     return {
       afterFiles: [
         {
-          source: '/:slug((?!dashboard|tienda|me|api|docs|stores|auth|newsletter|_next|\\.well-known|apple-app-site-association).*)',
+          source: '/:slug((?!dashboard|tienda|me|api|docs|stores|auth|about|newsletter|_next|\.well-known|apple-app-site-association).*)',
           destination: '/store/:slug',
         },
         {
-          source: '/:slug((?!dashboard|tienda|me|api|docs|stores|auth|newsletter|_next|\\.well-known|apple-app-site-association).*)/:path*',
+          source: '/:slug((?!dashboard|tienda|me|api|docs|stores|auth|about|newsletter|_next|\.well-known|apple-app-site-association).*)/:path*',
           destination: '/store/:slug/:path*',
         },
       ],

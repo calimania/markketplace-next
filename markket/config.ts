@@ -54,10 +54,23 @@ export const markketplace = {
   blank_favicon_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/43c188106f4d950987346842a05e0cbf.png",
   blank_logo_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/f96148440e7ccf81fe2c36a779c06e30.png",
   blank_cover_url: "https://markketplace.nyc3.digitaloceanspaces.com/uploads/c2491ef7c413165be47c9882a08d7ffd.png",
+  empty_gradients: [
+    'linear-gradient(135deg, #E4007C 0%, #E91E63 100%)',
+    'linear-gradient(135deg, #00BCD4 0%, #4CAF50 100%)',
+    'linear-gradient(135deg, #E91E63 0%, #FF6B6B 100%)',
+    'linear-gradient(135deg, #4CAF50 0%, #00BCD4 100%)',
+    'linear-gradient(135deg, #FF6B6B 0%, #E4007C 100%)',
+    'linear-gradient(135deg, #FFB703 0%, #E4007C 100%)',
+    'linear-gradient(135deg, #00BCD4 0%, #E4007C 100%)',
+    'linear-gradient(135deg, #4CAF50 0%, #FFB703 100%)',
+    'linear-gradient(135deg, #E91E63 0%, #00BCD4 100%)',
+  ],
   /** NEXT_PUBLIC_ MARKKET_API : markket-strapi api url || api.markket.place */
   api: process.env.NEXT_PUBLIC_MARKKET_API || "https://api.markket.place",
   /** NEXT_PUBLIC_MARKKET_URL : markket-next base url || markket.place */
   markket_url: process.env.NEXT_PUBLIC_MARKKET_URL || "https://markket.place",
+  /** MARKKET_APP_URL : internal app origin for server-side same-app API fetches */
+  app_url: process.env.MARKKET_APP_URL || process.env.NEXT_PUBLIC_MARKKET_URL || 'http://localhost:3000',
   /** NEXT_PUBLIC_MARKKET_STORE_SLUG */
   slug: process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || 'next',
   /** NEXT_PUBLIC_MARKKET_DESIGN_SYSTEM_STORE_SLUG */

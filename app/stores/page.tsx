@@ -7,6 +7,10 @@ import { Metadata } from "next";
 import PageContent from "@/app/components/ui/page.content";
 import { markketColors } from '@/markket/colors.config';
 import { markketplace } from "@/markket/config";
+import { StorefrontCarousel } from '@/app/components/ui/storefront.carousel';
+import StoresFeed from './feed';
+
+const PAGE_SIZE = 41;
 
 export async function generateMetadata(): Promise<Metadata> {
   const response = await strapiClient.getPage('stores', markketplace.slug);
@@ -28,13 +32,15 @@ export default async function StoresPage() {
   const [storeResponse, response, pageResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getStores(
-      { page: 1, pageSize: 41 },
+      { page: 1, pageSize: PAGE_SIZE },
       { filter: {}, sort: 'active:desc,updatedAt:desc' }
     ),
     strapiClient.getPage('stores'),
   ]);
   const store = storeResponse.data?.[0];
   const stores = response?.data || [];
+  const featuredStores = stores.filter((store: any) => Boolean(store?.active));
+  const remainingStores = stores.filter((store: any) => !Boolean(store?.active));
   const page = pageResponse?.data?.[0] as Page;
 
   return (
@@ -104,7 +110,32 @@ export default async function StoresPage() {
             </Stack>
           </Container>
         </Box>
-        <StoreGrid stores={stores} />
+        {featuredStores.length > 0 && (
+          <Box>
+            <Group justify="space-between" align="flex-end" mb="md">
+              <Box>
+                <Text size="xs" fw={600} tt="uppercase" style={{ letterSpacing: '0.12em', color: markketColors.sections.shop.main }}>
+                  Community highlights
+                </Text>
+              </Box>
+            </Group>
+            <StorefrontCarousel stores={featuredStores} />
+          </Box>
+        )}
+
+        <Box>
+          <Group justify="space-between" align="flex-end" mb="md">
+            <Box>
+              <Text size="xs" fw={600} tt="uppercase" style={{ letterSpacing: '0.12em', color: markketColors.neutral.mediumGray }}>
+                Recently Created
+              </Text>
+              <Title order={2} size={28} style={{ color: markketColors.neutral.charcoal, lineHeight: 1.15 }}>
+                Store feed
+              </Title>
+            </Box>
+          </Group>
+          <StoresFeed initialStores={remainingStores} initialHasMore={Boolean(response?.meta?.pagination?.total && stores.length < response.meta.pagination.total)} pageSize={PAGE_SIZE} />
+        </Box>
         <PageContent params={{ page }} />
       </Stack>
     </Container>

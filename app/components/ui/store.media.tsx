@@ -16,9 +16,10 @@ import {
   TextInput,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconUpload, IconPhoto, IconArrowLeft, IconArrowRight, IconTrash, IconDeviceFloppy } from '@tabler/icons-react';
+import { IconUpload, IconPhoto, IconArrowLeft, IconArrowRight, IconTrash, IconDeviceFloppy, IconSparkles } from '@tabler/icons-react';
 import { Store, Media } from '@/markket/store';
-import { markketClient, tiendaClient } from '@/markket/api';
+import { tiendaClient } from '@/markket/api';
+import ImageModal from '../../../markket/components/image.modal';
 
 interface StoreMediaProps {
   store: Store;
@@ -126,10 +127,10 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   const [loading, setLoading] = useState<'logo' | 'favicon' | 'social' | 'slides' | null>(null);
   const [savingSlides, setSavingSlides] = useState(false);
   const [savingAlt, setSavingAlt] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState('Logo');
   const [altText, setAltText] = useState('');
   const [draftSlides, setDraftSlides] = useState<SlideMedia[]>(Array.isArray(store.Slides) ? store.Slides : []);
-  const client = new markketClient();
 
   const readAuthToken = () => {
     if (typeof window === 'undefined') return '';
@@ -243,6 +244,11 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
     const width = image.naturalWidth || image.width;
     const height = image.naturalHeight || image.height;
 
+    // Validate dimensions before processing
+    if (width > rule.maxWidth || height > rule.maxHeight) {
+      console.warn(`[Media] ${field} exceeds max dimensions: ${width}x${height} (max ${rule.maxWidth}x${rule.maxHeight}). Will resize.`);
+    }
+
     const scale = Math.min(1, rule.maxWidth / width, rule.maxHeight / height);
     const nextWidth = Math.max(1, Math.round(width * scale));
     const nextHeight = Math.max(1, Math.round(height * scale));
@@ -300,10 +306,12 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       lastModified: Date.now(),
     });
 
+    console.log(`[Media] ${field} optimized: ${formatBytes(file.size)} → ${formatBytes(optimized.size)} | ${width}x${height} → ${nextWidth}x${nextHeight} | ${optimized.type}`);
+
     return optimized;
   };
 
-  const handleUpload = async (file: File, field: UploadField) => {
+  const handleUpload = async (file: File, field: UploadField, altOverride?: string) => {
     if (!store?.id) return;
 
     try {
@@ -318,11 +326,13 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       const optimizedFile = await optimizeForField(file, field);
 
       const storeRef = store.documentId || store.slug || store.id;
+      const effectiveAlt = altOverride?.trim() || altText.trim() || `${storeName} ${fieldAltLabel(field)}`;
+
       const uploadResult = await tiendaClient.uploadStoreMedia(storeRef, {
         token,
         files: [optimizedFile],
-        caption: altText.trim() || `${storeName} ${fieldAltLabel(field)}`,
-        alternativeText: altText.trim() || `${storeName} ${fieldAltLabel(field)}`,
+        caption: effectiveAlt,
+        alternativeText: effectiveAlt,
         attach: {
           contentType: 'store',
           field,
@@ -336,7 +346,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
       notifications.show({
         title: 'Success',
-        message: `${field} uploaded (${formatBytes(optimizedFile.size)})`,
+        message: `${field} uploaded (${formatBytes(file.size)} → ${formatBytes(optimizedFile.size)}, ${optimizedFile.type})`,
         color: 'green',
       });
 
@@ -361,6 +371,53 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
       });
     } finally {
       setLoading(null);
+    }
+  };
+
+  const openImageWorkModal = () => {
+    setImageModalOpen(true);
+  };
+
+  const uploadFromModal = async ({ url, img, alt }: { url?: string; img?: File; alt?: string }) => {
+    try {
+      const nextAlt = (alt || '').trim();
+      let nextFile: File | null = img || null;
+
+      if (!nextFile && url) {
+        const proxyUrl = `/api/markket/img?action=proxy&url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+          throw new Error('Could not load image URL for upload');
+        }
+
+        const blob = await response.blob();
+        const mime = blob.type || 'image/webp';
+        const extension = mime.includes('png') ? 'png' : mime.includes('jpeg') ? 'jpg' : 'webp';
+        nextFile = new File([blob], `modal-image.${extension}`, {
+          type: mime,
+          lastModified: Date.now(),
+        });
+      }
+
+      if (!nextFile) {
+        throw new Error('No image to upload');
+      }
+
+      await handleUpload(nextFile, selectedSlot.field, nextAlt || undefined);
+
+      if (nextAlt) {
+        setAltText(nextAlt);
+      }
+
+      setImageModalOpen(false);
+    } catch (error) {
+      console.error('modal.upload.failed', error);
+      notifications.show({
+        title: 'Could not apply image work',
+        message: error instanceof Error ? error.message : 'Try again in a moment.',
+        color: 'red',
+      });
     }
   };
 
@@ -404,10 +461,22 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
     try {
       setSavingSlides(true);
-      await onSaveSlides(draftSlides);
+
+      // Update the selected slide's alt text before saving
+      if (selectedSlot?.isSlide && selectedSlideIndex >= 0) {
+        const updatedSlides = [...draftSlides];
+        updatedSlides[selectedSlideIndex] = {
+          ...updatedSlides[selectedSlideIndex],
+          alternativeText: altText.trim(),
+        };
+        await onSaveSlides(updatedSlides);
+      } else {
+        await onSaveSlides(draftSlides);
+      }
+
       notifications.show({
         title: 'Slides saved',
-        message: 'Slides order and removals were saved.',
+        message: 'Slides order, alt text, and removals were saved.',
         color: 'green',
       });
       await onRefresh?.();
@@ -424,20 +493,56 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   };
 
   const saveAltText = async () => {
-    const mediaId = selectedSlot?.mediaId;
-    const storeId = store.documentId || store.id;
+    if (selectedSlot?.isSlide || selectedSlot?.id === 'slide-add') return;
 
-    if (!mediaId || !storeId) return;
+    const storeRef = store.documentId || store.slug || store.id;
+    const sourceUrl = selectedSlot?.src;
+
+    if (!storeRef || !sourceUrl) return;
 
     try {
       setSavingAlt(true);
-      const nextAlt = altText.trim();
 
-      const response = await client.updateImageAltText(mediaId, nextAlt, storeId);
+      const token = readAuthToken();
+      if (!token) {
+        throw new Error('Missing session token');
+      }
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Unable to save alt text');
+      const nextAlt = altText.trim() || `${storeName} ${fieldAltLabel(selectedSlot.field)}`;
+      const proxyUrl = `/api/markket/img?action=proxy&url=${encodeURIComponent(sourceUrl)}`;
+      const sourceResponse = await fetch(proxyUrl);
+
+      if (!sourceResponse.ok) {
+        throw new Error('Could not load current image for alt text update');
+      }
+
+      const sourceBlob = await sourceResponse.blob();
+      const mime = sourceBlob.type || 'image/webp';
+      const extension = mime.includes('png') ? 'png' : mime.includes('jpeg') ? 'jpg' : mime.includes('webp') ? 'webp' : 'img';
+      const file = new File([sourceBlob], `alt-refresh-${selectedSlot.field.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.${extension}`, {
+        type: mime,
+        lastModified: Date.now(),
+      });
+
+      const uploadResult = await tiendaClient.uploadStoreMedia(storeRef, {
+        token,
+        files: [file],
+        caption: nextAlt,
+        alternativeText: nextAlt,
+        attach: {
+          contentType: 'store',
+          field: selectedSlot.field,
+          mode: 'replace',
+        },
+      });
+
+      if (!uploadResult?.ok) {
+        throw new Error(uploadResult?.message || uploadResult?.text || 'Unable to save alt text');
+      }
+
+      const uploaded = uploadResult?.data?.[0] as Media | undefined;
+      if (uploaded) {
+        onUpdate(uploaded, selectedSlot.field, store.id);
       }
 
       notifications.show({
@@ -598,20 +703,44 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
                 <Group justify="space-between" align="center">
                   <Text size="sm" fw={600}>{selectedSlot.label}</Text>
-                  <Button
-                    variant="light"
-                    size="xs"
-                    leftSection={<IconUpload size={14} />}
-                    loading={loading === toLoadingField(selectedSlot.field)}
-                    {...props}
-                  >
-                    {selectedSlot?.src ? 'Replace' : 'Upload'}
-                  </Button>
+                  <Group gap="xs">
+                    {!selectedSlot?.isSlide && (
+                      <Button
+                        size="xs"
+                        variant="light"
+                        color="grape"
+                        leftSection={<IconDeviceFloppy size={14} />}
+                        onClick={saveAltText}
+                        loading={savingAlt}
+                        disabled={!selectedSlot?.mediaId || !hasAltDraftChanges || savingAlt || loading !== null}
+                      >
+                        Save Alt
+                      </Button>
+                    )}
+                    <Button
+                      variant="default"
+                      size="xs"
+                      leftSection={<IconSparkles size={14} />}
+                      onClick={openImageWorkModal}
+                      disabled={loading !== null || savingSlides || savingAlt}
+                    >
+                      Image Editor
+                    </Button>
+                    <Button
+                      variant="light"
+                      size="xs"
+                      leftSection={<IconUpload size={14} />}
+                      loading={loading === toLoadingField(selectedSlot.field)}
+                      {...props}
+                    >
+                      {selectedSlot?.src ? 'Replace' : 'Upload'}
+                    </Button>
+                  </Group>
                 </Group>
 
                 <TextInput
                   label="Alt text"
-                  description={`Used when you upload or replace this selected image. ${selectedRule.helper}`}
+                  description={`This description is saved when you upload or replace the image${selectedSlot?.isSlide ? ' and when you save slides' : ' and can also be saved directly'}. ${selectedRule.helper}`}
                   placeholder={`Describe ${selectedSlot.label.toLowerCase()} image`}
                   value={altText}
                   onChange={(event) => setAltText(event.currentTarget.value)}
@@ -621,19 +750,6 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                 <Text size="xs" c="dimmed">
                   Max upload budget for {selectedSlot.label}: {selectedRule.maxWidth}x{selectedRule.maxHeight} and about {formatBytes(selectedRule.maxBytes)}.
                 </Text>
-
-                <Group justify="space-between" align="center">
-                  <Text size="xs" c="dimmed">Save alt text for this selected image.</Text>
-                  <Button
-                    size="xs"
-                    variant="default"
-                    onClick={saveAltText}
-                    loading={savingAlt}
-                    disabled={!selectedSlot?.mediaId || !hasAltDraftChanges || savingAlt}
-                  >
-                    Save Alt Text
-                  </Button>
-                </Group>
 
                 {selectedSlot?.isSlide && selectedSlot.id !== 'slide-add' && (
                   <>
@@ -676,7 +792,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                         size="xs"
                         leftSection={<IconDeviceFloppy size={14} />}
                         onClick={saveSlides}
-                        disabled={!hasSlideDraftChanges || savingSlides}
+                        disabled={(!hasSlideDraftChanges && !hasAltDraftChanges) || savingSlides}
                         loading={savingSlides}
                       >
                         Save Slides
@@ -688,6 +804,15 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
             )}
           </FileButton>
         </Paper>
+
+        <ImageModal
+          imageModalOpen={imageModalOpen}
+          handleCloseModal={() => setImageModalOpen(false)}
+          imageUrl={selectedSlot?.src || ''}
+          imageAlt={altText || selectedSlot?.alt || ''}
+          maxWidth={selectedRule.maxWidth}
+          onReplace={uploadFromModal}
+        />
       </Stack>
     </Paper>
   );

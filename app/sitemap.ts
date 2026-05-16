@@ -9,6 +9,15 @@ import type { Product } from '@/markket/product.d';
 
 const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || 'https://markket.place';
 
+const SITEMAP_LIMITS = {
+  stores: 120,
+  posts: 240,
+  pages: 160,
+  events: 240,
+  products: 240,
+  total: 1500,
+} as const;
+
 const buildUrl = (path: string) => new URL(path, MARKKETPLACE_URL).toString();
 
 const toDate = (value?: string | null) => {
@@ -38,11 +47,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     communityEventsResponse,
     communityProductsResponse,
   ] = await Promise.all([
-    strapiClient.getStores({ page: 1, pageSize: 200 }, { filter: { active: { $eq: true } }, sort: 'updatedAt:desc' }),
-    strapiClient.getCommunityPosts({ page: 1, pageSize: 200 }, { sort: 'publishedAt:desc' }),
-    strapiClient.getCommunityPages({ page: 1, pageSize: 200 }, { sort: 'updatedAt:desc' }),
-    strapiClient.getCommunityEvents({ page: 1, pageSize: 200 }, { sort: 'startDate:asc' }),
-    strapiClient.getCommunityProducts({ page: 1, pageSize: 200 }, { sort: 'updatedAt:desc' }),
+    strapiClient.getStores({ page: 1, pageSize: SITEMAP_LIMITS.stores }, { filter: { active: { $eq: true } }, sort: 'updatedAt:desc' }),
+    strapiClient.getCommunityPosts({ page: 1, pageSize: SITEMAP_LIMITS.posts }, { sort: 'publishedAt:desc' }),
+    strapiClient.getCommunityPages({ page: 1, pageSize: SITEMAP_LIMITS.pages }, { sort: 'updatedAt:desc' }),
+    strapiClient.getCommunityEvents({ page: 1, pageSize: SITEMAP_LIMITS.events }, { sort: 'startDate:asc' }),
+    strapiClient.getCommunityProducts({ page: 1, pageSize: SITEMAP_LIMITS.products }, { sort: 'updatedAt:desc' }),
   ]);
 
   const stores = (storesResponse?.data || []) as Store[];
@@ -50,6 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages = (communityPagesResponse?.data || []) as Page[];
   const events = (communityEventsResponse?.data || []) as Event[];
   const products = (communityProductsResponse?.data || []) as Product[];
+
+  const limitedStores = stores.slice(0, SITEMAP_LIMITS.stores);
+  const limitedPosts = posts.slice(0, SITEMAP_LIMITS.posts);
+  const limitedPages = pages.slice(0, SITEMAP_LIMITS.pages);
+  const limitedEvents = events.slice(0, SITEMAP_LIMITS.events);
+  const limitedProducts = products.slice(0, SITEMAP_LIMITS.products);
 
   const staticEntries: MetadataRoute.Sitemap = [
     {
@@ -63,6 +78,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: buildUrl('/about'),
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
     },
     {
       url: buildUrl('/blog'),
@@ -84,7 +105,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const storeEntries: MetadataRoute.Sitemap = stores.flatMap((store) => {
+  const storeEntries: MetadataRoute.Sitemap = limitedStores.flatMap((store) => {
     const lastModified = toDate(store.updatedAt || store.publishedAt);
 
     return [
@@ -118,16 +139,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'weekly',
         priority: 0.7,
       },
-      {
-        url: buildUrl(`/${store.slug}/about/newsletter`),
-        lastModified,
-        changeFrequency: 'weekly',
-        priority: 0.5,
-      },
     ];
   });
 
-  const pageEntries: MetadataRoute.Sitemap = pages
+  const pageEntries: MetadataRoute.Sitemap = limitedPages
     .filter((page) => page.slug && !['home', 'about', 'newsletter'].includes(page.slug))
     .map((page) => ({
       url: buildUrl(`/${page.store?.slug}/about/${page.slug}`),
@@ -137,7 +152,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
     .filter((entry) => !entry.url.includes('/undefined/'));
 
-  const postEntries: MetadataRoute.Sitemap = posts
+  const postEntries: MetadataRoute.Sitemap = limitedPosts
     .map((post) => ({
       url: buildUrl(`/${post.store?.slug}/blog/${post.slug}`),
       lastModified: toDate(post.updatedAt || post.publishedAt),
@@ -146,7 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
     .filter((entry) => !entry.url.includes('/undefined/'));
 
-  const eventEntries: MetadataRoute.Sitemap = events
+  const eventEntries: MetadataRoute.Sitemap = limitedEvents
     .map((event) => ({
       url: buildUrl(`/${(event as any)?.stores?.[0]?.slug}/events/${event.slug}`),
       lastModified: toDate(event.updatedAt || event.publishedAt || event.startDate),
@@ -155,7 +170,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
     .filter((entry) => !entry.url.includes('/undefined/'));
 
-  const productEntries: MetadataRoute.Sitemap = products
+  const productEntries: MetadataRoute.Sitemap = limitedProducts
     .map((product) => ({
       url: buildUrl(`/${(product as any)?.stores?.[0]?.slug}/products/${product.slug}`),
       lastModified: toDate(product.updatedAt || product.publishedAt),
@@ -171,5 +186,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...postEntries,
     ...eventEntries,
     ...productEntries,
-  ]);
+  ]).slice(0, SITEMAP_LIMITS.total);
 }

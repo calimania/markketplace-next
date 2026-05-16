@@ -18,6 +18,8 @@ const PROXY_RULES: ProxyRule[] = [
 
   // Protected uploads and dashboard read-by-id endpoints.
   { methods: ['POST'], requiresAuth: true, match: /^\/api\/upload\/?$/ },
+  { methods: ['GET'], requiresAuth: true, match: /^\/api\/upload\/files\/?$/ },
+  { methods: ['DELETE'], requiresAuth: true, match: /^\/api\/upload\/files\/[^/?#]+\/?$/ },
   {
     methods: ['GET'],
     requiresAuth: true,

@@ -1,0 +1,58 @@
+/* Storefront section rail cards */
+.storefront-rail-card {
+  transition: all 0.25s ease;
+  scroll-snap-align: start;
+}
+
+.storefront-rail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero button subtle interactions */
+.hero-button {
+  transition: all 0.2s ease;
+}
+
+.hero-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Section header styling */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.section-header-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Newsletter CTA */
+.newsletter-cta {
+  transition: all 0.25s ease;
+}
+
+.newsletter-cta:hover {
+  box-shadow: 0 12px 32px rgba(228, 0, 124, 0.15);
+}
+
+/* Accessibility: respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .storefront-rail-card,
+  .hero-button,
+  .newsletter-cta {
+    transition: none;
+  }
+
+  .storefront-rail-card:hover,
+  .hero-button:hover {
+    transform: none;
+  }
+}

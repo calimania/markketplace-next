@@ -1,11 +1,18 @@
 import type { TiendaContentType, TiendaItemId, TiendaRef } from './tienda.endpoints';
 import { tiendaCollectionPath, tiendaItemPath } from './tienda.endpoints';
+import { markketplace } from './config';
 
 type TiendaRequestOptions = {
   token: string;
   query?: Record<string, string | number | boolean | undefined | null | string[]>;
   body?: unknown;
   baseUrl?: string;
+};
+
+type TiendaOverviewListOptions = {
+  token: string;
+  baseUrl?: string;
+  queries?: Partial<Record<'article' | 'page' | 'product' | 'event', TiendaRequestOptions['query']>>;
 };
 
 type TiendaUploadOptions = {
@@ -45,17 +52,35 @@ function withQuery(path: string, query?: TiendaRequestOptions['query']) {
   return queryString ? `${path}?${queryString}` : path;
 }
 
+function resolveBaseUrl(baseUrl?: string) {
+  if (baseUrl && baseUrl.trim()) {
+    return baseUrl.replace(/\/$/, '');
+  }
+
+  if (typeof window === 'undefined') {
+    return (markketplace.app_url || '').replace(/\/$/, '');
+  }
+
+  return '';
+}
+
+function resolveRequestUrl(path: string, baseUrl?: string) {
+  return `${resolveBaseUrl(baseUrl)}${path}`;
+}
+
 async function tiendaFetch(method: string, path: string, options: TiendaRequestOptions) {
-  const { token, body, baseUrl = '' } = options;
+  const { token, body, baseUrl } = options;
+  const requestUrl = resolveRequestUrl(path, baseUrl);
 
   if (!token) {
     throw new Error('Missing JWT token for Tienda request');
   }
 
-  console.log(`[tiendaFetch] ${method} ${baseUrl}${path}`, body ? { bodyKeys: Object.keys(body), body } : {});
+  console.log(`[tiendaFetch] ${method} ${requestUrl}`, body ? { bodyKeys: Object.keys(body), body } : {});
 
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await fetch(requestUrl, {
     method,
+    cache: method === 'GET' ? 'no-store' : 'default',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -86,7 +111,7 @@ async function tiendaFetch(method: string, path: string, options: TiendaRequestO
 }
 
 async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
-  const { token, files, caption, alternativeText, fileInfo, attach, baseUrl = '' } = options;
+  const { token, files, caption, alternativeText, fileInfo, attach, baseUrl } = options;
 
   if (!token) {
     throw new Error('Missing JWT token for Tienda upload request');
@@ -119,7 +144,7 @@ async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
     console.log('[tiendaUpload] attach:', attach);
   }
 
-  const url = `${baseUrl}/api/tienda/stores/${ref}/upload`;
+  const url = resolveRequestUrl(`/api/tienda/stores/${ref}/upload`, baseUrl);
   console.log('[tiendaUpload] uploading', files.length, 'file(s) to', url);
 
   const response = await fetch(url, {
@@ -164,9 +189,34 @@ async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
 }
 
 export const tiendaClient = {
+  async getStore(ref: TiendaRef, options: TiendaRequestOptions) {
+    const primaryPath = withQuery(`/api/tienda/stores/${ref}`, options.query);
+    const primaryResponse = await tiendaFetch('GET', primaryPath, options);
+
+    if ((primaryResponse as { status?: number } | null)?.status === 404) {
+      const aliasPath = withQuery(`/api/tienda/${ref}`, options.query);
+      return tiendaFetch('GET', aliasPath, options);
+    }
+
+    return primaryResponse;
+  },
+
   listContent(ref: TiendaRef, contentType: TiendaContentType, options: TiendaRequestOptions) {
     const path = withQuery(tiendaCollectionPath(ref, contentType), options.query);
     return tiendaFetch('GET', path, options);
+  },
+
+  async listOverviewContent(ref: TiendaRef, options: TiendaOverviewListOptions) {
+    const { token, baseUrl, queries } = options;
+
+    const [article, page, product, event] = await Promise.all([
+      this.listContent(ref, 'article', { token, baseUrl, query: queries?.article }),
+      this.listContent(ref, 'page', { token, baseUrl, query: queries?.page }),
+      this.listContent(ref, 'product', { token, baseUrl, query: queries?.product }),
+      this.listContent(ref, 'event', { token, baseUrl, query: queries?.event }),
+    ]);
+
+    return { article, page, product, event };
   },
 
   createContent(ref: TiendaRef, contentType: TiendaContentType, data: unknown, options: TiendaRequestOptions) {

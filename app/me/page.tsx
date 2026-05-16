@@ -60,12 +60,19 @@ export default function MeHomePage() {
     if (isLoading) return;
 
     if (!confirmed()) {
-      router.replace('/auth');
+      router.replace('/auth/login?next=/me');
+      return;
+    }
+
+    if (stores.length > 0) {
+      fetchStores().catch((error) => {
+        console.error('Failed to refresh stores in background:', error);
+      });
       return;
     }
 
     fetchStores({ force: true });
-  }, [confirmed, fetchStores, isLoading, router]);
+  }, [confirmed, fetchStores, isLoading, router, stores.length]);
 
   useEffect(() => {
     if (!confirmed() || isLoading) return;
@@ -165,8 +172,12 @@ export default function MeHomePage() {
     }
   };
 
+  if (!isLoading && !confirmed()) {
+    return null;
+  }
+
   return (
-    <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface">
+    <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface tech-vhs-surface">
       <Group justify="space-between" align="end" mb="xl" wrap="wrap" gap="sm">
         <Stack gap={6}>
           <Group gap="xs" wrap="wrap">
@@ -191,7 +202,7 @@ export default function MeHomePage() {
       </Group>
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter" style={{ background: 'linear-gradient(180deg, #fff 0%, #fffafc 100%)' }}>
+        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter">
           {(isLoading || !profileLoaded) ? (
             <Stack gap="md">
               <Group justify="space-between" align="flex-start">
@@ -317,7 +328,7 @@ export default function MeHomePage() {
           )}
         </Paper>
 
-        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter" style={{ minHeight: 360, background: 'linear-gradient(180deg, #ffffff 0%, #f8fdff 100%)' }}>
+        <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter" style={{ minHeight: 360 }}>
           <Group justify="space-between" align="flex-start" mb="sm" wrap="nowrap">
             <Stack gap={2} style={{ minWidth: 0 }}>
               <Group gap="xs" align="center" wrap="wrap">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import { Anchor, Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
 import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import { IconExternalLink, } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
@@ -19,6 +19,15 @@ type TiendaProductItemPageClientProps = {
   storeSlug: string;
   itemId: string;
 };
+
+function externalHostLabel(value?: string) {
+  if (!value) return 'external link';
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return 'external link';
+  }
+}
 
 export default function TiendaProductItemPageClient({ storeSlug, itemId }: TiendaProductItemPageClientProps) {
   const [product, setProduct] = useState<Product | null>(null);
@@ -88,6 +97,20 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
 
   const editorId = product.documentId || product.slug || itemId;
   const itemDocumentId = product.documentId || itemId;
+  const externalHost = externalHostLabel(product.SEO?.metaUrl);
+  const refreshProductAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextProduct = await findProduct(itemId, storeSlug, token);
+      if (nextProduct) {
+        setProduct(nextProduct);
+      }
+    } catch (err) {
+      console.error('Tienda product media refresh error', err);
+    }
+  };
   const slideSlots = (product.Slides || []).map((slide, index) => ({
     label: `Slide ${index + 1}`,
     field: 'Slides',
@@ -125,6 +148,9 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
           storeRef={storeSlug}
           contentType="product"
           itemDocumentId={itemDocumentId}
+          onUpload={() => {
+            void refreshProductAfterUpload();
+          }}
           slots={[
             {
               label: 'Thumbnail',
@@ -173,17 +199,15 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
         {product.SEO?.metaUrl && (
           <>
             <Divider />
-            <Button
+            <Anchor
               component="a"
               href={product.SEO.metaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              size="lg"
-              fullWidth
-              rightSection={<IconExternalLink size={16} />}
+              style={{ alignSelf: 'flex-start', fontWeight: 600 }}
             >
-              Buy at {new URL(product.SEO.metaUrl).hostname}
-            </Button>
+              Preview on {externalHost} <IconExternalLink size={14} style={{ marginLeft: 6, verticalAlign: 'middle' }} />
+            </Anchor>
           </>
         )}
       </Stack>
