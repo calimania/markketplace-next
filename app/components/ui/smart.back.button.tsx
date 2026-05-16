@@ -7,17 +7,19 @@ import { useRouter } from 'next/navigation';
 type SmartBackButtonProps = {
   fallbackHref: string;
   label?: string;
+  preferHistory?: boolean;
 } & Omit<ButtonProps, 'onClick'>;
 
 export default function SmartBackButton({
   fallbackHref,
   label = 'Back',
+  preferHistory = false,
   ...buttonProps
 }: SmartBackButtonProps) {
   const router = useRouter();
 
   const handleBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
+    if (preferHistory && typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
       return;
     }

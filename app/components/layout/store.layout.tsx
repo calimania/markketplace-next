@@ -14,29 +14,34 @@ import './store-navbar.css';
 
 function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visibility?: StoreVisibility | null; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const hasProducts = visibility ? visibility.content_summary.products_count > 0 : true;
+  const hasBlog = visibility ? visibility.content_summary.articles_count > 0 : true;
+  const hasEvents = visibility ? visibility.content_summary.events_count > 0 : true;
+  const hasAbout = visibility ? visibility.content_summary.pages_count > 0 : true;
+
   const navLinks = [
     {
       href: `/${slug}/products`,
       label: 'Products',
-      show: visibility ? visibility.show_shop : true,
+      show: visibility ? visibility.show_shop && hasProducts : true,
       color: markketColors.sections.shop.main,
     },
     {
       href: `/${slug}/blog`,
       label: 'Blog',
-      show: visibility ? visibility.show_blog : true,
+      show: visibility ? visibility.show_blog && hasBlog : true,
       color: markketColors.sections.blog.main,
     },
     {
       href: `/${slug}/events`,
       label: 'Events',
-      show: visibility ? visibility.show_events : true,
+      show: visibility ? visibility.show_events && hasEvents : true,
       color: markketColors.sections.events.main,
     },
     {
       href: `/${slug}/about`,
       label: 'About',
-      show: visibility ? visibility.show_about : true,
+      show: visibility ? visibility.show_about && hasAbout : true,
       color: markketColors.sections.about.main,
     },
     {
@@ -110,31 +115,35 @@ export function ClientLayout({
 
   const storeInitial = (store?.title || store?.SEO?.metaTitle || store?.slug || 'S').charAt(0).toUpperCase();
   const logoUrl = store?.Logo?.url;
+  const hasProducts = visibility ? visibility.content_summary.products_count > 0 : true;
+  const hasBlog = visibility ? visibility.content_summary.articles_count > 0 : true;
+  const hasEvents = visibility ? visibility.content_summary.events_count > 0 : true;
+  const hasAbout = visibility ? visibility.content_summary.pages_count > 0 : true;
 
   // Generate nav links for header
   const headerNavLinks = [
     {
       href: `/${store?.slug}/products`,
       label: 'Shop',
-      show: visibility ? visibility.show_shop : true,
+      show: visibility ? visibility.show_shop && hasProducts : true,
       color: markketColors.sections.shop.main,
     },
     {
       href: `/${store?.slug}/blog`,
       label: 'Blog',
-      show: visibility ? visibility.show_blog : true,
+      show: visibility ? visibility.show_blog && hasBlog : true,
       color: markketColors.sections.blog.main,
     },
     {
       href: `/${store?.slug}/events`,
       label: 'Events',
-      show: visibility ? visibility.show_events : true,
+      show: visibility ? visibility.show_events && hasEvents : true,
       color: markketColors.sections.events.main,
     },
     {
       href: `/${store?.slug}/about`,
       label: 'About',
-      show: visibility ? visibility.show_about : true,
+      show: visibility ? visibility.show_about && hasAbout : true,
       color: markketColors.sections.about.main,
     },
   ].filter(link => link.show);

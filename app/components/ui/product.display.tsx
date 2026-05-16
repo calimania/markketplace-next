@@ -54,6 +54,15 @@ function buildProductGallery(product: Product): GalleryImage[] {
   return gallery;
 }
 
+function externalHostLabel(value?: string) {
+  if (!value) return 'external site';
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return 'external site';
+  }
+}
+
 /**
  * ProductDisplay Component
  * Displays a product with image gallery, description, and checkout options
@@ -72,6 +81,7 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
     currency: price.Currency || "USD",
   })) || [];
   const hasExternalPurchaseUrl = Boolean(product?.SEO?.metaUrl);
+  const externalHost = externalHostLabel(product?.SEO?.metaUrl);
   const hasCheckoutOptions = prices.some((price) => !price.hidden && Boolean(price.STRIPE_ID));
 
   return (
@@ -159,9 +169,9 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
                     href={product.SEO?.metaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-300 hover:bg-gray-50"
+                    className="inline-flex items-center text-sm font-medium text-sky-600 underline-offset-2 transition hover:text-sky-700 hover:underline"
                   >
-                    Buy from external site
+                    Preview on {externalHost}
                   </a>
                 )}
 

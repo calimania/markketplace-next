@@ -60,6 +60,19 @@ const getEditorMarkdown = (editor: any): string => {
   return editor?.storage?.markdown?.getMarkdown?.() ?? '';
 };
 
+const markdownToHtml = (editor: any, markdown: string): string => {
+  const parser = editor?.storage?.markdown?.parser;
+  if (parser?.render) {
+    return parser.render(markdown);
+  }
+
+  // Fallback preserves line breaks if parser is temporarily unavailable.
+  return markdown
+    .split('\n')
+    .map((line) => `<p>${line || '<br>'}</p>`)
+    .join('');
+};
+
 const getBlocksValue = (editor: any) => {
   return JSONDocToBlocks(editor.getJSON());
 };
@@ -277,7 +290,7 @@ const ContentEditor = ({
       }),
       Markdown.configure({
         html: true,
-        transformPastedText: true,
+        transformPastedText: false,
       }),
       Link.configure({
         openOnClick: false,
@@ -327,11 +340,6 @@ const ContentEditor = ({
       }
     },
     onCreate: ({ editor }) => {
-      if (format == 'markdown') {
-        const markdown = getEditorMarkdown(editor);
-        onChange(markdown);
-      }
-
       if (format == 'html') {
         onChange(editor.getHTML());
       }
@@ -379,7 +387,8 @@ const ContentEditor = ({
     const currentContent = getEditorMarkdown(editor);
 
     if (currentContent !== value) {
-      editor.commands.setContent(value);
+      const parsedMarkdown = markdownToHtml(editor, value as string);
+      editor.commands.setContent(parsedMarkdown, false, { preserveWhitespace: 'full' });
     }
   }, [editor, value, format]);
 

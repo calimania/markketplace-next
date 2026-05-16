@@ -17,10 +17,12 @@ import {
   Slider,
   Badge,
   ScrollArea,
+  ActionIcon,
 } from '@mantine/core';
-import { IconLink, IconUpload, IconPhotoPlus, IconSparkles, IconTypography, IconShape, IconAdjustments } from '@tabler/icons-react';
+import { IconLink, IconUpload, IconPhotoPlus, IconSparkles, IconTypography, IconShape, IconAdjustments, IconTrash } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { markketplace } from '@/markket/config';
+import { readTiendaAuthToken } from '@/markket/helpers.tienda';
 
 const PLACEHOLDER = markketplace.blank_image_url;
 
@@ -54,6 +56,12 @@ type TextLayerState = {
   size: number;
   xPercent: number;
   yPercent: number;
+};
+
+type SourceResult = {
+  url: string;
+  source: 'personal' | 'unsplash' | 'pexels';
+  mediaId?: number;
 };
 
 const DEFAULT_FILTERS: FilterState = {
@@ -215,6 +223,13 @@ function createFileFromBlob(blob: Blob, fileName: string) {
   });
 }
 
+function resolveAssetUrl(url: string) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = (markketplace.api || '').replace(/\/$/, '');
+  return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 const ImageModal = ({
   imageModalOpen,
   handleCloseModal,
@@ -232,8 +247,9 @@ const ImageModal = ({
   const [backgroundColor, setBackgroundColor] = useState<string>('#f5f5f5');
   const [isBlankCanvas, setIsBlankCanvas] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<SourceResult[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
+  const [deletingMediaId, setDeletingMediaId] = useState<number | null>(null);
   const [urlLoading, setUrlLoading] = useState(false);
   const [fileLoading, setFileLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -334,8 +350,86 @@ const ImageModal = ({
 
     const payload = await response.json();
     return Array.isArray(payload?.urls)
-      ? payload.urls.filter((value: unknown) => typeof value === 'string') as string[]
+      ? payload.urls.filter((value: unknown) => typeof value === 'string').map((url: string) => ({
+        url,
+        source: action,
+      })) as SourceResult[]
       : [];
+  };
+
+  const fetchPersonalLibraryUrls = async (query: string) => {
+    const token = readTiendaAuthToken();
+    if (!token) return [] as SourceResult[];
+
+    const params = new URLSearchParams();
+    params.set('path', '/api/upload/files');
+    params.set('sort[0]', 'updatedAt:desc');
+    params.set('pagination[start]', '0');
+    params.set('pagination[limit]', '24');
+
+    const trimmed = query.trim();
+    if (trimmed) {
+      params.set('filters[name][$containsi]', trimmed);
+    }
+
+    const response = await fetch(`/api/markket?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) return [] as SourceResult[];
+
+    const payload = await response.json();
+    const entries = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
+
+    return entries
+      .map((entry: any) => {
+        const thumb = entry?.formats?.small?.url || entry?.formats?.thumbnail?.url;
+        const original = entry?.url;
+        const candidate = thumb || original;
+        if (typeof candidate !== 'string') return null;
+
+        return {
+          url: resolveAssetUrl(candidate),
+          source: 'personal' as const,
+          mediaId: typeof entry?.id === 'number' ? entry.id : undefined,
+        };
+      })
+      .filter((value: SourceResult | null): value is SourceResult => Boolean(value?.url));
+  };
+
+  const deletePersonalLibraryItem = async (mediaId: number) => {
+    const confirmed = window.confirm('Remove this image from your media library? This cannot be undone.');
+    if (!confirmed) return;
+
+    const token = readTiendaAuthToken();
+    if (!token) {
+      setUrlError('Please sign in again.');
+      return;
+    }
+
+    try {
+      setDeletingMediaId(mediaId);
+      setUrlError(null);
+
+      const response = await fetch(`/api/markket?path=${encodeURIComponent(`/api/upload/files/${mediaId}`)}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Could not delete image from library.');
+      }
+
+      setSearchResults((current) => current.filter((item) => item.mediaId !== mediaId));
+    } catch (error) {
+      setUrlError(error instanceof Error ? error.message : 'Could not delete image from library.');
+    } finally {
+      setDeletingMediaId(null);
+    }
   };
 
   const runLibrarySearch = async (queryOverride?: string) => {
@@ -344,30 +438,38 @@ const ImageModal = ({
       setUrlError(null);
 
       const nextQuery = (queryOverride ?? searchQuery).trim();
-      const urls = await Promise.all([
+      const results = await Promise.all([
         fetchLibraryUrls('unsplash', nextQuery),
         fetchLibraryUrls('pexels', nextQuery),
-      ]).then(([unsplashResults, pexelsResults]) => {
-        const staggered: string[] = [];
-        const maxLength = Math.max(unsplashResults.length, pexelsResults.length);
+        fetchPersonalLibraryUrls(nextQuery),
+      ]).then(([unsplashResults, pexelsResults, personalResults]) => {
+        const staggered: SourceResult[] = [];
+        const maxLength = Math.max(unsplashResults.length, pexelsResults.length, personalResults.length);
 
         for (let index = 0; index < maxLength; index += 1) {
+          const fromPersonal = personalResults[index];
           const fromUnsplash = unsplashResults[index];
           const fromPexels = pexelsResults[index];
+          if (fromPersonal) staggered.push(fromPersonal);
           if (fromUnsplash) staggered.push(fromUnsplash);
           if (fromPexels) staggered.push(fromPexels);
         }
 
-        return staggered;
+        const seen = new Set<string>();
+        return staggered.filter((item) => {
+          if (seen.has(item.url)) return false;
+          seen.add(item.url);
+          return true;
+        });
       });
 
-      if (!urls.length) {
+      if (!results.length) {
         setSearchResults([]);
         setUrlError('No images found.');
         return;
       }
 
-      setSearchResults(urls.slice(0, 18));
+      setSearchResults(results.slice(0, 24));
       setTab('source');
     } catch (error) {
       setUrlError(error instanceof Error ? error.message : 'Could not load library results.');
@@ -989,11 +1091,12 @@ const ImageModal = ({
                     columnGap: 10,
                   }}
                 >
-                  {searchResults.map((url, index) => {
+                  {searchResults.map((result, index) => {
+                    const url = result.url;
                     const tall = index % 3 === 0;
                     return (
                       <Box
-                        key={url}
+                        key={`${result.source}-${result.mediaId || index}-${url}`}
                         style={{
                           breakInside: 'avoid',
                           marginBottom: 10,
@@ -1010,6 +1113,23 @@ const ImageModal = ({
                           void loadFromUrl(url);
                         }}
                       >
+                        {result.source === 'personal' && result.mediaId && (
+                          <ActionIcon
+                            size="sm"
+                            variant="filled"
+                            color="red"
+                            loading={deletingMediaId === result.mediaId}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void deletePersonalLibraryItem(result.mediaId as number);
+                            }}
+                            style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}
+                            title="Delete from library"
+                            aria-label="Delete from library"
+                          >
+                            <IconTrash size={14} />
+                          </ActionIcon>
+                        )}
                         <MantineImage src={url} alt="result" w="100%" h="100%" fit="cover" />
                       </Box>
                     );

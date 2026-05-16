@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
+import { Anchor, Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
 import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import { IconExternalLink, } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
@@ -199,17 +199,15 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
         {product.SEO?.metaUrl && (
           <>
             <Divider />
-            <Button
+            <Anchor
               component="a"
               href={product.SEO.metaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              size="lg"
-              fullWidth
-              rightSection={<IconExternalLink size={16} />}
+              style={{ alignSelf: 'flex-start', fontWeight: 600 }}
             >
-              Buy at {externalHost}
-            </Button>
+              Preview on {externalHost} <IconExternalLink size={14} style={{ marginLeft: 6, verticalAlign: 'middle' }} />
+            </Anchor>
           </>
         )}
       </Stack>

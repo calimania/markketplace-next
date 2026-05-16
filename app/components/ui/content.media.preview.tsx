@@ -6,10 +6,51 @@ import { notifications } from '@mantine/notifications';
 import { IconPhoto } from '@tabler/icons-react';
 import { tiendaClient } from '@/markket/api.tienda';
 import { markketColors } from '@/markket/colors.config';
+import { readTiendaAuthToken } from '@/markket/helpers.tienda';
 import ImageModal from '@/markket/components/image.modal';
 
 const MAX_UPLOAD_EDGE = 1920;
 const MAX_UPLOAD_BYTES = 1_500_000;
+
+function sanitizeMediaToken(value: string) {
+  return (value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+}
+
+function withSearchableUploadName({
+  file,
+  storeRef,
+  contentType,
+  itemDocumentId,
+  field,
+}: {
+  file: File;
+  storeRef: string;
+  contentType: string;
+  itemDocumentId: string;
+  field: string;
+}) {
+  const extension = (file.name.split('.').pop() || (file.type.includes('png') ? 'png' : file.type.includes('jpeg') ? 'jpg' : 'webp')).toLowerCase();
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  const parts = [
+    sanitizeMediaToken(String(storeRef || 'store')),
+    sanitizeMediaToken(contentType || 'content'),
+    sanitizeMediaToken(itemDocumentId || 'item'),
+    sanitizeMediaToken(field || 'media'),
+    Date.now().toString(),
+    sanitizeMediaToken(baseName || 'image'),
+  ].filter(Boolean);
+
+  const nextName = `${parts.join('__')}.${extension}`;
+
+  return new File([file], nextName, {
+    type: file.type,
+    lastModified: Date.now(),
+  });
+}
 
 export type ContentMediaSlot = {
   /** Display label shown below the thumbnail */
@@ -36,16 +77,6 @@ type ContentMediaPreviewProps = {
   /** href for the "Open Media Studio" link */
   studioHref?: string;
 };
-
-function readAuthToken() {
-  if (typeof window === 'undefined') return '';
-  try {
-    const raw = localStorage.getItem('markket.auth');
-    return raw ? JSON.parse(raw)?.jwt || '' : '';
-  } catch {
-    return '';
-  }
-}
 
 function resolveContentTypeCandidates(contentType: string) {
   const normalized = (contentType || '').trim().toLowerCase();
@@ -150,12 +181,19 @@ async function uploadContentMediaSlotImage({
   slot: ContentMediaSlot;
   file: File;
 }) {
-  const token = readAuthToken();
+  const token = readTiendaAuthToken();
   if (!token) {
     throw new Error('Please sign in again.');
   }
 
   const optimizedFile = await optimizeImageBeforeUpload(file);
+  const namedFile = withSearchableUploadName({
+    file: optimizedFile,
+    storeRef,
+    contentType,
+    itemDocumentId,
+    field: slot.field,
+  });
 
   const attachCandidates = buildAttachCandidates(slot.field, contentType).map((attach) => ({
     ...attach,
@@ -172,7 +210,7 @@ async function uploadContentMediaSlotImage({
   for (const attach of attachCandidates) {
     const candidateResult = await tiendaClient.uploadStoreMedia(storeRef, {
       token,
-      files: [optimizedFile],
+      files: [namedFile],
       alternativeText: slot.alt || slot.label,
       attach,
     });
