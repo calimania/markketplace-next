@@ -49,9 +49,9 @@ function formatDateTime(value?: string, timezone?: string) {
   return new Intl.DateTimeFormat('en-US', options).format(parsed);
 }
 
-function toExcerpt(value?: string, max = 180) {
+function toExcerpt(value?: unknown, max = 180) {
   if (!value) return '';
-  const plain = stripMarkdown(richTextToPlainText(value));
+  const plain = stripMarkdown(richTextToPlainText(value as string));
   if (!plain) return '';
   return plain.length > max ? `${plain.slice(0, max - 1)}...` : plain;
 }
@@ -77,9 +77,9 @@ export async function generateMetadata({ params }: EventsPageProps) {
   const eventDate = event?.startDate ? formatDateTime(event.startDate, event?.timezone) : '';
   const location = '';
 
-  const description = event?.Description
-    ? event.Description.substring(0, 160).replace(/<[^>]*>/g, '')
-    : `${eventName}${eventDate ? ' on ' + eventDate : ''}${location ? ' at ' + location : ''}. Join us!`;
+  const description = event?.SEO?.metaDescription
+    || toExcerpt(event?.Description, 160)
+    || `${eventName}${eventDate ? ' on ' + eventDate : ''}${location ? ' at ' + location : ''}. Join us!`;
 
   return generateSEOMetadata({
     slug,

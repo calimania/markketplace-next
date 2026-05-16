@@ -86,6 +86,19 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
 
   const editorId = album.documentId || album.slug || itemId;
   const itemDocumentId = album.documentId || itemId;
+  const refreshAlbumAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextAlbum = await findAlbum(itemId, storeSlug, token);
+      if (nextAlbum) {
+        setAlbum(nextAlbum);
+      }
+    } catch (err) {
+      console.error('Tienda album media refresh error', err);
+    }
+  };
 
   return (
     <TiendaDetailShell
@@ -117,6 +130,9 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
           storeRef={storeSlug}
           contentType="album"
           itemDocumentId={itemDocumentId}
+          onUpload={() => {
+            void refreshAlbumAfterUpload();
+          }}
           slots={[
             {
               label: 'Cover',

@@ -8,7 +8,7 @@ import Markdown from '@/app/components/ui/page.markdown';
 import { motion } from 'framer-motion';
 import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
-import { Title } from "@mantine/core";
+import { Box, Modal, Title, UnstyledButton } from "@mantine/core";
 
 type GalleryImage = {
   id: string | number;
@@ -66,6 +66,7 @@ function buildProductGallery(product: Product): GalleryImage[] {
 export default function ProductDisplay({ product, page, store }: { product: Product, page?: Page, store?: Store }) {
   const gallery = buildProductGallery(product);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | undefined>(gallery[0]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const prices: Price[] = product.PRICES?.map((price) => ({
     ...price,
     currency: price.Currency || "USD",
@@ -96,7 +97,14 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
             layoutId="main-image"
             className="aspect-w-4 aspect-h-3 sm:aspect-w-3 sm:aspect-h-2 rounded-lg overflow-hidden bg-gray-100"
           >
-            <MainImage title={product.Name} image={selectedImage} />
+            <UnstyledButton
+              component="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="Open product image"
+              style={{ display: 'block', width: '100%', height: '100%', cursor: 'zoom-in' }}
+            >
+              <MainImage title={product.Name} image={selectedImage} />
+            </UnstyledButton>
           </motion.div>
 
           {gallery.length > 1 && (
@@ -184,6 +192,33 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
           </div>
         </motion.div>
       )}
+
+      <Modal
+        opened={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        centered
+        size="90vw"
+        title={selectedImage?.alternativeText || product.Name}
+        styles={{
+          content: { background: '#05080f' },
+          header: { background: '#05080f' },
+          title: { color: '#ffffff' },
+          close: { color: '#ffffff' },
+        }}
+      >
+        <Box
+          style={{
+            width: '100%',
+            height: 'min(80vh, 860px)',
+            backgroundImage: `url(${selectedImage?.formats?.large?.url || selectedImage?.url || ''})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: 12,
+            backgroundColor: '#0b1220',
+          }}
+        />
+      </Modal>
     </motion.div>
   );
 };

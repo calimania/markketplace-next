@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
-import { Badge, Box, Group, Loader, Stack, Text, Tooltip, rem } from '@mantine/core';
+import { useState, useEffect, useRef } from 'react';
+import { Badge, Box, Group, Stack, Text, Tooltip, rem } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import { IconPhoto } from '@tabler/icons-react';
 import { tiendaClient } from '@/markket/api.tienda';
 import { markketColors } from '@/markket/colors.config';
+import ImageModal from '@/markket/components/image.modal';
 
 const MAX_UPLOAD_EDGE = 1920;
 const MAX_UPLOAD_BYTES = 1_500_000;
@@ -136,123 +137,95 @@ async function optimizeImageBeforeUpload(file: File): Promise<File> {
   });
 }
 
-/** A single thumbnail slot — shows image or empty placeholder, accepts file drop */
-function MediaSlot({
-  slot,
+async function uploadContentMediaSlotImage({
   storeRef,
   contentType,
   itemDocumentId,
-  onUpload,
+  slot,
+  file,
 }: {
-  slot: ContentMediaSlot;
   storeRef: string;
   contentType: string;
   itemDocumentId: string;
-  onUpload?: (field: string, url: string) => void;
+  slot: ContentMediaSlot;
+  file: File;
 }) {
-  const [uploading, setUploading] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [preview, setPreview] = useState<string | undefined>(slot.src);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const token = readAuthToken();
+  if (!token) {
+    throw new Error('Please sign in again.');
+  }
 
-  useEffect(() => {
-    if (slot.src) setPreview(slot.src);
-  }, [slot.src]);
+  const optimizedFile = await optimizeImageBeforeUpload(file);
 
-  const handleFile = async (file: File) => {
-    if (slot.disabled) {
-      notifications.show({
-        title: 'Upload unavailable',
-        message: slot.disabledMessage || `${slot.label} cannot be uploaded here yet.`,
-        color: 'yellow',
-      });
-      return;
+  const attachCandidates = buildAttachCandidates(slot.field, contentType).map((attach) => ({
+    ...attach,
+    ...(itemDocumentId ? { itemId: itemDocumentId } : {}),
+  }));
+
+  if (attachCandidates.length === 0) {
+    throw new Error(slot.disabledMessage || `${slot.label} uploads are not supported for ${contentType} yet.`);
+  }
+
+  let result: any = null;
+  let lastErrorMessage = 'Upload failed';
+
+  for (const attach of attachCandidates) {
+    const candidateResult = await tiendaClient.uploadStoreMedia(storeRef, {
+      token,
+      files: [optimizedFile],
+      alternativeText: slot.alt || slot.label,
+      attach,
+    });
+
+    if (candidateResult?.ok) {
+      result = candidateResult;
+      break;
     }
 
-    const token = readAuthToken();
-    if (!token) {
-      notifications.show({ title: 'Session expired', message: 'Please sign in again.', color: 'red' });
-      return;
-    }
+    lastErrorMessage = candidateResult?.message || candidateResult?.text || lastErrorMessage;
+  }
 
-    try {
-      setUploading(true);
-      const optimizedFile = await optimizeImageBeforeUpload(file);
+  if (!result?.ok) {
+    throw new Error(lastErrorMessage);
+  }
 
-      const attachCandidates = buildAttachCandidates(slot.field, contentType).map((attach) => ({
-        ...attach,
-        ...(itemDocumentId ? { itemId: itemDocumentId } : {}),
-      }));
+  const uploaded = result?.data?.[0];
+  return uploaded?.formats?.small?.url || uploaded?.url || '';
+}
 
-      if (attachCandidates.length === 0) {
-        throw new Error(slot.disabledMessage || `${slot.label} uploads are not supported for ${contentType} yet.`);
-      }
-
-      let result: any = null;
-      let lastErrorMessage = 'Upload failed';
-
-      for (const attach of attachCandidates) {
-        const candidateResult = await tiendaClient.uploadStoreMedia(storeRef, {
-          token,
-          files: [optimizedFile],
-          alternativeText: slot.alt || slot.label,
-          attach,
-        });
-
-        if (candidateResult?.ok) {
-          result = candidateResult;
-          break;
-        }
-
-        lastErrorMessage = candidateResult?.message || candidateResult?.text || lastErrorMessage;
-      }
-
-      if (!result?.ok) {
-        throw new Error(lastErrorMessage);
-      }
-
-      const uploaded = result?.data?.[0];
-      const url = uploaded?.formats?.small?.url || uploaded?.url;
-      if (url) {
-        setPreview(url);
-        onUpload?.(slot.field, url);
-      }
-
-      notifications.show({
-        title: 'Uploaded',
-        message: `${slot.label} updated (optimized for web).`,
-        color: 'green',
-        autoClose: 2500,
-      });
-    } catch (err) {
-      console.error('[ContentMediaPreview] upload failed', err);
-      notifications.show({
-        title: 'Upload failed',
-        message: err instanceof Error ? err.message : 'Something went wrong.',
-        color: 'red',
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
+function MediaSlot({
+  slot,
+  uploading,
+  saved,
+  onOpenEditor,
+}: {
+  slot: ContentMediaSlot;
+  uploading?: boolean;
+  saved?: boolean;
+  onOpenEditor?: () => void;
+}) {
+  const preview = slot.src;
 
   return (
     <Tooltip
       label={
+        uploading
+          ? `${slot.label} is uploading...`
+          : saved
+            ? `${slot.label} saved`
+            :
         slot.disabled
           ? (slot.disabledMessage || `${slot.label} is preview-only right now`)
-          : uploading
-            ? 'Uploading…'
-            : `Click to upload ${slot.label}`
+              : `Click to edit ${slot.label}`
       }
       withArrow
     >
       <Box
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onTouchStart={() => setHovered(true)}
-        onTouchEnd={() => setTimeout(() => setHovered(false), 400)}
         onClick={() => {
+          if (uploading) {
+            return;
+          }
+
           if (slot.disabled) {
             notifications.show({
               title: 'Preview only',
@@ -262,9 +235,7 @@ function MediaSlot({
             return;
           }
 
-          if (!uploading) {
-            inputRef.current?.click();
-          }
+          onOpenEditor?.();
         }}
         style={{
           width: rem(80),
@@ -273,14 +244,14 @@ function MediaSlot({
           border: `2px dashed ${preview ? markketColors.sections.about.main : '#d0d0d0'}`,
           background: preview ? 'transparent' : markketColors.sections.about.light,
           overflow: 'hidden',
-          cursor: slot.disabled ? 'not-allowed' : uploading ? 'wait' : 'pointer',
+          cursor: uploading ? 'progress' : (slot.disabled ? 'not-allowed' : 'pointer'),
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'border-color 0.15s, opacity 0.15s, box-shadow 0.15s',
           opacity: slot.disabled ? 0.7 : 1,
-          boxShadow: hovered && !slot.disabled && !uploading ? '0 0 0 2px ' + markketColors.sections.about.main : 'none',
+          boxShadow: 'none',
         }}
       >
         {preview ? (
@@ -298,61 +269,32 @@ function MediaSlot({
           </Stack>
         )}
 
-        {/* persistent corner badge — always visible on mobile as tap hint */}
-        {!uploading && !slot.disabled && (
-          <Box
-            style={{
-              position: 'absolute', bottom: rem(4), right: rem(4),
-              background: 'rgba(0,0,0,0.55)',
-              borderRadius: rem(4),
-              padding: `${rem(2)} ${rem(3)}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'none',
-            }}
-          >
-            <IconUpload size={10} color="#fff" />
-          </Box>
-        )}
-
-        {/* uploading spinner overlay */}
         {uploading && (
           <Box
             style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.55)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.62)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <Loader size="sm" color="white" />
+            <Badge size="xs" color="grape" variant="filled">Uploading...</Badge>
           </Box>
         )}
 
-        {/* hover upload cue (only when idle and not disabled) */}
-        {!uploading && !slot.disabled && hovered && (
+        {!uploading && saved && (
           <Box
             style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.45)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: rem(4),
+              position: 'absolute',
+              top: 6,
+              right: 6,
             }}
           >
-            <IconUpload size={18} color="#fff" />
-            <Text size="xs" c="white" fw={600} style={{ fontSize: rem(9) }}>Upload</Text>
+            <Badge size="xs" color="teal" variant="filled">Saved</Badge>
           </Box>
         )}
-
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-            e.target.value = '';
-          }}
-        />
       </Box>
     </Tooltip>
   );
@@ -379,11 +321,162 @@ export default function ContentMediaPreview({
   onUpload,
   studioHref,
 }: ContentMediaPreviewProps) {
+  const slotKey = (slot: ContentMediaSlot, index: number) => `${slot.field}-${slot.label}-${index}`;
+  const [selectedSlotKey, setSelectedSlotKey] = useState(slots[0] ? slotKey(slots[0], 0) : '');
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [uploadingSlotKey, setUploadingSlotKey] = useState<string | null>(null);
+  const [savedSlotKey, setSavedSlotKey] = useState<string | null>(null);
+  const [slotPreviewOverrides, setSlotPreviewOverrides] = useState<Record<string, string>>({});
+  const [slotAltOverrides, setSlotAltOverrides] = useState<Record<string, string>>({});
+  const slotBlobPreviewsRef = useRef<Record<string, string>>({});
+  const savedBadgeTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setSelectedSlotKey(slots[0] ? slotKey(slots[0], 0) : '');
+  }, [slots]);
+
+  useEffect(() => {
+    return () => {
+      if (savedBadgeTimerRef.current) {
+        window.clearTimeout(savedBadgeTimerRef.current);
+      }
+
+      Object.values(slotBlobPreviewsRef.current).forEach((blobUrl) => {
+        if (blobUrl?.startsWith('blob:')) {
+          URL.revokeObjectURL(blobUrl);
+        }
+      });
+      slotBlobPreviewsRef.current = {};
+    };
+  }, []);
+
+  const setSlotPreview = (key: string, nextUrl: string, isBlobPreview: boolean) => {
+    const previousBlobUrl = slotBlobPreviewsRef.current[key];
+    if (previousBlobUrl && previousBlobUrl !== nextUrl) {
+      URL.revokeObjectURL(previousBlobUrl);
+      delete slotBlobPreviewsRef.current[key];
+    }
+
+    if (isBlobPreview && nextUrl.startsWith('blob:')) {
+      slotBlobPreviewsRef.current[key] = nextUrl;
+    }
+
+    setSlotPreviewOverrides((current) => ({
+      ...current,
+      [key]: nextUrl,
+    }));
+  };
+
+  const clearSlotPreviewOverride = (key: string) => {
+    const previousBlobUrl = slotBlobPreviewsRef.current[key];
+    if (previousBlobUrl) {
+      URL.revokeObjectURL(previousBlobUrl);
+      delete slotBlobPreviewsRef.current[key];
+    }
+
+    setSlotPreviewOverrides((current) => {
+      if (!(key in current)) return current;
+      const { [key]: _removed, ...rest } = current;
+      return rest;
+    });
+  };
+
+  const normalizedSlots = slots.map((slot, index) => {
+    const key = slotKey(slot, index);
+    return {
+      ...slot,
+      src: slotPreviewOverrides[key] ?? slot.src,
+      alt: slotAltOverrides[key] ?? slot.alt,
+      key,
+    };
+  });
+
+  const selectedSlotEntry = normalizedSlots.find((slot) => slot.key === selectedSlotKey) || normalizedSlots[0];
+
+  const uploadFromModal = async ({ url, img, alt }: { url?: string; img?: File; alt?: string }) => {
+    if (!selectedSlotEntry) return;
+
+    try {
+      setUploadingSlotKey(selectedSlotEntry.key);
+      const nextAlt = (alt || '').trim();
+      if (nextAlt) {
+        setSlotAltOverrides((current) => ({
+          ...current,
+          [selectedSlotEntry.key]: nextAlt,
+        }));
+      }
+
+      let nextFile: File | null = img || null;
+
+      if (!nextFile && url) {
+        const proxyUrl = `/api/markket/img?action=proxy&url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+          throw new Error('Could not load image URL for upload');
+        }
+
+        const blob = await response.blob();
+        const mime = blob.type || 'image/webp';
+        const extension = mime.includes('png') ? 'png' : mime.includes('jpeg') ? 'jpg' : 'webp';
+        nextFile = new File([blob], `media-image.${extension}`, {
+          type: mime,
+          lastModified: Date.now(),
+        });
+      }
+
+      if (!nextFile) {
+        throw new Error('No image to upload');
+      }
+
+      setSlotPreview(selectedSlotEntry.key, URL.createObjectURL(nextFile), true);
+
+      const nextUrl = await uploadContentMediaSlotImage({
+        storeRef,
+        contentType,
+        itemDocumentId,
+        slot: selectedSlotEntry,
+        file: nextFile,
+      });
+
+      if (nextUrl) {
+        setSlotPreview(selectedSlotEntry.key, nextUrl, false);
+        setSavedSlotKey(selectedSlotEntry.key);
+        if (savedBadgeTimerRef.current) {
+          window.clearTimeout(savedBadgeTimerRef.current);
+        }
+        savedBadgeTimerRef.current = window.setTimeout(() => {
+          setSavedSlotKey((current) => (current === selectedSlotEntry.key ? null : current));
+        }, 2200);
+        onUpload?.(selectedSlotEntry.field, nextUrl);
+      }
+
+      setImageModalOpen(false);
+    } catch (error) {
+      if (selectedSlotEntry.src) {
+        setSlotPreview(selectedSlotEntry.key, selectedSlotEntry.src, false);
+      } else {
+        clearSlotPreviewOverride(selectedSlotEntry.key);
+      }
+      console.error('content.media.modal.upload.failed', error);
+      notifications.show({
+        title: 'Could not apply image work',
+        message: error instanceof Error ? error.message : 'Try again in a moment.',
+        color: 'red',
+      });
+    } finally {
+      setUploadingSlotKey(null);
+    }
+  };
+
   return (
     <Stack gap="xs">
       <Group gap="xs" align="center">
         <IconPhoto size={14} color={markketColors.sections.about.main} />
         <Text size="xs" fw={600} tt="uppercase" c="dimmed">Image Manager</Text>
+        {uploadingSlotKey && (
+          <Badge size="xs" color="grape" variant="light">Uploading image...</Badge>
+        )}
         {studioHref && (
           <Badge
             component="a"
@@ -399,14 +492,16 @@ export default function ContentMediaPreview({
       </Group>
 
       <Group gap="sm" wrap="wrap">
-        {slots.map((slot, index) => (
-          <Stack key={`${slot.field}-${slot.label}-${index}`} gap={4} align="center">
+        {normalizedSlots.map((slot) => (
+          <Stack key={slot.key} gap={4} align="center">
             <MediaSlot
               slot={slot}
-              storeRef={storeRef}
-              contentType={contentType}
-              itemDocumentId={itemDocumentId}
-              onUpload={onUpload}
+              uploading={uploadingSlotKey === slot.key}
+              saved={savedSlotKey === slot.key}
+              onOpenEditor={() => {
+                setSelectedSlotKey(slot.key);
+                setImageModalOpen(true);
+              }}
             />
             <Text size="xs" c="dimmed" ta="center" style={{ fontSize: rem(10) }}>
               {slot.label}
@@ -414,6 +509,15 @@ export default function ContentMediaPreview({
           </Stack>
         ))}
       </Group>
+
+      <ImageModal
+        imageModalOpen={imageModalOpen}
+        handleCloseModal={() => setImageModalOpen(false)}
+        imageUrl={selectedSlotEntry?.src || ''}
+        imageAlt={selectedSlotEntry?.alt || ''}
+        maxWidth={1920}
+        onReplace={uploadFromModal}
+      />
 
     </Stack>
   );

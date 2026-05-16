@@ -88,6 +88,19 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
   const editorId = post.documentId || post.slug || itemId;
   const itemDocumentId = post.documentId || itemId;
   const storeRef = storeSlug;
+  const refreshPostAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextPost = await findBlogArticle(itemId, storeSlug, token);
+      if (nextPost) {
+        setPost(nextPost);
+      }
+    } catch (err) {
+      console.error('Tienda blog media refresh error', err);
+    }
+  };
 
   return (
     <TiendaDetailShell
@@ -119,6 +132,9 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
           storeRef={storeRef}
           contentType="article"
           itemDocumentId={itemDocumentId}
+          onUpload={() => {
+            void refreshPostAfterUpload();
+          }}
           slots={[
             {
               label: 'Cover',

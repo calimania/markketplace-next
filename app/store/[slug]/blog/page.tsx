@@ -1,4 +1,4 @@
-import { Container, Text, Stack, SimpleGrid, Paper, Group, Badge, Box, Title, Anchor } from "@mantine/core";
+import { Container, Text, Stack, SimpleGrid, Paper, Group, Badge, Box, Title } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
 import { BlogPostCard } from '@/app/components/docs/card';
 import { notFound } from 'next/navigation';
@@ -120,15 +120,17 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
                         {featuredExcerpt}{featuredExcerpt.length >= 240 ? '...' : ''}
                       </Text>
                     )}
-                    <Anchor
-                      component={Link}
+                    <Link
                       href={`/${slug}/blog/${featuredPost.slug}`}
-                      underline="never"
-                      fw={700}
-                      style={{ color: markketColors.sections.blog.main, width: 'fit-content' }}
+                      style={{
+                        color: markketColors.sections.blog.main,
+                        width: 'fit-content',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                      }}
                     >
                       Read feature
-                    </Anchor>
+                    </Link>
                   </Stack>
                 </SimpleGrid>
               </Paper>

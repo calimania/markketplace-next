@@ -98,6 +98,19 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
   const editorId = product.documentId || product.slug || itemId;
   const itemDocumentId = product.documentId || itemId;
   const externalHost = externalHostLabel(product.SEO?.metaUrl);
+  const refreshProductAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextProduct = await findProduct(itemId, storeSlug, token);
+      if (nextProduct) {
+        setProduct(nextProduct);
+      }
+    } catch (err) {
+      console.error('Tienda product media refresh error', err);
+    }
+  };
   const slideSlots = (product.Slides || []).map((slide, index) => ({
     label: `Slide ${index + 1}`,
     field: 'Slides',
@@ -135,6 +148,9 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
           storeRef={storeSlug}
           contentType="product"
           itemDocumentId={itemDocumentId}
+          onUpload={() => {
+            void refreshProductAfterUpload();
+          }}
           slots={[
             {
               label: 'Thumbnail',

@@ -128,7 +128,6 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   const [savingSlides, setSavingSlides] = useState(false);
   const [savingAlt, setSavingAlt] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [imageModalMode, setImageModalMode] = useState<'preview' | 'replace'>('replace');
   const [selectedSlotId, setSelectedSlotId] = useState('Logo');
   const [altText, setAltText] = useState('');
   const [draftSlides, setDraftSlides] = useState<SlideMedia[]>(Array.isArray(store.Slides) ? store.Slides : []);
@@ -376,7 +375,6 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   };
 
   const openImageWorkModal = () => {
-    setImageModalMode(selectedSlot?.src ? 'preview' : 'replace');
     setImageModalOpen(true);
   };
 
@@ -813,8 +811,6 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
           imageUrl={selectedSlot?.src || ''}
           imageAlt={altText || selectedSlot?.alt || ''}
           maxWidth={selectedRule.maxWidth}
-          mode={imageModalMode}
-          onToggleMode={() => setImageModalMode((current) => (current === 'preview' ? 'replace' : 'preview'))}
           onReplace={uploadFromModal}
         />
       </Stack>

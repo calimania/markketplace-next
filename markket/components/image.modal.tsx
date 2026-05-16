@@ -15,9 +15,10 @@ import {
   Box,
   Image as MantineImage,
   Slider,
+  Badge,
+  ScrollArea,
 } from '@mantine/core';
-import { IconLink, IconUpload, IconPhotoPlus, IconSparkles } from '@tabler/icons-react';
-import { Dropzone } from '@mantine/dropzone';
+import { IconLink, IconUpload, IconPhotoPlus, IconSparkles, IconTypography, IconShape, IconAdjustments } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { markketplace } from '@/markket/config';
 
@@ -31,20 +32,19 @@ type ImageModalProps = {
   maxWidth?: number;
   onReplace?: (img: { url: string; alt: string; img?: File }) => void;
   onInsert?: (img: { url: string; alt: string }) => void;
-  mode?: 'preview' | 'replace';
-  onToggleMode?: () => void;
   disableReplace?: boolean;
+  mode?: string; // optional, ignored by new modal
 };
 
-type EditorTab = 'source' | 'adjust' | 'design' | 'text';
-type SourceKind = 'upload' | 'web';
-type LibraryKind = 'unsplash' | 'pexels';
+type EditorTab = 'text' | 'design' | 'source';
 type ShapePreset = 'none' | 'hex-outline' | 'side-bands' | 'corner-frame' | 'circle-badge';
 
 type FilterState = {
   grayscale: number;
   brightness: number;
   contrast: number;
+  tintColor: string;
+  tintOpacity: number;
 };
 
 type TextLayerState = {
@@ -60,6 +60,8 @@ const DEFAULT_FILTERS: FilterState = {
   grayscale: 0,
   brightness: 100,
   contrast: 100,
+  tintColor: '#000000',
+  tintOpacity: 0,
 };
 
 const DEFAULT_TEXT_LAYER: TextLayerState = {
@@ -80,7 +82,9 @@ const TEXT_FONT_PRESETS = [
   { label: 'Mono', family: '"Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace' },
 ];
 
-const SHAPE_COLOR_PRESETS = ['#ffffff', '#111827', '#e4007c', '#00bcd4', '#4caf50', '#f59e0b'];
+const BACKGROUND_COLOR_PRESETS = ['#ffffff', '#f5f5f5', '#111827', '#e4007c', '#00bcd4', '#4caf50', '#f59e0b', '#667eea', '#ec4899'];
+
+const SHAPE_COLOR_PRESETS = ['#ffffff', '#111827', '#e4007c', '#00bcd4', '#4caf50', '#f59e0b', '#667eea', '#ec4899'];
 
 const SHAPE_STYLE_PRESETS = [
   { label: 'Soft', color: '#ffffff', opacity: 40, weight: 4 },
@@ -136,7 +140,7 @@ function drawShapeOverlay(
   if (preset === 'hex-outline') {
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.max(24, Math.min(width, height) * 0.38);
+    const radius = Math.max(16, Math.min(width, height) * 0.22);
 
     ctx.beginPath();
     for (let i = 0; i < 6; i += 1) {
@@ -192,6 +196,14 @@ function drawShapeOverlay(
   ctx.restore();
 }
 
+function getFontWeight(fontFamily: string): string {
+  // Monospace fonts look better without bold
+  if (fontFamily.includes('Mono') || fontFamily.includes('monospace')) {
+    return '500';
+  }
+  return '700';
+}
+
 function baseName(fileName: string) {
   return fileName.includes('.') ? fileName.slice(0, fileName.lastIndexOf('.')) : fileName;
 }
@@ -210,20 +222,20 @@ const ImageModal = ({
   imageAlt: initialImageAlt = '',
   maxWidth,
   onReplace,
-  mode = 'preview',
-  onToggleMode,
   disableReplace = false,
 }: ImageModalProps) => {
   const isMobile = useMediaQuery('(max-width: 900px)');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [tab, setTab] = useState<EditorTab>('source');
-  const [sourceKind, setSourceKind] = useState<SourceKind>('upload');
-  const [libraryKind, setLibraryKind] = useState<LibraryKind>('unsplash');
+  const [tab, setTab] = useState<EditorTab>('text');
+  const [backgroundColor, setBackgroundColor] = useState<string>('#f5f5f5');
+  const [isBlankCanvas, setIsBlankCanvas] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [urlLoading, setUrlLoading] = useState(false);
+  const [fileLoading, setFileLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
 
   const [workingFile, setWorkingFile] = useState<File | null>(null);
@@ -242,6 +254,7 @@ const ImageModal = ({
   const [textPromptOpen, setTextPromptOpen] = useState(false);
 
   const hasImage = Boolean(workingImage);
+  const hasContent = hasImage || textLayer.value.trim();
 
   const uploadAccept = useMemo(
     () => 'image/png,image/jpeg,image/webp,image/avif,image/gif,image/svg+xml',
@@ -250,6 +263,7 @@ const ImageModal = ({
 
   const loadImageFromFile = async (file: File) => {
     const objectUrl = URL.createObjectURL(file);
+    setFileLoading(true);
 
     try {
       const img = new window.Image();
@@ -269,10 +283,12 @@ const ImageModal = ({
       setWorkingImage(img);
       setPreviewThumb(objectUrl);
       setUrlError(null);
-      setTab('adjust');
+      setTab('design');
     } catch (error) {
       URL.revokeObjectURL(objectUrl);
       setUrlError(error instanceof Error ? error.message : 'Could not read selected image.');
+    } finally {
+      setFileLoading(false);
     }
   };
 
@@ -298,12 +314,28 @@ const ImageModal = ({
       setUrlError(null);
       const file = await fetchAsFile(sourceUrl.trim(), 'url-image');
       await loadImageFromFile(file);
-      setSourceKind('web');
     } catch (error) {
       setUrlError(error instanceof Error ? error.message : 'Could not load URL image.');
     } finally {
       setUrlLoading(false);
     }
+  };
+
+  const fetchLibraryUrls = async (action: 'unsplash' | 'pexels', query: string) => {
+    const endpoint = query
+      ? `/api/markket/img?action=${action}&query=${encodeURIComponent(query)}`
+      : `/api/markket/img?action=${action}`;
+
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+      throw new Error(`Could not load ${action} images.`);
+    }
+
+    const payload = await response.json();
+    return Array.isArray(payload?.urls)
+      ? payload.urls.filter((value: unknown) => typeof value === 'string') as string[]
+      : [];
   };
 
   const runLibrarySearch = async (queryOverride?: string) => {
@@ -312,24 +344,26 @@ const ImageModal = ({
       setUrlError(null);
 
       const nextQuery = (queryOverride ?? searchQuery).trim();
+      const urls = await Promise.all([
+        fetchLibraryUrls('unsplash', nextQuery),
+        fetchLibraryUrls('pexels', nextQuery),
+      ]).then(([unsplashResults, pexelsResults]) => {
+        const staggered: string[] = [];
+        const maxLength = Math.max(unsplashResults.length, pexelsResults.length);
 
-      const action = libraryKind === 'pexels' ? 'pexels' : 'unsplash';
-      const endpoint = nextQuery
-        ? `/api/markket/img?action=${action}&query=${encodeURIComponent(nextQuery)}`
-        : `/api/markket/img?action=${action}`;
+        for (let index = 0; index < maxLength; index += 1) {
+          const fromUnsplash = unsplashResults[index];
+          const fromPexels = pexelsResults[index];
+          if (fromUnsplash) staggered.push(fromUnsplash);
+          if (fromPexels) staggered.push(fromPexels);
+        }
 
-      const response = await fetch(endpoint);
-
-      if (!response.ok) {
-        throw new Error('Could not load images from library.');
-      }
-
-      const payload = await response.json();
-      const urls = Array.isArray(payload?.urls) ? payload.urls.filter((value: unknown) => typeof value === 'string') : [];
+        return staggered;
+      });
 
       if (!urls.length) {
         setSearchResults([]);
-        setUrlError(`No ${libraryKind === 'pexels' ? 'Pexels' : 'Unsplash'} images found.`);
+        setUrlError('No images found.');
         return;
       }
 
@@ -359,6 +393,13 @@ const ImageModal = ({
     await runLibrarySearch(nextValue);
   };
 
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      void handleSearchOrUrl();
+    }
+  };
+
   const renderToCanvas = () => {
     if (!canvasRef.current) return;
 
@@ -367,9 +408,37 @@ const ImageModal = ({
 
     if (!ctx) return;
 
+    // Handle blank canvas mode (when text is added but no image)
+    if (!workingImage && textLayer.value.trim()) {
+      canvas.width = 1200;
+      canvas.height = 640;
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawShapeOverlay(ctx, canvas.width, canvas.height, shapePreset, shapeColor, shapeOpacity, shapeWeight);
+
+      const x = Math.round((textLayer.xPercent / 100) * canvas.width);
+      const y = Math.round((textLayer.yPercent / 100) * canvas.height);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${Math.max(10, textLayer.size)}px ${textLayer.fontFamily}`;
+      ctx.fillStyle = textLayer.color;
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 2;
+      ctx.fillText(textLayer.value.trim(), x, y);
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      return;
+    }
+
     if (!workingImage) {
-      canvas.width = 1000;
-      canvas.height = 560;
+      canvas.width = 1200;
+      canvas.height = 640;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }
@@ -385,9 +454,12 @@ const ImageModal = ({
     canvas.height = nextHeight;
 
     ctx.clearRect(0, 0, nextWidth, nextHeight);
+
+    // Save context state before applying filters
+    ctx.save();
     ctx.filter = `grayscale(${filters.grayscale}%) brightness(${filters.brightness}%) contrast(${filters.contrast}%)`;
     ctx.drawImage(workingImage, 0, 0, nextWidth, nextHeight);
-    ctx.filter = 'none';
+    ctx.restore();
 
     drawShapeOverlay(ctx, nextWidth, nextHeight, shapePreset, shapeColor, shapeOpacity, shapeWeight);
 
@@ -397,7 +469,7 @@ const ImageModal = ({
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `700 ${Math.max(10, Math.round(textLayer.size * ratio))}px ${textLayer.fontFamily}`;
+      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${Math.max(10, Math.round(textLayer.size * ratio))}px ${textLayer.fontFamily}`;
       ctx.fillStyle = textLayer.color;
       ctx.shadowColor = 'rgba(0,0,0,0.55)';
       ctx.shadowBlur = 8;
@@ -438,6 +510,26 @@ const ImageModal = ({
   const applyImageWork = async () => {
     if (!onReplace) return;
 
+    // If no working image but text was added, export text + background as image
+    if (!workingImage && textLayer.value.trim()) {
+      try {
+        setApplying(true);
+        const file = await exportCanvasFile();
+        onReplace({
+          url: '',
+          alt: imageAlt.trim(),
+          img: file,
+        });
+        handleCloseModal();
+      } catch (error) {
+        setUrlError(error instanceof Error ? error.message : 'Could not export text image.');
+      } finally {
+        setApplying(false);
+      }
+      return;
+    }
+
+    // If no working image and no text, use initial image or abort
     if (!workingImage) {
       onReplace({ url: initialImageUrl || '', alt: imageAlt.trim() });
       handleCloseModal();
@@ -464,8 +556,6 @@ const ImageModal = ({
     if (!imageModalOpen) return;
 
     setTab('source');
-    setSourceKind(initialImageUrl ? 'web' : 'upload');
-    setLibraryKind('unsplash');
     setSearchQuery('');
     setSearchResults([]);
     setUrlError(null);
@@ -477,6 +567,7 @@ const ImageModal = ({
     setShapeWeight(6);
     setImageAlt(initialImageAlt || '');
     setTextPromptOpen(false);
+    setBackgroundColor('#f5f5f5');
 
     if (initialImageUrl) {
       void loadFromUrl(initialImageUrl);
@@ -498,7 +589,7 @@ const ImageModal = ({
     renderToCanvas();
     setRendering(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workingImage, filters, textLayer, shapePreset, shapeColor, shapeOpacity, shapeWeight, maxWidth, imageModalOpen]);
+  }, [workingImage, filters, textLayer, shapePreset, shapeColor, shapeOpacity, shapeWeight, maxWidth, imageModalOpen, backgroundColor]);
 
   useEffect(() => {
     return () => {
@@ -518,28 +609,13 @@ const ImageModal = ({
       }}
       closeOnClickOutside={!applying}
       closeOnEscape={!applying}
-      title={
-        <Group gap="xs" align="center">
-          <Text fw={700}>{mode === 'replace' ? 'Image Workbench' : 'Image Preview & Workbench'}</Text>
-          {!disableReplace && onToggleMode && (
-            <Button
-              variant="light"
-              color="grape"
-              size="xs"
-              leftSection={<IconPhotoPlus size={14} />}
-              onClick={onToggleMode}
-            >
-              {mode === 'preview' ? 'Switch to Replace' : 'Switch to Preview'}
-            </Button>
-          )}
-        </Group>
-      }
-      size={isMobile ? '100%' : '92%'}
+      title={<Text fw={700} size="lg">Create Image</Text>}
+      size={isMobile ? '100%' : '96%'}
       centered
       radius="lg"
       styles={{
         content: {
-          minHeight: isMobile ? '100dvh' : 760,
+          minHeight: isMobile ? '100dvh' : 880,
           maxHeight: isMobile ? '100dvh' : '95vh',
           display: 'flex',
           flexDirection: 'column',
@@ -548,25 +624,53 @@ const ImageModal = ({
     >
       <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
         <Paper withBorder p="xs" radius="md" style={{ flex: 1, minHeight: 0 }}>
-          <Center style={{ height: 420, background: 'var(--mantine-color-gray-0)', borderRadius: 10 }}>
-            {!hasImage && !rendering && (
-              <Stack align="center" gap={6}>
+          <Center style={{ height: isMobile ? 360 : 580, background: 'var(--mantine-color-gray-0)', borderRadius: 10 }}>
+            {!hasContent && !rendering && !fileLoading && (
+              <Stack align="center" gap={12}>
                 <MantineImage src={PLACEHOLDER} alt="placeholder" w={220} h={140} fit="contain" />
-                <Text size="sm" c="dimmed">Pick a source image to start editing.</Text>
+                <Stack gap={4} align="center">
+                  <Text size="sm" fw={600}>Start creating your image</Text>
+                  <Text size="xs" c="dimmed">Add text, upload a photo, or search</Text>
+                </Stack>
+                <FileButton
+                  onChange={(file) => {
+                    if (file) {
+                      void loadImageFromFile(file);
+                    }
+                  }}
+                  accept={uploadAccept}
+                >
+                  {(props) => (
+                    <Button
+                      size="sm"
+                      variant="filled"
+                      color="pink"
+                      leftSection={<IconUpload size={16} />}
+                      {...props}
+                    >
+                      Upload from Device
+                    </Button>
+                  )}
+                </FileButton>
               </Stack>
             )}
 
-            {rendering && (
-              <Group gap="xs">
-                <Loader size="sm" />
-                <Text size="sm">Rendering canvas...</Text>
-              </Group>
+            {(fileLoading || rendering) && (
+              <Stack align="center" justify="center" gap="md" style={{ height: '100%' }}>
+                <Group gap="xs">
+                  <Loader size="sm" />
+                  <Text size="sm">{fileLoading ? '📤 Loading image...' : 'Rendering canvas...'}</Text>
+                </Group>
+                {previewThumb && fileLoading && (
+                  <MantineImage src={previewThumb} alt="preview" mah={200} fit="contain" />
+                )}
+              </Stack>
             )}
 
             <canvas
               ref={canvasRef}
               style={{
-                display: hasImage ? 'block' : 'none',
+                display: hasContent ? 'block' : 'none',
                 maxWidth: '100%',
                 maxHeight: '100%',
                 objectFit: 'contain',
@@ -582,195 +686,200 @@ const ImageModal = ({
           value={tab}
           onChange={(value) => setTab(value as EditorTab)}
           data={[
-            { value: 'source', label: 'Source' },
-            { value: 'adjust', label: 'Adjust' },
-            { value: 'design', label: 'Design' },
-            { value: 'text', label: 'Text' },
+            { value: 'text', label: <Group gap={4} wrap="nowrap"><IconTypography size={16} /><span>Text</span></Group> },
+            { value: 'design', label: <Group gap={4} wrap="nowrap"><IconShape size={16} /><span>Design</span></Group> },
+            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload</span></Group> },
           ]}
           fullWidth
+          size="sm"
         />
 
-        <Paper withBorder p="sm" radius="md" style={{ maxHeight: 320, overflowY: 'auto' }}>
-          {tab === 'source' && (
-            <Stack gap="sm">
-              <SegmentedControl
-                value={sourceKind}
-                onChange={(value) => setSourceKind(value as SourceKind)}
-                data={[
-                  { label: 'Upload', value: 'upload' },
-                  { label: 'Search or URL', value: 'web' },
-                ]}
-                fullWidth
-              />
-
-              {sourceKind === 'upload' && (
-                <Dropzone
-                  onDrop={(files) => {
-                    const file = files[0];
-                    if (file) {
-                      void loadImageFromFile(file);
-                    }
-                  }}
-                  onReject={() => setUrlError('Unsupported image type or file too large.')}
-                  maxSize={6 * 1024 * 1024}
-                  accept={["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif", "image/svg+xml"]}
-                  multiple={false}
-                >
-                  <Stack align="center" py="md" gap={6}>
-                    <IconUpload size={26} opacity={0.6} />
-                    <Text size="sm">Drop an image here or select one.</Text>
-                    <FileButton
-                      onChange={(file) => {
-                        if (file) {
-                          void loadImageFromFile(file);
-                        }
-                      }}
-                      accept={uploadAccept}
-                    >
-                      {(props) => (
-                        <Button size="xs" variant="light" {...props}>
-                          Select Image
-                        </Button>
-                      )}
-                    </FileButton>
-                  </Stack>
-                </Dropzone>
-              )}
-
-              {sourceKind === 'web' && (
-                <Stack gap="xs">
-                  <SegmentedControl
-                    value={libraryKind}
-                    onChange={(value) => setLibraryKind(value as LibraryKind)}
-                    data={[
-                      { label: 'Unsplash', value: 'unsplash' },
-                      { label: 'Pexels', value: 'pexels' },
-                    ]}
-                    fullWidth
-                  />
-                  <Group grow>
-                    <TextInput
-                      label="Search or URL"
-                      placeholder="Type keywords or paste https://..."
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                      leftSection={/^https?:\/\//i.test(searchQuery.trim()) ? <IconLink size={14} /> : <IconSparkles size={14} />}
-                      error={urlError}
-                    />
-                    <Button loading={libraryLoading || urlLoading} onClick={() => void handleSearchOrUrl()}>
-                      Go
-                    </Button>
-                  </Group>
-                  <Group gap="xs">
-                    {searchResults.map((url) => (
-                      <Box
-                        key={url}
-                        style={{
-                          width: 84,
-                          height: 64,
-                          borderRadius: 8,
-                          overflow: 'hidden',
-                          border: '1px solid rgba(15,23,42,0.14)',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          void loadFromUrl(url);
-                        }}
-                      >
-                        <MantineImage src={url} alt="result" w="100%" h="100%" fit="cover" />
+        <Paper withBorder p="md" radius="md" style={{ maxHeight: 360, overflowY: 'auto', flex: 1 }}>
+          {tab === 'text' && (
+            <Stack gap="md">
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Add Text</Text>
+                <Text size="xs" c="dimmed">Start typing to create text. A background will be generated automatically.</Text>
+                {isMobile ? (
+                  <Paper
+                    withBorder
+                    p="md"
+                    radius="md"
+                    onClick={() => setTextPromptOpen(true)}
+                    style={{ cursor: 'pointer', background: 'rgba(250,250,250,0.8)' }}
+                  >
+                    <Group justify="space-between" align="flex-start" wrap="nowrap">
+                      <Box style={{ flex: 1 }}>
+                        <Text size="sm" fw={600} lineClamp={2}>
+                          {textLayer.value.trim() || 'Tap to add text'}
+                        </Text>
                       </Box>
-                    ))}
-                  </Group>
-                </Stack>
+                      <Button size="sm" variant="light" onClick={() => setTextPromptOpen(true)}>
+                        Edit
+                      </Button>
+                    </Group>
+                  </Paper>
+                ) : (
+                  <TextInput
+                    placeholder="Type something…"
+                    value={textLayer.value}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value;
+                      setTextLayer((current) => ({ ...current, value }));
+                    }}
+                    size="md"
+                  />
+                )}
+              </Stack>
+
+              {textLayer.value.trim() && (
+                <>
+                  <Stack gap="sm">
+                    <Text size="sm" fw={600}>Font</Text>
+                    <Group gap="xs" wrap="wrap">
+                      {TEXT_FONT_PRESETS.map((preset) => {
+                        const active = textLayer.fontFamily === preset.family;
+                        return (
+                          <Button
+                            key={preset.label}
+                            size="xs"
+                            variant={active ? 'filled' : 'light'}
+                            color={active ? 'pink' : 'gray'}
+                            onClick={() => setTextLayer((current) => ({ ...current, fontFamily: preset.family }))}
+                            style={{ fontFamily: preset.family }}
+                          >
+                            {preset.label}
+                          </Button>
+                        );
+                      })}
+                    </Group>
+                  </Stack>
+
+                  <Stack gap="sm">
+                    <Text size="sm" fw={600}>Color</Text>
+                    <Group gap="xs">
+                      {TEXT_COLOR_PRESETS.map((color) => {
+                        const active = textLayer.color.toLowerCase() === color.toLowerCase();
+                        return (
+                          <Box
+                            key={color}
+                            onClick={() => setTextLayer((current) => ({ ...current, color }))}
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 999,
+                              background: color,
+                              border: active ? '3px solid #111827' : '2px solid rgba(15,23,42,0.16)',
+                              boxShadow: active ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
+                              cursor: 'pointer',
+                              transition: 'transform 100ms ease',
+                            }}
+                          />
+                        );
+                      })}
+                    </Group>
+                  </Stack>
+
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="sm" fw={600}>Size</Text>
+                      <Text size="xs" c="dimmed">{textLayer.size}px</Text>
+                    </Group>
+                    <Slider
+                      label={null}
+                      min={16}
+                      max={120}
+                      value={textLayer.size}
+                      onChange={(value) => setTextLayer((current) => ({ ...current, size: value }))}
+                    />
+                  </Stack>
+                </>
               )}
-            </Stack>
-          )}
-
-          {tab === 'adjust' && (
-            <Stack gap="xs">
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={82}>Grayscale</Text>
-                <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
-                  min={0}
-                  max={100}
-                  value={filters.grayscale}
-                  onChange={(value) => setFilters((current) => ({ ...current, grayscale: value }))}
-                />
-              </Group>
-
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={82}>Brightness</Text>
-                <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
-                  min={40}
-                  max={170}
-                  value={filters.brightness}
-                  onChange={(value) => setFilters((current) => ({ ...current, brightness: value }))}
-                />
-              </Group>
-
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={82}>Contrast</Text>
-                <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
-                  min={40}
-                  max={170}
-                  value={filters.contrast}
-                  onChange={(value) => setFilters((current) => ({ ...current, contrast: value }))}
-                />
-              </Group>
-
-              <Group justify="flex-end">
-                <Button variant="default" size="xs" onClick={resetAdjustments}>
-                  Reset Adjustments
-                </Button>
-              </Group>
             </Stack>
           )}
 
           {tab === 'design' && (
-            <Stack gap="xs">
-              <SegmentedControl
-                value={shapePreset}
-                onChange={(value) => setShapePreset(value as ShapePreset)}
-                data={[
-                  { label: 'None', value: 'none' },
-                  { label: 'Hex', value: 'hex-outline' },
-                  { label: 'Bands', value: 'side-bands' },
-                  { label: 'Corners', value: 'corner-frame' },
-                  { label: 'Badge', value: 'circle-badge' },
-                ]}
-                fullWidth
-              />
+            <Stack gap="md">
+              {!hasImage && !textLayer.value.trim() && (
+                <Paper p="md" radius="md" style={{ background: 'rgba(250,250,250,0.8)', borderStyle: 'dashed', border: '1px dashed rgba(15,23,42,0.3)' }}>
+                  <Text size="sm" c="dimmed">✨ Add text or an image first to design.</Text>
+                </Paper>
+              )}
 
-              <Group gap="xs">
-                {SHAPE_STYLE_PRESETS.map((preset) => {
-                  const active = shapeColor === preset.color && shapeOpacity === preset.opacity && shapeWeight === preset.weight;
-                  return (
-                    <Button
-                      key={preset.label}
-                      size="xs"
-                      variant={active ? 'filled' : 'light'}
-                      color={active ? 'dark' : 'gray'}
-                      onClick={() => {
-                        setShapeColor(preset.color);
-                        setShapeOpacity(preset.opacity);
-                        setShapeWeight(preset.weight);
-                      }}
-                    >
-                      {preset.label}
-                    </Button>
-                  );
-                })}
-              </Group>
+              {textLayer.value.trim() && !hasImage && (
+                <Stack gap="sm">
+                  <Group justify="space-between" align="center">
+                    <Text size="sm" fw={600}>Background Color</Text>
+                    <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>{backgroundColor}</Text>
+                  </Group>
+                  <Group gap="xs">
+                    {BACKGROUND_COLOR_PRESETS.map((color) => {
+                      const active = backgroundColor.toLowerCase() === color.toLowerCase();
+                      return (
+                        <Box
+                          key={color}
+                          onClick={() => setBackgroundColor(color)}
+                          style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 999,
+                            background: color,
+                            border: active ? '3px solid #111827' : '2px solid rgba(15,23,42,0.2)',
+                            cursor: 'pointer',
+                            transition: 'all 100ms ease',
+                            opacity: active ? 1 : 0.8,
+                          }}
+                        />
+                      );
+                    })}
+                  </Group>
+                </Stack>
+              )}
 
-              <Group gap="xs" align="center">
-                <Text size="xs" c="dimmed" w={44}>Color</Text>
-                <Group gap={6}>
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Shape</Text>
+                <SegmentedControl
+                  value={shapePreset}
+                  onChange={(value) => setShapePreset(value as ShapePreset)}
+                  data={[
+                    { label: 'None', value: 'none' },
+                    { label: 'Hex', value: 'hex-outline' },
+                    { label: 'Bands', value: 'side-bands' },
+                    { label: 'Corners', value: 'corner-frame' },
+                    { label: 'Badge', value: 'circle-badge' },
+                  ]}
+                  fullWidth
+                  size="sm"
+                />
+              </Stack>
+
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Style presets</Text>
+                <Group gap="xs" wrap="wrap">
+                  {SHAPE_STYLE_PRESETS.map((preset) => {
+                    const active = shapeColor === preset.color && shapeOpacity === preset.opacity && shapeWeight === preset.weight;
+                    return (
+                      <Button
+                        key={preset.label}
+                        size="xs"
+                        variant={active ? 'filled' : 'light'}
+                        color={active ? 'pink' : 'gray'}
+                        onClick={() => {
+                          setShapeColor(preset.color);
+                          setShapeOpacity(preset.opacity);
+                          setShapeWeight(preset.weight);
+                        }}
+                      >
+                        {preset.label}
+                      </Button>
+                    );
+                  })}
+                </Group>
+              </Stack>
+
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Color</Text>
+                <Group gap="xs">
                   {SHAPE_COLOR_PRESETS.map((color) => {
                     const active = shapeColor.toLowerCase() === color.toLowerCase();
                     return (
@@ -778,188 +887,305 @@ const ImageModal = ({
                         key={color}
                         onClick={() => setShapeColor(color)}
                         style={{
-                          width: 22,
-                          height: 22,
+                          width: 32,
+                          height: 32,
                           borderRadius: 999,
                           background: color,
-                          border: active ? '2px solid #111827' : '1px solid rgba(15,23,42,0.16)',
+                          border: active ? '3px solid #111827' : '1px solid rgba(15,23,42,0.16)',
                           boxShadow: active ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
                           cursor: 'pointer',
+                          transition: 'transform 100ms ease',
                         }}
                       />
                     );
                   })}
                 </Group>
-              </Group>
+              </Stack>
 
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={54}>Opacity</Text>
+              <Stack gap="sm">
+                <Group justify="space-between" align="center">
+                  <Text size="sm" fw={600}>Opacity</Text>
+                  <Text size="xs" c="dimmed">{shapeOpacity}%</Text>
+                </Group>
                 <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
+                  label={null}
                   min={10}
                   max={100}
                   value={shapeOpacity}
                   onChange={(value) => setShapeOpacity(value)}
                 />
-              </Group>
+              </Stack>
 
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={54}>Weight</Text>
+              <Stack gap="sm">
+                <Group justify="space-between" align="center">
+                  <Text size="sm" fw={600}>Weight</Text>
+                  <Text size="xs" c="dimmed">{shapeWeight}px</Text>
+                </Group>
                 <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}px`}
+                  label={null}
                   min={2}
                   max={24}
                   value={shapeWeight}
                   onChange={(value) => setShapeWeight(value)}
                 />
-              </Group>
+              </Stack>
             </Stack>
           )}
 
-          {tab === 'text' && (
-            <Stack gap="xs">
-              {isMobile ? (
-                <Paper
-                  withBorder
-                  p="sm"
-                  radius="md"
-                  onClick={() => setTextPromptOpen(true)}
-                  style={{ cursor: 'pointer' }}
+          {tab === 'source' && (
+            <Stack gap="sm">
+              <Group align="end" gap="xs" wrap="nowrap">
+                <FileButton
+                  ref={fileInputRef}
+                  onChange={(file) => {
+                    if (file) {
+                      void loadImageFromFile(file);
+                    }
+                  }}
+                  accept={uploadAccept}
                 >
-                  <Group justify="space-between" align="flex-start" wrap="nowrap">
-                    <Box style={{ flex: 1 }}>
-                      <Text size="xs" c="dimmed">Text Overlay</Text>
-                      <Text size="sm" fw={600} lineClamp={2}>
-                        {textLayer.value.trim() || 'Tap to add text'}
-                      </Text>
-                    </Box>
-                    <Button size="xs" variant="light" onClick={() => setTextPromptOpen(true)}>
-                      Edit Text
-                    </Button>
-                  </Group>
-                </Paper>
-              ) : (
-                  <TextInput
-                    label="Text Overlay"
-                    placeholder="Type text to place on image"
-                    value={textLayer.value}
-                    onChange={(event) => {
-                      const value = event.currentTarget.value;
-                      setTextLayer((current) => ({ ...current, value }));
-                    }}
-                  />
-              )}
-              <Group gap="xs">
-                {TEXT_FONT_PRESETS.map((preset) => {
-                  const active = textLayer.fontFamily === preset.family;
-                  return (
+                  {(props) => (
                     <Button
-                      key={preset.label}
-                      size="xs"
-                      variant={active ? 'filled' : 'light'}
-                      color={active ? 'dark' : 'gray'}
-                      onClick={() => setTextLayer((current) => ({ ...current, fontFamily: preset.family }))}
-                      style={{ fontFamily: preset.family }}
+                      size="sm"
+                      variant="filled"
+                      color="pink"
+                      leftSection={<IconUpload size={16} />}
+                      style={{ flexShrink: 0 }}
+                      title="Click to select an image from your device"
+                      {...props}
                     >
-                      {preset.label}
+                      Upload
                     </Button>
-                  );
-                })}
+                  )}
+                </FileButton>
+                <TextInput
+                  style={{ flex: 1 }}
+                  placeholder="Search or paste URL…"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  leftSection={/^https?:\/\//i.test(searchQuery.trim()) ? <IconLink size={14} /> : <IconSparkles size={14} />}
+                  error={urlError}
+                  size="sm"
+                />
+                <Button
+                  size="sm"
+                  variant="filled"
+                  color="pink"
+                  onClick={() => void handleSearchOrUrl()}
+                  loading={libraryLoading || urlLoading}
+                  style={{ flexShrink: 0 }}
+                >
+                  Search
+                </Button>
               </Group>
 
-              <Group gap="xs" align="center">
-                <Text size="xs" c="dimmed" w={44}>Color</Text>
-                <Group gap={6}>
-                  {TEXT_COLOR_PRESETS.map((color) => {
-                    const active = textLayer.color.toLowerCase() === color.toLowerCase();
+              <Text size="xs" c="dimmed" style={{ marginBottom: 8 }}>💡 Click an image to load, or upload/search above</Text>
+
+              {searchResults.length > 0 ? (
+                <Box
+                  style={{
+                    columns: isMobile ? 2 : 3,
+                    columnGap: 10,
+                  }}
+                >
+                  {searchResults.map((url, index) => {
+                    const tall = index % 3 === 0;
+                    return (
+                      <Box
+                        key={url}
+                        style={{
+                          breakInside: 'avoid',
+                          marginBottom: 10,
+                          height: tall ? 184 : 130,
+                          borderRadius: 12,
+                          overflow: 'hidden',
+                          border: '1px solid rgba(15,23,42,0.12)',
+                          cursor: 'pointer',
+                          background: '#fff',
+                          boxShadow: '0 1px 4px rgba(15,23,42,0.04)',
+                          transition: 'transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease',
+                        }}
+                        onClick={() => {
+                          void loadFromUrl(url);
+                        }}
+                      >
+                        <MantineImage src={url} alt="result" w="100%" h="100%" fit="cover" />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              ) : (
+                <Paper
+                    withBorder
+                    radius="md"
+                    p="lg"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(250,250,250,0.92), rgba(255,255,255,0.98))',
+                      borderStyle: 'dashed',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 120ms ease',
+                      minHeight: 180,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#E4007C';
+                      e.currentTarget.style.background = 'linear-gradient(180deg, rgba(250,250,250,0.98), rgba(255,240,245,0.98))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '';
+                      e.currentTarget.style.background = 'linear-gradient(180deg, rgba(250,250,250,0.92), rgba(255,255,255,0.98))';
+                    }}
+                  >
+                    <Stack gap={6} align="center" justify="center" style={{ height: '100%' }}>
+                      <Text fw={600} size="sm">📤 Click or search for images</Text>
+                      <Text size="xs" c="dimmed">
+                        Upload from device or search libraries
+                      </Text>
+                  </Stack>
+                </Paper>
+              )}
+            </Stack>
+          )}
+
+          {tab === 'design' && (
+            <Stack gap="md">
+              {!hasImage && !textLayer.value.trim() && (
+                <Paper p="md" radius="md" style={{ background: 'rgba(250,250,250,0.8)', borderStyle: 'dashed', border: '1px dashed rgba(15,23,42,0.3)' }}>
+                  <Text size="sm" c="dimmed">Add text or an image to add design elements.</Text>
+                </Paper>
+              )}
+
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Shape</Text>
+                <SegmentedControl
+                  value={shapePreset}
+                  onChange={(value) => setShapePreset(value as ShapePreset)}
+                  data={[
+                    { label: 'None', value: 'none' },
+                    { label: 'Hex', value: 'hex-outline' },
+                    { label: 'Bands', value: 'side-bands' },
+                    { label: 'Corners', value: 'corner-frame' },
+                    { label: 'Badge', value: 'circle-badge' },
+                  ]}
+                  fullWidth
+                  size="sm"
+                />
+              </Stack>
+
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Style presets</Text>
+                <Group gap="xs" wrap="wrap">
+                  {SHAPE_STYLE_PRESETS.map((preset) => {
+                    const active = shapeColor === preset.color && shapeOpacity === preset.opacity && shapeWeight === preset.weight;
+                    return (
+                      <Button
+                        key={preset.label}
+                        size="sm"
+                        variant={active ? 'filled' : 'light'}
+                        color={active ? 'dark' : 'gray'}
+                        onClick={() => {
+                          setShapeColor(preset.color);
+                          setShapeOpacity(preset.opacity);
+                          setShapeWeight(preset.weight);
+                        }}
+                      >
+                        {preset.label}
+                      </Button>
+                    );
+                  })}
+                </Group>
+              </Stack>
+
+              <Stack gap="sm">
+                <Text size="sm" fw={600}>Color</Text>
+                <Group gap="xs">
+                  {SHAPE_COLOR_PRESETS.map((color) => {
+                    const active = shapeColor.toLowerCase() === color.toLowerCase();
                     return (
                       <Box
                         key={color}
-                        onClick={() => setTextLayer((current) => ({ ...current, color }))}
+                        onClick={() => setShapeColor(color)}
                         style={{
-                          width: 22,
-                          height: 22,
+                          width: 28,
+                          height: 28,
                           borderRadius: 999,
                           background: color,
                           border: active ? '2px solid #111827' : '1px solid rgba(15,23,42,0.16)',
                           boxShadow: active ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
                           cursor: 'pointer',
+                          transition: 'transform 100ms ease',
                         }}
                       />
                     );
                   })}
                 </Group>
-              </Group>
+              </Stack>
 
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={54}>Size</Text>
+              <Stack gap="sm">
+                <Group justify="space-between" align="center">
+                  <Text size="sm" fw={600}>Opacity</Text>
+                  <Text size="xs" c="dimmed">{shapeOpacity}%</Text>
+                </Group>
                 <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}px`}
-                  min={16}
-                  max={120}
-                  value={textLayer.size}
-                  onChange={(value) => setTextLayer((current) => ({ ...current, size: value }))}
-                />
-              </Group>
-
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={82}>X Position</Text>
-                <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
-                  min={0}
+                  label={null}
+                  min={10}
                   max={100}
-                  value={textLayer.xPercent}
-                  onChange={(value) => setTextLayer((current) => ({ ...current, xPercent: value }))}
+                  value={shapeOpacity}
+                  onChange={(value) => setShapeOpacity(value)}
                 />
-              </Group>
+              </Stack>
 
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Text size="xs" w={82}>Y Position</Text>
+              <Stack gap="sm">
+                <Group justify="space-between" align="center">
+                  <Text size="sm" fw={600}>Weight</Text>
+                  <Text size="xs" c="dimmed">{shapeWeight}px</Text>
+                </Group>
                 <Slider
-                  style={{ flex: 1 }}
-                  label={(value) => `${value}%`}
-                  min={0}
-                  max={100}
-                  value={textLayer.yPercent}
-                  onChange={(value) => setTextLayer((current) => ({ ...current, yPercent: value }))}
+                  label={null}
+                  min={2}
+                  max={24}
+                  value={shapeWeight}
+                  onChange={(value) => setShapeWeight(value)}
                 />
-              </Group>
+              </Stack>
             </Stack>
           )}
+
         </Paper>
 
-        <TextInput
-          label="Alt Text"
-          placeholder="Descriptive text for the image"
-          value={imageAlt}
-          onChange={(event) => setImageAlt(event.currentTarget.value)}
-          description="Used for accessibility and SEO."
-        />
+        <Stack gap="sm">
+          <TextInput
+            label="Alt Text"
+            placeholder="Describe the image content (accessibility & SEO)"
+            value={imageAlt}
+            onChange={(event) => setImageAlt(event.currentTarget.value)}
+            description="Help people understand what's in the image."
+          />
 
-        <Group justify="space-between" align="center">
-          <Text size="xs" c="dimmed">
-            {hasImage
-              ? 'Canvas ready. Nothing uploads until you click Confirm & Upload.'
-              : 'Choose a source image to start, then confirm upload.'}
-          </Text>
-          <Group gap="xs">
-            <Button variant="outline" color="gray" onClick={handleCloseModal} disabled={applying}>
-              Cancel
-            </Button>
-            <Button
-              leftSection={<IconPhotoPlus size={16} />}
-              onClick={() => void applyImageWork()}
-              disabled={disableReplace || applying || (!hasImage && !initialImageUrl)}
-              loading={applying}
-            >
-              Confirm & Upload
-            </Button>
+          <Group justify="space-between" align="center">
+            <Text size="xs" c="dimmed">
+              {hasContent
+                ? 'Ready to save. Edits apply when you confirm.'
+                : 'Upload or search to get started.'}
+            </Text>
+            <Group gap="xs">
+              <Button variant="default" onClick={handleCloseModal} disabled={applying}>
+                Cancel
+              </Button>
+              <Button
+                leftSection={<IconPhotoPlus size={16} />}
+                onClick={() => void applyImageWork()}
+                disabled={disableReplace || applying || (!hasContent && !initialImageUrl)}
+                loading={applying}
+                color="pink"
+              >
+                {initialImageUrl ? 'Save Image' : 'Create Image'}
+              </Button>
+            </Group>
           </Group>
-        </Group>
+        </Stack>
 
         <Modal
           opened={textPromptOpen}

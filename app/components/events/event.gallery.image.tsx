@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Box, Modal, UnstyledButton } from '@mantine/core';
 import { EventMainImage } from "./event.main.image";
 import { Event } from "@/markket/event";
 
@@ -63,14 +64,23 @@ function buildGallery(event: Event): GalleryImage[] {
 export function EventImageGallery({ event }: EventImageGalleryProps) {
   const gallery = buildGallery(event);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | undefined>(gallery[0]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   return (
-    <div className="flex flex-col">
-      <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-l">
+    <>
+      <div className="flex flex-col">
+        <UnstyledButton
+          component="button"
+          onClick={() => setLightboxOpen(true)}
+          aria-label="Open event image"
+          style={{ display: 'block', width: '100%' }}
+        >
+          <div className="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-l" style={{ cursor: 'zoom-in' }}>
         {selectedImage && (
           <EventMainImage title={event.Name} image={selectedImage} />
         )}
       </div>
+        </UnstyledButton>
       <div className="flex flex-col">
         {gallery.length > 1 && (
           <div className="mt-8">
@@ -93,6 +103,34 @@ export function EventImageGallery({ event }: EventImageGalleryProps) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+
+      <Modal
+        opened={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        centered
+        size="90vw"
+        title={selectedImage?.alternativeText || event.Name}
+        styles={{
+          content: { background: '#05080f' },
+          header: { background: '#05080f' },
+          title: { color: '#ffffff' },
+          close: { color: '#ffffff' },
+        }}
+      >
+        <Box
+          style={{
+            width: '100%',
+            height: 'min(80vh, 860px)',
+            backgroundImage: `url(${selectedImage?.formats?.large?.url || selectedImage?.url || ''})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: 12,
+            backgroundColor: '#0b1220',
+          }}
+        />
+      </Modal>
+    </>
   );
 };

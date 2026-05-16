@@ -50,21 +50,14 @@ function formatDateTime(value: string | undefined, timeZone: string) {
 }
 
 export default function EventSchedule({ startDate, endDate, timezone }: EventScheduleProps) {
-  const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
-  const normalizedBrowserTimeZone = browserTimeZone.toLowerCase();
-  const browserLooksGenericUtc = normalizedBrowserTimeZone === 'utc' || normalizedBrowserTimeZone === 'etc/utc';
-  const fallbackTimeZone = !browserLooksGenericUtc && isValidTimeZone(browserTimeZone)
-    ? browserTimeZone
-    : 'America/New_York';
   const resolvedTimeZone = isValidTimeZone(timezone)
     ? timezone!
-    : fallbackTimeZone;
+    : 'America/New_York';
 
   const startsAt = formatDateTime(startDate, resolvedTimeZone);
   const endsAt = formatDateTime(endDate, resolvedTimeZone);
   const tzShort = getTimeZoneName(resolvedTimeZone);
   const timezoneLabel = tzShort ? `${resolvedTimeZone} (${tzShort})` : resolvedTimeZone;
-  const usingBrowserFallback = !isValidTimeZone(timezone);
 
   return (
     <Paper
@@ -89,7 +82,7 @@ export default function EventSchedule({ startDate, endDate, timezone }: EventSch
         <Text size="sm" fw={600} c={markketColors.neutral.charcoal}>Starts: {startsAt}</Text>
         <Text size="sm" c={markketColors.neutral.darkGray}>Ends: {endsAt}</Text>
         <Text size="xs" c="dimmed" mt={2}>
-          Timezone: {timezoneLabel}{usingBrowserFallback ? ' (from your browser)' : ''}
+          Timezone: {timezoneLabel}{!isValidTimeZone(timezone) ? ' (defaulted to New York)' : ''}
         </Text>
       </Stack>
     </Paper>

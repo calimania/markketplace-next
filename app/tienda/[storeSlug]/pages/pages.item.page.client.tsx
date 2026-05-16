@@ -87,6 +87,19 @@ export default function TiendaPageItemPageClient({ storeSlug, itemId }: TiendaPa
 
   const editorId = page.documentId || page.slug || itemId;
   const itemDocumentId = page.documentId || itemId;
+  const refreshPageAfterUpload = async () => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+
+    try {
+      const nextPage = await findPage(itemId, storeSlug, token);
+      if (nextPage) {
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error('Tienda page media refresh error', err);
+    }
+  };
   const publicPath = page.slug === 'home'
     ? `/${storeSlug}`
     : page.slug === 'about'
@@ -123,6 +136,9 @@ export default function TiendaPageItemPageClient({ storeSlug, itemId }: TiendaPa
           storeRef={storeSlug}
           contentType="page"
           itemDocumentId={itemDocumentId}
+          onUpload={() => {
+            void refreshPageAfterUpload();
+          }}
           studioHref={`/tienda/${storeSlug}/snapshot`}
           slots={[
             {
