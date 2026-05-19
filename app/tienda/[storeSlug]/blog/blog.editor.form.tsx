@@ -189,7 +189,7 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
   };
 
   return (
-    <Stack gap="sm">
+    <Stack gap="md">
       <TextInput
         label="Title"
         value={title}

@@ -64,7 +64,7 @@ const toAbsoluteUrl = (path?: string) => {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: [page] } = await strapiClient.getPage('home');
+  const [page] = (await strapiClient.getPage('home'))?.data || [];
   const storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || markketplace.slug;
   const homepageTitle = page?.Title || 'Home';
   const homepageDescription = page?.SEO?.metaDescription ||
@@ -92,7 +92,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const EXCLUDED_PAGE_SLUGS = ['about', 'newsletter', 'products', 'events', 'blog', 'contact'];
 
-  const [{ data: [store] }, { data: [page] }, storesResponse, communityPostsResponse, communityEventsResponse, communityPagesResponse, communityProductsResponse] = await Promise.all([
+  const [storeRes, pageRes, storesResponse, communityPostsResponse, communityEventsResponse, communityPagesResponse, communityProductsResponse] = await Promise.all([
     strapiClient.getStore(),
     strapiClient.getPage('home'),
     strapiClient.getStores({ page: 1, pageSize: 12 }, { filter: { 'active': { $eq: true } }, sort: 'updatedAt:desc' }),
@@ -101,6 +101,9 @@ export default async function Home() {
     strapiClient.getCommunityPages({ page: 1, pageSize: 24 }, { sort: 'createdAt:desc' }),
     strapiClient.getCommunityProducts({ page: 1, pageSize: 12 }, { sort: 'updatedAt:desc' }),
   ]);
+
+  const [store] = storeRes?.data || [];
+  const [page] = pageRes?.data || [];
 
   const communityPosts = prioritizeWithImage((communityPostsResponse?.data || []) as Article[], articleHasImage);
   const featuredStores = prioritizeWithImage((storesResponse?.data || []) as Store[], storeHasImage);

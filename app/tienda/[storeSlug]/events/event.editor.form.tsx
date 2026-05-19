@@ -407,7 +407,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   };
 
   return (
-    <Stack gap="sm">
+    <Stack gap="md">
       <TextInput
         label="Name"
         value={name}

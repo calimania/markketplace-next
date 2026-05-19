@@ -49,13 +49,18 @@ export async function generateMetadata({ params }: ProductSlugPageProps): Promis
 export default async function ProductSlugPage({ params }: ProductSlugPageProps) {
   const { slug, product_slug } = await params;
 
-  const [{ data: [product] }, { data: [mainPage] }, { data: [page] }, { data: [store] }, productsResponse] = await Promise.all([
+  const [productRes, mainPageRes, pageRes, storeRes, productsResponse] = await Promise.all([
     strapiClient.getProduct(product_slug, slug),
     strapiClient.getPage('product'),
     strapiClient.getPage('product', slug),
     strapiClient.getStore(slug),
     strapiClient.getProducts({ page: 1, pageSize: 5 }, { filter: '', sort: 'updatedAt:desc' }, slug),
   ]);
+
+  const [product] = productRes?.data || [];
+  const [mainPage] = mainPageRes?.data || [];
+  const [page] = pageRes?.data || [];
+  const [store] = storeRes?.data || [];
 
   if (!(product as Product)?.id) {
     return notFound();

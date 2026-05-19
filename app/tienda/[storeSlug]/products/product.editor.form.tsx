@@ -169,7 +169,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
   };
 
   return (
-    <Stack gap="sm">
+    <Stack gap="md">
       <TextInput
         label="Name"
         value={name}

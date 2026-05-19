@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: [page] } = await strapiClient.getPage('auth', markketplace.slug) || { data: [] };
+  const [page] = (await strapiClient.getPage('auth', markketplace.slug))?.data || [];
 
   return generateSEOMetadata({
     slug: 'auth',

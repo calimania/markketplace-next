@@ -350,7 +350,7 @@ export class StrapiClient {
       console.error('Error fetching data:', error);
     }
 
-    return {} as StrapiResponse<T>;
+    return { data: [] } as unknown as StrapiResponse<T>;
   };
 
 
