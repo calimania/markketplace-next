@@ -796,13 +796,38 @@ const ImageModal = ({
           </Center>
         </Paper>
 
+        <Group gap="xs" align="center">
+          <FileButton
+            onChange={(file) => {
+              if (file) {
+                setTab('source');
+                void loadImageFromFile(file);
+              }
+            }}
+            accept={uploadAccept}
+          >
+            {(props) => (
+              <Button
+                size="xs"
+                variant="filled"
+                color="pink"
+                leftSection={<IconUpload size={14} />}
+                {...props}
+              >
+                Upload from Device
+              </Button>
+            )}
+          </FileButton>
+          <Text size="xs" c="dimmed">or use the tabs below to search, add text, or design</Text>
+        </Group>
+
         <SegmentedControl
           value={tab}
           onChange={(value) => setTab(value as EditorTab)}
           data={[
             { value: 'text', label: <Group gap={4} wrap="nowrap"><IconTypography size={16} /><span>Text</span></Group> },
             { value: 'design', label: <Group gap={4} wrap="nowrap"><IconShape size={16} /><span>Design</span></Group> },
-            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload</span></Group> },
+            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload / Search</span></Group> },
           ]}
           fullWidth
           size="sm"

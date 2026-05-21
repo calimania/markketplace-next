@@ -62,7 +62,6 @@ export default function StoreEditorSkeleton({
 }: StoreEditorSkeletonProps) {
   const activeSlug = isEditing ? (draftSlug || store.slug) : store.slug;
   const publicHref = `${markketplace.markket_url}/${activeSlug}`;
-  const mediaPreview = useMemo(() => buildEditorMediaPreview(draftDescription), [draftDescription]);
 
   useEffect(() => {
     if (!isEditing || typeof window === 'undefined') return;
@@ -86,12 +85,6 @@ export default function StoreEditorSkeleton({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isEditing, isSaving, onCancelEditing, onSave]);
 
-  const hasMediaPreview =
-    !!mediaPreview.excerpt ||
-    mediaPreview.imageThumbnails.length > 0 ||
-    mediaPreview.embeds.length > 0 ||
-    mediaPreview.urlCount > 0;
-
   return (
     <Stack gap="sm">
       <TinyBreadcrumbs
@@ -107,7 +100,7 @@ export default function StoreEditorSkeleton({
         <div>
           <Title order={1}>Store Details</Title>
           <Text size="xs" c="dimmed" mt={4}>
-            Manage store identity, storefront metadata, and the public URL people will actually visit.
+            Identity and links
           </Text>
         </div>
         <Group gap="xs">
@@ -123,10 +116,7 @@ export default function StoreEditorSkeleton({
           Back
         </Button>
         <Button component={Link} href={publicHref} target="_blank" rel="noopener noreferrer" leftSection={<IconExternalLink size={16} />} variant="light" color="cyan">
-          View live site
-        </Button>
-        <Button component={Link} href={`/tienda/${store.slug}/design-system`} target="_blank" rel="noopener noreferrer" variant="default" leftSection={<IconPalette size={16} />}>
-          View design system
+          View
         </Button>
         <Button component={Link} href={`/tienda/${store.slug}/team`} variant="default" leftSection={<IconUsers size={16} />}>
           Team
@@ -157,13 +147,13 @@ export default function StoreEditorSkeleton({
 
       <Paper withBorder radius="md" p="md">
         <Stack gap="sm">
-          <Text fw={600}>Shared URL</Text>
+          <Text fw={600}>Public URL</Text>
           <Text c="dimmed" size="sm">
-            This is the storefront link you can share publicly.
+            Use this when sharing your link
           </Text>
           <TextInput value={publicHref} readOnly type="url" />
           {!isEditing && (
-            <Text size="xs" c="dimmed">Tip: use Edit or double-click any section below.</Text>
+            <Text size="xs" c="dimmed">Click Edit above to make changes.</Text>
           )}
         </Stack>
       </Paper>
@@ -191,13 +181,14 @@ export default function StoreEditorSkeleton({
             <Badge variant="light" color="yellow">Step 1</Badge>
           </Group>
           <Text c="dimmed" size="sm">
-            Start with the basic fields first. Title, slug, and description can be the first tienda-native editing milestone.
+            (ﾉ◕ヮ◕)ﾉ:･ﾟ✧
           </Text>
 
           {isEditing ? (
             <div className="form-cols">
               <TextInput
-                label="Store Title"
+                label="Name"
+                description="^ _ ^ "
                 value={draftTitle}
                 onChange={(event) => onTitleChange(event.currentTarget.value)}
                 autoFocus
@@ -206,7 +197,7 @@ export default function StoreEditorSkeleton({
                 label="Slug"
                 value={draftSlug}
                 onChange={(event) => onSlugChange(event.currentTarget.value)}
-                description="Lowercase letters, numbers, and dashes only."
+                description="Lowercase letters, numbers, and dashes"
               />
             </div>
           ) : (
@@ -242,60 +233,13 @@ export default function StoreEditorSkeleton({
             <Stack gap="sm">
               <ContentEditor
                 label="Description"
-                description="Rich text (Strapi richtext) powered by Tiptap."
-                placeholder="Tell people what this store is about."
+                description="Short text for your homepage"
+                placeholder="Creative studio for forest fae"
                 value={draftDescription}
                 onChange={(value) => onDescriptionChange(typeof value === 'string' ? value : '')}
                 format="html"
                 minHeight={220}
               />
-
-              {hasMediaPreview && (
-                <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
-                  <Stack gap="xs">
-                    <Group justify="space-between" align="center">
-                      <Text fw={600} size="sm">Compact Media Summary</Text>
-                      <Badge variant="light" color="gray">{mediaPreview.urlCount} links</Badge>
-                    </Group>
-
-                    {!!mediaPreview.excerpt && (
-                      <Text size="xs" c="dimmed">{mediaPreview.excerpt}</Text>
-                    )}
-
-                    {mediaPreview.imageThumbnails.length > 0 && (
-                      <Stack gap={6}>
-                        <Text size="xs" fw={500}>Thumbnails</Text>
-                        <Group gap={6}>
-                          {mediaPreview.imageThumbnails.map((image, index) => (
-                            <Image
-                              key={`${image.src}-${index}`}
-                              src={image.src}
-                              alt={image.alt || `preview-${index}`}
-                              h={54}
-                              w={54}
-                              radius="sm"
-                              fit="cover"
-                            />
-                          ))}
-                        </Group>
-                      </Stack>
-                    )}
-
-                    {mediaPreview.embeds.length > 0 && (
-                      <Stack gap={6}>
-                        <Text size="xs" fw={500}>Embeds</Text>
-                        <Group gap={6}>
-                          {mediaPreview.embeds.map((embed) => (
-                            <Badge key={`${embed.provider}-${embed.id}`} variant="light" color="violet">
-                              {embed.provider}:{embed.id.slice(0, 10)}
-                            </Badge>
-                          ))}
-                        </Group>
-                      </Stack>
-                    )}
-                  </Stack>
-                </Paper>
-              )}
             </Stack>
           ) : (
               <div
@@ -317,8 +261,7 @@ export default function StoreEditorSkeleton({
                 <RichTextContent content={draftDescription} />
               ) : (
                 <Text c="dimmed" size="sm">No description yet.</Text>
-              )}
-                <Text size="xs" c="dimmed" mt={8}>Double-click this section to edit.</Text>
+                )}
             </div>
           )}
         </Stack>
@@ -343,20 +286,18 @@ export default function StoreEditorSkeleton({
       >
         <Stack gap="sm">
           <Group justify="space-between" align="center">
-            <Text fw={600}>SEO</Text>
-            <Badge variant="light" color="grape">Bottom section</Badge>
+            <Text fw={600}>Bot Optimization</Text>
+            <Badge variant="light" color="grape">SEO</Badge>
           </Group>
           <Text c="dimmed" size="sm">
-            Keep metadata concise and intentional. This block stays at the bottom to avoid jumping around while editing core content.
+            {"(>ᴗ•)"} As seen in social previews
           </Text>
-
           <TextInput
             label="SEO Title"
             value={draftSeoTitle}
             onChange={(event) => onSeoTitleChange(event.currentTarget.value)}
             readOnly={!isEditing}
           />
-
           <Textarea
             label="SEO Description"
             value={draftSeoDescription}
@@ -369,11 +310,11 @@ export default function StoreEditorSkeleton({
 
           <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
             <Stack gap={4}>
-              <Text size="sm" fw={600}>Search Card</Text>
+              <Text size="sm" fw={600}>Preview</Text>
               <Text size="sm" c="blue" fw={500}>{draftSeoTitle || draftTitle || store.title}</Text>
               <Text size="xs" c="green">{publicHref}</Text>
               <Text size="sm" c="dimmed">
-                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social cards.'}
+                {draftSeoDescription || 'by markkët'}
               </Text>
             </Stack>
           </Paper>
@@ -386,21 +327,17 @@ export default function StoreEditorSkeleton({
             <Text fw={600}>Links</Text>
             <Badge variant="light" color="cyan">Store URLs</Badge>
           </Group>
-          <Text c="dimmed" size="sm">
-            Add website and social links that show on the public store page.
-          </Text>
-
           {isEditing ? (
             <URLsInput
               label="Store Links"
-              description="Website, Instagram, X, YouTube, and any other links you want to feature."
+              description="https://"
               value={draftUrls}
               onChange={onUrlsChange}
             />
           ) : draftUrls.length > 0 ? (
             <URLsInput
               label="Store Links"
-              description="Public links currently shown on the storefront."
+                description="Shown on your homepage"
               value={draftUrls}
               onChange={() => undefined}
               readOnly

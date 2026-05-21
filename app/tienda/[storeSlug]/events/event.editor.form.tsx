@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button, CloseButton, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Collapse, CloseButton, Group, Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -277,12 +277,11 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   const [startDateInput, setStartDateInput] = useState(
     toDatetimeLocalInput(initial?.startDate || (mode === 'new' ? defaultRange.start : undefined), initialTimezoneValue),
   );
-  const [endDateInput, setEndDateInput] = useState(
-    toDatetimeLocalInput(initial?.endDate || (mode === 'new' ? defaultRange.end : new Date(Date.now() + 3600000).toISOString()), initialTimezoneValue),
-  );
+  const [endDateInput, setEndDateInput] = useState('');
   const [timezone, setTimezone] = useState(initialTimezoneValue);
   const [location, setLocation] = useState<EventLocationInput>(() => firstLocation(initial?.locations));
   const [showTimezoneEditor, setShowTimezoneEditor] = useState(false);
+  const [showLocation, setShowLocation] = useState(hasLocationValue(firstLocation(initial?.locations)));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone, location });
@@ -506,7 +505,6 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
           type="datetime-local"
           value={endDateInput}
           onChange={(e) => setEndDateInput(e.currentTarget.value)}
-          required
         />
       </div>
       <Group justify="space-between" align="end">
@@ -576,8 +574,19 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       )}
 
       <Stack gap="xs">
-        <Text fw={600}>Location</Text>
-        <Text size="sm" c="dimmed">Add the main location guests should use for this event.</Text>
+        <Group justify="space-between" align="center">
+          <Text fw={600}>Location</Text>
+          <Button variant="subtle" size="xs" onClick={() => setShowLocation((prev) => !prev)}>
+            {showLocation
+              ? 'Hide'
+              : hasLocationValue(location)
+                ? [location.name, location.city, location.country].filter(Boolean).join(', ') || 'Edit'
+                : 'Add location'}
+          </Button>
+        </Group>
+        <Collapse expanded={showLocation}>
+          <Stack gap="xs">
+            <Text size="sm" c="dimmed">Add the main location guests should use for this event.</Text>
         <div className="form-cols">
           <TextInput
             label="Venue Name"
@@ -633,6 +642,8 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
             placeholder="10001"
           />
         </div>
+          </Stack>
+        </Collapse>
       </Stack>
 
       <ContentEditor

@@ -139,14 +139,13 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
 
       try {
         const client = new markketClient();
-        const response = await client.fetch('/api/markket/store', {
+        const response = await client.fetch(`/api/tienda/stores/${encodeURIComponent(storeSlug)}`, {
           method: 'GET',
         });
         if (!active) return;
 
-        const storesFromApi = Array.isArray(response?.data) ? response.data as Store[] : [];
-        const nextStore = storesFromApi.find((candidate) => candidate.slug === storeSlug) as Store | undefined;
-        setStore(nextStore || null);
+        const directStore = (response?.data || response?.store || response) as Store | undefined;
+        setStore(directStore || null);
       } finally {
         if (active) {
           setStoreLoading(false);
