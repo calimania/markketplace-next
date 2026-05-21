@@ -7,11 +7,15 @@ import { IconCheck, IconCopy, IconExternalLink } from '@tabler/icons-react';
 type PublicLinkActionsProps = {
   path: string;
   openLabel?: string;
+  isPublicEnabled?: boolean;
+  disabledHint?: string;
 };
 
 export default function PublicLinkActions({
   path,
-  openLabel = 'Open public page',
+  openLabel = 'View live page',
+  isPublicEnabled = true,
+  disabledHint = 'Still in draft. Publish when you are ready to share.',
 }: PublicLinkActionsProps) {
   const [copied, setCopied] = useState(false);
 
@@ -26,6 +30,11 @@ export default function PublicLinkActions({
   }, [path]);
 
   const handleCopy = async () => {
+    if (!isPublicEnabled) {
+      setCopied(false);
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(absoluteUrl);
       setCopied(true);
@@ -38,13 +47,14 @@ export default function PublicLinkActions({
   return (
     <Group gap="xs" wrap="wrap" align="center">
       <Button
-        component="a"
-        href={path}
-        target="_blank"
-        rel="noopener noreferrer"
+        component={isPublicEnabled ? 'a' : 'button'}
+        href={isPublicEnabled ? path : undefined}
+        target={isPublicEnabled ? '_blank' : undefined}
+        rel={isPublicEnabled ? 'noopener noreferrer' : undefined}
         size="xs"
         variant="light"
         rightSection={<IconExternalLink size={14} />}
+        disabled={!isPublicEnabled}
       >
         {openLabel}
       </Button>
@@ -61,10 +71,16 @@ export default function PublicLinkActions({
           size="lg"
           onClick={handleCopy}
           aria-label="Copy public URL"
+          disabled={!isPublicEnabled}
         >
           {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
         </ActionIcon>
       </Tooltip>
+      {!isPublicEnabled && (
+        <Tooltip label={disabledHint}>
+          <span style={{ fontSize: 12, color: 'var(--mantine-color-dimmed)' }}>{disabledHint}</span>
+        </Tooltip>
+      )}
     </Group>
   );
 }

@@ -16,6 +16,7 @@ import type { Event } from '@/markket/event';
 import { richTextToPlainText } from '@/markket/richtext.utils';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY, TIENDA_OVERVIEW_PREVIEW_LIMIT } from './content.list.queries';
+import type { StoreVisibility } from '@/markket/store.visibility.d';
 
 type StoreOverviewProps = {
   store: Store;
@@ -50,6 +51,7 @@ export default function StoreOverview({
   const [previewPages, setPreviewPages] = useState<Page[]>(latestPages || []);
   const [previewProducts, setPreviewProducts] = useState<Product[]>(allProducts || []);
   const [previewEvents, setPreviewEvents] = useState<Event[]>(upcomingEvents || []);
+  const [visibilitySummary, setVisibilitySummary] = useState<StoreVisibility['content_summary'] | null>(null);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
@@ -74,28 +76,28 @@ export default function StoreOverview({
   const overviewTiles = [
     {
       label: 'Articles',
-      value: previewPosts.length,
+      value: visibilitySummary?.articles_count ?? previewPosts.length,
       icon: IconNews,
       listHref: `/tienda/${store.slug}/blog`,
       createHref: `/tienda/${store.slug}/blog/new`,
     },
     {
       label: 'Pages',
-      value: previewPages.length,
+      value: visibilitySummary?.pages_count ?? previewPages.length,
       icon: IconFileText,
       listHref: `/tienda/${store.slug}/about`,
       createHref: `/tienda/${store.slug}/pages/new`,
     },
     {
       label: 'Products',
-      value: previewProducts.length,
+      value: visibilitySummary?.products_count ?? previewProducts.length,
       icon: IconShoppingCart,
       listHref: `/tienda/${store.slug}/products`,
       createHref: `/tienda/${store.slug}/products/new`,
     },
     {
       label: 'Events',
-      value: previewEvents.length,
+      value: visibilitySummary?.events_count ?? previewEvents.length,
       icon: IconCalendarEvent,
       listHref: `/tienda/${store.slug}/events`,
       createHref: `/tienda/${store.slug}/events/new`,
@@ -270,6 +272,16 @@ export default function StoreOverview({
           },
         });
 
+        const visibilityRef = String(store.documentId || store.slug);
+        const visibilityResponse = await fetch(`/api/stores/${encodeURIComponent(visibilityRef)}/visibility`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+        });
+
         if (!isMounted) {
           if (debugEnabled) console.log('[store.overview] refresh completed but component unmounted');
           return;
@@ -279,6 +291,20 @@ export default function StoreOverview({
         const pagesArray = parseContentResponse<Page>(overviewResponse?.page);
         const productsArray = parseContentResponse<Product>(overviewResponse?.product);
         const eventsArray = parseContentResponse<Event>(overviewResponse?.event);
+        const visibilityPayload = visibilityResponse.ok ? await visibilityResponse.json() : null;
+        const visibility = (visibilityPayload?.data && typeof visibilityPayload.data === 'object')
+          ? visibilityPayload.data
+          : visibilityPayload;
+
+        if (visibility?.content_summary && typeof visibility.content_summary === 'object') {
+          setVisibilitySummary({
+            articles_count: Number(visibility.content_summary.articles_count || 0),
+            products_count: Number(visibility.content_summary.products_count || 0),
+            events_count: Number(visibility.content_summary.events_count || 0),
+            upcoming_events_count: Number(visibility.content_summary.upcoming_events_count || 0),
+            pages_count: Number(visibility.content_summary.pages_count || 0),
+          });
+        }
 
         if (debugEnabled) {
           console.log('[store.overview] refresh parsed', {
@@ -408,7 +434,7 @@ export default function StoreOverview({
           items={[
           { label: 'Me', href: '/me' },
             { label: 'Tienda', href: '/tienda' },
-          { label: currentStore.slug },
+          { label: currentStore.slug, href: `/tienda/${currentStore.slug}` },
           ]}
         />
 
@@ -417,10 +443,7 @@ export default function StoreOverview({
             <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
               <Group gap="xs" wrap="wrap">
                 <Title order={1}>{currentStore.title || currentStore.slug}</Title>
-              </Group>
-              <Text c="dimmed" size="sm">
-                <span className="accent-blue">/tienda/{currentStore.slug}</span>
-              </Text>
+            </Group>
               <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
             </Stack>
           </Group>
@@ -452,7 +475,7 @@ export default function StoreOverview({
               const isEmpty = tile.value === 0;
               const routesToCreate = isAuthorized && isEmpty;
               const tileHref = routesToCreate ? tile.createHref : tile.listHref;
-              const actionLabel = routesToCreate ? 'Create new' : 'Open list';
+              const actionLabel = routesToCreate ? 'Create new' : 'View list';
 
               return (
                 <Paper
@@ -506,7 +529,7 @@ export default function StoreOverview({
                 leftSection={<IconPhoto size={14} />}
                 size="xs"
               >
-                Open Media Studio
+                Manage media
               </Button>
             </Group>
             {allMediaThumbs.length > 0 ? (
@@ -564,7 +587,47 @@ export default function StoreOverview({
                 </Group>
               </Box>
             ) : (
-              <Text size="xs" c="dimmed">No images yet. Add some in Media Studio.</Text>
+              <Text size="xs" c="dimmed">No images yet. Add some in Snapshot.</Text>
+            )}
+          </Stack>
+
+          <Stack gap="xs">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
+                Social Links ({currentStore.URLS?.length || 0})
+              </Text>
+              {isAuthorized && (
+                <Button
+                  component="a"
+                  href={`/tienda/${store.slug}/store`}
+                  variant="subtle"
+                  size="xs"
+                  leftSection={<IconEdit size={12} />}
+                >
+                  Edit Links
+                </Button>
+              )}
+            </Group>
+            {currentStore.URLS?.length > 0 ? (
+              <Group gap="xs" wrap="wrap">
+                {currentStore.URLS.map((link) => (
+                  <Button
+                    key={link.id}
+                    component="a"
+                    href={link.URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="light"
+                    size="xs"
+                    color="blue"
+                    leftSection={<IconExternalLink size={11} />}
+                  >
+                    {link.Label || link.URL}
+                  </Button>
+                ))}
+              </Group>
+            ) : (
+              <Text size="xs" c="dimmed">No links yet. Add website, social, or newsletter links.</Text>
             )}
           </Stack>
           </Stack>
@@ -580,7 +643,7 @@ export default function StoreOverview({
             variant="light"
             color="cyan"
           >
-            Open in Markket
+          View live site
           </Button>
           {isAuthorized && (
             <>
@@ -616,7 +679,7 @@ export default function StoreOverview({
               href={`/tienda/${currentStore.slug}/store`}
               leftSection={<IconEdit size={16} />}
             >
-              Open Store Editor
+              Customize store
             </Button>
             </>
           )}
@@ -671,7 +734,7 @@ export default function StoreOverview({
                     icon: item.icon,
                     thumbnailUrl: item.thumbnailUrl,
                     thumbnailAlt: item.thumbnailAlt,
-                    ctaLabel: 'Open',
+                    ctaLabel: 'Manage',
                   }))}
                   emptyText="No content yet."
                 />
@@ -690,7 +753,7 @@ export default function StoreOverview({
               <Group justify="space-between" align="center" wrap="wrap" gap="xs">
                 <Text fw={600}><span className="accent-orange">CRM</span></Text>
                 <Button component="a" href={`/tienda/${store.slug}/crm`} variant="light" leftSection={<IconUsers size={14} />}>
-                  Open CRM
+                  Manage CRM
                 </Button>
               </Group>
               <Text size="sm" c="dimmed">
@@ -706,7 +769,7 @@ export default function StoreOverview({
               <Group justify="space-between" align="center" wrap="wrap" gap="xs">
                 <Text fw={600}>Payouts</Text>
                 <Button component="a" disabled href={`/tienda/${store.slug}/payouts`} variant="light" leftSection={<IconCreditCard size={14} />}>
-                  Open Payouts
+                  View payouts
                 </Button>
               </Group>
               <Text size="sm" c="dimmed">

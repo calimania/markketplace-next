@@ -13,10 +13,8 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
-  // IconCopy,
   IconDotsVertical,
-  // IconRocket,
-  // IconRocketOff,
+  IconEyeOff,
   IconPhoto,
 } from '@tabler/icons-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -127,9 +125,9 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                         >
                           Clone
                         </Menu.Item> */}
-                        {/* {item.publishedAt ? (
+                        {item.publishedAt ? (
                           <Menu.Item
-                            leftSection={<IconRocketOff size={14} />}
+                            leftSection={<IconEyeOff size={14} />}
                             onClick={() => handleAction('unpublish', item)}
                             color="yellow"
                           >
@@ -137,13 +135,13 @@ export default function ListComponent({ items, actions, plural, singular }: Arti
                           </Menu.Item>
                         ) : (
                           <Menu.Item
-                            leftSection={<IconRocket size={14} />}
+                              leftSection={<IconEye size={14} />}
                               onClick={() => handleAction('publish', item)}
                             color="green"
                           >
                             Publish
                           </Menu.Item>
-                        )} */}
+                        )}
                         <Menu.Divider />
                         <Menu.Item
                           leftSection={<IconTrash size={14} />}

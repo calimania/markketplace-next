@@ -1,6 +1,6 @@
 import { strapiClient } from "@/markket/api.strapi";
 import { ClientLayout } from "@/app/components/layout/store.layout";
-import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
+import { StoreVisibility } from "@/markket/store.visibility.d";
 import { markketplace } from "@/markket/config";
 import type { Metadata } from "next";
 import type { Store } from "@/markket";
@@ -11,10 +11,10 @@ async function getStore(slug: string) {
   return response?.data?.[0];
 }
 
-async function getVisibility(storeId: string | number) {
+async function getVisibility(storeRef: string) {
   'use server';
-  const visibilityResponse: StoreVisibilityResponse | null = await strapiClient.getStoreVisibility(storeId);
-  return visibilityResponse?.data;
+  const visibilityResponse: StoreVisibility | null = await strapiClient.getStoreVisibility(storeRef);
+  return visibilityResponse;
 }
 
 export async function generateMetadata({
@@ -45,7 +45,8 @@ export default async function StoreLayout({
 }) {
   const { slug } = await params;
   const store = await getStore(slug);
-  const visibility = store ? await getVisibility(store.documentId) : null;
+  const visibilityRef = String(store?.documentId || store?.slug || slug);
+  const visibility = store ? await getVisibility(visibilityRef) : null;
 
   return (
     <ClientLayout store={store} visibility={visibility}>

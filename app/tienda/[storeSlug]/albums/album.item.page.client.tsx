@@ -86,6 +86,7 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
 
   const editorId = album.documentId || album.slug || itemId;
   const itemDocumentId = album.documentId || itemId;
+  const albumIsPublished = isPublished(album);
   const refreshAlbumAfterUpload = async () => {
     const token = readTiendaAuthToken();
     if (!token) return;
@@ -168,13 +169,14 @@ export default function TiendaAlbumItemPageClient({ storeSlug, itemId }: TiendaA
           </>
         ) : (
           <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
-            <Text c="dimmed" ta="center" size="sm">No tracks yet.</Text>
+              <Text c="dimmed" ta="center" size="sm">No tracks yet. Add your first one.</Text>
           </Paper>
         )}
 
         <PublicLinkActions
           path={`/${storeSlug}/${album.slug || album.documentId || itemId}`}
-          openLabel="Open public album"
+          openLabel="View live album"
+          isPublicEnabled={albumIsPublished}
         />
       </Stack>
     </TiendaDetailShell>

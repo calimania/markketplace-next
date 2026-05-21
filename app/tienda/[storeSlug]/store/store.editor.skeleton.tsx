@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
-import { IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX } from '@tabler/icons-react';
+import { IconArrowLeft, IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconUsers } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import URLsInput from '@/app/components/ui/form.input.urls';
@@ -63,6 +63,29 @@ export default function StoreEditorSkeleton({
   const activeSlug = isEditing ? (draftSlug || store.slug) : store.slug;
   const publicHref = `${markketplace.markket_url}/${activeSlug}`;
   const mediaPreview = useMemo(() => buildEditorMediaPreview(draftDescription), [draftDescription]);
+
+  useEffect(() => {
+    if (!isEditing || typeof window === 'undefined') return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        if (!isSaving) {
+          onSave();
+        }
+        return;
+      }
+
+      if (event.key === 'Escape' && !isSaving) {
+        event.preventDefault();
+        onCancelEditing();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isEditing, isSaving, onCancelEditing, onSave]);
+
   const hasMediaPreview =
     !!mediaPreview.excerpt ||
     mediaPreview.imageThumbnails.length > 0 ||
@@ -70,7 +93,7 @@ export default function StoreEditorSkeleton({
     mediaPreview.urlCount > 0;
 
   return (
-    <Stack gap="md">
+    <Stack gap="sm">
       <TinyBreadcrumbs
         items={[
           { label: 'Me', href: '/me' },
@@ -83,9 +106,6 @@ export default function StoreEditorSkeleton({
       <Group justify="space-between" align="flex-start">
         <div>
           <Title order={1}>Store Details</Title>
-          <Text c="dimmed" mt={2}>
-            <span className="accent-blue">/tienda/{store.slug}/store</span>
-          </Text>
           <Text size="xs" c="dimmed" mt={4}>
             Manage store identity, storefront metadata, and the public URL people will actually visit.
           </Text>
@@ -99,16 +119,27 @@ export default function StoreEditorSkeleton({
       </Group>
 
       <Group>
+        <Button component={Link} href={`/tienda/${store.slug}`} variant="default" leftSection={<IconArrowLeft size={16} />}>
+          Back
+        </Button>
         <Button component={Link} href={publicHref} target="_blank" rel="noopener noreferrer" leftSection={<IconExternalLink size={16} />} variant="light" color="cyan">
-          Open in Markket
+          View live site
         </Button>
         <Button component={Link} href={`/tienda/${store.slug}/design-system`} target="_blank" rel="noopener noreferrer" variant="default" leftSection={<IconPalette size={16} />}>
-          Open Design System
+          View design system
+        </Button>
+        <Button component={Link} href={`/tienda/${store.slug}/team`} variant="default" leftSection={<IconUsers size={16} />}>
+          Team
         </Button>
         {!isEditing && (
           <Button onClick={onStartEditing} leftSection={<IconEdit size={16} />}>
             Edit
           </Button>
+        )}
+        {isEditing && (
+          <Badge variant="light" color="blue">
+            Save: Cmd/Ctrl+S • Cancel: Esc
+          </Badge>
         )}
       </Group>
 
@@ -128,11 +159,11 @@ export default function StoreEditorSkeleton({
         <Stack gap="sm">
           <Text fw={600}>Shared URL</Text>
           <Text c="dimmed" size="sm">
-            This is the storefront link you can preview and share publicly.
+            This is the storefront link you can share publicly.
           </Text>
           <TextInput value={publicHref} readOnly type="url" />
           {!isEditing && (
-            <Text size="xs" c="dimmed">Tip: use the Edit button or double-click any preview section below.</Text>
+            <Text size="xs" c="dimmed">Tip: use Edit or double-click any section below.</Text>
           )}
         </Stack>
       </Paper>
@@ -154,7 +185,7 @@ export default function StoreEditorSkeleton({
         aria-label={!isEditing ? 'Open edit mode from SEO section' : undefined}
         title={!isEditing ? 'Double-click to edit' : undefined}
       >
-        <Stack gap="sm">
+        <Stack gap="xs">
           <Group justify="space-between" align="center">
             <Text fw={600}>Identity</Text>
             <Badge variant="light" color="yellow">Step 1</Badge>
@@ -163,19 +194,38 @@ export default function StoreEditorSkeleton({
             Start with the basic fields first. Title, slug, and description can be the first tienda-native editing milestone.
           </Text>
 
-          <TextInput
-            label="Store Title"
-            value={draftTitle}
-            onChange={(event) => onTitleChange(event.currentTarget.value)}
-            readOnly={!isEditing}
-          />
-          <TextInput
-            label="Slug"
-            value={draftSlug}
-            onChange={(event) => onSlugChange(event.currentTarget.value)}
-            readOnly={!isEditing}
-            description="Lowercase letters, numbers, and dashes only."
-          />
+          {isEditing ? (
+            <div className="form-cols">
+              <TextInput
+                label="Store Title"
+                value={draftTitle}
+                onChange={(event) => onTitleChange(event.currentTarget.value)}
+                autoFocus
+              />
+              <TextInput
+                label="Slug"
+                value={draftSlug}
+                onChange={(event) => onSlugChange(event.currentTarget.value)}
+                description="Lowercase letters, numbers, and dashes only."
+              />
+            </div>
+          ) : (
+            <>
+                <TextInput
+                  label="Store Title"
+                  value={draftTitle}
+                  onChange={(event) => onTitleChange(event.currentTarget.value)}
+                  readOnly
+                />
+                <TextInput
+                  label="Slug"
+                  value={draftSlug}
+                  onChange={(event) => onSlugChange(event.currentTarget.value)}
+                  readOnly
+                  description="Lowercase letters, numbers, and dashes only."
+                />
+            </>
+          )}
 
           {isEditing && (
             <Group justify="flex-end">
@@ -197,6 +247,7 @@ export default function StoreEditorSkeleton({
                 value={draftDescription}
                 onChange={(value) => onDescriptionChange(typeof value === 'string' ? value : '')}
                 format="html"
+                minHeight={220}
               />
 
               {hasMediaPreview && (
@@ -318,11 +369,11 @@ export default function StoreEditorSkeleton({
 
           <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-gray-0)">
             <Stack gap={4}>
-              <Text size="sm" fw={600}>Search Preview</Text>
+              <Text size="sm" fw={600}>Search Card</Text>
               <Text size="sm" c="blue" fw={500}>{draftSeoTitle || draftTitle || store.title}</Text>
               <Text size="xs" c="green">{publicHref}</Text>
               <Text size="sm" c="dimmed">
-                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social previews.'}
+                {draftSeoDescription || 'Add a concise description to shape how this tienda appears in search and social cards.'}
               </Text>
             </Stack>
           </Paper>
@@ -364,23 +415,33 @@ export default function StoreEditorSkeleton({
         <Paper
           withBorder
           radius="xl"
-          p="sm"
+          p="xs"
           style={{
             position: 'sticky',
-            bottom: 12,
+            bottom: 10,
             zIndex: 30,
-            background: 'rgba(255, 255, 255, 0.96)',
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.96))',
             backdropFilter: 'blur(6px)',
-            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+            boxShadow: '0 6px 22px rgba(0, 0, 0, 0.10)',
           }}
         >
           <Group justify="space-between" align="center">
-            <Text size="sm" c="dimmed">Editing in progress</Text>
+            <Text size="xs" c="dimmed">Editing in progress</Text>
             <Group>
-              <Button variant="default" onClick={onCancelEditing} leftSection={<IconPencilX size={16} />}>
+              <Button
+                variant="default"
+                onClick={onCancelEditing}
+                leftSection={<IconPencilX size={16} />}
+                aria-keyshortcuts="Escape"
+              >
                 Discard
               </Button>
-              <Button onClick={onSave} loading={isSaving} leftSection={<IconDeviceFloppy size={16} />}>
+              <Button
+                onClick={onSave}
+                loading={isSaving}
+                leftSection={<IconDeviceFloppy size={16} />}
+                aria-keyshortcuts="Meta+S Control+S"
+              >
                 Save
               </Button>
             </Group>

@@ -235,11 +235,14 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
 
 function ProductPrice({ prices }: { prices: Price[] }) {
   if (!prices.length) return null;
+  const first = prices[0];
+  const currency = first.Currency || 'USD';
+  const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(first.Price));
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-2xl font-bold text-blue-600">
-        ${prices[0].Price}
+        {formatted}
       </span>
       {prices.length > 1 && (
         <span className="text-sm text-gray-500">

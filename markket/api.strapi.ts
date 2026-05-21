@@ -1,6 +1,7 @@
 import { StrapiResponse, FetchOptions } from './index.d';
 import { Store } from './store';
 import { Page } from './page';
+import type { StoreVisibility, StoreVisibilityResponse } from './store.visibility.d';
 import qs from 'qs';
 
 export { type StrapiResponse, type FetchOptions };
@@ -440,7 +441,7 @@ export class StrapiClient {
     });
   }
 
-  async getStoreVisibility(storeId: string | number) {
+  async getStoreVisibility(storeRef: string | number) {
     const apiKey = typeof window === 'undefined' ? process.env.MARKKET_API_KEY : undefined;
 
     try {
@@ -452,10 +453,10 @@ export class StrapiClient {
         headers['Authorization'] = `Bearer ${apiKey}`;
       }
 
-      const response = await fetch(new URL(`api/stores/${storeId}/visibility`, this.baseUrl), {
+      const response = await fetch(new URL(`api/stores/${encodeURIComponent(String(storeRef))}/visibility`, this.baseUrl), {
         method: 'GET',
         headers,
-        next: { revalidate: 60 },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -463,11 +464,84 @@ export class StrapiClient {
         return null;
       }
 
-      return await response.json();
+      const payload = (await response.json()) as StoreVisibilityResponse | null;
+      return this.normalizeStoreVisibility(payload);
     } catch (error) {
       console.error('Error fetching store visibility:', error);
       return null;
     }
+  }
+
+  private normalizeStoreVisibility(payload: StoreVisibilityResponse | null): StoreVisibility | null {
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const sourceBase = (payload.data && typeof payload.data === 'object') ? payload.data : payload;
+    const source = {
+      ...sourceBase,
+      summary: sourceBase.summary || payload.summary,
+      _debug: sourceBase._debug || payload._debug,
+    };
+    const summarySignals = source.summary?.content_signals || {};
+    const enabledSections = new Set((source.summary?.enabled_sections || []).map((value) => String(value).trim().toLowerCase()));
+    const disabledSections = new Set((source.summary?.disabled_sections || []).map((value) => String(value).trim().toLowerCase()));
+    const explicitOverrides = source.summary?.explicit_overrides || {};
+
+    const resolveShowFlag = (
+      section: 'blog' | 'events' | 'shop' | 'about' | 'newsletter' | 'home',
+      directValue: unknown,
+      fallback = true,
+    ) => {
+      if (typeof directValue === 'boolean') {
+        return directValue;
+      }
+
+      const explicitValue = explicitOverrides?.[section];
+      if (typeof explicitValue === 'boolean') {
+        return explicitValue;
+      }
+
+      if (enabledSections.has(section)) {
+        return true;
+      }
+
+      if (disabledSections.has(section)) {
+        return false;
+      }
+
+      return fallback;
+    };
+
+    const contentSummary = source.content_summary || {
+      articles_count: Number(summarySignals.articles || 0),
+      products_count: Number(summarySignals.products || 0),
+      events_count: Number(summarySignals.events || 0),
+      upcoming_events_count: Number(summarySignals.upcoming_events || 0),
+      pages_count: Number(summarySignals.pages || 0),
+    };
+
+    return {
+      show_blog: resolveShowFlag('blog', source.show_blog, true),
+      show_events: resolveShowFlag('events', source.show_events, true),
+      show_shop: resolveShowFlag('shop', source.show_shop, true),
+      show_about: resolveShowFlag('about', source.show_about, true),
+      show_newsletter: resolveShowFlag('newsletter', source.show_newsletter, true),
+      show_home: resolveShowFlag('home', source.show_home, true),
+      has_upcoming_events: Boolean(source.has_upcoming_events ?? contentSummary.upcoming_events_count > 0),
+      has_events: Boolean(source.has_events ?? contentSummary.events_count > 0),
+      content_summary: {
+        articles_count: Number(contentSummary.articles_count || 0),
+        products_count: Number(contentSummary.products_count || 0),
+        events_count: Number(contentSummary.events_count || 0),
+        upcoming_events_count: Number(contentSummary.upcoming_events_count || 0),
+        pages_count: Number(contentSummary.pages_count || 0),
+      },
+      magic_pages_detected: Array.isArray(source.magic_pages_detected) ? source.magic_pages_detected : [],
+      settings_overrides: Array.isArray(source.settings_overrides) ? source.settings_overrides : [],
+      summary: source.summary,
+      _debug: source._debug,
+    };
   }
 
 

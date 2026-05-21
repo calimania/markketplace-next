@@ -88,7 +88,7 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           title: page.Title || 'Untitled page',
           subtitle: `${statusText} · ${formatDate(page.updatedAt || page.createdAt)} · ${page.documentId || page.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/pages/${page.documentId || page.slug}`,
-          previewHref: resolvePagePreviewHref(storeSlug, page.slug || ''),
+          previewHref: isPublished(page) && page.slug ? resolvePagePreviewHref(storeSlug, page.slug || '') : undefined,
           icon: 'page' as const,
         };
       }),
@@ -107,7 +107,12 @@ export default function PagesListClient({ storeSlug, initialPages }: PagesListCl
           { label: 'Z-A', value: 'alpha-desc' },
         ]}
       />
-      <NavTable emptyText="No pages yet." items={items} loading={loading} />
+      <NavTable
+        emptyText="No pages yet. Create your first page to start shaping your site."
+        items={items}
+        loading={loading}
+        searchPlaceholder="Search pages by title"
+      />
     </Stack>
   );
 }

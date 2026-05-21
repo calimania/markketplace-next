@@ -40,7 +40,7 @@ export default async function TiendaProductsPage({ params }: TiendaProductsPageP
             leftSection={<IconListSearch size={16} />}
             target="_blank"
           >
-            Open in Markket
+            Open
           </Button>
           <Button component="a" href={`/tienda/${storeSlug}/products/new`} leftSection={<IconPlus size={16} />}>
             New Product

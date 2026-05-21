@@ -56,6 +56,12 @@ function getEventExcerpt(value?: string | RichTextValue | StoredRichText, max = 
   return plain.length > max ? `${plain.slice(0, max - 1)}...` : plain;
 }
 
+function getEventListLocationLabel(event: Event) {
+  const first = Array.isArray(event.locations) && event.locations.length > 0 ? event.locations[0] : null;
+  if (!first) return '';
+  return (first.city || first.name || '').trim();
+}
+
 export async function generateMetadata({ params }: EventsPageProps) {
   const { slug } = await params;
   const response = await getStoreCached(slug);
@@ -147,6 +153,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                   {upcomingEvents.map((event) => {
                     const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
                     const excerpt = getEventExcerpt(event.Description);
+                    const locationLabel = getEventListLocationLabel(event);
 
                     return (
                       <Link
@@ -222,6 +229,15 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                                 </Text>
                               </Group>
                             )}
+
+                            {!event.SEO?.metaUrl && locationLabel && (
+                              <Group gap="xs" mt="auto">
+                                <IconMapPin size={14} color={markketColors.sections.events.main} />
+                                <Text size="xs" c={markketColors.sections.events.main} fw={500} lineClamp={1}>
+                                  {locationLabel}
+                                </Text>
+                              </Group>
+                            )}
                           </Stack>
                         </Paper>
                       </Link>
@@ -260,6 +276,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                   {pastEvents.map((event) => {
                     const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
                     const excerpt = getEventExcerpt(event.Description);
+                    const locationLabel = getEventListLocationLabel(event);
 
                     return (
                       <Link
@@ -344,6 +361,15 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                                 <IconMapPin size={14} color={markketColors.neutral.mediumGray} />
                                 <Text size="xs" c={markketColors.neutral.mediumGray} fw={500}>
                                   External Event
+                                </Text>
+                              </Group>
+                            )}
+
+                            {!event.SEO?.metaUrl && locationLabel && (
+                              <Group gap="xs" mt="auto">
+                                <IconMapPin size={14} color={markketColors.neutral.mediumGray} />
+                                <Text size="xs" c={markketColors.neutral.mediumGray} fw={500} lineClamp={1}>
+                                  {locationLabel}
                                 </Text>
                               </Group>
                             )}

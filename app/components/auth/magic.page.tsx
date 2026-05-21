@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconExternalLink, IconMailStar, IconSparkles } from '@tabler/icons-react';
+import { IconCheck, IconMailStar, IconSparkles } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { type Page, type Store } from '@/markket/index.d';
 import PageContent from '../ui/page.content';
@@ -41,7 +41,7 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
   const [redirectIn, setRedirectIn] = useState<number | null>(null);
   const router = useRouter();
   const { confirmed, isLoading } = useAuth();
-  const redirectTarget = store?.slug ? `/store/${store.slug}` : '/';
+  const redirectTarget = store?.slug ? `/${store.slug}` : '/';
 
   const openInBrowser = () => {
     if (typeof window === 'undefined') return;
@@ -205,54 +205,16 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                     Can't find it? Check your spam folder.
                   </Text>
                 </Stack>
-                <Stack w="100%" gap="sm">
-                  <Button
-                    fullWidth
-                    size="lg"
-                    h={58}
-                    fw={700}
-                    radius="xl"
-                    variant="outline"
-                    leftSection={<IconExternalLink size={18} />}
-                    onClick={openInBrowser}
-                  >
-                    Open in Safari or your default browser
-                  </Button>
-                  <Button
-                    fullWidth
-                    size="lg"
-                    h={58}
-                    fw={700}
-                    radius="xl"
-                    variant="light"
-                    onClick={() => router.replace(redirectTarget)}
-                  >
-                    Go Now
-                  </Button>
-                  <Button
-                    fullWidth
-                    size="lg"
-                    h={58}
-                    fw={700}
-                    radius="xl"
-                    variant="gradient"
-                    gradient={{ from: markketColors.rosa.main, to: markketColors.sections.blog.main, deg: 135 }}
-                    leftSection={<IconMailStar size={18} />}
-                    onClick={() => setState({ success: false, error: null })}
-                  >
-                    Try again with a different email
-                  </Button>
-                  <Text size="sm" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
-                    Prefer your password?{' '}
-                    <Anchor
-                      size="sm"
-                      component="button"
-                      style={{ color: markketColors.rosa.main, fontWeight: 600 }}
-                      onClick={() => router.push('/auth/login')}
-                    >
+                <Stack w="100%" gap="md">
+                  <Group justify="center" gap="xs">
+                    <Anchor size="sm" component="button" style={{ color: markketColors.neutral.mediumGray }} onClick={openInBrowser}>
+                      Open in browser
+                    </Anchor>
+                    <Text size="sm" c="dimmed">·</Text>
+                    <Anchor size="sm" component="button" style={{ color: markketColors.neutral.mediumGray }} onClick={() => router.push('/auth/login')}>
                       Sign in with password
                     </Anchor>
-                  </Text>
+                  </Group>
                 </Stack>
               </Stack>
             ) : (
@@ -291,16 +253,11 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                     </Button>
 
                     <Button
-                      fullWidth
-                      size="md"
-                      h={46}
-                      fw={600}
-                      radius="xl"
-                      variant="outline"
-                      leftSection={<IconExternalLink size={16} />}
-                      onClick={openInBrowser}
+                      variant="subtle"
+                      size="sm"
+                      onClick={() => router.push('/auth/login')}
                     >
-                      Open this page in Safari or your default browser
+                      Use password instead
                     </Button>
 
                     {state.error && (
@@ -308,18 +265,6 @@ export default function MagicLinkPage({ page, store }: MagicLinkPageProps) {
                         {state.error}
                       </Text>
                     )}
-
-                    <Text size="sm" ta="center" style={{ color: markketColors.neutral.mediumGray }}>
-                      Have a password?{' '}
-                      <Anchor
-                        size="sm"
-                        component="button"
-                        style={{ color: markketColors.rosa.main, fontWeight: 600 }}
-                        onClick={() => router.push('/auth/login')}
-                      >
-                        Sign in instead
-                      </Anchor>
-                    </Text>
                   </Stack>
               </form>
             )}

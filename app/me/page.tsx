@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,7 +20,7 @@ import {
   Skeleton,
   ThemeIcon,
 } from '@mantine/core';
-import { IconBuildingStore, IconUserCircle, IconPlus, IconCamera, IconPencil, IconSparkles, IconChevronRight, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { IconBuildingStore, IconPlus, IconCamera, IconPencil, IconSparkles, IconChevronRight, IconEye, IconEyeOff, IconSearch } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient, strapiClient } from '@/markket/api';
@@ -39,8 +39,17 @@ export default function MeHomePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const storesRetryCountRef = useRef(0);
-  const previewStores = [...stores].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 2);
+  const [storeSearch, setStoreSearch] = useState('');
+  const previewStores = [...stores]
+    .filter((store) => {
+      const query = storeSearch.trim().toLowerCase();
+      if (!query) return true;
+      const title = (store.title || '').toLowerCase();
+      const slug = (store.slug || '').toLowerCase();
+      return title.includes(query) || slug.includes(query);
+    })
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 6);
 
   useEffect(() => {
     if (isLoading) return;
@@ -64,31 +73,11 @@ export default function MeHomePage() {
       return;
     }
 
-    if (stores.length > 0) {
-      fetchStores().catch((error) => {
-        console.error('Failed to refresh stores in background:', error);
+    if (stores.length === 0) {
+      fetchStores({ force: true }).catch((error) => {
+        console.error('Failed to load stores:', error);
       });
-      return;
     }
-
-    fetchStores({ force: true });
-  }, [confirmed, fetchStores, isLoading, router, stores.length]);
-
-  useEffect(() => {
-    if (!confirmed() || isLoading) return;
-    if (stores.length > 0) {
-      storesRetryCountRef.current = 0;
-      return;
-    }
-
-    if (storesRetryCountRef.current >= 2) return;
-
-    const timer = window.setTimeout(() => {
-      storesRetryCountRef.current += 1;
-      fetchStores({ force: true });
-    }, 1200);
-
-    return () => window.clearTimeout(timer);
   }, [confirmed, fetchStores, isLoading, stores.length]);
 
   const onSaveQuickProfile = async () => {
@@ -180,23 +169,22 @@ export default function MeHomePage() {
     <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface tech-vhs-surface">
       <Group justify="space-between" align="end" mb="xl" wrap="wrap" gap="sm">
         <Stack gap={6}>
-          <Group gap="xs" wrap="wrap">
-            <ThemeIcon radius="xl" size={34} variant="light" color="pink">
-              <IconUserCircle size={20} />
-            </ThemeIcon>
-            <Title order={1}>Me</Title>
-            <Badge variant="light" radius="xl" color="pink">Workspace</Badge>
+          <Group gap="md" align="center" wrap="wrap">
+            <Avatar src={user?.avatar?.url} size={56} radius="xl">
+              {(user?.displayName || user?.username || 'M').charAt(0).toUpperCase()}
+            </Avatar>
+            <Stack gap={2}>
+              <Title order={1}>
+                {user?.displayName || user?.username || 'Hey there'}
+              </Title>
+              <Text c="dimmed" size="sm">{user?.email}</Text>
+            </Stack>
           </Group>
-          <Text c="dimmed" maw={560}>
-            Tienda backend
-            <br />
-            <span className="accent-blue-note">Content & Settings</span>
-          </Text>
         </Stack>
 
         <Group>
           <Button variant="light" component={Link} href="/me/account" radius="xl" color="pink">
-            Account
+            Tune account
           </Button>
         </Group>
       </Group>
@@ -224,13 +212,13 @@ export default function MeHomePage() {
                 <Group justify="space-between" align="flex-start" mb="md" wrap="nowrap">
                   <div>
                     <Group gap="xs" mb={4} wrap="wrap">
-                      <Title order={3}>Profile</Title>
-                      <Badge variant="light" radius="xl" color="grape">You</Badge>
+                      <Title order={3}>Identity</Title>
+                      <Badge variant="light" radius="xl" color="grape">Me</Badge>
                     </Group>
                     <Text mt="xs" c="dimmed">
                       {isEditingProfile
-                        ? (!displayName ? 'Welcome! Fill in your name and a short bio to get started.' : 'Editing mode. Save when done.')
-                        : 'Update your name, bio, and avatar.'}
+                        ? (!displayName ? 'Welcome. Add a name and a short intro to set the tone.' : 'Adjust what you want, then save changes.')
+                        : 'Name, bio, and photo that represent you across your stores.'}
                     </Text>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -273,7 +261,7 @@ export default function MeHomePage() {
                   <Stack gap="sm">
                     <div>
                       <Text size="sm" c="dimmed">Display name</Text>
-                      <Text fw={600}>{displayName || 'No display name yet'}</Text>
+                      <Text fw={600}>{displayName || 'Add a display name'}</Text>
                     </div>
                     <div>
                       <Text size="sm" c="dimmed">Email</Text>
@@ -281,7 +269,7 @@ export default function MeHomePage() {
                     </div>
                     <div>
                       <Text size="sm" c="dimmed">Bio</Text>
-                      <Text>{bio || 'No bio yet. Add a short intro.'}</Text>
+                      <Text>{bio || 'No bio yet. Add a short hello.'}</Text>
                     </div>
                     <Group justify="flex-end">
                       <Button
@@ -290,7 +278,7 @@ export default function MeHomePage() {
                         radius="xl"
                         color="pink"
                       >
-                        Edit Profile
+                        Edit details
                       </Button>
                     </Group>
                   </Stack>
@@ -319,7 +307,7 @@ export default function MeHomePage() {
                         </Button>
                       )}
                       <Button onClick={onSaveQuickProfile} loading={isSaving} radius="xl">
-                        Save Profile
+                          Save changes
                       </Button>
                     </Group>
                   </Stack>
@@ -344,6 +332,15 @@ export default function MeHomePage() {
             </Stack>
           </Group>
 
+          <TextInput
+            size="xs"
+            placeholder="Search your stores"
+            value={storeSearch}
+            onChange={(event) => setStoreSearch(event.currentTarget.value)}
+            leftSection={<IconSearch size={12} />}
+            mb="sm"
+          />
+
           <Divider mb="sm" />
 
           <Stack>
@@ -365,7 +362,7 @@ export default function MeHomePage() {
                   key={storeKey}
                   href={`/tienda/${store.slug}`}
                   className="store-tile-link"
-                  aria-label={`Open studio for ${store.title || store.slug} (${isPublished ? 'Visible' : 'Hidden'})`}
+                  aria-label={`Enter store ${store.title || store.slug} (${isPublished ? 'Visible' : 'Hidden'})`}
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
                   <Paper
@@ -410,7 +407,7 @@ export default function MeHomePage() {
                         }}
                         aria-hidden="true"
                       >
-                        <Text size="xs" fw={700}>Open</Text>
+                        <Text size="xs" fw={700}>Enter</Text>
                         <IconChevronRight size={14} />
                       </Group>
                     </Group>
@@ -418,6 +415,9 @@ export default function MeHomePage() {
                 </Link>
               );
             })}
+            {!isLoading && stores.length > 0 && previewStores.length === 0 && (
+              <Text size="sm" c="dimmed">No stores match "{storeSearch.trim()}".</Text>
+            )}
             {!isLoading && stores.length < 2 && (
               <>
                 <Button

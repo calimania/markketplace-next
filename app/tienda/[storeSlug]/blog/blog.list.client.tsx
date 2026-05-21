@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { SegmentedControl, Stack } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Article } from '@/markket/article';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -69,6 +70,30 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const handlePublishToggle = useCallback(async (navItem: { key: string }) => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+    const post = posts.find(p => getTiendaItemKey(p) === navItem.key);
+    if (!post) return;
+    const published = isPublished(post);
+    const data = published ? { unpublishNow: true, saveAsDraft: true } : { publishNow: true };
+    try {
+      await tiendaClient.updateContent(storeSlug, 'article', post.documentId || post.slug || '', data, { token });
+      setPosts(prev => prev.map(p =>
+        getTiendaItemKey(p) === navItem.key
+          ? { ...p, publishedAt: published ? null : new Date().toISOString() }
+          : p
+      ));
+      notifications.show({
+        title: published ? 'Now in draft' : 'Now live',
+        message: published ? 'Your article is hidden from the public site.' : 'Your article is now visible on your live site.',
+        color: published ? 'yellow' : 'green',
+      });
+    } catch {
+      notifications.show({ title: 'Could not save', message: 'Please try publishing again.', color: 'red' });
+    }
+  }, [posts, storeSlug]);
+
   const sortedPosts = useMemo(() => {
     if (sortMode === 'alpha') {
       return [...posts].sort((a, b) => (a.Title || '').localeCompare(b.Title || ''));
@@ -93,8 +118,9 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           publishedAt: post.publishedAt,
           subtitle: `${statusText} · ${formatDate(post.updatedAt || post.createdAt)} · ${post.documentId || post.slug || 'no-id'}`,
           href: `/tienda/${storeSlug}/blog/${post.documentId || post.slug}`,
-          previewHref: `/${storeSlug}/blog/${post.slug}`,
+          previewHref: isPublished(post) && post.slug ? `/${storeSlug}/blog/${post.slug}` : undefined,
           icon: 'article' as const,
+          status: isPublished(post) ? 'published' as const : 'draft' as const,
         };
       }),
     [sortedPosts, storeSlug],
@@ -112,7 +138,13 @@ export default function BlogListClient({ storeSlug, initialPosts }: BlogListClie
           { label: 'Z-A', value: 'alpha-desc' },
         ]}
       />
-      <NavTable emptyText="No articles yet." items={items} loading={loading} />
+      <NavTable
+        emptyText="No articles yet. Publish your first story to get started."
+        items={items}
+        loading={loading}
+        onPublishToggle={handlePublishToggle}
+        searchPlaceholder="Search articles by title"
+      />
     </Stack>
   );
 }

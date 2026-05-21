@@ -87,6 +87,7 @@ export default function TiendaPageItemPageClient({ storeSlug, itemId }: TiendaPa
 
   const editorId = page.documentId || page.slug || itemId;
   const itemDocumentId = page.documentId || itemId;
+  const pageIsPublished = isPublished(page);
   const refreshPageAfterUpload = async () => {
     const token = readTiendaAuthToken();
     if (!token) return;
@@ -150,7 +151,7 @@ export default function TiendaPageItemPageClient({ storeSlug, itemId }: TiendaPa
           ]}
         />
 
-        <Divider label={<Badge variant="dot" color="gray" size="sm">Content preview</Badge>} labelPosition="left" />
+        <Divider label={<Badge variant="dot" color="gray" size="sm">Page preview</Badge>} labelPosition="left" />
 
         {page.Content?.length ? (
           <Paper withBorder p="lg" radius="md" style={{ background: 'var(--mantine-color-gray-0, #fafafa)' }}>
@@ -159,15 +160,15 @@ export default function TiendaPageItemPageClient({ storeSlug, itemId }: TiendaPa
         ) : (
           <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
             <Text c="dimmed" size="sm" ta="center" py="xl">
-              No content yet.{' '}
+                Nothing here yet.{' '}
               <a href={`/tienda/${storeSlug}/pages/${editorId}/edit`} style={{ color: 'inherit', textDecoration: 'underline' }}>
-                Start editing →
+                  Add your first section →
               </a>
             </Text>
           </Paper>
         )}
 
-        <PublicLinkActions path={publicPath} openLabel="Open public page" />
+        <PublicLinkActions path={publicPath} openLabel="View live page" isPublicEnabled={pageIsPublished} />
       </Stack>
     </TiendaDetailShell>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Button, CloseButton, Group, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -22,6 +22,10 @@ type ProductEditorFormProps = {
     sourceUrl?: string;
     seoSocialImageId?: number;
     seoSocialImageDocumentId?: string;
+    thumbnailDocumentId?: string;
+    tagIds?: number[];
+    slideDocumentIds?: string[];
+    initialSEO?: Record<string, unknown>;
   };
 };
 
@@ -91,21 +95,30 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       Name: name.trim(),
       slug: nextSlug,
       Description: description,
+      // Thumbnail is managed via the Image Manager on the preview page, not here
       SEO: {
+        ...(initial?.initialSEO
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          : {}),
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
         metaUrl: sourceUrl.trim() || undefined,
-        ...(initial?.seoSocialImageDocumentId
-          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
-          : initial?.seoSocialImageId
-            ? { socialImage: initial.seoSocialImageId }
-            : {}),
+        ...(initial?.seoSocialImageId
+          ? { socialImage: { id: initial.seoSocialImageId } }
+          : {}),
       },
     };
+
+    if (initial?.tagIds && initial.tagIds.length > 0) {
+      payload.Tag = initial.tagIds.map((id) => ({ id }));
+    }
+    if (initial?.slideDocumentIds && initial.slideDocumentIds.length > 0) {
+      payload.Slides = initial.slideDocumentIds.map((documentId) => ({ documentId }));
+    }
 
     try {
       setIsSubmitting(true);
@@ -169,13 +182,14 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
   };
 
   return (
-    <Stack gap="md">
+    <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Name"
         value={name}
         onChange={(e) => setName(e.currentTarget.value)}
         placeholder="Product name"
         required
+        rightSection={name ? <CloseButton size="sm" onClick={() => setName('')} aria-label="Clear name" /> : null}
       />
 
       <TextInput
@@ -210,6 +224,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         value={seoTitle}
         onChange={(e) => setSeoTitle(e.currentTarget.value)}
         placeholder="SEO title (optional)"
+        rightSection={seoTitle ? <CloseButton size="sm" onClick={() => setSeoTitle('')} aria-label="Clear SEO title" /> : null}
       />
 
       <TextInput
@@ -217,6 +232,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         value={seoDescription}
         onChange={(e) => setSeoDescription(e.currentTarget.value)}
         placeholder="SEO description (optional)"
+        rightSection={seoDescription ? <CloseButton size="sm" onClick={() => setSeoDescription('')} aria-label="Clear SEO description" /> : null}
       />
 
       <TextInput
@@ -225,9 +241,10 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         onChange={(e) => setSourceUrl(e.currentTarget.value)}
         placeholder="https://example.com/buy"
         description="Optional URL for external checkout or marketplace listing."
+        rightSection={sourceUrl ? <CloseButton size="sm" onClick={() => setSourceUrl('')} aria-label="Clear URL" /> : null}
       />
 
-      <Group justify="space-between">
+      <Group justify="space-between" className="tienda-form-actions">
         <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/products/${itemDocumentId}` : `/tienda/${storeSlug}/products`}>
           Cancel
         </Button>

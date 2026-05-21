@@ -71,7 +71,6 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
   const [loading, setLoading] = useState(true);
   const [missingAuth, setMissingAuth] = useState(false);
   const [error, setError] = useState('');
-  const [endpointHit, setEndpointHit] = useState('');
   const [pageInfo, setPageInfo] = useState<{ page: number; pageSize: number; total: number } | null>(null);
 
   useEffect(() => {
@@ -85,7 +84,6 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
     const load = async () => {
       try {
         const endpointPath = `/api/crm/customers?storeRef=${encodeURIComponent(storeRef)}&page=1&pageSize=25`;
-        setEndpointHit(endpointPath);
 
         const response = await fetch(endpointPath, {
           method: 'GET',
@@ -149,7 +147,10 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
   if (missingAuth) {
     return (
       <Paper withBorder radius="md" p="md" bg="var(--mantine-color-yellow-0)">
-        <Text size="sm" c="yellow.9">Missing auth token. Sign in again to load CRM endpoint data.</Text>
+        <Stack gap={4}>
+          <Text size="sm" fw={600} c="yellow.9">Sign in required</Text>
+          <Text size="xs" c="yellow.9">Please sign in again to load your customer list.</Text>
+        </Stack>
       </Paper>
     );
   }
@@ -158,7 +159,7 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
     return (
       <Paper withBorder radius="md" p="md" bg="var(--mantine-color-red-0)">
         <Stack gap={4}>
-          <Text fw={600} size="sm" c="red">CRM endpoint request failed</Text>
+          <Text fw={600} size="sm" c="red">Could not load customers</Text>
           <Text size="xs" c="red.8">{error}</Text>
         </Stack>
       </Paper>
@@ -169,17 +170,14 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
     <Paper withBorder radius="md" p="md">
       <Stack gap="sm">
         <Stack gap={2}>
-          <Text fw={600} size="sm">Customers Endpoint Preview</Text>
+          <Text fw={600} size="sm">Customers</Text>
           <Text size="xs" c="dimmed">
-            Endpoint: {endpointHit || `/api/crm/customers?storeRef=${storeRef}&page=1&pageSize=25`} (GET)
-          </Text>
-          <Text size="xs" c="dimmed">
-            Showing unified customer records returned by CRM API.
+            Unified customer records from orders, RSVPs, and subscribers.
           </Text>
         </Stack>
 
         <Stack gap={6}>
-          <Badge variant="light" color="blue">{rows.length} result{rows.length === 1 ? '' : 's'}</Badge>
+          <Badge variant="light" color="blue">{rows.length} customer{rows.length === 1 ? '' : 's'}</Badge>
           {pageInfo && (
             <Text size="xs" c="dimmed">
               Page {pageInfo.page} · Size {pageInfo.pageSize} · Total {pageInfo.total}
@@ -193,7 +191,14 @@ export default function CrmOrdersTableClient({ storeRef }: CrmOrdersTableClientP
         </Stack>
 
         {rows.length === 0 ? (
-          <Text size="sm" c="dimmed">No customers returned from the endpoint yet.</Text>
+          <Paper withBorder radius="md" p="lg" bg="var(--mantine-color-gray-0)">
+            <Stack gap={4} align="center">
+              <Text size="sm" fw={600}>No customers yet</Text>
+              <Text size="xs" c="dimmed" ta="center">
+                Once orders, RSVPs, or subscribers come in, your customer list will show up here.
+              </Text>
+            </Stack>
+          </Paper>
         ) : (
           <ScrollArea>
             <Table striped highlightOnHover withTableBorder>

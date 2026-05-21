@@ -26,6 +26,8 @@ type PageEditorFormProps = {
     seoDescription?: string;
     seoSocialImageId?: number;
     seoSocialImageDocumentId?: string;
+    albumDocumentIds?: string[];
+    initialSEO?: Record<string, unknown>;
   };
 };
 
@@ -129,20 +131,25 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       Title: title.trim(),
       slug: nextSlug,
       Content: tiptapToStrapiBlocks(content),
       SEO: {
+        ...(initial?.initialSEO
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          : {}),
         metaTitle: (seoTitle || title).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
-        ...(initial?.seoSocialImageDocumentId
-          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
-          : initial?.seoSocialImageId
-            ? { socialImage: initial.seoSocialImageId }
-            : {}),
+        ...(initial?.seoSocialImageId
+          ? { socialImage: { id: initial.seoSocialImageId } }
+          : {}),
       },
     };
+
+    if (initial?.albumDocumentIds && initial.albumDocumentIds.length > 0) {
+      payload.albums = initial.albumDocumentIds.map((documentId) => ({ documentId }));
+    }
 
     try {
       setIsSubmitting(true);
@@ -213,36 +220,31 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
   const titleRemaining = 60 - (seoTitle || title || '').length;
 
   return (
-    <Stack gap="md">
-      {/* Title + slug row */}
-      <Group align="flex-end" grow>
-        <TextInput
-          label="Title"
-          value={title}
-          onChange={(e) => { setTitle(e.currentTarget.value); }}
-          placeholder="Page title"
-          required
-          style={{ flex: 2 }}
-        />
-        <TextInput
-          label="Slug"
-          value={slug}
-          onChange={(e) => {
-            setSlugTouched(true);
-            setSlug(e.currentTarget.value);
-          }}
-          placeholder="page-slug"
-          required
-          description={
-            slug ? (
-              <span style={{ fontFamily: 'monospace' }}>
-                /{storeSlug}/<strong>{slug}</strong>
-              </span>
-            ) : undefined
-          }
-          style={{ flex: 1 }}
-        />
-      </Group>
+    <Stack gap="md" className="tienda-editor-form">
+      <TextInput
+        label="Title"
+        value={title}
+        onChange={(e) => { setTitle(e.currentTarget.value); }}
+        placeholder="Page title"
+        required
+      />
+      <TextInput
+        label="Slug"
+        value={slug}
+        onChange={(e) => {
+          setSlugTouched(true);
+          setSlug(e.currentTarget.value);
+        }}
+        placeholder="page-slug"
+        required
+        description={
+          slug ? (
+            <span style={{ fontFamily: 'monospace' }}>
+              /{storeSlug}/<strong>{slug}</strong>
+            </span>
+          ) : undefined
+        }
+      />
 
       {/* Rich text */}
       <ContentEditor

@@ -1,13 +1,24 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import { Button, CloseButton, Group, Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { Event } from '@/markket/event.d';
+
+type EventLocationInput = {
+  name: string;
+  email: string;
+  street: string;
+  street_2: string;
+  city: string;
+  state: string;
+  country: string;
+  zipcode: string;
+};
 
 type EventEditorFormProps = {
   storeSlug: string;
@@ -23,11 +34,16 @@ type EventEditorFormProps = {
     startDate?: string;
     endDate?: string;
     timezone?: string;
+    locations?: Event['locations'];
     thumbnailUrl?: string;
     socialImageUrl?: string;
     slides?: Event['Slides'];
     seoSocialImageId?: number;
     seoSocialImageDocumentId?: string;
+    thumbnailDocumentId?: string;
+    tagIds?: number[];
+    slideDocumentIds?: string[];
+    initialSEO?: Record<string, unknown>;
   };
 };
 
@@ -44,9 +60,9 @@ function readAuthToken() {
 
 function browserTimezone() {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
   } catch {
-    return 'UTC';
+    return 'America/New_York';
   }
 }
 
@@ -227,6 +243,24 @@ function normalizeTimezone(value?: string) {
   return (value || '').trim();
 }
 
+function firstLocation(locations?: Event['locations']): EventLocationInput {
+  const first = Array.isArray(locations) && locations.length > 0 ? locations[0] : null;
+  return {
+    name: first?.name || '',
+    email: first?.email || '',
+    street: first?.street || '',
+    street_2: first?.street_2 || '',
+    city: first?.city || '',
+    state: first?.state || '',
+    country: first?.country || '',
+    zipcode: first?.zipcode || '',
+  };
+}
+
+function hasLocationValue(location: EventLocationInput) {
+  return Object.values(location).some((value) => (value || '').trim().length > 0);
+}
+
 export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initial }: EventEditorFormProps) {
   const router = useRouter();
   const store = useStore();
@@ -247,13 +281,15 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
     toDatetimeLocalInput(initial?.endDate || (mode === 'new' ? defaultRange.end : new Date(Date.now() + 3600000).toISOString()), initialTimezoneValue),
   );
   const [timezone, setTimezone] = useState(initialTimezoneValue);
+  const [location, setLocation] = useState<EventLocationInput>(() => firstLocation(initial?.locations));
   const [showTimezoneEditor, setShowTimezoneEditor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
-  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone });
+  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone, location });
   const [isDirty, setIsDirty] = useState(false);
   const storeRef = store.documentId || store.slug || storeSlug;
   const normalizedTimezone = normalizeTimezone(timezone);
+  const timezoneForPayload = normalizedTimezone || 'America/New_York';
   const initialTimezone = normalizeTimezone(initial?.timezone);
   const browserTimezoneValue = normalizeTimezone(autoTimezone);
   const hasTimezoneError = !isValidIanaTimezone(normalizedTimezone);
@@ -281,9 +317,10 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       || sourceUrl !== snap.sourceUrl
       || startDateInput !== snap.startDateInput
       || endDateInput !== snap.endDateInput
-      || timezone !== snap.timezone,
+      || timezone !== snap.timezone
+      || JSON.stringify(location) !== JSON.stringify(snap.location),
     );
-  }, [name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone]);
+  }, [name, slug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone, location]);
 
   const handleSubmit = async () => {
     const token = readAuthToken();
@@ -304,8 +341,8 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       return;
     }
 
-    const startDate = toIsoString(startDateInput, normalizedTimezone);
-    const endDate = toIsoString(endDateInput, normalizedTimezone);
+    const startDate = toIsoString(startDateInput, timezoneForPayload);
+    const endDate = toIsoString(endDateInput, timezoneForPayload);
 
     if (!startDate || !endDate) {
       notifications.show({ title: 'Date required', message: 'Please provide valid start and end dates.', color: 'orange' });
@@ -326,24 +363,45 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       Name: name.trim(),
       slug: nextSlug,
       Description: description,
       startDate,
       endDate,
-      timezone: normalizedTimezone || undefined,
+      timezone: timezoneForPayload,
+      locations: hasLocationValue(location)
+        ? [{
+          name: location.name.trim() || undefined,
+          email: location.email.trim() || undefined,
+          street: location.street.trim() || undefined,
+          street_2: location.street_2.trim() || undefined,
+          city: location.city.trim() || undefined,
+          state: location.state.trim() || undefined,
+          country: location.country.trim() || undefined,
+          zipcode: location.zipcode.trim() || undefined,
+        }]
+        : [],
+      // Thumbnail is managed via the Image Manager on the preview page, not here
       SEO: {
+        ...(initial?.initialSEO
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          : {}),
         metaTitle: (seoTitle || name).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
         metaUrl: sourceUrl.trim() || undefined,
-        ...(initial?.seoSocialImageDocumentId
-          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
-          : initial?.seoSocialImageId
-            ? { socialImage: initial.seoSocialImageId }
-            : {}),
+        ...(initial?.seoSocialImageId
+          ? { socialImage: { id: initial.seoSocialImageId } }
+          : {}),
       },
     };
+
+    if (initial?.tagIds && initial.tagIds.length > 0) {
+      payload.Tag = initial.tagIds.map((id) => ({ id }));
+    }
+    if (initial?.slideDocumentIds && initial.slideDocumentIds.length > 0) {
+      payload.Slides = initial.slideDocumentIds.map((documentId) => ({ documentId }));
+    }
 
     try {
       setIsSubmitting(true);
@@ -379,7 +437,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         responseDocumentId = verifiedEvent.documentId || responseDocumentId;
       }
 
-      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone };
+      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl, startDateInput, endDateInput, timezone, location };
       setIsDirty(false);
 
       notifications.show({
@@ -407,13 +465,14 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
   };
 
   return (
-    <Stack gap="md">
+    <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Name"
         value={name}
         onChange={(e) => setName(e.currentTarget.value)}
         placeholder="Event name"
         required
+        rightSection={name ? <CloseButton size="sm" onClick={() => setName('')} aria-label="Clear name" /> : null}
       />
 
       <TextInput
@@ -434,7 +493,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         }
       />
 
-      <Group grow>
+      <div className="form-cols">
         <TextInput
           label="Start Date & Time"
           type="datetime-local"
@@ -449,7 +508,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
           onChange={(e) => setEndDateInput(e.currentTarget.value)}
           required
         />
-      </Group>
+      </div>
       <Group justify="space-between" align="end">
         <Stack gap={2}>
           <Text size="sm" fw={500}>Timezone</Text>
@@ -516,6 +575,66 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         </>
       )}
 
+      <Stack gap="xs">
+        <Text fw={600}>Location</Text>
+        <Text size="sm" c="dimmed">Add the main location guests should use for this event.</Text>
+        <div className="form-cols">
+          <TextInput
+            label="Venue Name"
+            value={location.name}
+            onChange={(e) => setLocation((prev) => ({ ...prev, name: e.currentTarget.value }))}
+            placeholder="Studio Norte"
+          />
+          <TextInput
+            label="Contact Email"
+            type="email"
+            value={location.email}
+            onChange={(e) => setLocation((prev) => ({ ...prev, email: e.currentTarget.value }))}
+            placeholder="events@example.com"
+          />
+        </div>
+        <TextInput
+          label="Street"
+          value={location.street}
+          onChange={(e) => setLocation((prev) => ({ ...prev, street: e.currentTarget.value }))}
+          placeholder="123 Main St"
+        />
+        <TextInput
+          label="Street 2"
+          value={location.street_2}
+          onChange={(e) => setLocation((prev) => ({ ...prev, street_2: e.currentTarget.value }))}
+          placeholder="Suite 400"
+        />
+        <div className="form-cols">
+          <TextInput
+            label="City"
+            value={location.city}
+            onChange={(e) => setLocation((prev) => ({ ...prev, city: e.currentTarget.value }))}
+            placeholder="New York"
+          />
+          <TextInput
+            label="State"
+            value={location.state}
+            onChange={(e) => setLocation((prev) => ({ ...prev, state: e.currentTarget.value }))}
+            placeholder="NY"
+          />
+        </div>
+        <div className="form-cols">
+          <TextInput
+            label="Country"
+            value={location.country}
+            onChange={(e) => setLocation((prev) => ({ ...prev, country: e.currentTarget.value }))}
+            placeholder="USA"
+          />
+          <TextInput
+            label="Zipcode"
+            value={location.zipcode}
+            onChange={(e) => setLocation((prev) => ({ ...prev, zipcode: e.currentTarget.value }))}
+            placeholder="10001"
+          />
+        </div>
+      </Stack>
+
       <ContentEditor
         value={description}
         onChange={(value) => setDescription(typeof value === 'string' ? value : '')}
@@ -530,6 +649,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         value={seoTitle}
         onChange={(e) => setSeoTitle(e.currentTarget.value)}
         placeholder="SEO title (optional)"
+        rightSection={seoTitle ? <CloseButton size="sm" onClick={() => setSeoTitle('')} aria-label="Clear SEO title" /> : null}
       />
 
       <TextInput
@@ -537,6 +657,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         value={seoDescription}
         onChange={(e) => setSeoDescription(e.currentTarget.value)}
         placeholder="SEO description (optional)"
+        rightSection={seoDescription ? <CloseButton size="sm" onClick={() => setSeoDescription('')} aria-label="Clear SEO description" /> : null}
       />
 
       <TextInput
@@ -545,6 +666,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         onChange={(e) => setSourceUrl(e.currentTarget.value)}
         placeholder="https://example.com/rsvp"
         description="Used as the external RSVP link on the event page."
+        rightSection={sourceUrl ? <CloseButton size="sm" onClick={() => setSourceUrl('')} aria-label="Clear URL" /> : null}
       />
 
       <Text size="xs" c="dimmed">
@@ -552,7 +674,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       </Text>
 
 
-      <Group justify="space-between">
+      <Group justify="space-between" className="tienda-form-actions">
         <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/events/${itemDocumentId}` : `/tienda/${storeSlug}/events`}>
           Cancel
         </Button>

@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Badge, Button, Group, Paper, SimpleGrid, Stack, Text, ThemeIcon } from '@mantine/core';
-import { IconArrowLeft, IconCalendarEvent, IconMail, IconShoppingBag, IconUsers } from '@tabler/icons-react';
+import { Badge, Group, Paper, SimpleGrid, Stack, Text, ThemeIcon } from '@mantine/core';
+import { IconCalendarEvent, IconMail, IconShoppingBag, IconUsers } from '@tabler/icons-react';
 import TiendaListShell from '@/app/components/ui/tienda.list.shell';
 import { findStoreForTienda } from '../store.find';
 import CrmOrdersTableClient from './crm.orders.table.client';
+import CrmOrdersListClient from './crm.orders.list.client';
+import CrmSubscribersListClient from './crm.subscribers.list.client';
 
 type TiendaCrmPageProps = {
   params: Promise<{ storeSlug: string }>;
@@ -29,7 +31,7 @@ const CRM_SECTIONS: CrmSection[] = [
   {
     id: 'customers',
     label: 'Customers',
-    description: 'Unified list across orders, RSVPs, and subscribers.',
+    description: 'One shared view of each customer across activity.',
     icon: IconUsers,
     color: 'blue',
     active: true,
@@ -38,20 +40,20 @@ const CRM_SECTIONS: CrmSection[] = [
   {
     id: 'orders',
     label: 'Orders',
-    description: 'Purchase history and buyer timeline.',
+    description: 'Recent purchases and order status.',
     icon: IconShoppingBag,
     color: 'violet',
-    active: false,
-    ready: false,
+    active: true,
+    ready: true,
   },
   {
     id: 'subscribers',
     label: 'Subscribers',
-    description: 'Newsletter status and sync lifecycle.',
+    description: 'Newsletter members and sync status.',
     icon: IconMail,
     color: 'pink',
-    active: false,
-    ready: false,
+    active: true,
+    ready: true,
   },
   {
     id: 'rsvps',
@@ -82,21 +84,16 @@ export default async function TiendaCrmPage({ params }: TiendaCrmPageProps) {
         { label: 'CRM' },
       ]}
       title="CRM"
-      subtitle={`Customer, newsletter, order, and RSVP touchpoints for ${storeSlug}`}
+      subtitle={`Customers, subscribers, and orders for ${store.title || storeSlug}`}
       routePath={`/tienda/${storeSlug}/crm`}
-      sectionTitle="CRM Index"
+      sectionTitle="Overview"
       tone="crm"
-      actions={(
-        <Button component="a" href={`/tienda/${storeSlug}`} variant="light" leftSection={<IconArrowLeft size={14} />}>
-          Back To Overview
-        </Button>
-      )}
     >
       <Stack gap="md">
         <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
           {CRM_SECTIONS.map((section) => {
             const Icon = section.icon;
-            return (
+            const card = (
               <Paper
                 key={section.id}
                 withBorder
@@ -136,10 +133,30 @@ export default async function TiendaCrmPage({ params }: TiendaCrmPageProps) {
                 </Stack>
               </Paper>
             );
+
+            if (section.ready) {
+              return (
+                <a key={section.id} href={`#crm-${section.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {card}
+                </a>
+              );
+            }
+
+            return (
+              <div key={section.id}>{card}</div>
+            );
           })}
         </SimpleGrid>
 
-        <CrmOrdersTableClient storeRef={storeRef} />
+        <div id="crm-customers">
+          <CrmOrdersTableClient storeRef={storeRef} />
+        </div>
+        <div id="crm-orders">
+          <CrmOrdersListClient storeRef={storeRef} />
+        </div>
+        <div id="crm-subscribers">
+          <CrmSubscribersListClient storeRef={storeRef} />
+        </div>
       </Stack>
     </TiendaListShell>
   );

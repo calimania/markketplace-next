@@ -1,0 +1,30 @@
+# markkët
+
+> Open-source ecommerce platform for artists, collectives, and communities
+
+markkët lets creators launch beautiful storefronts, sell products and event tickets, publish articles, and manage subscribers — without expensive platforms or vendor lock-in. Built for weird internet people, crafters, musicians, and small communities who want to own their infrastructure and long-term roadmap.
+
+## Platform
+
+- [markkët](https://markket.place): Main platform homepage
+- [Stores](https://markket.place/stores): Browse creator storefronts
+- [Blog](https://markket.place/blog): Updates, launch notes, and community stories
+
+## For Creators
+
+- [Dashboard](https://markket.place/tienda): Manage your store, products, events, articles, and subscribers
+- [Selling](https://markket.place/sell): Information about selling in markketplace
+- [Sign up](https://markket.place/auth): Create an account and launch your store
+
+## Technical
+
+- Built with Next.js (App Router), Strapi v5, Stripe, and SendGrid
+- Open source: https://github.com/calimania/markketplace-next
+- REST API via Strapi; Stripe Connect for payouts; SendGrid for transactional email
+- Self-hostable; data owned by the creator
+
+## Optional
+
+- [Sitemap](https://markket.place/sitemap.xml)
+- [GitHub](https://github.com/calimania/markketplace-next)
+- [Club Calima](https://caliman.org/)

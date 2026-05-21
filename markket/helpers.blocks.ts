@@ -50,22 +50,12 @@ const sanitizeInlineNodes = (
 };
 
 const hasValidImagePayload = (block: StrapiBlock): boolean => {
+  // Only require the fields needed to render. Drop truly empty/broken blocks.
   return Boolean(
     block.type === 'image'
       && block.image
       && typeof block.image.url === 'string'
-      && block.image.url.trim().length > 0
-      && typeof block.image.name === 'string'
-      && typeof block.image.width === 'number'
-      && typeof block.image.height === 'number'
-      && block.image.formats
-      && typeof block.image.hash === 'string'
-      && typeof block.image.ext === 'string'
-      && typeof block.image.mime === 'string'
-      && typeof block.image.size === 'number'
-      && typeof block.image.provider === 'string'
-      && typeof block.image.createdAt === 'string'
-      && typeof block.image.updatedAt === 'string',
+    && block.image.url.trim().length > 0,
   );
 };
 
@@ -82,7 +72,13 @@ export const sanitizeStrapiBlocks = (blocks: StrapiBlock[]): StrapiBlock[] => {
 
     if (!block || typeof block !== 'object') return [];
 
-    if (block.type === 'paragraph' || block.type === 'heading' || block.type === 'quote' || block.type === 'code') {
+    if (block.type === 'paragraph') {
+      const children = sanitizeInlineNodes(block.children);
+      // Preserve empty paragraphs — they represent intentional blank lines between content.
+      return [{ ...block, children: children.length > 0 ? children : [{ type: 'text', text: '' } as StrapiBlockTextChild] }];
+    }
+
+    if (block.type === 'heading' || block.type === 'quote' || block.type === 'code') {
       const children = sanitizeInlineNodes(block.children);
       return children.length > 0 ? [{ ...block, children }] : [];
     }

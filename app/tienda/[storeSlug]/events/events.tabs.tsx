@@ -23,6 +23,7 @@ export default function EventsTabs({ storeSlug, upcomingEvents, pastEvents }: Ev
       <Tabs.Panel value="upcoming" pt="sm">
         <NavTable
           emptyText="No upcoming events yet."
+          searchPlaceholder="Search upcoming events"
           items={upcomingEvents.map((event) => ({
             key: event.documentId || event.slug,
             title: event.Name || 'Untitled event',
@@ -36,6 +37,7 @@ export default function EventsTabs({ storeSlug, upcomingEvents, pastEvents }: Ev
       <Tabs.Panel value="past" pt="sm">
         <NavTable
           emptyText="No past events yet."
+          searchPlaceholder="Search past events"
           items={pastEvents.map((event) => ({
             key: event.documentId || event.slug,
             title: event.Name || 'Untitled event',

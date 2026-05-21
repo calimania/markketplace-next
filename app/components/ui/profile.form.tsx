@@ -78,7 +78,7 @@ export default function ProfileForm() {
 
       showNotification({
         title: 'Success',
-        message: 'Profile updated successfully',
+        message: 'Your details were saved.',
         color: 'green',
         onClose: () => refreshUser()
       });
@@ -86,7 +86,7 @@ export default function ProfileForm() {
       console.error('Failed to update profile:', error);
       showNotification({
         title: 'Error',
-        message: 'Failed to update profile',
+        message: 'Could not save your changes.',
         color: 'red',
       });
     } finally {
@@ -133,9 +133,9 @@ export default function ProfileForm() {
         <Stack>
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3}>Profile Settings</Title>
+              <Title order={3}>Identity details</Title>
               <Text size="sm" c="dimmed">
-                Update your personal information
+                Choose how your name and intro appear across your spaces.
               </Text>
             </div>
             <Group>
@@ -163,7 +163,7 @@ export default function ProfileForm() {
                       leftSection={<IconUpload size={16} />}
                       onClick={onClick}
                     >
-                      Upload Picture
+                      Upload photo
                     </Button>
                   )}
                 </FileButton>
@@ -189,12 +189,12 @@ export default function ProfileForm() {
 
           <TextInput
             label="Display Name"
-            placeholder="Darth Plagueis"
+            placeholder="What people should call you"
             {...form.getInputProps('displayName')}
           />
           <TextInput
             label="Bio"
-            placeholder="I've became paranoid as I've grown in power"
+            placeholder="A short line about what you create"
             {...form.getInputProps('bio')}
           />
 
@@ -203,7 +203,7 @@ export default function ProfileForm() {
               type="submit"
               loading={loading}
             >
-              Update Profile
+              Save changes
             </Button>
           </Group>
         </Stack>

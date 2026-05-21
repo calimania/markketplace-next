@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Group, Skeleton, Stack, Text, ThemeIcon } from '@mantine/core';
-import { IconChevronRight, IconFileText, IconNews, IconPhoto, IconShoppingCart, IconCalendarEvent, IconMusic, IconExternalLink } from '@tabler/icons-react';
+import { Group, Skeleton, Stack, Text, TextInput, ThemeIcon } from '@mantine/core';
+import { IconChevronRight, IconFileText, IconNews, IconPhoto, IconShoppingCart, IconCalendarEvent, IconMusic, IconExternalLink, IconEye, IconEyeOff, IconSearch } from '@tabler/icons-react';
 import { appendEmbedParamsToHref } from '@/app/utils/embed.query';
 
 type NavIcon = 'article' | 'page' | 'store' | 'product' | 'event' | 'album';
@@ -18,12 +18,15 @@ type NavTableItem = {
   thumbnailAlt?: string;
   ctaLabel?: string;
   previewHref?: string;
+  status?: 'published' | 'draft';
 };
 
 type NavTableProps = {
   items: NavTableItem[];
   emptyText?: string;
   loading?: boolean;
+  onPublishToggle?: (item: NavTableItem) => void;
+  searchPlaceholder?: string;
 };
 
 function getIcon(icon?: NavIcon) {
@@ -35,11 +38,23 @@ function getIcon(icon?: NavIcon) {
   return <IconPhoto size={14} />;
 }
 
-export default function NavTable({ items, emptyText = 'No items yet.', loading = false }: NavTableProps) {
+export default function NavTable({ items, emptyText = 'No items yet.', loading = false, onPublishToggle, searchPlaceholder }: NavTableProps) {
   const router = useRouter();
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [search, setSearch] = useState('');
   const navTimerRef = useRef<number | null>(null);
+
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return items;
+
+    return items.filter((item) => {
+      const title = item.title?.toLowerCase() || '';
+      const subtitle = item.subtitle?.toLowerCase() || '';
+      return title.includes(query) || subtitle.includes(query);
+    });
+  }, [items, search]);
 
   useEffect(() => {
     return () => {
@@ -85,8 +100,20 @@ export default function NavTable({ items, emptyText = 'No items yet.', loading =
   }
 
   return (
-    <Stack gap={0} className={`ui-nav-table${isNavigating ? ' is-exiting' : ''}`}>
-      {items.map((item, index) => (
+    <Stack gap="xs" className={`ui-nav-table${isNavigating ? ' is-exiting' : ''}`}>
+      {searchPlaceholder && (
+        <TextInput
+          size="xs"
+          placeholder={searchPlaceholder}
+          value={search}
+          onChange={(event) => setSearch(event.currentTarget.value)}
+          leftSection={<IconSearch size={12} />}
+        />
+      )}
+
+      {filteredItems.length === 0 ? (
+        <Text c="dimmed" size="sm">No matches for "{search.trim()}". Try a different search.</Text>
+      ) : filteredItems.map((item, index) => (
         <div
           key={`${item.key}-${index}`}
           className={`ui-nav-row${pressedKey === item.key ? ' is-pressed' : ''}`}
@@ -130,7 +157,12 @@ export default function NavTable({ items, emptyText = 'No items yet.', loading =
                   }}
                 />
               ) : (
-                  <ThemeIcon variant="light" size="sm" radius="xl" color="gray">
+                  <ThemeIcon
+                    variant="light"
+                    size="sm"
+                    radius="xl"
+                    color={item.status === 'published' ? 'green' : item.status === 'draft' ? 'yellow' : 'gray'}
+                  >
                     {getIcon(item.icon)}
                   </ThemeIcon>
               )}
@@ -146,6 +178,22 @@ export default function NavTable({ items, emptyText = 'No items yet.', loading =
               </div>
             </Group>
             <Group gap={8} wrap="nowrap" align="center">
+              {onPublishToggle && item.status && (
+                <button
+                  type="button"
+                  title={item.status === 'published' ? 'Unpublish' : 'Publish'}
+                  aria-label={item.status === 'published' ? 'Unpublish' : 'Publish'}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onPublishToggle(item);
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', color: item.status === 'published' ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-yellow-7)', padding: '4px 6px', borderRadius: 6, lineHeight: 1, background: 'transparent', border: 'none', cursor: 'pointer' }}
+                  className="ui-nav-publish-btn"
+                >
+                  {item.status === 'published' ? <IconEyeOff size={14} /> : <IconEye size={14} />}
+                </button>
+              )}
               {item.previewHref && (
                 <button
                   type="button"
