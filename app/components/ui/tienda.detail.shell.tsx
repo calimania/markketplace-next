@@ -48,7 +48,7 @@ export default function TiendaDetailShell({
         {!!actions && <Group>{actions}</Group>}
       </Group>
 
-      <Paper withBorder p="md" radius="md" className="tienda-panel">
+      <Paper withBorder p="xl" radius="md" className="tienda-panel" maw={900}>
         {children}
       </Paper>
     </Stack>

@@ -86,6 +86,7 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
   }
 
   const editorId = post.documentId || post.slug || itemId;
+  const postIsPublished = isPublished(post);
   const itemDocumentId = post.documentId || itemId;
   const storeRef = storeSlug;
   const refreshPostAfterUpload = async () => {
@@ -152,7 +153,7 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
         />
 
         <Divider
-          label={<Badge variant="dot" color="gray" size="sm">Content preview</Badge>}
+          label={<Badge variant="dot" color="gray" size="sm">Story preview</Badge>}
           labelPosition="left"
         />
 
@@ -166,9 +167,9 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
             <PageContent params={{ post }} />
           ) : (
             <Text c="dimmed" size="sm" ta="center" py="xl">
-              No content yet.{' '}
+                Nothing here yet.{' '}
               <a href={`/tienda/${storeSlug}/blog/${editorId}/edit`} style={{ color: 'inherit', textDecoration: 'underline' }}>
-                Start editing →
+                  Add your first section →
               </a>
             </Text>
           )}
@@ -176,7 +177,8 @@ export default function TiendaBlogItemPageClient({ storeSlug, itemId }: TiendaBl
 
         <PublicLinkActions
           path={`/${storeSlug}/blog/${post.slug || post.documentId || itemId}`}
-          openLabel="Open public article"
+          openLabel="View live article"
+          isPublicEnabled={postIsPublished}
         />
       </Stack>
     </TiendaDetailShell>

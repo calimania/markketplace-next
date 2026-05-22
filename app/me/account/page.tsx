@@ -24,7 +24,7 @@ export default function MeAccountPage() {
   if (isLoading) {
     return (
       <Container size="md" py="xl" className="tech-vhs-surface">
-        <Text c="dimmed">Checking your session...</Text>
+        <Text c="dimmed">Just a moment…</Text>
       </Container>
     );
   }
@@ -37,11 +37,11 @@ export default function MeAccountPage() {
     <Container size="md" py="xl" className="tech-vhs-surface">
       <Group justify="space-between" mb="lg">
         <Stack gap={2}>
-          <Title order={1}>Account</Title>
-          <Text c="dimmed">Profile and security settings in one place.</Text>
+          <Title order={1}>My Settings</Title>
+          <Text c="dimmed">Manage your identity and login security from one screen.</Text>
         </Stack>
         <Button variant="default" component={Link} href="/me" leftSection={<IconArrowLeft size={16} />}>
-          Back to Me
+          Back to dashboard
         </Button>
       </Group>
 
@@ -49,7 +49,7 @@ export default function MeAccountPage() {
         <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'profile')}>
           <Tabs.List>
             <Tabs.Tab value="profile" leftSection={<IconUserCircle size={16} />}>
-              Profile
+              Identity
             </Tabs.Tab>
             <Tabs.Tab value="security" leftSection={<IconKey size={16} />}>
               Security

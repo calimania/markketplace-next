@@ -101,6 +101,9 @@ export default function TiendaBlogEditPageClient({ storeSlug, itemId }: TiendaBl
           seoDescription: post.SEO?.metaDescription,
           seoSocialImageId: post.SEO?.socialImage?.id,
           seoSocialImageDocumentId: post.SEO?.socialImage?.documentId,
+          coverDocumentId: post.cover?.documentId,
+          tagIds: post.Tags?.map((t) => t.id).filter(Boolean) ?? [],
+          initialSEO: post.SEO as Record<string, unknown> | undefined,
         }}
       />
     </TiendaDetailShell>

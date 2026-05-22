@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, Divider, Paper, Stack, Text } from '@mantine/core';
 import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
-import { IconExternalLink, IconEdit } from '@tabler/icons-react';
+import { IconExternalLink, } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import EventItemActions from './event.item.actions';
@@ -34,6 +34,19 @@ function externalHostLabel(value?: string) {
   } catch {
     return 'external link';
   }
+}
+
+function formatPrimaryLocation(event: Event) {
+  const location = Array.isArray(event.locations) && event.locations.length > 0 ? event.locations[0] : null;
+  if (!location) return null;
+
+  const line1 = [location.name, location.street].filter(Boolean).join(' - ').trim();
+  const cityStateZip = [location.city, location.state, location.zipcode].filter(Boolean).join(', ').trim();
+  const country = location.country?.trim();
+  const email = location.email?.trim();
+
+  const lines = [line1, cityStateZip, country, email].filter((value) => Boolean(value && value.length > 0));
+  return lines.length > 0 ? lines : null;
 }
 
 export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaEventItemPageClientProps) {
@@ -107,6 +120,8 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
   const storeRef = storeSlug;
   const startsAt = formatDateTime(event.startDate);
   const endsAt = formatDateTime(event.endDate);
+  const eventIsPublished = isPublished(event);
+  const primaryLocationLines = formatPrimaryLocation(event);
   const externalHost = externalHostLabel(event.SEO?.metaUrl);
   const refreshEventAfterUpload = async () => {
     const token = readTiendaAuthToken();
@@ -163,6 +178,17 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
             </Stack>
           </Paper>
 
+          {primaryLocationLines && (
+            <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
+              <Stack gap={4}>
+                <Text fw={600}>Location</Text>
+                {primaryLocationLines.map((line, index) => (
+                  <Text key={`location-line-${index}`} size="sm">{line}</Text>
+                ))}
+              </Stack>
+            </Paper>
+          )}
+
           <ContentMediaPreview
             storeRef={storeRef}
             contentType="event"
@@ -206,13 +232,14 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
           )}
           {!event.Description && !event.SEO?.metaDescription && (
             <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
-              <Text c="dimmed" ta="center" size="sm">No details yet.</Text>
+              <Text c="dimmed" ta="center" size="sm">Details coming soon.</Text>
             </Paper>
           )}
 
           <PublicLinkActions
             path={`/${storeSlug}/events/${event.slug || event.documentId || itemId}`}
-            openLabel="Open public event"
+            openLabel="View live event"
+            isPublicEnabled={eventIsPublished}
           />
 
           {event.SEO?.metaUrl && (
@@ -227,7 +254,7 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
                 fullWidth
                 rightSection={<IconExternalLink size={16} />}
               >
-                RSVP at {externalHost}
+                Open RSVP on {externalHost}
               </Button>
             </>
           )}

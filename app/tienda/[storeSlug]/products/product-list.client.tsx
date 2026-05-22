@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { SegmentedControl, Stack } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import NavTable from '@/app/components/ui/nav.table';
 import type { Product } from '@/markket/product';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -69,6 +70,30 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
 
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
+  const handlePublishToggle = useCallback(async (navItem: { key: string }) => {
+    const token = readTiendaAuthToken();
+    if (!token) return;
+    const product = products.find(p => getTiendaItemKey(p) === navItem.key);
+    if (!product) return;
+    const published = isPublished(product);
+    const data = published ? { unpublishNow: true, saveAsDraft: true } : { publishNow: true };
+    try {
+      await tiendaClient.updateContent(storeSlug, 'product', product.documentId || product.slug || '', data, { token });
+      setProducts(prev => prev.map(p =>
+        getTiendaItemKey(p) === navItem.key
+          ? { ...p, publishedAt: published ? null : new Date().toISOString() }
+          : p
+      ));
+      notifications.show({
+        title: published ? 'Now in draft' : 'Now live',
+        message: published ? 'Your product is hidden from the public site.' : 'Your product is now visible on your live site.',
+        color: published ? 'yellow' : 'green',
+      });
+    } catch {
+      notifications.show({ title: 'Could not save', message: 'Please try publishing again.', color: 'red' });
+    }
+  }, [products, storeSlug]);
+
   const sortedProducts = useMemo(() => {
     if (sortMode === 'alpha') {
       return [...products].sort((a, b) => (a.Name || '').localeCompare(b.Name || ''));
@@ -92,9 +117,10 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           title: product.Name || 'Untitled product',
           subtitle: `${statusText} · ${formatDate(product.updatedAt || product.createdAt)} · ${product.slug}`,
           href: `/tienda/${storeSlug}/products/${product.documentId || product.slug}`,
-          previewHref: `/${storeSlug}/products/${product.slug}`,
+          previewHref: isPublished(product) && product.slug ? `/${storeSlug}/products/${product.slug}` : undefined,
           icon: 'product' as const,
           thumbnailUrl: product.Thumbnail?.url || product?.SEO?.socialImage?.url || product?.Slides?.[0]?.url,
+          status: isPublished(product) ? 'published' as const : 'draft' as const,
         };
       }),
     [sortedProducts, storeSlug],
@@ -112,7 +138,13 @@ export default function ProductListClient({ storeSlug, initialProducts }: Produc
           { label: 'Z-A', value: 'alpha-desc' },
         ]}
       />
-      <NavTable emptyText="No products yet." items={items} loading={loading} />
+      <NavTable
+        emptyText="No products yet. Add your first product to start selling."
+        items={items}
+        loading={loading}
+        onPublishToggle={handlePublishToggle}
+        searchPlaceholder="Search products by name"
+      />
     </Stack>
   );
 }

@@ -3,4 +3,3 @@ Disallow: /dashboard/
 Disallow: /me/
 Disallow: /tienda/
 Disallow: /api/
-

@@ -1,7 +1,18 @@
 import { Slide } from "./product";
-import { SEO } from "./seo.d";
+import { SEO, ImageData } from "./seo.d";
 import { Store } from "./store.d";
 import { Tag } from "./tag.d";
+
+export interface Address {
+  name?: string;
+  email?: string;
+  street?: string;
+  street_2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipcode?: string;
+}
 
 export interface RSVP {
   id: number;
@@ -37,6 +48,7 @@ export interface Event {
   Slides: Slide[];
   endDate: string;
   timezone?: string;
+  locations?: Address[];
   Description: string;
   maxCapacity: number | null;
   amountSold: number | null;
@@ -51,14 +63,5 @@ export interface Event {
   SEO?: SEO;
   Tag?: Tag[];
   stores?: Store[];
-  Thumbnail?: {
-    url: string;
-    alternativeText?: string | null;
-    formats?: {
-      thumbnail?: { url: string };
-      small?: { url: string };
-      medium?: { url: string };
-      large?: { url: string };
-    };
-  };
+  Thumbnail?: ImageData;
 }

@@ -10,7 +10,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { data: [store] } = await strapiClient.getStore(slug) || { data: [] };
+  const [store] = (await strapiClient.getStore(slug))?.data || [];
 
   return {
     title: store ? `Manage Subscription · ${store.title || slug}` : 'Manage Subscription',
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SubscriptionPage({ params }: Props) {
   const { slug } = await params;
-  const { data: [store] } = await strapiClient.getStore(slug) || { data: [] };
+  const [store] = (await strapiClient.getStore(slug))?.data || [];
 
   if (!store) {
     notFound();

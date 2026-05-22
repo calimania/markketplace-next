@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import '@mantine/tiptap/styles.css';
 import { useEditor } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
@@ -14,7 +13,7 @@ import {
 } from '@mantine/core';
 import {
   IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
-  IconUpload, IconLink, IconX, IconCheck, IconFileUpload, IconMaximize, IconMinimize
+  IconUpload, IconLink, IconX, IconCheck, IconMaximize, IconMinimize
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
@@ -73,6 +72,24 @@ const markdownToHtml = (editor: any, markdown: string): string => {
     .join('');
 };
 
+const escapeHtml = (input: string): string => {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const plainTextToPreservedHtml = (text: string): string => {
+  const normalized = text.replace(/\r\n?/g, '\n');
+
+  return normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+};
+
 const getBlocksValue = (editor: any) => {
   return JSONDocToBlocks(editor.getJSON());
 };
@@ -103,7 +120,7 @@ const ContentEditor = ({
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
-  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload' | 'library'>('library');
+  const [imageUploadOption, setImageUploadOption] = useState<'url' | 'upload' | 'library'>('upload');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -290,6 +307,7 @@ const ContentEditor = ({
       }),
       Markdown.configure({
         html: true,
+        breaks: true,
         transformPastedText: false,
       }),
       Link.configure({
@@ -309,6 +327,25 @@ const ContentEditor = ({
         },
       }),
     ],
+    editorProps: {
+      handlePaste: (_view, event) => {
+        const clipboard = event.clipboardData;
+        if (!clipboard) return false;
+
+        const plainText = clipboard.getData('text/plain');
+        if (!plainText || !plainText.includes('\n')) return false;
+
+        const richText = clipboard.getData('text/html');
+        if (richText && richText.trim()) return false;
+
+        event.preventDefault();
+        const html = plainTextToPreservedHtml(plainText);
+        editor?.chain().focus().insertContent(html, {
+          parseOptions: { preserveWhitespace: 'full' },
+        }).run();
+        return true;
+      },
+    },
     content: initialContentRef.current,
     // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
     onBlur: ({ editor }) => {
@@ -455,7 +492,7 @@ const ContentEditor = ({
   // Handle modal close
   const handleCloseModal = () => {
     setImageModalOpen(false);
-    setImageUploadOption('library');
+    setImageUploadOption('upload');
     setImageUrl('');
     setImageAlt('');
     setImageError(null);
@@ -517,16 +554,6 @@ const ContentEditor = ({
             </Tabs.List>
 
             <Group>
-              {(format === 'markdown' || format === 'blocks') && (
-                <Tooltip label="Insert image">
-                  <ActionIcon
-                    onClick={openImageModal}
-                    variant="light"
-                    color="blue"
-                  >
-                    <IconPhoto size={16} />
-                  </ActionIcon>
-                </Tooltip>)}
               {allowFullscreen && (
                 <Tooltip label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen editor'}>
                   <ActionIcon
@@ -546,52 +573,81 @@ const ContentEditor = ({
               editor={editor}
               style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : minHeight, border: 'none' }}
             >
-              {editor && (
-                <BubbleMenu editor={editor}>
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.Bold />
-                    <RichTextEditor.Italic />
-                    <RichTextEditor.Link />
-                  </RichTextEditor.ControlsGroup>
-                </BubbleMenu>
-              )}
+
               <RichTextEditor.Toolbar sticky stickyOffset={isFullscreen ? (isCompactViewport ? 6 : 12) : 60}>
-                <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Bold />
-                  <RichTextEditor.Italic />
-                  <RichTextEditor.Underline />
-                  <RichTextEditor.Code />
-                </RichTextEditor.ControlsGroup>
+                {isCompactViewport ? (
+                  /* Mobile: minimal toolbar */
+                  <>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.Bold />
+                      <RichTextEditor.Italic />
+                    </RichTextEditor.ControlsGroup>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.H2 />
+                      <RichTextEditor.H3 />
+                    </RichTextEditor.ControlsGroup>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.BulletList />
+                      <RichTextEditor.Link />
+                    </RichTextEditor.ControlsGroup>
+                    {(format === 'markdown' || format === 'blocks') && (
+                      <RichTextEditor.ControlsGroup>
+                        <ActionIcon
+                          variant="subtle"
+                          onClick={openImageModal}
+                          title="Insert image"
+                        >
+                          <IconPhotoPlus size={18} />
+                        </ActionIcon>
+                      </RichTextEditor.ControlsGroup>
+                    )}
+                  </>
+                ) : (
+                  /* Desktop: full toolbar */
+                  <>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.Undo />
+                      <RichTextEditor.Redo />
+                    </RichTextEditor.ControlsGroup>
 
-                <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.H1 />
-                  <RichTextEditor.H2 />
-                  <RichTextEditor.H3 />
-                  <RichTextEditor.H4 />
-                </RichTextEditor.ControlsGroup>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.Bold />
+                      <RichTextEditor.Italic />
+                      <RichTextEditor.Underline />
+                      <RichTextEditor.Code />
+                    </RichTextEditor.ControlsGroup>
 
-                <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Blockquote />
-                  <RichTextEditor.BulletList />
-                  <RichTextEditor.OrderedList />
-                </RichTextEditor.ControlsGroup>
+                      <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.H1 />
+                        <RichTextEditor.H2 />
+                        <RichTextEditor.H3 />
+                        <RichTextEditor.H4 />
+                      </RichTextEditor.ControlsGroup>
 
-                <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Link />
-                  <RichTextEditor.Unlink />
-                </RichTextEditor.ControlsGroup>
+                      <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.Blockquote />
+                        <RichTextEditor.BulletList />
+                        <RichTextEditor.OrderedList />
+                      </RichTextEditor.ControlsGroup>
 
-                <RichTextEditor.ControlsGroup>
-                  {(format === 'markdown' || format === 'blocks') && (
-                    <ActionIcon
-                      variant="subtle"
-                      onClick={openImageModal}
-                      title="Insert image"
-                    >
-                      <IconPhotoPlus size={18} />
-                    </ActionIcon>
-                  )}
-                </RichTextEditor.ControlsGroup>
+                      <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.Link />
+                        <RichTextEditor.Unlink />
+                      </RichTextEditor.ControlsGroup>
+
+                      <RichTextEditor.ControlsGroup>
+                        {(format === 'markdown' || format === 'blocks') && (
+                          <ActionIcon
+                            variant="subtle"
+                            onClick={openImageModal}
+                            title="Insert image"
+                          >
+                            <IconPhotoPlus size={18} />
+                          </ActionIcon>
+                        )}
+                      </RichTextEditor.ControlsGroup>
+                  </>
+                )}
               </RichTextEditor.Toolbar>
 
               <RichTextEditor.Content />
@@ -627,206 +683,187 @@ const ContentEditor = ({
         title="Insert Image"
         size="md"
         centered
+        fullScreen={isCompactViewport}
       >
-        <Stack my="md">
+        <Stack gap="sm">
           <SegmentedControl
             value={imageUploadOption}
             onChange={(value) => setImageUploadOption(value as 'url' | 'upload' | 'library')}
             data={[
-              { label: 'Image URL', value: 'url' },
-              { label: 'Upload Image', value: 'upload' },
+              { label: 'Upload', value: 'upload' },
+              { label: 'URL', value: 'url' },
               { label: 'Library', value: 'library' },
             ]}
+            size="xs"
             fullWidth
           />
 
-          {(
-            <Paper withBorder p="xs" radius="md">
-              <Text size="xs" c="dimmed" mb={8}>Preview:</Text>
-              <Center style={{ height: 150 }} bg="var(--mantine-color-gray-0)" p="xs" >
-                {isUploading ? (
-                  <Loader size="sm" />
-                ) : (
-                  <img
-                      src={previewUrl || imageUrl || 'https://markketplace.nyc3.digitaloceanspaces.com/uploads/079a9ce3daa373036a6bc77c1739d424.png'}
-                    alt={imageAlt || "Preview"}
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYWFhYWFhIj5JbWFnZSBsb2FkaW5nIGVycm9yPC90ZXh0Pjwvc3ZnPg==';
+          {imageUploadOption === 'upload' ? (
+            <Stack gap="xs">
+              {/* Entire zone is the file picker */}
+              <FileButton onChange={handleFileUpload} accept="image/png,image/jpeg,image/gif,image/webp">
+                {(props) => (
+                  <Box
+                    component="button"
+                    type="button"
+                    {...props}
+                    style={{
+                      width: '100%',
+                      minHeight: 140,
+                      border: '2px dashed var(--mantine-color-default-border)',
+                      borderRadius: 10,
+                      background: 'var(--mantine-color-gray-0)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      padding: 0,
                     }}
-                  />
-                )}
-              </Center>
-            </Paper>
-          )}
-
-          {imageUploadOption === 'url' ? (
-            <TextInput
-              label="Image URL"
-              placeholder="https://example.com/image.jpg"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.currentTarget.value)}
-              required
-              leftSection={<IconLink size={16} />}
-              data-autofocus
-            />
-          ) : imageUploadOption === 'upload' ? (
-            <Stack my="xs">
-              <Text size="sm" fw={500}>Upload Image</Text>
-              <Paper
-                withBorder
-                p="md"
-                radius="md"
-                  bg="var(--mantine-color-gray-0)"
-              >
-                  <Stack my="md" align="center" py={12} gap="sm">
-                    <IconFileUpload size={28} opacity={0.5} />
-                    <div>
-                      <Text size="sm" ta="center">
-                        Select an image file
-                      </Text>
-                      <Text size="xs" c="dimmed" ta="center">
-                        JPEG, PNG, GIF, WEBP up to 5MB
-                      </Text>
-                    </div>
-
-                    <Group gap="xs">
-                      <FileButton
-                        onChange={handleFileUpload}
-                        accept="image/png,image/jpeg,image/gif,image/webp"
-                      >
-                        {(props) => (
-                          <Button
-                            variant="light"
-                            radius="md"
-                            leftSection={<IconUpload size={14} />}
-                            {...props}
-                          >
-                            {imageFile ? 'Replace file' : 'Select file'}
-                          </Button>
-                        )}
-                      </FileButton>
-
-                      {imageFile && (
-                        <Button
-                          variant="subtle"
-                        color="red"
-                          leftSection={<IconX size={14} />}
-                        onClick={resetFileInput}
-                      >
-                          Clear
-                        </Button>
-                      )}
-                    </Group>
-
-                    {imageFile && (
-                      <Text size="sm" truncate fw={500}>
-                        {imageFile.name}
-                      </Text>
-                    )}
-
-                    {uploadProgress > 0 && (
-                      <Stack mt="md" w="100%">
-                        <Group justify="apart" m="md">
-                          <Text size="xs">Uploading...</Text>
-                          <Text size="xs" fw={500}>{uploadProgress}%</Text>
-                        </Group>
-                        <Progress
-                          value={uploadProgress}
-                          size="sm"
-                          color={uploadProgress === 100 ? 'green' : 'blue'}
-                          radius="xl"
+                  >
+                    {isUploading ? (
+                      <Loader size="sm" />
+                    ) : previewUrl ? (
+                      <img
+                          src={previewUrl}
+                          alt="Upload preview"
+                          style={{ maxWidth: '100%', maxHeight: 140, objectFit: 'contain' }}
                         />
-                        {uploadProgress === 100 && (
-                          <Group m={5}>
-                            <IconCheck size={14} color="green" />
-                            <Text size="xs" c="green">Upload complete!</Text>
-                          </Group>
-                        )}
-                      </Stack>
+                      ) : (
+                        <Stack align="center" gap={6}>
+                          <IconUpload size={28} opacity={0.4} />
+                          <Text size="xs" c="dimmed">Tap to select image</Text>
+                          <Text size="xs" c="dimmed">JPEG · PNG · GIF · WEBP · 5 MB</Text>
+                        </Stack>
                     )}
-                  </Stack>
-                </Paper>
-              </Stack>
-            ) : (
-              <Stack my="xs" gap="sm">
-                <SegmentedControl
-                  value={imageLibrary}
-                  onChange={(value) => setImageLibrary(value as 'unsplash' | 'pexels')}
-                  data={[
-                    { label: 'Unsplash', value: 'unsplash' },
-                    { label: 'Pexels', value: 'pexels' },
-                  ]}
-                  fullWidth
-                />
+                  </Box>
+                )}
+              </FileButton>
 
-                <Group align="flex-end" wrap="nowrap">
-                  <TextInput
-                    label="Search images"
-                    placeholder="e.g. artisan market, pottery, flowers"
-                    value={libraryQuery}
-                    onChange={(e) => setLibraryQuery(e.currentTarget.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <Button onClick={searchImageLibrary} loading={libraryLoading}>
-                    Search
+              {imageFile && (
+                <Group justify="space-between" align="center">
+                  <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>{imageFile.name}</Text>
+                  <Button variant="subtle" color="red" size="xs" leftSection={<IconX size={12} />} onClick={resetFileInput}>
+                    Clear
                   </Button>
                 </Group>
+              )}
 
-                {libraryResults.length > 0 ? (
-                  <SimpleGrid cols={3} spacing="xs">
-                    {libraryResults.slice(0, 18).map((url, index) => (
-                      <Box
-                        key={`${url}-${index}`}
-                        component="button"
-                        type="button"
-                        onClick={() => {
-                          setImageUrl(url);
-                          setImageUploadOption('url');
-                          setUploadedImageData(null);
-                        }}
-                        style={{
-                          border: 0,
-                          padding: 0,
-                          background: 'transparent',
-                          cursor: 'pointer',
-                          borderRadius: 8,
-                          overflow: 'hidden',
-                        }}
-                        title="Use this image"
-                      >
-                        <MantineImage src={url} alt={`search-result-${index}`} h={90} fit="cover" radius="sm" />
-                      </Box>
-                    ))}
-                  </SimpleGrid>
-                ) : (
-                  <Text size="xs" c="dimmed">Search Unsplash or Pexels and click an image to use it.</Text>
+              {uploadProgress > 0 && (
+                <Stack gap={4}>
+                  <Group justify="space-between">
+                    <Text size="xs">Uploading…</Text>
+                    <Text size="xs" fw={500}>{uploadProgress}%</Text>
+                  </Group>
+                  <Progress value={uploadProgress} size="sm" color={uploadProgress === 100 ? 'green' : 'blue'} radius="xl" />
+                  {uploadProgress === 100 && (
+                    <Group gap={4}>
+                      <IconCheck size={14} color="green" />
+                      <Text size="xs" c="green">Upload complete!</Text>
+                    </Group>
+                  )}
+                </Stack>
+              )}
+            </Stack>
+
+          ) : imageUploadOption === 'url' ? (
+            <Stack gap="xs">
+              <TextInput
+                label="Image URL"
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.currentTarget.value)}
+                leftSection={<IconLink size={16} />}
+                data-autofocus
+              />
+              {imageUrl && (
+                <Center style={{ height: 120 }} bg="var(--mantine-color-gray-0)">
+                  <img
+                    src={imageUrl}
+                    alt={imageAlt || 'Preview'}
+                    style={{ maxWidth: '100%', maxHeight: 120, objectFit: 'contain' }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </Center>
+              )}
+            </Stack>
+
+            ) : (
+                <Stack gap="sm">
+                  <SegmentedControl
+                    value={imageLibrary}
+                    onChange={(value) => setImageLibrary(value as 'unsplash' | 'pexels')}
+                    data={[
+                      { label: 'Unsplash', value: 'unsplash' },
+                      { label: 'Pexels', value: 'pexels' },
+                    ]}
+                    fullWidth
+                    size="xs"
+                  />
+                  <Group align="flex-end" gap="xs" wrap="nowrap">
+                    <TextInput
+                      placeholder="artisan market, pottery…"
+                      value={libraryQuery}
+                      onChange={(e) => setLibraryQuery(e.currentTarget.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && searchImageLibrary()}
+                      size="sm"
+                      style={{ flex: 1 }}
+                    />
+                    <Button size="sm" onClick={searchImageLibrary} loading={libraryLoading}>
+                      Search
+                    </Button>
+                  </Group>
+
+                  {libraryResults.length > 0 ? (
+                    <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+                      {libraryResults.slice(0, 18).map((url, index) => (
+                        <Box
+                          key={`${url}-${index}`}
+                          component="button"
+                          type="button"
+                          onClick={() => {
+                            setImageUrl(url);
+                            setPreviewUrl(null);
+                            setUploadedImageData(null);
+                          }}
+                          style={{
+                            border: url === imageUrl ? '2px solid var(--mantine-color-pink-5)' : '2px solid transparent',
+                            padding: 0, background: 'transparent',
+                            cursor: 'pointer', borderRadius: 8, overflow: 'hidden',
+                            transition: 'border-color 0.15s',
+                          }}
+                          title="Use this image"
+                        >
+                          <MantineImage src={url} alt={`result-${index}`} h={80} fit="cover" radius="sm" />
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+                  ) : (
+                      <Text size="xs" c="dimmed">Search Unsplash or Pexels and tap an image to use it.</Text>
                   )}
                 </Stack>
           )}
 
           <TextInput
-            label="Alt Text"
-            placeholder="Descriptive text for the image"
+            label="Alt text"
+            placeholder="Describe the image"
             value={imageAlt}
             onChange={(e) => setImageAlt(e.currentTarget.value)}
-            description="Add accessible description of the image content"
+            size="sm"
           />
-          {imageError && (
-            <Text size="xs" c="red">
-              {imageError}
-            </Text>
-          )}
-          <Group align="right" mt="md">
-            <Button variant="subtle" onClick={handleCloseModal}>
-              Cancel
-            </Button>
+          {imageError && <Text size="xs" c="red">{imageError}</Text>}
+
+          <Group justify="flex-end" pt="xs" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+            <Button variant="subtle" size="sm" onClick={handleCloseModal}>Cancel</Button>
             <Button
+              size="sm"
               onClick={handleInsertImage}
               disabled={!imageUrl?.trim() || isUploading}
               leftSection={<IconPhotoPlus size={16} />}
             >
-              {editor?.isActive('image') ? 'Replace Image' : 'Insert Image'}
+              {editor?.isActive('image') ? 'Replace' : 'Insert Image'}
             </Button>
           </Group>
         </Stack>

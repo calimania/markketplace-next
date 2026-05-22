@@ -195,7 +195,7 @@ export class markketClient {
   };
 
 
-  public verifyMagicCode = async (code: string): Promise<{ jwt?: string; user?: { id: string, username: string, email: string } }> => {
+  public verifyMagicCode = async (code: string): Promise<{ jwt?: string; user?: { id?: string; documentId?: string; username?: string; email?: string } }> => {
 
     const _url = new URL(`/api/auth-magic/verify`, markketplace.api);
 
@@ -206,11 +206,76 @@ export class markketClient {
     })
 
     if (!response.ok) {
-      return {};
+      const errBody = await response.json().catch(() => ({})) as { error?: { message?: string } };
+      const error = new Error(errBody?.error?.message || `Request failed (${response.status})`) as Error & { status?: number };
+      error.status = response.status;
+      throw error;
     }
 
-    const json = response.json();
+    const json = await response.json();
 
-    return json;
+    const jwt =
+      json?.jwt ||
+      json?.token ||
+      json?.accessToken ||
+      json?.data?.jwt ||
+      json?.data?.token ||
+      json?.session?.jwt ||
+      json?.session?.token ||
+      json?.data?.session?.jwt ||
+      json?.data?.session?.token;
+
+    let user =
+      json?.user ||
+      json?.data?.user ||
+      json?.session?.user ||
+      json?.data?.session?.user ||
+      null;
+
+    if (!user && json?.id) {
+      user = json;
+    }
+
+    if (!jwt) {
+      const error = new Error('Login did not return a valid session. Please request a new magic link.') as Error & { status?: number };
+      error.status = 401;
+      throw error;
+    }
+
+    return { jwt, user: user || undefined };
+  }
+
+  public previewMagicCode = async (code: string): Promise<{
+    success?: boolean;
+    state?: string;
+    message?: string;
+    data?: {
+      purpose?: string;
+      channel?: string;
+      nextPath?: string;
+      expiresAt?: string;
+      reusable?: boolean;
+      useCount?: number;
+      maxUses?: number;
+      emailHint?: string;
+      meta?: {
+        storeTitle?: string;
+        storeDocumentId?: string;
+      };
+    };
+  } | null> => {
+    const _url = new URL(`/api/auth-magic/preview`, markketplace.api);
+
+    const response = await fetch(_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
   }
 };

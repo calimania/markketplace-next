@@ -37,8 +37,8 @@ export async function generateMetadata({ params }: NewsletterPageProps): Promise
 
 export default async function NewsletterPage({ params }: NewsletterPageProps) {
   const { slug } = await params;
-  const { data: [page] } = await strapiClient.getPage('newsletter', slug);
-  const { data: [store] } = await strapiClient.getStore(slug);
+  const [page] = (await strapiClient.getPage('newsletter', slug))?.data || [];
+  const [store] = (await strapiClient.getStore(slug))?.data || [];
   const title = page?.Title || `Newsletter`;
   const subtitle = page?.SEO?.metaDescription || `A calm inbox with updates from ${store?.title || 'this store'}.`;
 

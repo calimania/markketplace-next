@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Badge, Container, Title, Text, Paper, Stack, Group, Button, Skeleton, SegmentedControl } from '@mantine/core';
-import { IconArrowLeft, IconChevronRight, IconEye, IconEyeOff, IconPlus } from '@tabler/icons-react';
+import { Badge, Container, Title, Text, Paper, Stack, Group, Button, Skeleton, SegmentedControl, TextInput } from '@mantine/core';
+import { IconArrowLeft, IconChevronRight, IconEye, IconEyeOff, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import { markketColors } from '@/markket/colors.config';
@@ -29,6 +29,7 @@ export default function MeStoresPage() {
   const [isStoresHydrating, setIsStoresHydrating] = useState(true);
   const [sortMode, setSortMode] = useState<'alpha' | 'recent'>('alpha');
   const [visibilityMode, setVisibilityMode] = useState<'all' | 'published' | 'draft'>('all');
+  const [storeSearch, setStoreSearch] = useState('');
 
   const uniqueStores = stores
     .filter((store, index, array) => {
@@ -43,7 +44,16 @@ export default function MeStoresPage() {
     return visibilityMode === 'published' ? published : !published;
   });
 
-  const sortedStores = [...visibleStores].sort((a, b) => {
+  const filteredStores = visibleStores.filter((store) => {
+    const query = storeSearch.trim().toLowerCase();
+    if (!query) return true;
+
+    const title = (store.title || '').toLowerCase();
+    const slug = (store.slug || '').toLowerCase();
+    return title.includes(query) || slug.includes(query);
+  });
+
+  const sortedStores = [...filteredStores].sort((a, b) => {
     if (sortMode === 'recent') {
       const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
       const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime();
@@ -110,18 +120,18 @@ export default function MeStoresPage() {
 
         <Group justify="space-between" align="flex-start">
           <div>
-            <Title order={1}>My Stores</Title>
+            <Title order={1}>Your Stores</Title>
             <Text c="dimmed" mt={2}>
               <span className="accent-blue">/</span>
             </Text>
-            <Text c="dimmed" mt={4}>Pick a store to open its workspace.</Text>
+            <Text c="dimmed" mt={4}>Choose a store and jump back into your studio.</Text>
           </div>
           <Group>
             <Button variant="default" component={Link} href="/me" leftSection={<IconArrowLeft size={16} />}>
-              Back
+              Back to home
             </Button>
             <Button component={Link} href="/me/store/new" leftSection={<IconPlus size={16} />}>
-              Create Store
+              New store
             </Button>
           </Group>
         </Group>
@@ -131,6 +141,13 @@ export default function MeStoresPage() {
             {sortedStores.length} store{sortedStores.length === 1 ? '' : 's'}
           </Text>
           <Group gap="xs" wrap="wrap">
+            <TextInput
+              size="sm"
+              placeholder="Search stores"
+              value={storeSearch}
+              onChange={(event) => setStoreSearch(event.currentTarget.value)}
+              leftSection={<IconSearch size={12} />}
+            />
             <SegmentedControl
               size="xs"
               value={visibilityMode}
@@ -191,10 +208,10 @@ export default function MeStoresPage() {
           >
             <Stack gap="xs">
               <Text fw={700} style={{ color: markketColors.neutral.charcoal }}>No stores yet</Text>
-              <Text c="dimmed" size="sm">Create your first store and we will drop you right into the studio.</Text>
+              <Text c="dimmed" size="sm">Create your first store and start publishing in minutes.</Text>
               <Group>
                 <Button component={Link} href="/me/store/new" radius="xl" leftSection={<IconPlus size={16} />}>
-                  Create First Store
+                  Create your first store
                 </Button>
               </Group>
             </Stack>
@@ -205,7 +222,7 @@ export default function MeStoresPage() {
             key={store.documentId || `${store.slug || 'store'}-${index}`}
             href={`/tienda/${store.slug}`}
             className="store-tile-link"
-            aria-label={`Open ${store.title || store.slug} (${isStorePublished(store as StoreStatusShape) ? 'Published' : 'Draft'})`}
+            aria-label={`Enter ${store.title || store.slug} (${isStorePublished(store as StoreStatusShape) ? 'Published' : 'Draft'})`}
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <Paper
@@ -252,7 +269,7 @@ export default function MeStoresPage() {
                   }}
                   aria-hidden="true"
                 >
-                  <Text size="xs" fw={700}>Open</Text>
+                  <Text size="xs" fw={700}>Enter</Text>
                   <IconChevronRight size={14} />
                 </Group>
               </Group>

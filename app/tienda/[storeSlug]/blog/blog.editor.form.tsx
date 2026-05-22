@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Button, CloseButton, Group, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -23,6 +23,9 @@ type BlogEditorFormProps = {
     seoDescription?: string;
     seoSocialImageId?: number;
     seoSocialImageDocumentId?: string;
+    coverDocumentId?: string;
+    tagIds?: number[];
+    initialSEO?: Record<string, unknown>;
   };
 };
 
@@ -34,10 +37,6 @@ function slugify(value: string) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 }
-
-
-
-
 
 export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initial }: BlogEditorFormProps) {
   const router = useRouter();
@@ -76,10 +75,6 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
     }
   }, [title, slugTouched]);
 
-
-
-
-
   const handleSubmit = async () => {
     const token = readTiendaAuthToken();
 
@@ -111,20 +106,25 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       Title: title.trim(),
       slug: nextSlug,
       Content: tiptapToStrapiBlocks(content),
       SEO: {
+        ...(initial?.initialSEO
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          : {}),
         metaTitle: (seoTitle || title).trim().slice(0, 60),
         metaDescription: (seoDescription || '').trim().slice(0, 160),
-        ...(initial?.seoSocialImageDocumentId
-          ? { socialImage: { documentId: initial.seoSocialImageDocumentId } }
-          : initial?.seoSocialImageId
-            ? { socialImage: initial.seoSocialImageId }
-            : {}),
+        ...(initial?.seoSocialImageId
+          ? { socialImage: { id: initial.seoSocialImageId } }
+          : {}),
       },
     };
+
+    if (initial?.tagIds && initial.tagIds.length > 0) {
+      payload.Tags = initial.tagIds.map((id) => ({ id }));
+    }
 
     try {
       setIsSubmitting(true);
@@ -132,6 +132,9 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       const response = mode === 'new'
         ? await tiendaClient.createContent(storeRef, 'article', payload, { token })
         : await tiendaClient.updateContent(storeRef, 'article', itemDocumentId || '', payload, { token });
+
+      console.log('[blog save] sent SEO.socialImage:', (payload.SEO as Record<string, unknown>)?.socialImage ?? 'omitted (no id)');
+      console.log('[blog save] returned SEO.socialImage:', response?.data?.SEO?.socialImage ?? 'missing in response');
 
       if (!response || (response?.status && response.status >= 400)) {
         throw new Error(response?.message || `Server error: ${response?.status || 'unknown'}`);
@@ -189,15 +192,15 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
   };
 
   return (
-    <Stack gap="sm">
+    <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Title"
         value={title}
         onChange={(event) => setTitle(event.currentTarget.value)}
         placeholder="Article title"
         required
+        rightSection={title ? <CloseButton size="sm" onClick={() => setTitle('')} aria-label="Clear title" /> : null}
       />
-
       <TextInput
         label="Slug"
         value={slug}
@@ -215,7 +218,6 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
           ) : undefined
         }
       />
-
       <ContentEditor
         value={content}
         onChange={setContent}
@@ -224,17 +226,13 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         minHeight={400}
         placeholder="Write your article content..."
       />
-
-      <Text size="xs" c="dimmed">
-        Image management moved to the preview page for this article to keep editing focused on text.
-      </Text>
-
       <TextInput
         label="SEO Title"
         value={seoTitle}
         onChange={(event) => setSeoTitle(event.currentTarget.value)}
         placeholder="SEO title (optional)"
         description={`${60 - (seoTitle || title || '').length} characters remaining`}
+        rightSection={seoTitle ? <CloseButton size="sm" onClick={() => setSeoTitle('')} aria-label="Clear SEO title" /> : null}
       />
 
       <Text size="xs" c="dimmed">
@@ -247,9 +245,10 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         onChange={(event) => setSeoDescription(event.currentTarget.value)}
         placeholder="SEO description (optional)"
         description={`${160 - (seoDescription || '').length} characters remaining`}
+        rightSection={seoDescription ? <CloseButton size="sm" onClick={() => setSeoDescription('')} aria-label="Clear SEO description" /> : null}
       />
 
-      <Group justify="space-between">
+      <Group justify="space-between" className="tienda-form-actions">
         <Group>
           <Button component="a" variant="subtle" href={mode === 'edit' && itemDocumentId ? `/tienda/${storeSlug}/blog/${itemDocumentId}` : `/tienda/${storeSlug}/blog`}>
             Cancel

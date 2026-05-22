@@ -129,7 +129,7 @@ export default function LoginPage() {
 
       notifications.show({
         title: 'Welcome back!',
-        message: 'Authorized credentials. Loading dashboard...',
+        message: "Access Granted! Preparing your dashboard…",
         color: 'green',
         icon: <IconSparkles size="1.1rem" />,
         autoClose: 800,

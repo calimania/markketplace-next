@@ -65,6 +65,25 @@ function getHostLabel(url?: string) {
   }
 }
 
+function getLocationParts(event?: Event) {
+  const location = Array.isArray(event?.locations) && event?.locations?.length ? event.locations[0] : null;
+  if (!location) {
+    return { cityLabel: '', lines: [] as string[] };
+  }
+
+  const cityLabel = (location.city || location.name || '').trim();
+  const line1 = [location.name, location.street].filter(Boolean).join(' - ').trim();
+  const line2 = [location.street_2].filter(Boolean).join('').trim();
+  const line3 = [location.city, location.state, location.zipcode].filter(Boolean).join(', ').trim();
+  const line4 = [location.country].filter(Boolean).join('').trim();
+  const line5 = [location.email].filter(Boolean).join('').trim();
+
+  return {
+    cityLabel,
+    lines: [line1, line2, line3, line4, line5].filter((line) => line.length > 0),
+  };
+}
+
 export async function generateMetadata({ params }: EventsPageProps) {
   const { slug, event_slug } = await params;
   const response = await strapiClient.getStore(slug);
@@ -75,7 +94,7 @@ export async function generateMetadata({ params }: EventsPageProps) {
 
   const eventName = event?.Name || 'Event';
   const eventDate = event?.startDate ? formatDateTime(event.startDate, event?.timezone) : '';
-  const location = '';
+  const location = getLocationParts(event).cityLabel;
 
   const description = event?.SEO?.metaDescription
     || toExcerpt(event?.Description, 160)
@@ -125,6 +144,7 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
   const canRsvpInternal = Boolean(event?.documentId || event?.id);
   const externalHostLabel = getHostLabel(event?.SEO?.metaUrl);
   const excerpt = event?.SEO?.metaDescription || toExcerpt(event?.Description, 220);
+  const locationDetails = getLocationParts(event);
 
   const relatedEvents = ((eventsListResponse?.data || []) as Event[])
     .filter((item) => item.slug !== event_slug && new Date(item.startDate) >= new Date())
@@ -171,6 +191,19 @@ export default async function StoreEventPage({ params }: EventsPageProps) {
               endDate={event?.endDate}
               timezone={event?.timezone}
             />
+
+            {locationDetails.lines.length > 0 && (
+              <Paper withBorder radius="lg" p="lg" style={{ borderColor: `${markketColors.sections.events.main}22` }}>
+                <Stack gap={4}>
+                  <Text fw={600}>Location</Text>
+                  {locationDetails.lines.map((line, index) => (
+                    <Text key={`event-location-line-${index}`} size="sm" c={markketColors.neutral.darkGray}>
+                      {line}
+                    </Text>
+                  ))}
+                </Stack>
+              </Paper>
+            )}
 
             <Paper withBorder radius="lg" p="lg" style={{ borderColor: `${markketColors.sections.events.main}22` }}>
               <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">

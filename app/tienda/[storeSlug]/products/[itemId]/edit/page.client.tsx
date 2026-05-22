@@ -102,6 +102,10 @@ export default function TiendaProductEditPageClient({ storeSlug, itemId }: Tiend
           sourceUrl: product.SEO?.metaUrl || undefined,
           seoSocialImageId: product.SEO?.socialImage?.id,
           seoSocialImageDocumentId: product.SEO?.socialImage?.documentId,
+          thumbnailDocumentId: product.Thumbnail?.documentId,
+          tagIds: product.Tag?.map((t) => t.id).filter(Boolean) ?? [],
+          slideDocumentIds: product.Slides?.map((s) => s.documentId).filter(Boolean) ?? [],
+          initialSEO: product.SEO as Record<string, unknown> | undefined,
         }}
       />
     </TiendaDetailShell>

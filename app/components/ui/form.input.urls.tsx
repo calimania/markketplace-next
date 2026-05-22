@@ -7,7 +7,6 @@ import {
   ActionIcon,
   Stack,
   Text,
-  Box,
   ThemeIcon,
   Tooltip,
 } from '@mantine/core';
@@ -183,47 +182,46 @@ export default function URLsInput({
                   style={{ borderLeft: `3px solid ${profile.color}` }}
                 >
                   <input type="hidden" name={`${field}[${index}].id`} value={url.id || ''} />
-                  <Group align="center" wrap="nowrap" gap="sm">
-                    <Tooltip label={profile.suggestedLabel} position="top">
-                      <ThemeIcon
-                        radius="xl"
-                        size={36}
-                        style={{ background: `${profile.color}18`, flexShrink: 0 }}
-                      >
-                        <profile.Icon size={18} color={profile.color} />
-                      </ThemeIcon>
-                    </Tooltip>
-                    <Group grow align="flex-start" style={{ flex: 1 }}>
+                  <Stack gap="xs">
+                    <Group align="center" wrap="nowrap" gap="sm">
+                      <Tooltip label={profile.suggestedLabel} position="top">
+                        <ThemeIcon
+                          radius="xl"
+                          size={36}
+                          style={{ background: `${profile.color}18`, flexShrink: 0 }}
+                        >
+                          <profile.Icon size={18} color={profile.color} />
+                        </ThemeIcon>
+                      </Tooltip>
                       <TextInput
                         placeholder="Label  (e.g. Instagram)"
                         value={url.Label}
                         onChange={(e) => handleChangeUrl(index, 'Label', e.target.value)}
                         radius="md"
                         size="sm"
+                        style={{ flex: 1 }}
                         readOnly={readOnly}
                       />
-                      <Box style={{ flex: 1.5 }}>
-                        <TextInput
-                          placeholder="https://..."
-                          value={url.URL}
-                          onChange={(e) => handleChangeUrl(index, 'URL', e.target.value)}
-                          radius="md"
-                          size="sm"
-                          leftSection={<IconLink size={13} color={profile.color} />}
-                          readOnly={readOnly}
-                        />
-                      </Box>
+                      <ActionIcon
+                        color="red"
+                        variant="subtle"
+                        onClick={() => handleRemoveUrl(index)}
+                        style={{ flexShrink: 0 }}
+                        disabled={readOnly}
+                      >
+                        <IconTrash size={15} />
+                      </ActionIcon>
                     </Group>
-                    <ActionIcon
-                      color="red"
-                      variant="subtle"
-                      onClick={() => handleRemoveUrl(index)}
-                      style={{ flexShrink: 0 }}
-                      disabled={readOnly}
-                    >
-                      <IconTrash size={15} />
-                    </ActionIcon>
-                  </Group>
+                    <TextInput
+                      placeholder="https://..."
+                      value={url.URL}
+                      onChange={(e) => handleChangeUrl(index, 'URL', e.target.value)}
+                      radius="md"
+                      size="sm"
+                      leftSection={<IconLink size={13} color={profile.color} />}
+                      readOnly={readOnly}
+                    />
+                  </Stack>
                 </Paper>
               );
             })}

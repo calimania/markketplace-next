@@ -152,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storage = getStorage();
     storage?.removeItem('markket.auth');
     clearDraftStorage();
-    router.push(`/auth/login?next=${encodeURIComponent(next)}`);
+    router.push(`/auth/magic?next=${encodeURIComponent(next)}`);
   }
 
   const readLocalStorage = () => {

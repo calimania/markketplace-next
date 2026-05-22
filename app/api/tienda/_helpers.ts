@@ -13,7 +13,7 @@ const DEFAULT_CONTENT_POPULATE: Record<string, string[]> = {
   article: ['SEO', 'SEO.socialImage', 'Tags', 'cover', 'store', 'store.Logo'],
   page: ['SEO', 'SEO.socialImage', 'store', 'store.Logo', 'albums', 'albums.cover', 'albums.SEO', 'albums.tracks'],
   product: ['SEO', 'SEO.socialImage', 'Thumbnail', 'Slides', 'PRICES', 'stores', 'stores.Logo', 'extras'],
-  event: ['SEO', 'SEO.socialImage', 'Tag', 'Thumbnail', 'Slides', 'stores', 'stores.Logo'],
+  event: ['SEO', 'SEO.socialImage', 'Tag', 'Thumbnail', 'Slides', 'stores', 'stores.Logo', 'locations'],
   album: ['SEO', 'cover', 'tracks', 'tracks.SEO', 'tracks.media', 'store', 'store.Logo'],
   track: ['SEO', 'media', 'urls', 'store', 'store.Logo'],
 };

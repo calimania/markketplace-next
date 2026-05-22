@@ -33,9 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
 };
 
 export default async function NewsletterPage() {
-  const { data: [page] } = await strapiClient.getPage('newsletter') || { data: [] };
-
-  const { data: [store] } = await strapiClient.getStore();
+  const [page] = (await strapiClient.getPage('newsletter'))?.data || [];
+  const [store] = (await strapiClient.getStore())?.data || [];
   const title = page?.Title || `Newsletter for ${store?.SEO?.metaTitle}`;
   const image = page?.SEO?.socialImage || store?.SEO?.socialImage;
   const description = page?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Stories, updates, and featured releases from the community.';

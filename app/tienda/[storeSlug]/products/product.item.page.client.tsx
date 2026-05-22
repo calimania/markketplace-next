@@ -97,6 +97,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
 
   const editorId = product.documentId || product.slug || itemId;
   const itemDocumentId = product.documentId || itemId;
+  const productIsPublished = isPublished(product);
   const externalHost = externalHostLabel(product.SEO?.metaUrl);
   const refreshProductAfterUpload = async () => {
     const token = readTiendaAuthToken();
@@ -187,13 +188,14 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
         )}
         {!product.Description && !product.SEO?.metaDescription && (
           <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-0)">
-            No description yet.
+            Description coming soon.
           </Paper>
         )}
 
         <PublicLinkActions
           path={`/${storeSlug}/products/${product.slug || product.documentId || itemId}`}
-          openLabel="Open public product"
+          openLabel="View live product"
+          isPublicEnabled={productIsPublished}
         />
 
         {product.SEO?.metaUrl && (
@@ -206,7 +208,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
               rel="noopener noreferrer"
               style={{ alignSelf: 'flex-start', fontWeight: 600 }}
             >
-              Preview on {externalHost} <IconExternalLink size={14} style={{ marginLeft: 6, verticalAlign: 'middle' }} />
+              View on {externalHost} <IconExternalLink size={14} style={{ marginLeft: 6, verticalAlign: 'middle' }} />
             </Anchor>
           </>
         )}

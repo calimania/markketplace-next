@@ -13,7 +13,7 @@ async function findStoreByStatus(slug: string, status: StoreStatus = 'all') {
       },
     },
     status,
-    populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover,Slides',
+    populate: 'Logo,SEO,SEO.socialImage,Favicon,URLS,Cover,Slides,users,users.avatar',
     paginate: { page: 1, pageSize: 1 },
     includeAuth: true,
   });

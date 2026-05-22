@@ -267,7 +267,6 @@ const ImageModal = ({
   const [shapeOpacity, setShapeOpacity] = useState(55);
   const [shapeWeight, setShapeWeight] = useState(6);
   const [imageAlt, setImageAlt] = useState(initialImageAlt);
-  const [textPromptOpen, setTextPromptOpen] = useState(false);
 
   const hasImage = Boolean(workingImage);
   const hasContent = hasImage || textLayer.value.trim();
@@ -520,17 +519,24 @@ const ImageModal = ({
       drawShapeOverlay(ctx, canvas.width, canvas.height, shapePreset, shapeColor, shapeOpacity, shapeWeight);
 
       const x = Math.round((textLayer.xPercent / 100) * canvas.width);
-      const y = Math.round((textLayer.yPercent / 100) * canvas.height);
+      const fontSize = Math.max(10, textLayer.size);
+      const lineHeight = Math.round(fontSize * 1.3);
+      const lines = textLayer.value.split('\n');
+      const totalHeight = lines.length * lineHeight;
+      let y = Math.round((textLayer.yPercent / 100) * canvas.height) - Math.round(totalHeight / 2) + Math.round(lineHeight / 2);
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${Math.max(10, textLayer.size)}px ${textLayer.fontFamily}`;
+      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${fontSize}px ${textLayer.fontFamily}`;
       ctx.fillStyle = textLayer.color;
       ctx.shadowColor = 'rgba(0,0,0,0.55)';
       ctx.shadowBlur = 8;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 2;
-      ctx.fillText(textLayer.value.trim(), x, y);
+      for (const line of lines) {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
@@ -567,17 +573,24 @@ const ImageModal = ({
 
     if (textLayer.value.trim()) {
       const x = Math.round((textLayer.xPercent / 100) * nextWidth);
-      const y = Math.round((textLayer.yPercent / 100) * nextHeight);
+      const fontSize = Math.max(10, Math.round(textLayer.size * ratio));
+      const lineHeight = Math.round(fontSize * 1.3);
+      const lines = textLayer.value.split('\n');
+      const totalHeight = lines.length * lineHeight;
+      let y = Math.round((textLayer.yPercent / 100) * nextHeight) - Math.round(totalHeight / 2) + Math.round(lineHeight / 2);
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${Math.max(10, Math.round(textLayer.size * ratio))}px ${textLayer.fontFamily}`;
+      ctx.font = `${getFontWeight(textLayer.fontFamily)} ${fontSize}px ${textLayer.fontFamily}`;
       ctx.fillStyle = textLayer.color;
       ctx.shadowColor = 'rgba(0,0,0,0.55)';
       ctx.shadowBlur = 8;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 2;
-      ctx.fillText(textLayer.value.trim(), x, y);
+      for (const line of lines) {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
@@ -668,7 +681,6 @@ const ImageModal = ({
     setShapeOpacity(55);
     setShapeWeight(6);
     setImageAlt(initialImageAlt || '');
-    setTextPromptOpen(false);
     setBackgroundColor('#f5f5f5');
 
     if (initialImageUrl) {
@@ -784,13 +796,38 @@ const ImageModal = ({
           </Center>
         </Paper>
 
+        <Group gap="xs" align="center">
+          <FileButton
+            onChange={(file) => {
+              if (file) {
+                setTab('source');
+                void loadImageFromFile(file);
+              }
+            }}
+            accept={uploadAccept}
+          >
+            {(props) => (
+              <Button
+                size="xs"
+                variant="filled"
+                color="pink"
+                leftSection={<IconUpload size={14} />}
+                {...props}
+              >
+                Upload from Device
+              </Button>
+            )}
+          </FileButton>
+          <Text size="xs" c="dimmed">or use the tabs below to search, add text, or design</Text>
+        </Group>
+
         <SegmentedControl
           value={tab}
           onChange={(value) => setTab(value as EditorTab)}
           data={[
             { value: 'text', label: <Group gap={4} wrap="nowrap"><IconTypography size={16} /><span>Text</span></Group> },
             { value: 'design', label: <Group gap={4} wrap="nowrap"><IconShape size={16} /><span>Design</span></Group> },
-            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload</span></Group> },
+            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload / Search</span></Group> },
           ]}
           fullWidth
           size="sm"
@@ -802,36 +839,17 @@ const ImageModal = ({
               <Stack gap="sm">
                 <Text size="sm" fw={600}>Add Text</Text>
                 <Text size="xs" c="dimmed">Start typing to create text. A background will be generated automatically.</Text>
-                {isMobile ? (
-                  <Paper
-                    withBorder
-                    p="md"
-                    radius="md"
-                    onClick={() => setTextPromptOpen(true)}
-                    style={{ cursor: 'pointer', background: 'rgba(250,250,250,0.8)' }}
-                  >
-                    <Group justify="space-between" align="flex-start" wrap="nowrap">
-                      <Box style={{ flex: 1 }}>
-                        <Text size="sm" fw={600} lineClamp={2}>
-                          {textLayer.value.trim() || 'Tap to add text'}
-                        </Text>
-                      </Box>
-                      <Button size="sm" variant="light" onClick={() => setTextPromptOpen(true)}>
-                        Edit
-                      </Button>
-                    </Group>
-                  </Paper>
-                ) : (
-                  <TextInput
-                    placeholder="Type something…"
-                    value={textLayer.value}
-                    onChange={(event) => {
-                      const value = event.currentTarget.value;
-                      setTextLayer((current) => ({ ...current, value }));
-                    }}
-                    size="md"
-                  />
-                )}
+                <Textarea
+                  placeholder="Type something…"
+                  value={textLayer.value}
+                  onChange={(event) => {
+                    const value = event.currentTarget.value;
+                    setTextLayer((current) => ({ ...current, value }));
+                  }}
+                  minRows={2}
+                  autosize
+                  size="md"
+                />
               </Stack>
 
               {textLayer.value.trim() && (
@@ -893,6 +911,34 @@ const ImageModal = ({
                       max={120}
                       value={textLayer.size}
                       onChange={(value) => setTextLayer((current) => ({ ...current, size: value }))}
+                    />
+                  </Stack>
+
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="sm" fw={600}>Horizontal position</Text>
+                      <Text size="xs" c="dimmed">{textLayer.xPercent}%</Text>
+                    </Group>
+                    <Slider
+                      label={null}
+                      min={5}
+                      max={95}
+                      value={textLayer.xPercent}
+                      onChange={(value) => setTextLayer((current) => ({ ...current, xPercent: value }))}
+                    />
+                  </Stack>
+
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text size="sm" fw={600}>Vertical position</Text>
+                      <Text size="xs" c="dimmed">{textLayer.yPercent}%</Text>
+                    </Group>
+                    <Slider
+                      label={null}
+                      min={5}
+                      max={95}
+                      value={textLayer.yPercent}
+                      onChange={(value) => setTextLayer((current) => ({ ...current, yPercent: value }))}
                     />
                   </Stack>
                 </>
@@ -1036,7 +1082,29 @@ const ImageModal = ({
 
           {tab === 'source' && (
             <Stack gap="sm">
-              <Group align="end" gap="xs" wrap="nowrap">
+              <Stack gap="xs">
+                <Group align="end" gap="xs" wrap="nowrap">
+                  <TextInput
+                    style={{ flex: 1 }}
+                    placeholder="Search or paste URL…"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    leftSection={/^https?:\/\//i.test(searchQuery.trim()) ? <IconLink size={14} /> : <IconSparkles size={14} />}
+                    error={urlError}
+                    size="sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="filled"
+                    color="pink"
+                    onClick={() => void handleSearchOrUrl()}
+                    loading={libraryLoading || urlLoading}
+                    style={{ flexShrink: 0 }}
+                  >
+                    Search
+                  </Button>
+                </Group>
                 <FileButton
                   ref={fileInputRef}
                   onChange={(file) => {
@@ -1049,38 +1117,18 @@ const ImageModal = ({
                   {(props) => (
                     <Button
                       size="sm"
-                      variant="filled"
-                      color="pink"
+                      variant="light"
+                      color="gray"
                       leftSection={<IconUpload size={16} />}
-                      style={{ flexShrink: 0 }}
+                      fullWidth
                       title="Click to select an image from your device"
                       {...props}
                     >
-                      Upload
+                      Upload from Device
                     </Button>
                   )}
                 </FileButton>
-                <TextInput
-                  style={{ flex: 1 }}
-                  placeholder="Search or paste URL…"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  leftSection={/^https?:\/\//i.test(searchQuery.trim()) ? <IconLink size={14} /> : <IconSparkles size={14} />}
-                  error={urlError}
-                  size="sm"
-                />
-                <Button
-                  size="sm"
-                  variant="filled"
-                  color="pink"
-                  onClick={() => void handleSearchOrUrl()}
-                  loading={libraryLoading || urlLoading}
-                  style={{ flexShrink: 0 }}
-                >
-                  Search
-                </Button>
-              </Group>
+              </Stack>
 
               <Text size="xs" c="dimmed" style={{ marginBottom: 8 }}>💡 Click an image to load, or upload/search above</Text>
 
@@ -1169,109 +1217,6 @@ const ImageModal = ({
             </Stack>
           )}
 
-          {tab === 'design' && (
-            <Stack gap="md">
-              {!hasImage && !textLayer.value.trim() && (
-                <Paper p="md" radius="md" style={{ background: 'rgba(250,250,250,0.8)', borderStyle: 'dashed', border: '1px dashed rgba(15,23,42,0.3)' }}>
-                  <Text size="sm" c="dimmed">Add text or an image to add design elements.</Text>
-                </Paper>
-              )}
-
-              <Stack gap="sm">
-                <Text size="sm" fw={600}>Shape</Text>
-                <SegmentedControl
-                  value={shapePreset}
-                  onChange={(value) => setShapePreset(value as ShapePreset)}
-                  data={[
-                    { label: 'None', value: 'none' },
-                    { label: 'Hex', value: 'hex-outline' },
-                    { label: 'Bands', value: 'side-bands' },
-                    { label: 'Corners', value: 'corner-frame' },
-                    { label: 'Badge', value: 'circle-badge' },
-                  ]}
-                  fullWidth
-                  size="sm"
-                />
-              </Stack>
-
-              <Stack gap="sm">
-                <Text size="sm" fw={600}>Style presets</Text>
-                <Group gap="xs" wrap="wrap">
-                  {SHAPE_STYLE_PRESETS.map((preset) => {
-                    const active = shapeColor === preset.color && shapeOpacity === preset.opacity && shapeWeight === preset.weight;
-                    return (
-                      <Button
-                        key={preset.label}
-                        size="sm"
-                        variant={active ? 'filled' : 'light'}
-                        color={active ? 'dark' : 'gray'}
-                        onClick={() => {
-                          setShapeColor(preset.color);
-                          setShapeOpacity(preset.opacity);
-                          setShapeWeight(preset.weight);
-                        }}
-                      >
-                        {preset.label}
-                      </Button>
-                    );
-                  })}
-                </Group>
-              </Stack>
-
-              <Stack gap="sm">
-                <Text size="sm" fw={600}>Color</Text>
-                <Group gap="xs">
-                  {SHAPE_COLOR_PRESETS.map((color) => {
-                    const active = shapeColor.toLowerCase() === color.toLowerCase();
-                    return (
-                      <Box
-                        key={color}
-                        onClick={() => setShapeColor(color)}
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 999,
-                          background: color,
-                          border: active ? '2px solid #111827' : '1px solid rgba(15,23,42,0.16)',
-                          boxShadow: active ? '0 0 0 2px rgba(228,0,124,0.18)' : 'none',
-                          cursor: 'pointer',
-                          transition: 'transform 100ms ease',
-                        }}
-                      />
-                    );
-                  })}
-                </Group>
-              </Stack>
-
-              <Stack gap="sm">
-                <Group justify="space-between" align="center">
-                  <Text size="sm" fw={600}>Opacity</Text>
-                  <Text size="xs" c="dimmed">{shapeOpacity}%</Text>
-                </Group>
-                <Slider
-                  label={null}
-                  min={10}
-                  max={100}
-                  value={shapeOpacity}
-                  onChange={(value) => setShapeOpacity(value)}
-                />
-              </Stack>
-
-              <Stack gap="sm">
-                <Group justify="space-between" align="center">
-                  <Text size="sm" fw={600}>Weight</Text>
-                  <Text size="xs" c="dimmed">{shapeWeight}px</Text>
-                </Group>
-                <Slider
-                  label={null}
-                  min={2}
-                  max={24}
-                  value={shapeWeight}
-                  onChange={(value) => setShapeWeight(value)}
-                />
-              </Stack>
-            </Stack>
-          )}
 
         </Paper>
 
@@ -1307,34 +1252,7 @@ const ImageModal = ({
           </Group>
         </Stack>
 
-        <Modal
-          opened={textPromptOpen}
-          onClose={() => setTextPromptOpen(false)}
-          title="Edit Text Overlay"
-          centered
-          fullScreen={isMobile}
-          size="lg"
-        >
-          <Stack gap="sm">
-            <Textarea
-              label="Text"
-              placeholder="Type text to place on image"
-              minRows={isMobile ? 6 : 4}
-              autosize
-              value={textLayer.value}
-              onChange={(event) => {
-                const value = event.currentTarget.value;
-                setTextLayer((current) => ({ ...current, value }));
-              }}
-              data-autofocus
-            />
-            <Group justify="flex-end">
-              <Button variant="outline" color="gray" onClick={() => setTextPromptOpen(false)}>
-                Done
-              </Button>
-            </Group>
-          </Stack>
-        </Modal>
+
       </Stack>
     </Modal>
   );

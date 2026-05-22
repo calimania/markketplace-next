@@ -40,7 +40,7 @@ export default async function TiendaEventsPage({ params }: TiendaEventsPageProps
             leftSection={<IconListSearch size={16} />}
             target="_blank"
           >
-            Open in Markket
+            View live events
           </Button>
           <Button component="a" href={`/tienda/${storeSlug}/events/new`} leftSection={<IconPlus size={16} />}>
             New Event

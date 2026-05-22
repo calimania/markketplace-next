@@ -86,5 +86,5 @@ export default function AlbumListClient({ storeSlug, initialAlbums }: AlbumListC
     [albums, storeSlug],
   );
 
-  return <NavTable emptyText="No albums yet." items={items} loading={loading} />;
+  return <NavTable emptyText="No albums yet. Add your first album to start your catalog." items={items} loading={loading} searchPlaceholder="Search albums by title" />;
 }

@@ -14,26 +14,27 @@ interface StorefrontCarouselProps {
   stores: Store[];
 }
 
-const formatIndex = (value: number) => value.toString().padStart(2, '0');
+const fmt = (n: number) => n.toString().padStart(2, '0');
 
-const getStoreDescription = (store?: Store) => {
-  return store?.SEO?.metaDescription
-    || store?.SEO?.metaTitle
-    || 'Independent storefronts with a distinct point of view, curated across the Markketplace network.';
-};
+const getDesc = (store?: Store) =>
+  store?.SEO?.metaDescription ||
+  store?.SEO?.metaTitle ||
+  'Independent storefront on the Markketplace network.';
 
 export function StorefrontCarousel({ stores }: StorefrontCarouselProps) {
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const thumbnailsRef = useRef<HTMLDivElement | null>(null);
+  const stripRef = useRef<HTMLDivElement | null>(null);
 
   if (!stores.length) return null;
 
   const featured = stores[selectedIdx];
   const progress = ((selectedIdx + 1) / stores.length) * 100;
   const coverUrl = pickImg(
+    featured?.Cover?.formats?.large?.url,
     featured?.Cover?.formats?.medium?.url,
     featured?.Cover?.formats?.small?.url,
     featured?.Cover?.url,
+    featured?.SEO?.socialImage?.formats?.medium?.url,
     featured?.SEO?.socialImage?.url,
   );
   const logoUrl = pickImg(
@@ -43,151 +44,35 @@ export function StorefrontCarousel({ stores }: StorefrontCarouselProps) {
   );
   const href = featured?.slug ? `/${featured.slug}` : '/stores';
 
-  const scrollThumbnails = (direction: 'left' | 'right') => {
-    const container = thumbnailsRef.current;
-    if (!container) return;
-
-    const amount = Math.max(container.clientWidth * 0.72, 220);
-    container.scrollBy({
-      left: direction === 'left' ? -amount : amount,
-      behavior: 'smooth',
-    });
+  const scrollStrip = (dir: 'left' | 'right') => {
+    const el = stripRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -240 : 240, behavior: 'smooth' });
   };
 
   return (
     <Box
       style={{
-        borderRadius: 28,
+        borderRadius: 24,
         overflow: 'hidden',
-        background: '#ffffff',
-        boxShadow: '0 22px 60px rgba(24, 24, 24, 0.12)',
+        background: '#fff',
         border: `1px solid ${markketColors.neutral.lightGray}`,
+        boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
       }}
     >
-      <Link href={href} style={{ textDecoration: 'none' }}>
+      {/* ── Featured panel ── */}
+      <Link href={href} style={{ textDecoration: 'none', display: 'block' }}>
         <Box
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.05fr) minmax(0, 1.45fr)',
-            background: markketColors.neutral.offWhite,
+            gridTemplateColumns: '1fr',
           }}
-          className="max-md:grid-cols-1"
         >
+          {/* Cover image */}
           <Box
             style={{
               position: 'relative',
-              padding: 'clamp(1.4rem, 3vw, 2.4rem)',
-              background: [
-                `radial-gradient(circle at top left, ${markketColors.sections.shop.light} 0%, transparent 42%)`,
-                `linear-gradient(180deg, ${markketColors.neutral.offWhite} 0%, #ffffff 100%)`,
-              ].join(', '),
-              minHeight: 'clamp(280px, 34vw, 460px)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              gap: rem(20),
-            }}
-          >
-            <Stack gap={18}>
-              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
-                <Stack gap={6}>
-                  <Text
-                    size="xs"
-                    style={{
-                      fontFamily: 'monospace',
-                      letterSpacing: '0.12em',
-                      textTransform: 'uppercase',
-                      color: markketColors.sections.shop.main,
-                    }}
-                  >
-                    Store {formatIndex(selectedIdx + 1)}
-                  </Text>
-                </Stack>
-
-                <Box
-                  style={{
-                    minWidth: rem(72),
-                    padding: '10px 12px',
-                    borderRadius: 16,
-                    background: '#ffffff',
-                    border: `1px solid ${markketColors.neutral.lightGray}`,
-                    textAlign: 'right',
-                  }}
-                >
-                  <Text fw={700} style={{ color: markketColors.neutral.charcoal, lineHeight: 1 }}>
-                    {formatIndex(selectedIdx + 1)}
-                  </Text>
-                  <Text size="xs" style={{ color: markketColors.neutral.mediumGray }}>
-                    / {formatIndex(stores.length)}
-                  </Text>
-                </Box>
-              </Group>
-
-              <Stack gap={10}>
-                <Text
-                  style={{
-                    fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                    lineHeight: 0.95,
-                    fontWeight: 900,
-                    letterSpacing: '-0.045em',
-                    color: markketColors.neutral.charcoal,
-                    textWrap: 'balance',
-                  }}
-                >
-                  {featured?.title || 'A store worth opening'}
-                </Text>
-
-                <Text
-                  style={{
-                    maxWidth: rem(440),
-                    color: markketColors.neutral.darkGray,
-                    lineHeight: 1.7,
-                    fontSize: '1rem',
-                  }}
-                >
-                  {getStoreDescription(featured)}
-                </Text>
-              </Stack>
-            </Stack>
-
-            <Group justify="space-between" align="flex-end" wrap="nowrap" gap="md">
-              <Stack gap={6}>
-                <Text
-                  size="xs"
-                  fw={700}
-                  style={{
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    color: markketColors.neutral.mediumGray,
-                  }}
-                >
-                  Open the store
-                </Text>
-                <Text size="sm" style={{ color: markketColors.neutral.darkGray }}>
-                  /{featured?.slug || 'stores'}
-                </Text>
-              </Stack>
-
-              <Group gap="xs" wrap="nowrap">
-                <Text
-                  size="sm"
-                  fw={700}
-                  style={{
-                    color: markketColors.sections.shop.main,
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  Enter store
-                </Text>
-                <IconArrowRight size={18} color={markketColors.sections.shop.main} />
-              </Group>
-            </Group>
-          </Box>
-
-          <Box
-            style={{
-              position: 'relative',
-              minHeight: 'clamp(300px, 34vw, 460px)',
+              height: 'clamp(220px, 30vw, 420px)',
               background: coverUrl
                 ? `url(${coverUrl}) center/cover no-repeat`
                 : `linear-gradient(135deg, ${markketColors.sections.shop.main} 0%, ${markketColors.rosa.main} 100%)`,
@@ -197,228 +82,220 @@ export function StorefrontCarousel({ stores }: StorefrontCarouselProps) {
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: [
-                  'linear-gradient(180deg, rgba(21,21,21,0.08) 0%, rgba(21,21,21,0.0) 24%)',
-                  'linear-gradient(180deg, rgba(21,21,21,0.04) 0%, rgba(21,21,21,0.52) 100%)',
-                ].join(', '),
+                background: 'linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.48) 100%)',
               }}
             />
-
-            <Box
+            {logoUrl && (
+              <Box
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  left: 16,
+                  width: 52,
+                  height: 52,
+                  borderRadius: 14,
+                  overflow: 'hidden',
+                  background: 'rgba(255,255,255,0.96)',
+                  padding: 6,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.16)',
+                }}
+              >
+                <img
+                  src={logoUrl}
+                  alt={`${featured?.title} logo`}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
+                />
+              </Box>
+            )}
+            <Text
+              size="xs"
+              fw={600}
               style={{
                 position: 'absolute',
-                inset: 0,
-                padding: 'clamp(1.2rem, 3vw, 2rem)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
+                top: 16,
+                right: 16,
+                color: 'rgba(255,255,255,0.9)',
+                fontFamily: 'monospace',
+                letterSpacing: '0.1em',
+                background: 'rgba(0,0,0,0.28)',
+                borderRadius: 8,
+                padding: '4px 10px',
               }}
             >
-              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
-                {logoUrl && (
-                  <Box
-                    style={{
-                      width: rem(62),
-                      height: rem(62),
-                      borderRadius: 18,
-                      overflow: 'hidden',
-                      background: 'rgba(255,255,255,0.94)',
-                      padding: 8,
-                      boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
-                    }}
-                  >
-                    <img
-                      src={logoUrl}
-                      alt={featured?.title || 'Store logo'}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 10 }}
-                    />
-                  </Box>
-                )}
-              </Group>
+              {fmt(selectedIdx + 1)} / {fmt(stores.length)}
+            </Text>
+          </Box>
 
-              <Group justify="space-between" align="flex-end" wrap="nowrap" gap="md">
-                <Text
-                  size="xs"
-                  style={{
-                    color: 'rgba(255,255,255,0.72)',
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    writingMode: 'vertical-rl',
-                    transform: 'rotate(180deg)',
-                  }}
-                  className="max-sm:hidden"
-                >
-                  Open store
-                </Text>
-              </Group>
-            </Box>
+          {/* Text panel */}
+          <Box
+            style={{
+              padding: 'clamp(1.2rem, 3vw, 2rem)',
+              background: [
+                `radial-gradient(circle at top left, ${markketColors.sections.shop.light} 0%, transparent 50%)`,
+                `linear-gradient(180deg, ${markketColors.neutral.offWhite} 0%, #fff 100%)`,
+              ].join(', '),
+              display: 'flex',
+              flexDirection: 'column',
+              gap: rem(16),
+            }}
+          >
+            <Stack gap={8}>
+              <Text
+                style={{
+                  fontSize: 'clamp(1.4rem, 4vw, 2.4rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.1,
+                  color: markketColors.neutral.charcoal,
+                }}
+              >
+                {featured?.title || 'A store worth opening'}
+              </Text>
+
+              <Text
+                style={{
+                  color: markketColors.neutral.darkGray,
+                  lineHeight: 1.6,
+                  fontSize: '0.95rem',
+                }}
+                lineClamp={2}
+              >
+                {getDesc(featured)}
+              </Text>
+            </Stack>
+
+            <Group gap={6} wrap="nowrap" align="center">
+              <Text
+                size="sm"
+                fw={700}
+                style={{ color: markketColors.sections.shop.main }}
+              >
+                Visit /{featured?.slug || 'stores'}
+              </Text>
+              <IconArrowRight size={15} color={markketColors.sections.shop.main} />
+            </Group>
           </Box>
         </Box>
       </Link>
 
+      {/* ── Thumbnail strip ── */}
       {stores.length > 1 && (
-        <Stack gap={14} p="lg" style={{ background: '#ffffff' }}>
-          <Group justify="space-between" align="center" wrap="nowrap" gap="md">
-            <Stack gap={2}>
-              <Text
-                size="xs"
-                fw={700}
-                style={{
-                  color: markketColors.neutral.mediumGray,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Browse stores
-              </Text>
-              <Text size="sm" style={{ color: markketColors.neutral.darkGray }}>
-                Scroll the strip and swap the featured panel.
-              </Text>
-            </Stack>
-
-            <Group gap="xs" wrap="nowrap">
-              <ActionIcon
-                variant="default"
-                radius="xl"
-                size="lg"
-                onClick={() => scrollThumbnails('left')}
-                aria-label="Scroll stores left"
-                style={{
-                  background: '#ffffff',
-                  borderColor: markketColors.neutral.lightGray,
-                  color: markketColors.neutral.charcoal,
-                }}
-              >
-                <IconChevronLeft size={18} />
-              </ActionIcon>
-              <ActionIcon
-                variant="default"
-                radius="xl"
-                size="lg"
-                onClick={() => scrollThumbnails('right')}
-                aria-label="Scroll stores right"
-                style={{
-                  background: '#ffffff',
-                  borderColor: markketColors.neutral.lightGray,
-                  color: markketColors.neutral.charcoal,
-                }}
-              >
-                <IconChevronRight size={18} />
-              </ActionIcon>
-            </Group>
-          </Group>
-
-          <Box
-            style={{
-              height: 6,
-              borderRadius: 999,
-              overflow: 'hidden',
-              background: markketColors.neutral.lightGray,
-            }}
-          >
+        <Box style={{ background: '#fff', borderTop: `1px solid ${markketColors.neutral.lightGray}` }}>
+          {/* Progress bar */}
+          <Box style={{ height: 3, background: markketColors.neutral.lightGray }}>
             <Box
               style={{
                 height: '100%',
                 width: `${progress}%`,
-                borderRadius: 999,
                 background: `linear-gradient(90deg, ${markketColors.sections.shop.main} 0%, ${markketColors.rosa.main} 100%)`,
-                transition: 'width 0.22s ease',
+                transition: 'width 0.25s ease',
               }}
             />
           </Box>
 
-          <Box
-            ref={thumbnailsRef}
-            style={{
-              display: 'grid',
-              gridAutoFlow: 'column',
-              gridAutoColumns: 'minmax(180px, 220px)',
-              gap: rem(14),
-              overflowX: 'auto',
-              paddingBottom: rem(6),
-              scrollbarWidth: 'thin',
-            }}
-          >
-            {stores.map((store, idx) => {
-              const isActive = idx === selectedIdx;
-              const thumbUrl = pickImg(
-                store?.Cover?.formats?.thumbnail?.url,
-                store?.Cover?.formats?.small?.url,
-                store?.Cover?.url,
-                store?.Logo?.formats?.thumbnail?.url,
-                store?.Logo?.formats?.small?.url,
-                store?.Logo?.url,
-                store?.SEO?.socialImage?.formats?.thumbnail?.url,
-                store?.SEO?.socialImage?.url,
-              );
-
-              return (
-                <Box
-                  key={store.documentId || store.id || store.slug || idx}
-                  component="button"
-                  type="button"
-                  onClick={() => setSelectedIdx(idx)}
-                  style={{
-                    appearance: 'none',
-                    border: `1px solid ${isActive ? `${markketColors.rosa.main}55` : markketColors.neutral.lightGray}`,
-                    background: isActive ? markketColors.neutral.offWhite : '#ffffff',
-                    borderRadius: 22,
-                    padding: 0,
-                    cursor: 'pointer',
-                    overflow: 'hidden',
-                    textAlign: 'left',
-                    boxShadow: isActive
-                      ? `0 18px 36px ${markketColors.rosa.main}22`
-                      : '0 8px 20px rgba(0,0,0,0.06)',
-                    transition: 'border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
-                    transform: isActive ? 'translateY(-2px)' : 'none',
-                  }}
+          <Box px="md" pt="sm" pb="md">
+            <Group justify="space-between" align="center" mb="sm" wrap="nowrap">
+              <Text
+                size="xs"
+                fw={600}
+                style={{
+                  color: markketColors.neutral.mediumGray,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {fmt(selectedIdx + 1)} of {stores.length} stores
+              </Text>
+              <Group gap={6} wrap="nowrap">
+                <ActionIcon
+                  variant="default"
+                  radius="xl"
+                  size="md"
+                  onClick={() => scrollStrip('left')}
+                  aria-label="Previous store"
+                  style={{ borderColor: markketColors.neutral.lightGray }}
                 >
+                  <IconChevronLeft size={15} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="default"
+                  radius="xl"
+                  size="md"
+                  onClick={() => scrollStrip('right')}
+                  aria-label="Next store"
+                  style={{ borderColor: markketColors.neutral.lightGray }}
+                >
+                  <IconChevronRight size={15} />
+                </ActionIcon>
+              </Group>
+            </Group>
+
+            <Box
+              ref={stripRef}
+              style={{
+                display: 'grid',
+                gridAutoFlow: 'column',
+                gridAutoColumns: 'minmax(140px, 180px)',
+                gap: rem(10),
+                overflowX: 'auto',
+                paddingBottom: rem(4),
+                scrollbarWidth: 'none',
+              }}
+            >
+              {stores.map((store, idx) => {
+                const isActive = idx === selectedIdx;
+                const thumbUrl = pickImg(
+                  store?.Cover?.formats?.thumbnail?.url,
+                  store?.Cover?.formats?.small?.url,
+                  store?.Cover?.url,
+                  store?.Logo?.formats?.thumbnail?.url,
+                  store?.Logo?.url,
+                );
+
+                return (
                   <Box
+                    key={store.documentId || store.id || store.slug || idx}
+                    component="button"
+                    type="button"
+                    onClick={() => setSelectedIdx(idx)}
                     style={{
-                      height: rem(104),
-                      background: thumbUrl
-                        ? `url(${thumbUrl}) center/cover no-repeat`
-                        : `linear-gradient(135deg, ${markketColors.sections.shop.main} 0%, ${markketColors.rosa.main} 100%)`,
-                      position: 'relative',
+                      appearance: 'none',
+                      border: `2px solid ${isActive ? markketColors.sections.shop.main : markketColors.neutral.lightGray}`,
+                      background: '#fff',
+                      borderRadius: 14,
+                      padding: 0,
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      textAlign: 'left',
+                      transition: 'border-color 0.18s, transform 0.18s, box-shadow 0.18s',
+                      transform: isActive ? 'translateY(-2px)' : 'none',
+                      boxShadow: isActive
+                        ? `0 6px 20px ${markketColors.sections.shop.main}28`
+                        : '0 2px 8px rgba(0,0,0,0.05)',
                     }}
                   >
                     <Box
                       style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'linear-gradient(180deg, rgba(21,21,21,0.02) 0%, rgba(21,21,21,0.4) 100%)',
+                        height: rem(80),
+                        background: thumbUrl
+                          ? `url(${thumbUrl}) center/cover no-repeat`
+                          : `linear-gradient(135deg, ${markketColors.sections.shop.main} 0%, ${markketColors.rosa.main} 100%)`,
                       }}
                     />
-                    <Text
-                      size="xs"
-                      fw={700}
-                      style={{
-                        position: 'absolute',
-                        top: 12,
-                        left: 12,
-                        color: 'white',
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {formatIndex(idx + 1)}
-                    </Text>
+                    <Box p="xs">
+                      <Text size="xs" fw={700} lineClamp={1} style={{ color: markketColors.neutral.charcoal }}>
+                        {store.title}
+                      </Text>
+                      <Text size="xs" lineClamp={1} style={{ color: markketColors.neutral.mediumGray, marginTop: 2 }}>
+                        /{store.slug}
+                      </Text>
+                    </Box>
                   </Box>
-
-                  <Stack gap={6} p="sm">
-                    <Text size="sm" fw={700} lineClamp={1} style={{ color: markketColors.neutral.charcoal }}>
-                      {store.title}
-                    </Text>
-                    <Text size="xs" lineClamp={2} style={{ color: markketColors.neutral.darkGray, minHeight: rem(30) }}>
-                      {getStoreDescription(store)}
-                    </Text>
-                  </Stack>
-                </Box>
-              );
-            })}
+                );
+              })}
+            </Box>
           </Box>
-        </Stack>
+        </Box>
       )}
     </Box>
   );

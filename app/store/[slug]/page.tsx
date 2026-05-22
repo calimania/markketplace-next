@@ -13,7 +13,6 @@ import StoreSlidesGallery from '@/app/components/ui/store.slides.gallery';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { markketplace } from '@/markket/config';
 import { Store } from "@/markket/store.d";
-import { StoreVisibilityResponse } from "@/markket/store.visibility.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
 import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
@@ -143,15 +142,18 @@ export default async function StorePage({
     notFound();
   }
 
+  const visibilityRef = String(store.documentId || store.slug || slug);
+
   const [visibilityResponse, productsResponse, postsResponse, eventsResponse, pagesResponse] = await Promise.all([
-    strapiClient.getStoreVisibility(store.documentId),
+    strapiClient.getStoreVisibility(visibilityRef),
     strapiClient.getProducts({ page: 1, pageSize: 6 }, { filter: '', sort: 'updatedAt:desc' }, slug),
     strapiClient.getPosts({ page: 1, pageSize: 6 }, { sort: 'updatedAt:desc' }, slug),
     strapiClient.getEvents(slug),
     strapiClient.getPages(slug),
   ]);
 
-  const visibility = visibilityResponse?.data;
+  const visibility = visibilityResponse;
+  const visibilityCounts = visibility?.content_summary;
   const showShop = visibility ? visibility.show_shop : true;
   const showBlog = visibility ? visibility.show_blog : true;
   const showEvents = visibility ? visibility.show_events : true;
@@ -186,7 +188,6 @@ export default async function StorePage({
     : [];
 
   const descriptionText = richTextToPlainText(store.Description);
-  const storeSubtitle = homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || compact(descriptionText, 220);
   const hasStoreDescription = Boolean(descriptionText?.trim());
   const shouldRenderRichDescription = !homePage?.Title && hasStoreDescription;
   const homePageImage = imageOrFallback(
@@ -277,7 +278,7 @@ export default async function StorePage({
       show: showShop,
       color: markketColors.sections.shop.main,
       bg: markketColors.sections.shop.light,
-      countLabel: `${publishedProducts.length} products`,
+      countLabel: `${visibilityCounts?.products_count ?? publishedProducts.length} products`,
       headline: featuredProduct?.Name || 'Featured products',
       description: compactRich(featuredProduct?.Description, 96) || 'Browse your latest drops and essentials in one place.',
       hasContent: publishedProducts.length > 0,
@@ -294,7 +295,7 @@ export default async function StorePage({
       show: showBlog,
       color: markketColors.sections.blog.main,
       bg: markketColors.sections.blog.light,
-      countLabel: `${publishedPosts.length} posts`,
+      countLabel: `${visibilityCounts?.articles_count ?? publishedPosts.length} posts`,
       headline: featuredPost?.Title || 'Latest stories',
       description: compact(featuredPost?.SEO?.metaDescription || 'Read stories, updates, and ideas from this store.'),
       hasContent: publishedPosts.length > 0,
@@ -312,7 +313,7 @@ export default async function StorePage({
       show: showEvents,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
-      countLabel: `${publishedEvents.length} events`,
+      countLabel: `${visibilityCounts?.events_count ?? publishedEvents.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
       description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
       hasContent: publishedEvents.length > 0,
@@ -330,7 +331,7 @@ export default async function StorePage({
       show: showAbout,
       color: markketColors.sections.about.main,
       bg: markketColors.sections.about.light,
-      countLabel: `${aboutPages.length} pages`,
+      countLabel: `${visibilityCounts?.pages_count ?? aboutPages.length} pages`,
       headline: featuredAbout?.Title || 'About this store',
       description: compact(featuredAbout?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Learn the story and explore the world behind this store.'),
       hasContent: aboutPages.length > 0 || hasStoreDescription,
@@ -358,7 +359,7 @@ export default async function StorePage({
     {
       url: `/${slug}/blog`,
       title: 'Blog',
-      description: `${publishedPosts.length} articles`,
+      description: `${visibilityCounts?.articles_count ?? publishedPosts.length} articles`,
       show: showBlog,
       color: markketColors.sections.blog.main,
       bgColor: markketColors.sections.blog.light,
@@ -368,7 +369,7 @@ export default async function StorePage({
       url: `/${slug}/events`,
       title: 'Events',
       description: (() => {
-        const upcoming = publishedEvents.filter((event) => new Date(event.startDate).getTime() >= Date.now()).length;
+        const upcoming = visibilityCounts?.upcoming_events_count ?? publishedEvents.filter((event) => new Date(event.startDate).getTime() >= Date.now()).length;
         return upcoming > 0 ? `${upcoming} upcoming` : `${publishedEvents.length} events`;
       })(),
       show: showEvents,
@@ -379,7 +380,7 @@ export default async function StorePage({
     {
       url: `/${slug}/about`,
       title: 'About',
-      description: `${aboutPages.length} pages`,
+      description: `${visibilityCounts?.pages_count ?? aboutPages.length} pages`,
       show: showAbout,
       color: markketColors.sections.about.main,
       bgColor: markketColors.sections.about.light,
@@ -522,7 +523,7 @@ export default async function StorePage({
                     c="dimmed"
                     style={{ fontSize: 'clamp(1rem, 2.2vw, 1.16rem)' }}
                   >
-                    {homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || descriptionText || 'Discover the latest collection, stories, and upcoming moments from this store.'}
+                    {homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || '....φ(︶▽︶)φ....'}
                   </Text>
                 </Stack>
 
@@ -588,7 +589,7 @@ export default async function StorePage({
 
         <Container size="lg" pb="xl">
           <Stack gap="xl">
-            {(!hasHomePageBlocks && (hasHomePageStory || previewCards.length > 0 || storeSubtitle)) && (
+            {(!hasHomePageBlocks && (hasHomePageStory || previewCards.length > 0 || homePage?.Title)) && (
               <Box
                 style={{
                   borderRadius: 22,
@@ -600,14 +601,10 @@ export default async function StorePage({
                 <Stack gap="md">
                   <Group justify="space-between" align="flex-start" wrap="wrap">
                     <Stack gap={4} maw={560}>
-                      <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.12em' }}>
-                        {homePage?.Title ? 'Home page' : 'From the store'}
-                      </Text>
                       <Text fw={700} size="xl" style={{ letterSpacing: '-0.03em' }}>
-                        {homePage?.Title || storeSubtitle || 'A storefront shaped around the creator behind it.'}
+                        {homePage?.Title || '(ノ°∀°)ノ⌒･*:.｡. .｡.:*･゜ﾟ･*☆'}
                       </Text>
                     </Stack>
-
                     {homePageImage ? (
                       <Box
                         style={{

@@ -102,9 +102,14 @@ export default function TiendaEventEditPageClient({ storeSlug, itemId }: TiendaE
           sourceUrl: event.SEO?.metaUrl,
           seoSocialImageId: event.SEO?.socialImage?.id,
           seoSocialImageDocumentId: event.SEO?.socialImage?.documentId,
+          thumbnailDocumentId: event.Thumbnail?.documentId,
+          tagIds: event.Tag?.map((t) => t.id).filter(Boolean) ?? [],
+          slideDocumentIds: event.Slides?.map((s) => s.documentId).filter(Boolean) ?? [],
+          initialSEO: event.SEO as Record<string, unknown> | undefined,
           startDate: event.startDate,
           endDate: event.endDate,
           timezone: event.timezone,
+          locations: event.locations,
         }}
       />
     </TiendaDetailShell>
