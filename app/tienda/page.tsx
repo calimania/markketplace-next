@@ -67,7 +67,7 @@ export default function MeStoresPage() {
     if (isLoading) return;
 
     if (!confirmed()) {
-      router.replace('/auth/login?next=/tienda');
+      router.replace('/auth/magic?next=/tienda');
       return;
     }
 

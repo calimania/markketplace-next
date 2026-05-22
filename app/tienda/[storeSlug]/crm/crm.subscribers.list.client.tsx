@@ -121,8 +121,9 @@ export default function CrmSubscribersListClient({ storeRef }: { storeRef: strin
   return (
     <Stack gap="sm">
       <Group justify="space-between" wrap="nowrap">
-        <Group gap="xs">
-          <Text fw={600} size="sm">Subscribers <Badge size="xs" variant="light" color="pink" ml={4}>{rows.length}</Badge></Text>
+        <Group gap={6} align="center">
+          <Text fw={600} size="sm">Subscribers</Text>
+          <Badge size="xs" variant="light" color="pink">{rows.length}</Badge>
           {activeCount > 0 && <Badge size="xs" variant="light" color="green">{activeCount} active</Badge>}
         </Group>
         <TextInput

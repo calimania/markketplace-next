@@ -2,12 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, CloseButton, Group, Stack, Text, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
-import { readTiendaAuthToken } from '@/markket/helpers.tienda';
+import {
+  isValidOptionalHttpUrl,
+  isValidTiendaSlug,
+  readTiendaAuthToken,
+  slugifyTiendaValue,
+} from '@/markket/helpers.tienda';
 
 type ProductEditorFormProps = {
   storeSlug: string;
@@ -24,32 +30,54 @@ type ProductEditorFormProps = {
     seoSocialImageDocumentId?: string;
     thumbnailDocumentId?: string;
     tagIds?: number[];
-    slideDocumentIds?: string[];
+    slideDocumentIds?: number[];
     initialSEO?: Record<string, unknown>;
   };
 };
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
+type ProductFormValues = {
+  name: string;
+  slug: string;
+  description: string;
+  seoTitle: string;
+  seoDescription: string;
+  sourceUrl: string;
+};
 
 export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, initial }: ProductEditorFormProps) {
   const router = useRouter();
 
-  const [name, setName] = useState(initial?.name || '');
-  const [slug, setSlug] = useState(initial?.slug || '');
-  const [description, setDescription] = useState(initial?.description || '');
-  const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
-  const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
-  const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl || '');
+  const form = useForm<ProductFormValues>({
+    validateInputOnBlur: true,
+    initialValues: {
+      name: initial?.name || '',
+      slug: initial?.slug || '',
+      description: initial?.description || '',
+      seoTitle: initial?.seoTitle || '',
+      seoDescription: initial?.seoDescription || '',
+      sourceUrl: initial?.sourceUrl || '',
+    },
+    validate: {
+      name: (value) => (value.trim() ? null : 'Name is required.'),
+      slug: (value) => {
+        const normalized = slugifyTiendaValue(value);
+        if (!normalized) return 'Slug is required.';
+        if (!isValidTiendaSlug(normalized)) {
+          return 'Slug can only contain lowercase letters, numbers, and dashes.';
+        }
+        return null;
+      },
+      seoTitle: (value) => (value.trim().length > 60 ? 'SEO title should be 60 characters or less.' : null),
+      seoDescription: (value) => (value.trim().length > 160 ? 'SEO description should be 160 characters or less.' : null),
+      sourceUrl: (value) => {
+        return isValidOptionalHttpUrl(value) ? null : 'Use a valid URL starting with http:// or https://';
+      },
+    },
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
-  const savedSnapshotRef = useRef({ name, slug, description, seoTitle, seoDescription, sourceUrl });
+  const savedSnapshotRef = useRef<ProductFormValues>({ ...form.values });
   const [isDirty, setIsDirty] = useState(false);
 
   const store = useStore();
@@ -59,22 +87,31 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
   );
 
   useEffect(() => {
-    if (!slugTouched) {
-      setSlug(slugify(name));
+    if (slugTouched) return;
+    const nextSlug = slugifyTiendaValue(form.values.name);
+    if (form.values.slug !== nextSlug) {
+      form.setFieldValue('slug', nextSlug);
     }
-  }, [name, slugTouched]);
+  }, [form.values.name, form.values.slug, slugTouched]);
 
   useEffect(() => {
     const snap = savedSnapshotRef.current;
     setIsDirty(
-      name !== snap.name
-      || slug !== snap.slug
-      || description !== snap.description
-      || seoTitle !== snap.seoTitle
-      || seoDescription !== snap.seoDescription
-      || sourceUrl !== snap.sourceUrl,
+      form.values.name !== snap.name
+      || form.values.slug !== snap.slug
+      || form.values.description !== snap.description
+      || form.values.seoTitle !== snap.seoTitle
+      || form.values.seoDescription !== snap.seoDescription
+      || form.values.sourceUrl !== snap.sourceUrl,
     );
-  }, [name, slug, description, seoTitle, seoDescription, sourceUrl]);
+  }, [
+    form.values.name,
+    form.values.slug,
+    form.values.description,
+    form.values.seoTitle,
+    form.values.seoDescription,
+    form.values.sourceUrl,
+  ]);
 
   const handleSubmit = async () => {
     const token = readTiendaAuthToken();
@@ -84,29 +121,30 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       return;
     }
 
-    if (!name.trim()) {
-      notifications.show({ title: 'Name required', message: 'Add a product name before saving.', color: 'orange' });
+    const validation = form.validate();
+    if (validation.hasErrors) {
+      notifications.show({ title: 'Please review the form', message: 'Some fields need attention before saving.', color: 'orange' });
       return;
     }
 
-    const nextSlug = slugify(slug || name);
+    const nextSlug = slugifyTiendaValue(form.values.slug || form.values.name);
     if (!nextSlug) {
       notifications.show({ title: 'Slug required', message: 'A valid slug is required.', color: 'orange' });
       return;
     }
 
     const payload: Record<string, unknown> = {
-      Name: name.trim(),
+      Name: form.values.name.trim(),
       slug: nextSlug,
-      Description: description,
+      Description: form.values.description,
       // Thumbnail is managed via the Image Manager on the preview page, not here
       SEO: {
         ...(initial?.initialSEO
-          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage' && k !== 'id' && k !== 'documentId'))
           : {}),
-        metaTitle: (seoTitle || name).trim().slice(0, 60),
-        metaDescription: (seoDescription || '').trim().slice(0, 160),
-        metaUrl: sourceUrl.trim() || undefined,
+        metaTitle: (form.values.seoTitle || form.values.name).trim().slice(0, 60),
+        metaDescription: (form.values.seoDescription || '').trim().slice(0, 160),
+        metaUrl: form.values.sourceUrl.trim() || undefined,
         ...(initial?.seoSocialImageId
           ? { socialImage: { id: initial.seoSocialImageId } }
           : {}),
@@ -117,7 +155,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
       payload.Tag = initial.tagIds.map((id) => ({ id }));
     }
     if (initial?.slideDocumentIds && initial.slideDocumentIds.length > 0) {
-      payload.Slides = initial.slideDocumentIds.map((documentId) => ({ documentId }));
+      payload.Slides = initial.slideDocumentIds.map((id) => ({ id }));
     }
 
     try {
@@ -154,12 +192,15 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         responseDocumentId = verifiedProduct.documentId || responseDocumentId;
       }
 
-      savedSnapshotRef.current = { name, slug: nextSlug, description, seoTitle, seoDescription, sourceUrl };
+      savedSnapshotRef.current = {
+        ...form.values,
+        slug: nextSlug,
+      };
       setIsDirty(false);
 
       notifications.show({
         title: 'Saved',
-        message: `Product "${name}" saved successfully.`,
+        message: `Product "${form.values.name}" saved successfully.`,
         color: 'green',
         autoClose: 3000,
       });
@@ -185,34 +226,36 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
     <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Name"
-        value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
+        value={form.values.name}
+        onChange={(e) => form.setFieldValue('name', e.currentTarget.value)}
         placeholder="Product name"
         required
-        rightSection={name ? <CloseButton size="sm" onClick={() => setName('')} aria-label="Clear name" /> : null}
+        error={form.errors.name}
+        rightSection={form.values.name ? <CloseButton size="sm" onClick={() => form.setFieldValue('name', '')} aria-label="Clear name" /> : null}
       />
 
       <TextInput
         label="Slug"
-        value={slug}
+        value={form.values.slug}
         onChange={(e) => {
           setSlugTouched(true);
-          setSlug(e.currentTarget.value);
+          form.setFieldValue('slug', e.currentTarget.value);
         }}
         placeholder="product-slug"
         required
+        error={form.errors.slug}
         description={
-          slug ? (
+          form.values.slug ? (
             <span style={{ fontFamily: 'monospace' }}>
-              /{storeSlug}/products/<strong>{slug}</strong>
+              /{storeSlug}/products/<strong>{form.values.slug}</strong>
             </span>
           ) : undefined
         }
       />
 
       <ContentEditor
-        value={description}
-        onChange={(value) => setDescription(typeof value === 'string' ? value : '')}
+        value={form.values.description}
+        onChange={(value) => form.setFieldValue('description', typeof value === 'string' ? value : '')}
         label="Description"
         format="markdown"
         minHeight={320}
@@ -221,27 +264,30 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
 
       <TextInput
         label="SEO Title"
-        value={seoTitle}
-        onChange={(e) => setSeoTitle(e.currentTarget.value)}
+        value={form.values.seoTitle}
+        onChange={(e) => form.setFieldValue('seoTitle', e.currentTarget.value)}
         placeholder="SEO title (optional)"
-        rightSection={seoTitle ? <CloseButton size="sm" onClick={() => setSeoTitle('')} aria-label="Clear SEO title" /> : null}
+        error={form.errors.seoTitle}
+        rightSection={form.values.seoTitle ? <CloseButton size="sm" onClick={() => form.setFieldValue('seoTitle', '')} aria-label="Clear SEO title" /> : null}
       />
 
       <TextInput
         label="SEO Description"
-        value={seoDescription}
-        onChange={(e) => setSeoDescription(e.currentTarget.value)}
+        value={form.values.seoDescription}
+        onChange={(e) => form.setFieldValue('seoDescription', e.currentTarget.value)}
         placeholder="SEO description (optional)"
-        rightSection={seoDescription ? <CloseButton size="sm" onClick={() => setSeoDescription('')} aria-label="Clear SEO description" /> : null}
+        error={form.errors.seoDescription}
+        rightSection={form.values.seoDescription ? <CloseButton size="sm" onClick={() => form.setFieldValue('seoDescription', '')} aria-label="Clear SEO description" /> : null}
       />
 
       <TextInput
         label="External Purchase URL"
-        value={sourceUrl}
-        onChange={(e) => setSourceUrl(e.currentTarget.value)}
+        value={form.values.sourceUrl}
+        onChange={(e) => form.setFieldValue('sourceUrl', e.currentTarget.value)}
         placeholder="https://example.com/buy"
         description="Optional URL for external checkout or marketplace listing."
-        rightSection={sourceUrl ? <CloseButton size="sm" onClick={() => setSourceUrl('')} aria-label="Clear URL" /> : null}
+        error={form.errors.sourceUrl}
+        rightSection={form.values.sourceUrl ? <CloseButton size="sm" onClick={() => form.setFieldValue('sourceUrl', '')} aria-label="Clear URL" /> : null}
       />
 
       <Group justify="space-between" className="tienda-form-actions">

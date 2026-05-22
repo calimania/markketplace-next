@@ -134,7 +134,7 @@ export default function TiendaNewPage() {
     }
 
     if (!confirmed()) {
-      router.replace('/auth/login?next=/tienda/new');
+      router.replace('/auth/magic?next=/tienda/new');
     }
   }, [confirmed, isLoading, router]);
 

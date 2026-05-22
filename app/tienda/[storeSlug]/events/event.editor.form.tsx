@@ -9,6 +9,7 @@ import { tiendaClient } from '@/markket/api.tienda';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { Event } from '@/markket/event.d';
+import { IconBrowser } from '@tabler/icons-react';
 
 type EventLocationInput = {
   name: string;
@@ -56,7 +57,7 @@ type EventEditorFormProps = {
     seoSocialImageDocumentId?: string;
     thumbnailDocumentId?: string;
     tagIds?: number[];
-    slideDocumentIds?: string[];
+    slideDocumentIds?: number[];
     initialSEO?: Record<string, unknown>;
   };
 };
@@ -483,7 +484,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       // Thumbnail is managed via the Image Manager on the preview page, not here
       SEO: {
         ...(initial?.initialSEO
-          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage' && k !== 'id' && k !== 'documentId'))
           : {}),
         metaTitle: (form.values.seoTitle || form.values.name).trim().slice(0, 60),
         metaDescription: (form.values.seoDescription || '').trim().slice(0, 160),
@@ -498,7 +499,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       payload.Tag = initial.tagIds.map((id) => ({ id }));
     }
     if (initial?.slideDocumentIds && initial.slideDocumentIds.length > 0) {
-      payload.Slides = initial.slideDocumentIds.map((documentId) => ({ documentId }));
+      payload.Slides = initial.slideDocumentIds.map((id) => ({ id }));
     }
 
     try {
@@ -608,18 +609,14 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
       <Group justify="space-between" align="end">
         <Stack gap={2}>
           <Text size="sm" fw={500}>Timezone</Text>
-          <Text size="sm" c="dimmed">Assumed from browser: {autoTimezone}</Text>
-          <Text size="xs" c="dimmed">Stored timezone: {normalizedTimezone || 'Not set'}</Text>
-          {mode === 'edit' && initialTimezone && (
-            <Text size="xs" c="dimmed">Originally saved: {initialTimezone}</Text>
-          )}
+          <Text size="sm" c="dimmed">{autoTimezone}</Text>
         </Stack>
         <Button
           variant="subtle"
           size="xs"
           onClick={() => setShowTimezoneEditor((prev) => !prev)}
         >
-          {showTimezoneEditor ? 'Hide timezone options' : 'Edit timezone'}
+          {showTimezoneEditor ? 'Hide ' : 'Edit'}
         </Button>
       </Group>
 

@@ -366,6 +366,12 @@ const ContentEditor = ({
       }
     },
     onUpdate: ({ editor }) => {
+      if (format == 'markdown') {
+        isInternalUpdateRef.current = true;
+        const markdown = getEditorMarkdown(editor);
+        onChange(markdown);
+      }
+
       if (format == 'html') {
         isInternalUpdateRef.current = true;
         onChange(editor.getHTML());

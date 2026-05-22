@@ -31,7 +31,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
       <Container size="lg">
         <Group justify="space-between" align="center" wrap="nowrap">
           <Link
-            href={pathname.startsWith('tienda') ? '/tienda' : '/'}
+            href={pathname.startsWith('/tienda/') ? '/tienda' : '/'}
             prefetch={false}
             style={{
               textDecoration: 'none',

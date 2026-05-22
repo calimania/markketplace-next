@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accordion, Badge, Button, Group, Stack, Text, TextInput, Textarea,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { IconSearch, IconAlertTriangle } from '@tabler/icons-react';
@@ -12,7 +13,7 @@ import { tiptapToStrapiBlocks } from '@/markket/richtext.transform';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { RichTextValue } from '@/markket/richtext';
-import { readTiendaAuthToken } from '@/markket/helpers.tienda';
+import { isValidTiendaSlug, readTiendaAuthToken, slugifyTiendaValue } from '@/markket/helpers.tienda';
 
 type PageEditorFormProps = {
   storeSlug: string;
@@ -31,31 +32,49 @@ type PageEditorFormProps = {
   };
 };
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
+type PageFormValues = {
+  title: string;
+  slug: string;
+  content: RichTextValue;
+  seoTitle: string;
+  seoDescription: string;
+};
 
 export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initial }: PageEditorFormProps) {
   const router = useRouter();
   const store = useStore();
 
-  const [title, setTitle] = useState(initial?.title || '');
-  const [slug, setSlug] = useState(initial?.slug || '');
-  const [content, setContent] = useState<RichTextValue>(initial?.content ?? '');
-  const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
-  const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
+  const form = useForm<PageFormValues>({
+    validateInputOnBlur: true,
+    initialValues: {
+      title: initial?.title || '',
+      slug: initial?.slug || '',
+      content: initial?.content ?? '',
+      seoTitle: initial?.seoTitle || '',
+      seoDescription: initial?.seoDescription || '',
+    },
+    validate: {
+      title: (value) => (value.trim() ? null : 'Title is required.'),
+      slug: (value) => {
+        const normalized = slugifyTiendaValue(value);
+        if (!normalized) return 'Slug is required.';
+        if (!isValidTiendaSlug(normalized)) {
+          return 'Slug can only contain lowercase letters, numbers, and dashes.';
+        }
+        return null;
+      },
+      seoTitle: (value) => (value.trim().length > 60 ? 'SEO title should be 60 characters or less.' : null),
+      seoDescription: (value) => (value.trim().length > 160 ? 'SEO description should be 160 characters or less.' : null),
+    },
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
 
   // Dirty state: track if there are unsaved changes
   const [isDirty, setIsDirty] = useState(false);
-  const savedSnapshotRef = useRef({ title, slug, seoTitle, seoDescription, content });
+  const savedSnapshotRef = useRef<PageFormValues>({ ...form.values });
 
   const storeRef = useMemo(
     () => store.documentId || store.slug || storeSlug,
@@ -64,30 +83,39 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
 
   // Auto-derive slug from title until manually touched
   useEffect(() => {
-    if (!slugTouched) {
-      setSlug(slugify(title));
+    if (slugTouched) return;
+    const nextSlug = slugifyTiendaValue(form.values.title);
+    if (form.values.slug !== nextSlug) {
+      form.setFieldValue('slug', nextSlug);
     }
-  }, [title, slugTouched]);
+  }, [form.values.title, form.values.slug, slugTouched]);
 
   // Mark dirty whenever any field changes after initial load
   useEffect(() => {
     const snap = savedSnapshotRef.current;
-    const dirtyTitle = title !== snap.title;
-    const dirtySlug = slug !== snap.slug;
-    const dirtySeoTitle = seoTitle !== snap.seoTitle;
-    const dirtySeoDesc = seoDescription !== snap.seoDescription;
-    const dirtyContent = JSON.stringify(content) !== JSON.stringify(snap.content);
+    const dirtyTitle = form.values.title !== snap.title;
+    const dirtySlug = form.values.slug !== snap.slug;
+    const dirtySeoTitle = form.values.seoTitle !== snap.seoTitle;
+    const dirtySeoDesc = form.values.seoDescription !== snap.seoDescription;
+    const dirtyContent = JSON.stringify(form.values.content) !== JSON.stringify(snap.content);
 
     const nextDirty = dirtyTitle || dirtySlug || dirtySeoTitle || dirtySeoDesc || dirtyContent;
     setIsDirty(nextDirty);
     if (nextDirty && isSaved) {
       setIsSaved(false);
     }
-  }, [title, slug, seoTitle, seoDescription, content, isSaved]);
+  }, [
+    form.values.title,
+    form.values.slug,
+    form.values.seoTitle,
+    form.values.seoDescription,
+    form.values.content,
+    isSaved,
+  ]);
 
   // Track content changes (no-op now, dirty is handled by effect above)
   const handleContentChange = (value: RichTextValue) => {
-    setContent(value);
+    form.setFieldValue('content', value);
   };
 
   // Warn on hard navigation while dirty
@@ -120,27 +148,28 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       return;
     }
 
-    if (!title.trim()) {
-      notifications.show({ title: 'Title required', message: 'Add a title before saving.', color: 'orange' });
+    const validation = form.validate();
+    if (validation.hasErrors) {
+      notifications.show({ title: 'Please review the form', message: 'Some fields need attention before saving.', color: 'orange' });
       return;
     }
 
-    const nextSlug = slugify(slug || title);
+    const nextSlug = slugifyTiendaValue(form.values.slug || form.values.title);
     if (!nextSlug) {
       notifications.show({ title: 'Slug required', message: 'A valid slug is required.', color: 'orange' });
       return;
     }
 
     const payload: Record<string, unknown> = {
-      Title: title.trim(),
+      Title: form.values.title.trim(),
       slug: nextSlug,
-      Content: tiptapToStrapiBlocks(content),
+      Content: tiptapToStrapiBlocks(form.values.content),
       SEO: {
         ...(initial?.initialSEO
-          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage' && k !== 'id' && k !== 'documentId'))
           : {}),
-        metaTitle: (seoTitle || title).trim().slice(0, 60),
-        metaDescription: (seoDescription || '').trim().slice(0, 160),
+        metaTitle: (form.values.seoTitle || form.values.title).trim().slice(0, 60),
+        metaDescription: (form.values.seoDescription || '').trim().slice(0, 160),
         ...(initial?.seoSocialImageId
           ? { socialImage: { id: initial.seoSocialImageId } }
           : {}),
@@ -187,13 +216,16 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
         responseDocumentId = verifiedPage.documentId || responseDocumentId;
       }
 
-      savedSnapshotRef.current = { title, slug: nextSlug, seoTitle, seoDescription, content };
+      savedSnapshotRef.current = {
+        ...form.values,
+        slug: nextSlug,
+      };
       setIsDirty(false);
       setIsSaved(true);
 
       notifications.show({
         title: 'Saved',
-        message: `Page "${title}" saved successfully.`,
+        message: `Page "${form.values.title}" saved successfully.`,
         color: 'green',
         autoClose: 3000,
       });
@@ -216,31 +248,33 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
     }
   };
 
-  const descRemaining = 160 - (seoDescription || '').length;
-  const titleRemaining = 60 - (seoTitle || title || '').length;
+  const descRemaining = 160 - (form.values.seoDescription || '').length;
+  const titleRemaining = 60 - (form.values.seoTitle || form.values.title || '').length;
 
   return (
     <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Title"
-        value={title}
-        onChange={(e) => { setTitle(e.currentTarget.value); }}
+        value={form.values.title}
+        onChange={(e) => { form.setFieldValue('title', e.currentTarget.value); }}
         placeholder="Page title"
         required
+        error={form.errors.title}
       />
       <TextInput
         label="Slug"
-        value={slug}
+        value={form.values.slug}
         onChange={(e) => {
           setSlugTouched(true);
-          setSlug(e.currentTarget.value);
+          form.setFieldValue('slug', e.currentTarget.value);
         }}
         placeholder="page-slug"
         required
+        error={form.errors.slug}
         description={
-          slug ? (
+          form.values.slug ? (
             <span style={{ fontFamily: 'monospace' }}>
-              /{storeSlug}/<strong>{slug}</strong>
+              /{storeSlug}/<strong>{form.values.slug}</strong>
             </span>
           ) : undefined
         }
@@ -249,7 +283,7 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
       {/* Rich text */}
       <ContentEditor
         label="Content"
-        value={content}
+        value={form.values.content}
         onChange={handleContentChange}
         format="blocks"
         placeholder="Start writing your page…"
@@ -276,21 +310,21 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
 
               <TextInput
                 label="Meta Title"
-                value={seoTitle}
-                onChange={(e) => setSeoTitle(e.currentTarget.value)}
-                placeholder={title || 'SEO title'}
+                value={form.values.seoTitle}
+                onChange={(e) => form.setFieldValue('seoTitle', e.currentTarget.value)}
+                placeholder={form.values.title || 'SEO title'}
                 description={`${Math.max(0, titleRemaining)} chars remaining (60 max)`}
-                error={titleRemaining < 0 ? 'Over 60 character limit' : undefined}
+                error={form.errors.seoTitle || (titleRemaining < 0 ? 'Over 60 character limit' : undefined)}
               />
               <Textarea
                 label="Meta Description"
-                value={seoDescription}
-                onChange={(e) => setSeoDescription(e.currentTarget.value)}
+                value={form.values.seoDescription}
+                onChange={(e) => form.setFieldValue('seoDescription', e.currentTarget.value)}
                 placeholder="Brief description for search engines…"
                 minRows={3}
                 autosize
                 description={`${Math.max(0, descRemaining)} chars remaining (160 max)`}
-                error={descRemaining < 0 ? 'Over 160 character limit' : undefined}
+                error={form.errors.seoDescription || (descRemaining < 0 ? 'Over 160 character limit' : undefined)}
               />
             </Stack>
           </Accordion.Panel>
