@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEmbeddedMode } from '@/app/hooks/useEmbeddedMode';
 import { markketColors } from '@/markket/colors.config';
 import AccountButton from '@/app/components/ui/account.button';
+import { usePathname } from "next/navigation";
 
 interface GlobalBannerProps {
   extraActions?: React.ReactNode;
@@ -12,6 +13,7 @@ interface GlobalBannerProps {
 
 export function GlobalBanner({ extraActions }: GlobalBannerProps) {
   const embedded = useEmbeddedMode();
+  const pathname = usePathname();
 
   if (embedded) return null;
 
@@ -29,7 +31,7 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
       <Container size="lg">
         <Group justify="space-between" align="center" wrap="nowrap">
           <Link
-            href="/"
+            href={pathname.startsWith('tienda') ? '/tienda' : '/'}
             prefetch={false}
             style={{
               textDecoration: 'none',
@@ -40,9 +42,8 @@ export function GlobalBanner({ extraActions }: GlobalBannerProps) {
               letterSpacing: '-0.02em',
             }}
           >
-            Markk<span style={{ fontStyle: 'italic' }}>ë</span>t
+            Markkët
           </Link>
-
           <Group gap="xs" align="center" wrap="nowrap">
             {extraActions}
             <AccountButton />
