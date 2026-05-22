@@ -22,5 +22,5 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns {JSX.Element}
  */
 export default async function AuthPage() {
-  redirect('/auth/login');
+  redirect('/auth/magic');
 };

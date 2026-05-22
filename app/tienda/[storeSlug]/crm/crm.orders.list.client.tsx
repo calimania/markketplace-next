@@ -122,7 +122,10 @@ export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) 
   return (
     <Stack gap="sm">
       <Group justify="space-between" wrap="nowrap">
-        <Text fw={600} size="sm">Orders <Badge size="xs" variant="light" color="violet" ml={4}>{rows.length}</Badge></Text>
+        <Group gap={6} align="center">
+          <Text fw={600} size="sm">Orders</Text>
+          <Badge size="xs" variant="light" color="violet">{rows.length}</Badge>
+        </Group>
         <TextInput
           size="xs"
           placeholder="Search by email or order ID"

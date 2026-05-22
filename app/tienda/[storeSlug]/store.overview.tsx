@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon, Box, Tabs } from '@mantine/core';
 import { IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles, IconPhoto, IconWorld, IconWorldOff, IconUsers, IconCreditCard } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -57,9 +57,6 @@ export default function StoreOverview({
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('latest');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const latestRefreshSeqRef = useRef(0);
-  const refreshInFlightRef = useRef(false);
-  const lastRefreshStartedAtRef = useRef(0);
   const debugEnabled = process.env.NODE_ENV === 'development';
   const isAuthorized = confirmed() && stores.some((s) => s.slug === store.slug);
   const isPublished = useMemo(() => isStorePublished(currentStore), [currentStore]);
@@ -430,24 +427,24 @@ export default function StoreOverview({
 
   return (
     <Stack gap="md" className="tech-vhs-surface">
-        <TinyBreadcrumbs
-          items={[
+      <TinyBreadcrumbs
+        items={[
           { label: 'Me', href: '/me' },
-            { label: 'Tienda', href: '/tienda' },
+          { label: 'Tienda', href: '/tienda' },
           { label: currentStore.slug, href: `/tienda/${currentStore.slug}` },
-          ]}
-        />
+        ]}
+      />
 
       <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} className="tienda-panel">
-          <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
-            <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
-              <Group gap="xs" wrap="wrap">
-                <Title order={1}>{currentStore.title || currentStore.slug}</Title>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+          <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+            <Group gap="xs" wrap="wrap">
+              <Title order={1}>{currentStore.title || currentStore.slug}</Title>
             </Group>
-              <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
-            </Stack>
-          </Group>
-        </Paper>
+            <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
+          </Stack>
+        </Group>
+      </Paper>
 
       {statusNotice && (
         <Paper withBorder radius="md" p="md" className="tienda-panel">
@@ -456,7 +453,7 @@ export default function StoreOverview({
       )}
 
       <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} className="tienda-panel">
-          <Stack gap="sm">
+        <Stack gap="sm">
           <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text fw={600}>Store Snapshot</Text>
             <Badge variant="light" radius="xl" color="yellow" leftSection={<IconSparkles size={12} />}>
@@ -467,15 +464,15 @@ export default function StoreOverview({
             <Text c="dimmed" size="sm" lh={1.6} lineClamp={4}>
               {descriptionText}
             </Text>
-            ) : (
-              <Text c="dimmed">No description yet for this store.</Text>
-            )}
+          ) : (
+            <Text c="dimmed">No description yet for this store.</Text>
+          )}
           <SimpleGrid cols={{ base: 2, md: 4 }} spacing="sm">
             {overviewTiles.map((tile) => {
               const isEmpty = tile.value === 0;
               const routesToCreate = isAuthorized && isEmpty;
               const tileHref = routesToCreate ? tile.createHref : tile.listHref;
-              const actionLabel = routesToCreate ? 'Create new' : 'View list';
+              const actionLabel = routesToCreate ? 'Add' : '';
 
               return (
                 <Paper
@@ -502,15 +499,12 @@ export default function StoreOverview({
                       </ThemeIcon>
                       <div>
                         <Text fw={700} size="sm">{tile.value}</Text>
-                        <Text size="xs" c="dimmed">{tile.label}</Text>
+                        <Text size="xs" c="dimmed"> {tile.value != 1 ? tile.label : tile.label.slice(0, -1)} </Text>
                         <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.08em' }}>
                           {actionLabel}
                         </Text>
                       </div>
                     </Group>
-                    <Badge variant="light" color={!isEmpty ? overviewTileColors[tile.label] || 'gray' : 'gray'} size="xs">
-                      {!isEmpty ? 'List' : routesToCreate ? 'New' : 'View'}
-                    </Badge>
                   </Group>
                 </Paper>
               );
@@ -529,7 +523,7 @@ export default function StoreOverview({
                 leftSection={<IconPhoto size={14} />}
                 size="xs"
               >
-                Manage media
+                Manage
               </Button>
             </Group>
             {allMediaThumbs.length > 0 ? (
@@ -587,7 +581,7 @@ export default function StoreOverview({
                 </Group>
               </Box>
             ) : (
-              <Text size="xs" c="dimmed">No images yet. Add some in Snapshot.</Text>
+                <Text size="xs" c="dimmed">Add some in Snapshot.</Text>
             )}
           </Stack>
 
@@ -596,17 +590,6 @@ export default function StoreOverview({
               <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
                 Social Links ({currentStore.URLS?.length || 0})
               </Text>
-              {isAuthorized && (
-                <Button
-                  component="a"
-                  href={`/tienda/${store.slug}/store`}
-                  variant="subtle"
-                  size="xs"
-                  leftSection={<IconEdit size={12} />}
-                >
-                  Edit Links
-                </Button>
-              )}
             </Group>
             {currentStore.URLS?.length > 0 ? (
               <Group gap="xs" wrap="wrap">
@@ -627,26 +610,26 @@ export default function StoreOverview({
                 ))}
               </Group>
             ) : (
-              <Text size="xs" c="dimmed">No links yet. Add website, social, or newsletter links.</Text>
+                <Text size="xs" c="dimmed">Add website, social, and external links.</Text>
             )}
           </Stack>
-          </Stack>
-        </Paper>
+        </Stack>
+      </Paper>
 
-        <Group gap="xs" wrap="wrap">
-          <Button
-            component="a"
+      <Group gap="xs" wrap="wrap">
+        <Button
+          component="a"
           href={`/${currentStore.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            leftSection={<IconExternalLink size={16} />}
-            variant="light"
-            color="cyan"
-          >
-          View live site
-          </Button>
-          {isAuthorized && (
-            <>
+          target="_blank"
+          rel="noopener noreferrer"
+          leftSection={<IconExternalLink size={16} />}
+          variant="light"
+          color="cyan"
+        >
+          Visit
+        </Button>
+        {isAuthorized && (
+          <>
             {/* <Button
               component="a"
               href={`/tienda/${currentStore.slug}/design-system`}
@@ -671,7 +654,7 @@ export default function StoreOverview({
               loading={isSavingStatus}
               leftSection={isPublished ? <IconWorldOff size={16} /> : <IconWorld size={16} />}
             >
-              {isPublished ? 'Hide' : 'Publish'}
+              {isPublished ? 'Unpublish' : 'Publish'}
             </Button>
             <Button
               component="a"
@@ -679,11 +662,11 @@ export default function StoreOverview({
               href={`/tienda/${currentStore.slug}/store`}
               leftSection={<IconEdit size={16} />}
             >
-              Customize store
+              Edit
             </Button>
-            </>
-          )}
-        </Group>
+          </>
+        )}
+      </Group>
 
       <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'latest')} keepMounted={false} className="tienda-overview-tabs">
         <Tabs.List
@@ -711,7 +694,7 @@ export default function StoreOverview({
           <Paper withBorder radius="lg" p="md" className="tienda-panel">
             <Stack gap="sm">
               <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                <Text fw={600}><span className="accent-yellow">Unified</span> Content Feed</Text>
+                <Text fw={600}><span className="accent-yellow">Content</span> Feed</Text>
                 <Group gap="xs" wrap="wrap">
                   {isAuthorized && (
                     <>
@@ -779,6 +762,6 @@ export default function StoreOverview({
           </Paper>
         </Tabs.Panel>
       </Tabs>
-      </Stack>
+    </Stack>
   );
 }

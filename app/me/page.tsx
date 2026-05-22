@@ -69,7 +69,7 @@ export default function MeHomePage() {
     if (isLoading) return;
 
     if (!confirmed()) {
-      router.replace('/auth/login?next=/me');
+      router.replace('/auth/magic?next=/me');
       return;
     }
 

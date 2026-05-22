@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     setIsMaybe(!!_string);
 
     if (!_string) {
-      router.replace('/auth/login');
+      router.replace('/auth/magic');
     }
   }, [router]);
 

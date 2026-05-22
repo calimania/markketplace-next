@@ -336,8 +336,8 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
           URLS: normalizedUrls,
           SEO: {
             ...store.SEO,
-            metaTitle: draftSeoTitle.trim() || title,
-            metaDescription: draftSeoDescription.trim(),
+            metaTitle: (draftSeoTitle.trim() || title).slice(0, 60),
+            metaDescription: draftSeoDescription.trim().slice(0, 160),
           },
           Favicon: store.Favicon,
           Cover: store.Cover,

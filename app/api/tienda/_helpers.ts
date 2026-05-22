@@ -18,6 +18,33 @@ const DEFAULT_CONTENT_POPULATE: Record<string, string[]> = {
   track: ['SEO', 'media', 'urls', 'store', 'store.Logo'],
 };
 
+const SEO_TEXT_DB_MAX = 255;
+
+function clampSeoText(value: unknown) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const compact = value.replace(/\s+/g, ' ').trim();
+  return compact.length > SEO_TEXT_DB_MAX ? compact.slice(0, SEO_TEXT_DB_MAX) : compact;
+}
+
+function sanitizeSeoComponent(data: Record<string, any>) {
+  if (!data || typeof data !== 'object') {
+    return;
+  }
+
+  const seo = data.SEO;
+  if (!seo || typeof seo !== 'object') {
+    return;
+  }
+
+  seo.metaTitle = clampSeoText(seo.metaTitle);
+  seo.metaDescription = clampSeoText(seo.metaDescription);
+  seo.metaKeywords = clampSeoText(seo.metaKeywords);
+  seo.metaUrl = clampSeoText(seo.metaUrl);
+}
+
 function hasPopulateParams(searchParams: URLSearchParams) {
   for (const key of searchParams.keys()) {
     if (key === 'populate' || key.startsWith('populate[')) {
@@ -174,6 +201,10 @@ export async function proxyToUpstream(req: NextRequest, upstreamUrl: URL, token:
 
       if (rawBody.trim()) {
         bodyJson = JSON.parse(rawBody);
+
+        if (bodyJson?.data && typeof bodyJson.data === 'object') {
+          sanitizeSeoComponent(bodyJson.data);
+        }
 
         // Auto-publish content on creation so it's visible on public pages immediately
         if (method === 'POST' && bodyJson?.data && typeof bodyJson.data === 'object' && !bodyJson.data.publishedAt) {

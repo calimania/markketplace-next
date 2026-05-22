@@ -28,6 +28,12 @@ type CreateStoreForm = {
   description: string;
 };
 
+const TITLE_MIN = 3;
+const TITLE_MAX = 80;
+const SLUG_MIN = 5;
+const DESCRIPTION_MIN = 24;
+const DESCRIPTION_MAX = 280;
+
 function slugifyStoreTitle(title: string) {
   const base = title
     .toLowerCase()
@@ -54,7 +60,7 @@ function normalizeSlugInput(value: string) {
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/-{2,}/g, '-')
     .replace(/^-+|-+$/g, '');
 
@@ -69,25 +75,50 @@ export default function TiendaNewPage() {
   const [isSlugTouched, setIsSlugTouched] = useState(false);
 
   const form = useForm<CreateStoreForm>({
+    validateInputOnBlur: true,
     initialValues: {
       title: '',
       slug: '',
       description: '',
     },
     validate: {
-      title: (value) => (value.trim().length < 3 ? 'Title should be at least 3 characters.' : null),
+      title: (value) => {
+        const trimmed = value.trim();
+        if (trimmed.length < TITLE_MIN) return `Title must be at least ${TITLE_MIN} characters.`;
+        if (trimmed.length > TITLE_MAX) return `Title must be ${TITLE_MAX} characters or less`;
+        return null;
+      },
       slug: (value) => {
         const normalized = normalizeSlugInput(value);
         if (!normalized) return 'Slug is required.';
-        if (normalized.length < 5) return 'Slug must be at least 5 characters.';
+        if (normalized.length < SLUG_MIN) return `Slug must be at least ${SLUG_MIN} characters.`;
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized)) {
           return 'Slug can only contain lowercase letters, numbers, and dashes.';
         }
         return null;
       },
-      description: (value) => (value.trim().length < 12 ? 'Add a short description so the store has a clear starting point.' : null),
+      description: (value) => {
+        const trimmed = value.trim();
+        if (trimmed.length < DESCRIPTION_MIN) {
+          return `Add at least ${DESCRIPTION_MIN} characters so your store has a clear starting description.`;
+        }
+        if (trimmed.length > DESCRIPTION_MAX) {
+          return `Keep the description under ${DESCRIPTION_MAX} characters for clarity.`;
+        }
+        return null;
+      },
     },
   });
+
+  const trimmedTitleLength = form.values.title.trim().length;
+  const trimmedDescriptionLength = form.values.description.trim().length;
+  const canSubmit =
+    !isSubmitting
+    && trimmedTitleLength >= TITLE_MIN
+    && trimmedTitleLength <= TITLE_MAX
+    && form.values.slug.length >= SLUG_MIN
+    && trimmedDescriptionLength >= DESCRIPTION_MIN
+    && trimmedDescriptionLength <= DESCRIPTION_MAX;
 
   useEffect(() => {
     if (isSlugTouched) return;
@@ -95,7 +126,7 @@ export default function TiendaNewPage() {
     if (form.values.slug !== suggested) {
       form.setFieldValue('slug', suggested);
     }
-  }, [form.values.title, form.values.slug, form, isSlugTouched]);
+  }, [form.values.title, form.values.slug, isSlugTouched]);
 
   useEffect(() => {
     if (isLoading) {
@@ -103,7 +134,7 @@ export default function TiendaNewPage() {
     }
 
     if (!confirmed()) {
-      router.replace('/auth/login?next=/me/store/new');
+      router.replace('/auth/magic?next=/tienda/new');
     }
   }, [confirmed, isLoading, router]);
 
@@ -150,29 +181,27 @@ export default function TiendaNewPage() {
 
       const nextSlug = createdSlug || slug;
 
-      if (process.env.NODE_ENV === 'development') {
-        console.info('store.create.success', {
-          requestedSlug: slug,
-          returnedSlug: createdSlug,
-          documentId: created?.documentId,
-          id: created?.id,
-          redirectTo: `/tienda/${nextSlug}`,
-        });
-      }
+      console.info('store.create.success', {
+        requestedSlug: slug,
+        returnedSlug: createdSlug,
+        documentId: created?.documentId,
+        id: created?.id,
+      });
 
       fetchStores({ force: true }).catch((error) => {
         console.warn('store.create.fetchStores.failed', error);
       });
 
       notifications.show({
-        title: 'Store created',
-        message: 'Your store shell is ready. Now you can add the rest of the details.',
+        title: 'Launched!',
+        message: 'Continue by adding images and pages',
         color: 'green',
       });
 
       router.replace(`/tienda/${nextSlug}?created=1`);
+
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not create store.';
+      const message = error instanceof Error ? error.message : 'Launch error';
       notifications.show({
         title: 'Create store failed',
         message,
@@ -225,10 +254,10 @@ export default function TiendaNewPage() {
             <div>
               <Group gap="xs" mb="xs">
                 <IconBuildingStore size={24} />
-                <Title order={1}>Create Store</Title>
+                <Title order={1}>Launch</Title>
               </Group>
               <Text c="dimmed">
-                Start with the minimum: title and description. We will use the title for SEO and send you straight into your new store overview so it is obvious the store was created.
+                Identity
               </Text>
             </div>
 
@@ -236,29 +265,29 @@ export default function TiendaNewPage() {
               <Stack gap="md">
                 <TextInput
                   label="Store title"
-                  placeholder="Casa Caliman"
-                  description="This also seeds SEO.metaTitle and the first slug."
+                  placeholder="Mr Manager"
+                  description={`${trimmedTitleLength}/${TITLE_MAX} characters`}
                   disabled={isSubmitting}
+                  withAsterisk
+                  maxLength={TITLE_MAX}
                   {...form.getInputProps('title')}
                 />
 
                 <TextInput
                   label="Slug"
-                  placeholder="casa-caliman"
+                  placeholder="mr-manager"
                   description={
                     form.values.slug ? (
                       <span style={{ fontFamily: 'monospace' }}>
-                        markket.place/<strong>{form.values.slug}</strong>
-                        <span style={{ color: 'var(--mantine-color-dimmed)', margin: '0 6px' }}>·</span>
-                        /tienda/{form.values.slug}
+                        https://markket.place/<strong>{form.values.slug}</strong>
                       </span>
-                    ) : 'At least 5 chars. Lowercase letters, numbers, and dashes.'
+                    ) : `At least ${SLUG_MIN} chars. Lowercase letters, numbers, and dashes only.`
                   }
                   disabled={isSubmitting}
                   value={form.values.slug}
                   onChange={(event) => {
                     setIsSlugTouched(true);
-                    form.setFieldValue('slug', normalizeSlugInput(event.currentTarget.value));
+                    form.setFieldValue('slug', event.currentTarget.value.toLowerCase());
                   }}
                   onBlur={() => {
                     const normalized = normalizeSlugInput(form.values.slug);
@@ -270,9 +299,11 @@ export default function TiendaNewPage() {
                 <Textarea
                   label="Short description"
                   placeholder="A studio, shop, or collective with a clear point of view..."
-                  description="This becomes the starting store description and SEO.metaDescription."
+                  description={`${trimmedDescriptionLength}/${DESCRIPTION_MAX} characters. `}
                   minRows={5}
                   autosize
+                  withAsterisk
+                  maxLength={DESCRIPTION_MAX}
                   disabled={isSubmitting}
                   {...form.getInputProps('description')}
                 />
@@ -281,9 +312,9 @@ export default function TiendaNewPage() {
                   <Stack gap={4}>
                     <Group gap="xs">
                       <IconSparkles size={16} />
-                      <Text fw={600} size="sm">What happens next</Text>
+                      <Text fw={600} size="sm">Getting ready</Text>
                     </Group>
-                    <Text size="sm" c="dimmed">We will create your store and take you straight to it, so you can review it and keep customizing right away.</Text>
+                    <Text size="sm" c="dimmed">Your new site can be found at markket.place/{form.values.slug} </Text>
                   </Stack>
                 </Paper>
 
@@ -297,8 +328,8 @@ export default function TiendaNewPage() {
                   >
                     Back
                   </Button>
-                  <Button type="submit" loading={isSubmitting} leftSection={<IconBuildingStore size={16} />}>
-                    Create Store
+                  <Button type="submit" loading={isSubmitting} disabled={!canSubmit} leftSection={<IconBuildingStore size={16} />}>
+                    Launch
                   </Button>
                 </Group>
               </Stack>

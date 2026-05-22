@@ -60,3 +60,31 @@ export function getTiendaItemKey(item: { documentId?: string | number; id?: stri
   return String(item.documentId || item.id || item.slug || Math.random());
 }
 
+/**
+ * Slugify free text into tienda-compatible slugs.
+ */
+export function slugifyTiendaValue(value: string): string {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+/**
+ * Validate normalized slug format.
+ */
+export function isValidTiendaSlug(value: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+/**
+ * Optional URL validator used by editor forms.
+ */
+export function isValidOptionalHttpUrl(value: string): boolean {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return true;
+  return /^https?:\/\//.test(trimmed);
+}
+

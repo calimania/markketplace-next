@@ -245,7 +245,6 @@ const ImageModal = ({
 
   const [tab, setTab] = useState<EditorTab>('text');
   const [backgroundColor, setBackgroundColor] = useState<string>('#f5f5f5');
-  const [isBlankCanvas, setIsBlankCanvas] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SourceResult[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
@@ -724,48 +723,35 @@ const ImageModal = ({
       closeOnClickOutside={!applying}
       closeOnEscape={!applying}
       title={<Text fw={700} size="lg">Create Image</Text>}
-      size={isMobile ? '100%' : '96%'}
+      size={isMobile ? '100%' : 'xl'}
+      fullScreen={isMobile}
       centered
       radius="lg"
       styles={{
         content: {
-          minHeight: isMobile ? '100dvh' : 880,
+          minHeight: isMobile ? '100dvh' : 860,
           maxHeight: isMobile ? '100dvh' : '95vh',
           display: 'flex',
           flexDirection: 'column',
         },
+        body: {
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          paddingBottom: isMobile ? 12 : undefined,
+        },
       }}
     >
-      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap="xs" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Paper withBorder p="xs" radius="md" style={{ flex: 1, minHeight: 0 }}>
-          <Center style={{ height: isMobile ? 360 : 580, background: 'var(--mantine-color-gray-0)', borderRadius: 10 }}>
+          <Center style={{ height: isMobile ? 250 : 520, background: 'var(--mantine-color-gray-0)', borderRadius: 10 }}>
             {!hasContent && !rendering && !fileLoading && (
               <Stack align="center" gap={12}>
                 <MantineImage src={PLACEHOLDER} alt="placeholder" w={220} h={140} fit="contain" />
                 <Stack gap={4} align="center">
                   <Text size="sm" fw={600}>Start creating your image</Text>
-                  <Text size="xs" c="dimmed">Add text, upload a photo, or search</Text>
+                  <Text size="xs" c="dimmed">Add text first, then use Source to upload or search</Text>
                 </Stack>
-                <FileButton
-                  onChange={(file) => {
-                    if (file) {
-                      void loadImageFromFile(file);
-                    }
-                  }}
-                  accept={uploadAccept}
-                >
-                  {(props) => (
-                    <Button
-                      size="sm"
-                      variant="filled"
-                      color="pink"
-                      leftSection={<IconUpload size={16} />}
-                      {...props}
-                    >
-                      Upload from Device
-                    </Button>
-                  )}
-                </FileButton>
               </Stack>
             )}
 
@@ -796,44 +782,21 @@ const ImageModal = ({
           </Center>
         </Paper>
 
-        <Group gap="xs" align="center">
-          <FileButton
-            onChange={(file) => {
-              if (file) {
-                setTab('source');
-                void loadImageFromFile(file);
-              }
-            }}
-            accept={uploadAccept}
-          >
-            {(props) => (
-              <Button
-                size="xs"
-                variant="filled"
-                color="pink"
-                leftSection={<IconUpload size={14} />}
-                {...props}
-              >
-                Upload from Device
-              </Button>
-            )}
-          </FileButton>
-          <Text size="xs" c="dimmed">or use the tabs below to search, add text, or design</Text>
-        </Group>
+        <Text size="xs" c="dimmed">Use Source, Text, or Design below</Text>
 
         <SegmentedControl
           value={tab}
           onChange={(value) => setTab(value as EditorTab)}
           data={[
+            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Source</span></Group> },
             { value: 'text', label: <Group gap={4} wrap="nowrap"><IconTypography size={16} /><span>Text</span></Group> },
             { value: 'design', label: <Group gap={4} wrap="nowrap"><IconShape size={16} /><span>Design</span></Group> },
-            { value: 'source', label: <Group gap={4} wrap="nowrap"><IconUpload size={16} /><span>Upload / Search</span></Group> },
           ]}
           fullWidth
           size="sm"
         />
 
-        <Paper withBorder p="md" radius="md" style={{ maxHeight: 360, overflowY: 'auto', flex: 1 }}>
+        <Paper withBorder p="sm" radius="md" style={{ maxHeight: isMobile ? 235 : 320, overflowY: 'auto', flex: 1 }}>
           {tab === 'text' && (
             <Stack gap="md">
               <Stack gap="sm">
@@ -1083,9 +1046,8 @@ const ImageModal = ({
           {tab === 'source' && (
             <Stack gap="sm">
               <Stack gap="xs">
-                <Group align="end" gap="xs" wrap="nowrap">
+                <Stack gap="xs">
                   <TextInput
-                    style={{ flex: 1 }}
                     placeholder="Search or paste URL…"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.currentTarget.value)}
@@ -1100,11 +1062,11 @@ const ImageModal = ({
                     color="pink"
                     onClick={() => void handleSearchOrUrl()}
                     loading={libraryLoading || urlLoading}
-                    style={{ flexShrink: 0 }}
+                    fullWidth={isMobile}
                   >
                     Search
                   </Button>
-                </Group>
+                </Stack>
                 <FileButton
                   ref={fileInputRef}
                   onChange={(file) => {
@@ -1183,74 +1145,57 @@ const ImageModal = ({
                     );
                   })}
                 </Box>
-              ) : (
-                <Paper
-                    withBorder
-                    radius="md"
-                    p="lg"
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(250,250,250,0.92), rgba(255,255,255,0.98))',
-                      borderStyle: 'dashed',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 120ms ease',
-                      minHeight: 180,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#E4007C';
-                      e.currentTarget.style.background = 'linear-gradient(180deg, rgba(250,250,250,0.98), rgba(255,240,245,0.98))';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '';
-                      e.currentTarget.style.background = 'linear-gradient(180deg, rgba(250,250,250,0.92), rgba(255,255,255,0.98))';
-                    }}
-                  >
-                    <Stack gap={6} align="center" justify="center" style={{ height: '100%' }}>
-                      <Text fw={600} size="sm">📤 Click or search for images</Text>
-                      <Text size="xs" c="dimmed">
-                        Upload from device or search libraries
-                      </Text>
-                  </Stack>
-                </Paper>
-              )}
+              ) : null}
             </Stack>
           )}
 
 
         </Paper>
 
-        <Stack gap="sm">
-          <TextInput
-            label="Alt Text"
-            placeholder="Describe the image content (accessibility & SEO)"
-            value={imageAlt}
-            onChange={(event) => setImageAlt(event.currentTarget.value)}
-            description="Help people understand what's in the image."
-          />
+        <Paper
+          withBorder
+          p="sm"
+          radius="md"
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 3,
+            background: 'var(--mantine-color-body)',
+            boxShadow: '0 -6px 18px rgba(15, 23, 42, 0.08)',
+          }}
+        >
+          <Stack gap="xs">
+            <TextInput
+              label="Alt Text"
+              placeholder="Describe the image content (accessibility & SEO)"
+              value={imageAlt}
+              onChange={(event) => setImageAlt(event.currentTarget.value)}
+              description="Optional, but recommended for accessibility and SEO."
+              size="sm"
+            />
 
-          <Group justify="space-between" align="center">
-            <Text size="xs" c="dimmed">
-              {hasContent
-                ? 'Ready to save. Edits apply when you confirm.'
-                : 'Upload or search to get started.'}
-            </Text>
-            <Group gap="xs">
-              <Button variant="default" onClick={handleCloseModal} disabled={applying}>
-                Cancel
-              </Button>
-              <Button
-                leftSection={<IconPhotoPlus size={16} />}
-                onClick={() => void applyImageWork()}
-                disabled={disableReplace || applying || (!hasContent && !initialImageUrl)}
-                loading={applying}
-                color="pink"
-              >
-                {initialImageUrl ? 'Save Image' : 'Create Image'}
-              </Button>
+            <Group justify="space-between" align="center" wrap="wrap">
+              <Text size="xs" c="dimmed">
+                {hasContent ? 'Ready to save.' : 'Open Source or add text to begin.'}
+              </Text>
+              <Group gap="xs" style={{ width: isMobile ? '100%' : undefined }}>
+                <Button variant="default" onClick={handleCloseModal} disabled={applying} style={{ flex: isMobile ? 1 : undefined }}>
+                  Cancel
+                </Button>
+                <Button
+                  leftSection={<IconPhotoPlus size={16} />}
+                  onClick={() => void applyImageWork()}
+                  disabled={disableReplace || applying || (!hasContent && !initialImageUrl)}
+                  loading={applying}
+                  color="pink"
+                  style={{ flex: isMobile ? 1 : undefined }}
+                >
+                  {initialImageUrl ? 'Save Image' : 'Create Image'}
+                </Button>
+              </Group>
             </Group>
-          </Group>
-        </Stack>
+          </Stack>
+        </Paper>
 
 
       </Stack>

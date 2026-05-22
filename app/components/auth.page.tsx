@@ -107,7 +107,7 @@ export default function AuthPage() {
             fullWidth
             variant="default"
             leftSection={<IconLogin size={18} />}
-            onClick={() => router.push('/auth/login')}
+              onClick={() => router.push('/auth/magic')}
           >
             Sign in with password
           </Button>

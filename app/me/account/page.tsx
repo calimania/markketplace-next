@@ -17,7 +17,7 @@ export default function MeAccountPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!confirmed()) {
-      router.replace('/auth/login?next=/me/account');
+      router.replace('/auth/magic?next=/me/account');
     }
   }, [confirmed, isLoading, router]);
 

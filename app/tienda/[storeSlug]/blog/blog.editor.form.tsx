@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, CloseButton, Group, Stack, Text, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { tiendaClient } from '@/markket/api.tienda';
@@ -9,7 +10,7 @@ import { tiptapToStrapiBlocks } from '@/markket/richtext.transform';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { RichTextValue } from '@/markket/richtext';
-import { readTiendaAuthToken } from '@/markket/helpers.tienda';
+import { isValidTiendaSlug, readTiendaAuthToken, slugifyTiendaValue } from '@/markket/helpers.tienda';
 
 type BlogEditorFormProps = {
   storeSlug: string;
@@ -29,28 +30,46 @@ type BlogEditorFormProps = {
   };
 };
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
+type BlogFormValues = {
+  title: string;
+  slug: string;
+  content: RichTextValue;
+  seoTitle: string;
+  seoDescription: string;
+};
 
 export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initial }: BlogEditorFormProps) {
   const router = useRouter();
   const store = useStore();
 
-  const [title, setTitle] = useState(initial?.title || '');
-  const [slug, setSlug] = useState(initial?.slug || '');
-  const [content, setContent] = useState<RichTextValue>(initial?.content ?? '');
-  const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || '');
-  const [seoDescription, setSeoDescription] = useState(initial?.seoDescription || '');
+  const form = useForm<BlogFormValues>({
+    validateInputOnBlur: true,
+    initialValues: {
+      title: initial?.title || '',
+      slug: initial?.slug || '',
+      content: initial?.content ?? '',
+      seoTitle: initial?.seoTitle || '',
+      seoDescription: initial?.seoDescription || '',
+    },
+    validate: {
+      title: (value) => (value.trim() ? null : 'Title is required.'),
+      slug: (value) => {
+        const normalized = slugifyTiendaValue(value);
+        if (!normalized) return 'Slug is required.';
+        if (!isValidTiendaSlug(normalized)) {
+          return 'Slug can only contain lowercase letters, numbers, and dashes.';
+        }
+        return null;
+      },
+      seoTitle: (value) => (value.trim().length > 60 ? 'SEO title should be 60 characters or less.' : null),
+      seoDescription: (value) => (value.trim().length > 160 ? 'SEO description should be 160 characters or less.' : null),
+    },
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [isDirty, setIsDirty] = useState(false);
-  const savedSnapshotRef = useRef({ title, slug, seoTitle, seoDescription, content });
+  const savedSnapshotRef = useRef<BlogFormValues>({ ...form.values });
 
   const storeRef = useMemo(
     () => store.documentId || store.slug || storeSlug,
@@ -60,20 +79,28 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
   // Track dirty state
   useEffect(() => {
     const isDifferent =
-      title !== savedSnapshotRef.current.title ||
-      slug !== savedSnapshotRef.current.slug ||
-      seoTitle !== savedSnapshotRef.current.seoTitle ||
-      seoDescription !== savedSnapshotRef.current.seoDescription ||
-      JSON.stringify(content) !== JSON.stringify(savedSnapshotRef.current.content);
+      form.values.title !== savedSnapshotRef.current.title ||
+      form.values.slug !== savedSnapshotRef.current.slug ||
+      form.values.seoTitle !== savedSnapshotRef.current.seoTitle ||
+      form.values.seoDescription !== savedSnapshotRef.current.seoDescription ||
+      JSON.stringify(form.values.content) !== JSON.stringify(savedSnapshotRef.current.content);
     setIsDirty(isDifferent);
-  }, [title, slug, seoTitle, seoDescription, content]);
+  }, [
+    form.values.title,
+    form.values.slug,
+    form.values.seoTitle,
+    form.values.seoDescription,
+    form.values.content,
+  ]);
 
   // Auto-derive slug from title until manually touched
   useEffect(() => {
-    if (!slugTouched) {
-      setSlug(slugify(title));
+    if (slugTouched) return;
+    const nextSlug = slugifyTiendaValue(form.values.title);
+    if (form.values.slug !== nextSlug) {
+      form.setFieldValue('slug', nextSlug);
     }
-  }, [title, slugTouched]);
+  }, [form.values.title, form.values.slug, slugTouched]);
 
   const handleSubmit = async () => {
     const token = readTiendaAuthToken();
@@ -87,16 +114,17 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       return;
     }
 
-    if (!title.trim()) {
+    const validation = form.validate();
+    if (validation.hasErrors) {
       notifications.show({
-        title: 'Title required',
-        message: 'Add a title before saving.',
+        title: 'Please review the form',
+        message: 'Some fields need attention before saving.',
         color: 'orange',
       });
       return;
     }
 
-    const nextSlug = slugify(slug || title);
+    const nextSlug = slugifyTiendaValue(form.values.slug || form.values.title);
     if (!nextSlug) {
       notifications.show({
         title: 'Slug required',
@@ -107,15 +135,15 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
     }
 
     const payload: Record<string, unknown> = {
-      Title: title.trim(),
+      Title: form.values.title.trim(),
       slug: nextSlug,
-      Content: tiptapToStrapiBlocks(content),
+      Content: tiptapToStrapiBlocks(form.values.content),
       SEO: {
         ...(initial?.initialSEO
-          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage'))
+          ? Object.fromEntries(Object.entries(initial.initialSEO).filter(([k]) => k !== 'socialImage' && k !== 'id' && k !== 'documentId'))
           : {}),
-        metaTitle: (seoTitle || title).trim().slice(0, 60),
-        metaDescription: (seoDescription || '').trim().slice(0, 160),
+        metaTitle: (form.values.seoTitle || form.values.title).trim().slice(0, 60),
+        metaDescription: (form.values.seoDescription || '').trim().slice(0, 160),
         ...(initial?.seoSocialImageId
           ? { socialImage: { id: initial.seoSocialImageId } }
           : {}),
@@ -163,12 +191,15 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
         responseDocumentId = verifiedArticle.documentId || responseDocumentId;
       }
 
-      savedSnapshotRef.current = { title, slug: nextSlug, seoTitle, seoDescription, content };
+      savedSnapshotRef.current = {
+        ...form.values,
+        slug: nextSlug,
+      };
       setIsDirty(false);
 
       notifications.show({
         title: 'Saved',
-        message: `Article "${title}" saved successfully.`,
+        message: `Article "${form.values.title}" saved successfully.`,
         color: 'green',
         autoClose: 3000,
       });
@@ -195,32 +226,34 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
     <Stack gap="md" className="tienda-editor-form">
       <TextInput
         label="Title"
-        value={title}
-        onChange={(event) => setTitle(event.currentTarget.value)}
+        value={form.values.title}
+        onChange={(event) => form.setFieldValue('title', event.currentTarget.value)}
         placeholder="Article title"
         required
-        rightSection={title ? <CloseButton size="sm" onClick={() => setTitle('')} aria-label="Clear title" /> : null}
+        error={form.errors.title}
+        rightSection={form.values.title ? <CloseButton size="sm" onClick={() => form.setFieldValue('title', '')} aria-label="Clear title" /> : null}
       />
       <TextInput
         label="Slug"
-        value={slug}
+        value={form.values.slug}
         onChange={(event) => {
           setSlugTouched(true);
-          setSlug(event.currentTarget.value);
+          form.setFieldValue('slug', event.currentTarget.value);
         }}
         placeholder="article-slug"
         required
+        error={form.errors.slug}
         description={
-          slug ? (
+          form.values.slug ? (
             <span style={{ fontFamily: 'monospace' }}>
-              /{storeSlug}/blog/<strong>{slug}</strong>
+              /{storeSlug}/blog/<strong>{form.values.slug}</strong>
             </span>
           ) : undefined
         }
       />
       <ContentEditor
-        value={content}
-        onChange={setContent}
+        value={form.values.content}
+        onChange={(value) => form.setFieldValue('content', value)}
         label="Content"
         format="blocks"
         minHeight={400}
@@ -228,11 +261,12 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
       />
       <TextInput
         label="SEO Title"
-        value={seoTitle}
-        onChange={(event) => setSeoTitle(event.currentTarget.value)}
+        value={form.values.seoTitle}
+        onChange={(event) => form.setFieldValue('seoTitle', event.currentTarget.value)}
         placeholder="SEO title (optional)"
-        description={`${60 - (seoTitle || title || '').length} characters remaining`}
-        rightSection={seoTitle ? <CloseButton size="sm" onClick={() => setSeoTitle('')} aria-label="Clear SEO title" /> : null}
+        error={form.errors.seoTitle}
+        description={`${60 - (form.values.seoTitle || form.values.title || '').length} characters remaining`}
+        rightSection={form.values.seoTitle ? <CloseButton size="sm" onClick={() => form.setFieldValue('seoTitle', '')} aria-label="Clear SEO title" /> : null}
       />
 
       <Text size="xs" c="dimmed">
@@ -241,11 +275,12 @@ export default function BlogEditorForm({ storeSlug, mode, itemDocumentId, initia
 
       <TextInput
         label="SEO Description"
-        value={seoDescription}
-        onChange={(event) => setSeoDescription(event.currentTarget.value)}
+        value={form.values.seoDescription}
+        onChange={(event) => form.setFieldValue('seoDescription', event.currentTarget.value)}
         placeholder="SEO description (optional)"
-        description={`${160 - (seoDescription || '').length} characters remaining`}
-        rightSection={seoDescription ? <CloseButton size="sm" onClick={() => setSeoDescription('')} aria-label="Clear SEO description" /> : null}
+        error={form.errors.seoDescription}
+        description={`${160 - (form.values.seoDescription || '').length} characters remaining`}
+        rightSection={form.values.seoDescription ? <CloseButton size="sm" onClick={() => form.setFieldValue('seoDescription', '')} aria-label="Clear SEO description" /> : null}
       />
 
       <Group justify="space-between" className="tienda-form-actions">

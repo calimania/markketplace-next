@@ -54,7 +54,6 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
 
   return (
     <Stack gap="lg" w="100%" h="100%">
-      {/* Main Navigation */}
       <Stack gap="xs">
         {navLinks.map((link) => (
           <Link key={link.href} href={link.href} onClick={onNavigate}>
@@ -71,8 +70,6 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
           </Link>
         ))}
       </Stack>
-
-      {/* Footer Section */}
       <Box className="mt-auto">
         <Divider my="md" />
         <Stack gap="xs">
@@ -84,7 +81,7 @@ function StoreNavigation({ slug, visibility, onNavigate }: { slug: string; visib
               size="sm"
               className="store-nav-home"
             >
-              Back to Markkët
+              Markkët
             </Button>
           </Link>
         </Stack>
@@ -300,7 +297,7 @@ export function ClientLayout({
               <Group justify="space-between" align="center" gap="md" wrap="wrap">
                 <Box>
                   <Text size="sm" c="dimmed">
-                    Return to the Markkët homepage to browse other stores and sections
+                    {"(◕‿◕✿)"}
                   </Text>
                 </Box>
                 <Anchor component={Link} href="/" underline="never">
@@ -309,7 +306,7 @@ export function ClientLayout({
                     color="gray"
                     radius="xl"
                   >
-                    markkët homepage
+                    markkët
                   </Button>
                 </Anchor>
               </Group>
