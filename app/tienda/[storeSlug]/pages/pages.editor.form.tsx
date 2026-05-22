@@ -256,9 +256,6 @@ export default function PageEditorForm({ storeSlug, mode, itemDocumentId, initia
         minHeight={320}
       />
 
-      <Text size="xs" c="dimmed">
-        Image management moved to the preview page for this entry to keep editing focused on text.
-      </Text>
 
       {/* SEO accordion */}
       <Accordion variant="contained" radius="md">

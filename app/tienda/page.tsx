@@ -142,7 +142,7 @@ export default function MeStoresPage() {
           </Text>
           <Group gap="xs" wrap="wrap">
             <TextInput
-              size="xs"
+              size="sm"
               placeholder="Search stores"
               value={storeSearch}
               onChange={(event) => setStoreSearch(event.currentTarget.value)}

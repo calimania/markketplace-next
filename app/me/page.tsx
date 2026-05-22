@@ -328,12 +328,11 @@ export default function MeHomePage() {
                 </Title>
                 <Badge variant="light" className="me-store-count">{stores.length}</Badge>
               </Group>
-              <Text mt="xs" c="dimmed">Preview and edit</Text>
             </Stack>
           </Group>
 
           <TextInput
-            size="xs"
+            size="sm"
             placeholder="Search your stores"
             value={storeSearch}
             onChange={(event) => setStoreSearch(event.currentTarget.value)}

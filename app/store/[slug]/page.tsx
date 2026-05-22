@@ -188,7 +188,6 @@ export default async function StorePage({
     : [];
 
   const descriptionText = richTextToPlainText(store.Description);
-  const storeSubtitle = homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || compact(descriptionText, 220);
   const hasStoreDescription = Boolean(descriptionText?.trim());
   const shouldRenderRichDescription = !homePage?.Title && hasStoreDescription;
   const homePageImage = imageOrFallback(
@@ -524,7 +523,7 @@ export default async function StorePage({
                     c="dimmed"
                     style={{ fontSize: 'clamp(1rem, 2.2vw, 1.16rem)' }}
                   >
-                    {homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || descriptionText || 'Discover the latest collection, stories, and upcoming moments from this store.'}
+                    {homePage?.SEO?.metaDescription || store?.SEO?.metaDescription || '....φ(︶▽︶)φ....'}
                   </Text>
                 </Stack>
 
@@ -590,7 +589,7 @@ export default async function StorePage({
 
         <Container size="lg" pb="xl">
           <Stack gap="xl">
-            {(!hasHomePageBlocks && (hasHomePageStory || previewCards.length > 0 || storeSubtitle)) && (
+            {(!hasHomePageBlocks && (hasHomePageStory || previewCards.length > 0 || homePage?.Title)) && (
               <Box
                 style={{
                   borderRadius: 22,
@@ -602,14 +601,10 @@ export default async function StorePage({
                 <Stack gap="md">
                   <Group justify="space-between" align="flex-start" wrap="wrap">
                     <Stack gap={4} maw={560}>
-                      <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: '0.12em' }}>
-                        {homePage?.Title ? 'Home page' : 'From the store'}
-                      </Text>
                       <Text fw={700} size="xl" style={{ letterSpacing: '-0.03em' }}>
-                        {homePage?.Title || storeSubtitle || 'A storefront shaped around the creator behind it.'}
+                        {homePage?.Title || '(ノ°∀°)ノ⌒･*:.｡. .｡.:*･゜ﾟ･*☆'}
                       </Text>
                     </Stack>
-
                     {homePageImage ? (
                       <Box
                         style={{
