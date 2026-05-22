@@ -2,14 +2,13 @@
 
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Badge, Button, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
-import { IconArrowLeft, IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconUsers } from '@tabler/icons-react';
+import { Badge, Button, CopyButton, Group, Image, Paper, Skeleton, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
+import { IconArrowLeft, IconCheck, IconCopy, IconDeviceFloppy, IconEdit, IconExternalLink, IconPalette, IconPencilX, IconUsers } from '@tabler/icons-react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import URLsInput from '@/app/components/ui/form.input.urls';
 import type { URLItem } from '@/app/components/ui/form.input.urls';
 import RichTextContent from '@/app/components/ui/richtext.content';
-import { buildEditorMediaPreview } from '@/markket/richtext.smart';
 import type { Store } from '@/markket/store';
 import { markketplace } from '@/markket/config';
 
@@ -151,7 +150,21 @@ export default function StoreEditorSkeleton({
           <Text c="dimmed" size="sm">
             Use this when sharing your link
           </Text>
-          <TextInput value={publicHref} readOnly type="url" />
+          <Group align="flex-end" wrap="nowrap">
+            <TextInput value={publicHref} readOnly type="url" style={{ flex: 1 }} />
+            <CopyButton value={publicHref} timeout={1800}>
+              {({ copied, copy }) => (
+                <Button
+                  variant={copied ? 'filled' : 'default'}
+                  color={copied ? 'teal' : 'gray'}
+                  onClick={copy}
+                  leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                >
+                  {copied ? 'Copied' : 'Copy'}
+                </Button>
+              )}
+            </CopyButton>
+          </Group>
           {!isEditing && (
             <Text size="xs" c="dimmed">Click Edit above to make changes.</Text>
           )}

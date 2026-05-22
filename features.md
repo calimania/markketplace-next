@@ -2,23 +2,12 @@
 
 ## Upcoming
 
+## 2026
 
-### v0.9.0 May 2026
-
-P0 (must-fix before launch)
 - [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
-- [ ] tienda dashboard: adding/editing Event dates works end-to-end (draft -> save -> list -> detail)
-- [ ] tienda dashboard: add/edit `event.timezone` (IANA) and ensure emails/rendering use event timezone instead of server timezone
 - [ ] tienda dashboard: validate forms for price/date fields and show clear error states
-- [ ] content QA: drafts are visible in dashboard lists and can open individual item screens reliably
 - [ ] stripe dashboard connection: reconnect and verify account status sync in tienda
-- [ ] buyer side: improve checkout UX (totals, loading states, validation, success/receipt transitions)
 - [ ] payments QA: test successful payment, failed payment, and refund visibility paths
-- [ ] owner dashboard CRM integration (JWT): wire preview/dashboard data to `/api/crm/subscribers?storeRef=<slug>`, `/api/crm/newsletters?storeRef=<slug>`, `/api/crm/orders?storeRef=<slug>`, `/api/crm/customers?storeRef=<slug>` (unified per-email record merging orders + RSVPs + subscriber status)
-- [ ] owner dashboard actions (JWT): wire `/api/crm/subscribers/:documentId/sync`, `/api/crm/newsletters/:documentId/send`, and `/api/crm/stripe/connect`
-- [ ] event preview RSVPs (JWT): ensure `/api/tienda/stores/:ref/events/:eventId/rsvps` renders records and `/api/tienda/stores/:ref/events/:eventId/rsvps/sync` only runs when sync metadata exists
-
-P1 (strongly recommended this wave)
 - [ ] buyer side: introduce per-store cart flow (add/remove/update quantity)
 - [ ] buyer side: verify checkout supports single-item fast buy and cart checkout
 - [ ] payment form: improve in-app payment form reliability and preview state
@@ -29,14 +18,8 @@ P1 (strongly recommended this wave)
 - [ ] CRM search + sort: text search (email/name/documentId) and sort by `lastOrderAt`, `lastRsvpAt`, `totalSpent`, `ordersCount`
 - [ ] CRM detail modal: click row to open modal with record summary + quick links/actions (`order-documentId`, `subscriber-documentId`, `rsvp-documentId`)
 - [ ] CRM modal actions (phase 1): subscriber sync + newsletter send hooks; deeper edit flows deferred
-
-P2 (polish if time)
-- [ ] tienda dashboard: verify date/timezone display consistency in list and detail pages
 - [ ] stripe connect option: define standard flow (connected account onboarding + dashboard handoff)
-- [ ] launch QA: mobile pass for homepage, store list, and checkout screens
-
 - [ ] inbox widget in receipt page
-- [ ] links not working in tiptapp - articles
 - [ ] slug for article starts with YEAR-
 - [ ] store.isMarketplace & conditional field stores?
 - [ ] strapi endpoint /related [products,pages,blogs,stores] in each service and controller
@@ -45,32 +28,19 @@ P2 (polish if time)
 - [ ] Crowdfunding? template - https://crowdfundr.com/dropindust?ref=
 - [ ] Prixel printing kit - https://prixel.com/products/the-prixel-printing-kit
 - [ ] move Tags editing to item.view
-- [ ] fail error in CMS still says success
 - [ ] use store settings reply-to email
 - [ ] use store settings support email
 - [ ] edit order status [crm dashboard]
 - [ ] notify buyer of order change
 - [ ] buyer order_id status page
 - [ ] order receipt email, store parameter
-- [ ] item.edit form meta title fix, include store.title
-- [ ] item.edit form meta description suggestion
-- [ ] store settings dashboard modify some
-- [ ] markket-next changes store_slug under url?
-- [ ] confirm email during verify if it wasn't already
+- [ ] abstract componenets to cafecito
 - [ ] Xcelerator post
 - [ ] image modal lets you search from the library and pick an existing pic
-- [ ] image upload in tiptap editor
-- [ ] tiptap error with urls
-- [ ] abstract componenets to cafecito
 - [ ] layout, header store selection type autocomplete~ component
 - [ ] generate types from get-schema
-- [ ] tiptap editor, prevent ctrl+s (PUT draft or save to local storage)
-- [ ] tiptap editor, drafts in local storage
-- [ ] tiptap editor preserve content on REST error
 - [ ] POSTMAN automated tests
 - [ ] AUTOMATED REST POST tests after deploy
-- [ ] magic user code, invite collaborator to store
-- [ ] magic code for buyers - token with no user
 - [ ] Static sites can be created via API
 - [ ] manage custom domain
 - [ ] github api - trigger build of github website
@@ -78,50 +48,20 @@ P2 (polish if time)
 - [ ] album tracks are edited in album item.view, individual image managers
 - [ ] add albums[/collections] to pages
 - [ ] add albums[/collections] to products
-- [ ] rearrange slides in image.manager
-- [ ] publish / unpublish CMS items
-- [ ] when magic link login, swap confirmed to true
-- [ ] image.modal canvas generation images with text
-- [ ] better image modal unsplash (open libraries) integration
 - [ ] item form, display error when save create (store.slug)
-- [ ] crm.orders endpoint
-- [ ] bootstrap initial content (startup|landing_page|community|magazine|store|crowdfund)
 - [ ] Events send calendar invite after RSVP
 - [ ] Email event subscribers (zoom instructions, access, etc)
 - [ ] Product.Extensions format (JSON, lifecycle, and API processing)
 - [ ] SKU and price ids for events
-- [ ] add DATEs to event, forms
 - [ ] react dev template
 - [ ] better debugging (console.log audits)
 - [ ] sendgrid templates & strapi?
 - [ ] 2FA for admin
 - [ ] soc2 plugin compliance
 - [ ] audit log
-- [ ] pagination and additional results
 - [ ] dynamically restrict content limits
 - [ ] postgres backups
 - [ ] trigger github actions build, via endpoint using store.extensions.credentials
-- [ ] new onboarding: create 1st store & info
-
-## 2026
-
-- [ ] use SEO endpoints to generate, skip asking
-- [ ] enable paid RSVP to events
-- [ ] pexels search in image modal
-- [ ] custom stripe components payment
-- [ ] custom stripe components dashboard
-- [ ] adding dates to event
-- [ ] list of previous events
-- [ ] remove or hide an item[product,page,blog,] (unpublish, deactivate)
-- [ ] create albums with tracks
-- [ ] shopping cart per store, with multiple products toggle with [store.extensions]
-- [ ] albums can include any content types
-- [ ] store bootstrap content : after create, (pages, blog, products)
-- [ ] markket: newsletter sendgrid sync (add, remove)
-- [ ] markket: price|product settings, digital, ships_to
-- [ ] prettier newsletter page
-- [ ] display orders in dashboard
-- [ ] display subscribers in dashboard
 - [ ] create newsletter editions in dashboard
 - [ ] headers#anchor links in parsing Content
 - [ ] mattermost link
@@ -130,6 +70,58 @@ P2 (polish if time)
 - [ ] better afterSave action.helpers (stripe_sync, default_SEO)
 - [ ] read pages in english spanish
 - [ ] create/edit pages in english spanish
+- [ ] enable paid RSVP to events
+- [ ] custom stripe components payment
+- [ ] custom stripe components dashboard
+- [ ] list of previous events
+- [ ] create albums with tracks
+- [ ] shopping cart per store, with multiple products toggle with [store.extensions]
+- [ ] albums can include any content types
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+
+### v0.9.0 May 2026
+
+- [x] content QA: drafts are visible in dashboard lists and can open individual item screens reliably
+- [x] tienda dashboard: adding/editing Event dates works end-to-end (draft -> save -> list -> detail)
+- [x] tienda dashboard: add/edit `event.timezone` (IANA) and ensure emails/rendering use event timezone instead of server timezone
+- [x] buyer side: improve checkout UX (totals, loading states, validation, success/receipt transitions)
+- [x] owner dashboard CRM integration (JWT): wire preview/dashboard data to `/api/crm/subscribers?storeRef=<slug>`, `/api/crm/newsletters?storeRef=<slug>`, `/api/crm/orders?storeRef=<slug>`, `/api/crm/customers?storeRef=<slug>` (unified per-email record merging orders + RSVPs + subscriber status)
+- [x] owner dashboard actions (JWT): wire `/api/crm/subscribers/:documentId/sync`, `/api/crm/newsletters/:documentId/send`, and `/api/crm/stripe/connect`
+- [x] event preview RSVPs (JWT): ensure `/api/tienda/stores/:ref/events/:eventId/rsvps` renders records and `/api/tienda/stores/:ref/events/:eventId/rsvps/sync` only runs when sync metadata exists
+- [x] tienda dashboard: verify date/timezone display consistency in list and detail pages
+- [x] links not working in tiptapp - articles
+- [x] fail error in CMS still says success
+- [x] item.edit form meta title fix, include store.title
+- [x] item.edit form meta description suggestion
+- [x] store settings dashboard modify some
+- [x] markket-next changes store_slug under url?
+- [x] confirm email during verify if it wasn't already
+- [x] image upload in tiptap editor
+- [x] tiptap error with urls
+- [x] tiptap editor, prevent ctrl+s (PUT draft or save to local storage)
+- [x] tiptap editor, drafts in local storage
+- [x] tiptap editor preserve content on REST error
+- [x] magic user code, invite collaborator to store
+- [x] magic code for buyers - token with no user
+- [x] rearrange slides in image.manager
+- [x] publish / unpublish CMS items
+- [x] when magic link login, swap confirmed to true
+- [x] image.modal canvas generation images with text
+- [x] better image modal unsplash (open libraries) integration
+- [x] crm.orders endpoint
+- [x] bootstrap initial content (startup|landing_page|community|magazine|store|crowdfund)
+- [x] add DATEs to event, forms
+- [x] pagination and additional results
+- [x] new onboarding: create 1st store & info
+- [x] use SEO endpoints to generate, skip asking
+- [x] pexels search in image modal
+- [x] adding dates to event
+- [x] remove or hide an item[product,page,blog,] (unpublish, deactivate)
+- [x] store bootstrap content : after create, (pages, blog, products)
+- [x] prettier newsletter page
+- [x] display orders in dashboard
+- [x] display subscribers in dashboard
 
 ## April
 
