@@ -41,7 +41,7 @@
     "date-fns": "^4.2.1",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.4.10",
-    "next": "16.2.4",
+    "next": "16.2.6",
     "next-swagger-doc": "^0.4.1",
     "posthog-js": "1.372.1",
     "posthog-node": "5.30.4",
