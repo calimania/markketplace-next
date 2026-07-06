@@ -402,17 +402,23 @@ export class StrapiClient {
     });
   }
 
-  async getEvents(store_slug: string = this.storeSlug) {
+  async getEvents(store_slug: string = this.storeSlug, options?: { filter?: any; sort?: string; paginate?: { page: number; pageSize: number }; status?: string }) {
+    const filters = {
+      stores: {
+        slug: {
+          $eq: store_slug,
+        },
+      },
+      ...(options?.filter || {}),
+    };
+
     return this.fetch({
       contentType: 'events',
-      filters: {
-        stores: {
-          slug: {
-            $eq: store_slug,
-          }
-        }
-      },
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+      filters,
+      status: (options?.status || 'published') as "published" | "draft" | "all",
+      sort: options?.sort,
+      paginate: options?.paginate,
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores',
     });
   }
 

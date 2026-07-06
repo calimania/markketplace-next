@@ -14,6 +14,7 @@ import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
 import { readTiendaAuthToken } from '../content.find';
 import type { Event } from '@/markket/event';
+import RichTextContent from '@/app/components/ui/richtext.content';
 
 type TiendaEventItemPageClientProps = {
   storeSlug: string;
@@ -222,7 +223,7 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
 
           {event.Description && (
             <Paper withBorder p="lg" radius="md" className="prose dark:prose-dark max-w-none">
-              <Text>{event.Description}</Text>
+              <RichTextContent content={event.Description} />
             </Paper>
           )}
           {!event.Description && event.SEO?.metaDescription && (

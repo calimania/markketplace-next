@@ -3,32 +3,17 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Badge, Container, Title, Text, Paper, Stack, Group, Button, Skeleton, SegmentedControl, TextInput } from '@mantine/core';
-import { IconArrowLeft, IconChevronRight, IconEye, IconEyeOff, IconPlus, IconSearch } from '@tabler/icons-react';
+import { Container, Title, Text, Paper, Stack, Group, Button, Skeleton, SegmentedControl, TextInput } from '@mantine/core';
+import { IconArrowLeft, IconChevronRight, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import { markketColors } from '@/markket/colors.config';
-
-type StoreStatusShape = {
-  status?: string;
-  publishedAt?: string | null;
-  slug?: string;
-  documentId?: string;
-};
-
-function isStorePublished(store: StoreStatusShape) {
-  const status = String(store.status || '').toLowerCase();
-  if (status === 'published') return true;
-  if (status === 'draft') return false;
-  return Boolean(store.publishedAt);
-}
 
 export default function MeStoresPage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();
   const [isStoresHydrating, setIsStoresHydrating] = useState(true);
   const [sortMode, setSortMode] = useState<'alpha' | 'recent'>('alpha');
-  const [visibilityMode, setVisibilityMode] = useState<'all' | 'published' | 'draft'>('all');
   const [storeSearch, setStoreSearch] = useState('');
 
   const uniqueStores = stores
@@ -38,13 +23,7 @@ export default function MeStoresPage() {
       return array.findIndex((candidate) => (candidate.documentId || candidate.slug) === identity) === index;
     });
 
-  const visibleStores = uniqueStores.filter((store) => {
-    if (visibilityMode === 'all') return true;
-    const published = isStorePublished(store as StoreStatusShape);
-    return visibilityMode === 'published' ? published : !published;
-  });
-
-  const filteredStores = visibleStores.filter((store) => {
+  const filteredStores = uniqueStores.filter((store) => {
     const query = storeSearch.trim().toLowerCase();
     if (!query) return true;
 
@@ -62,7 +41,6 @@ export default function MeStoresPage() {
 
     return (a.title || a.slug || '').localeCompare(b.title || b.slug || '');
   });
-
   useEffect(() => {
     if (isLoading) return;
 
@@ -85,31 +63,26 @@ export default function MeStoresPage() {
       .finally(() => setIsStoresHydrating(false));
   }, [confirmed, fetchStores, isLoading, router, stores.length]);
 
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    if (sortedStores.length > 0) {
+      console.table(
+        sortedStores.map((store) => ({
+          slug: store.slug,
+          title: store.title,
+          updatedAt: store.updatedAt,
+        })),
+      );
+    }
+  }, [sortedStores]);
+
   if (!isLoading && !confirmed()) {
     return null;
   }
 
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
-
-    const statusSnapshot = sortedStores.map((store) => {
-      const typed = store as StoreStatusShape;
-      return {
-        slug: store.slug,
-        documentId: typed.documentId,
-        status: typed.status,
-        publishedAt: typed.publishedAt,
-        resolved: isStorePublished(typed) ? 'Published' : 'Draft',
-      };
-    });
-
-    if (statusSnapshot.length > 0) {
-      console.table(statusSnapshot);
-    }
-  }, [sortedStores]);
-
   return (
-    <Container size="md" py="xl" className="tech-vhs-surface">
+    <Container size="md" py="lg" className="tech-vhs-surface">
       <Stack gap="md" mb="lg">
         <TinyBreadcrumbs
           items={[
@@ -118,19 +91,17 @@ export default function MeStoresPage() {
           ]}
         />
 
-        <Group justify="space-between" align="flex-start">
-          <div>
-            <Title order={1}>Your Stores</Title>
-            <Text c="dimmed" mt={2}>
-              <span className="accent-blue">/</span>
-            </Text>
-            <Text c="dimmed" mt={4}>Choose a store and jump back into your studio.</Text>
-          </div>
-          <Group>
-            <Button variant="default" component={Link} href="/me" leftSection={<IconArrowLeft size={16} />}>
-              Back to home
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+          <Stack gap={4}>
+            <Title order={2}>Your Stores</Title>
+            <Text c="dimmed" size="sm">Choose a store and continue editing.</Text>
+          </Stack>
+
+          <Group gap="sm" wrap="wrap" justify="flex-end">
+            <Button variant="default" component={Link} href="/me" leftSection={<IconArrowLeft size={16} />} radius="xl">
+              Back
             </Button>
-            <Button component={Link} href="/me/store/new" leftSection={<IconPlus size={16} />}>
+            <Button component={Link} href="/me/store/new" leftSection={<IconPlus size={16} />} radius="xl">
               New store
             </Button>
           </Group>
@@ -147,16 +118,6 @@ export default function MeStoresPage() {
               value={storeSearch}
               onChange={(event) => setStoreSearch(event.currentTarget.value)}
               leftSection={<IconSearch size={12} />}
-            />
-            <SegmentedControl
-              size="xs"
-              value={visibilityMode}
-              onChange={(value) => setVisibilityMode(value as 'all' | 'published' | 'draft')}
-              data={[
-                { label: 'All', value: 'all' },
-                { label: 'Published', value: 'published' },
-                { label: 'Draft', value: 'draft' },
-              ]}
             />
             <SegmentedControl
               size="xs"
@@ -177,10 +138,7 @@ export default function MeStoresPage() {
             withBorder
             p="lg"
             radius="xl"
-            style={{
-              borderColor: `${markketColors.sections.shop.main}22`,
-              background: `linear-gradient(135deg, ${markketColors.sections.shop.light} 0%, #ffffff 52%, ${markketColors.rosa.light} 100%)`,
-            }}
+            style={{ background: '#fff' }}
           >
             <Stack gap="md">
               <Group justify="space-between" align="center">
@@ -201,10 +159,7 @@ export default function MeStoresPage() {
             withBorder
             p="lg"
             radius="xl"
-            style={{
-              borderColor: `${markketColors.rosa.main}33`,
-              background: `linear-gradient(135deg, ${markketColors.rosa.light} 0%, #ffffff 60%, ${markketColors.sections.shop.light} 100%)`,
-            }}
+            style={{ background: '#fff' }}
           >
             <Stack gap="xs">
               <Text fw={700} style={{ color: markketColors.neutral.charcoal }}>No stores yet</Text>
@@ -222,35 +177,20 @@ export default function MeStoresPage() {
             key={store.documentId || `${store.slug || 'store'}-${index}`}
             href={`/tienda/${store.slug}`}
             className="store-tile-link"
-            aria-label={`Enter ${store.title || store.slug} (${isStorePublished(store as StoreStatusShape) ? 'Published' : 'Draft'})`}
+            aria-label={`Enter ${store.title || store.slug}`}
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <Paper
               withBorder
               p="md"
-              radius="xs"
+              radius="lg"
               className="store-tile-card"
             >
               <Group justify="space-between" align="center" wrap="nowrap">
                 <div style={{ minWidth: 0 }}>
-                  {(() => {
-                    const isPublished = isStorePublished(store as StoreStatusShape);
-
-                    return (
-                      <Group gap="xs" align="center" mb={2} wrap="wrap">
-                        <Title order={4}>{store.title}</Title>
-                        <Badge
-                          variant="light"
-                          color={isPublished ? 'green' : 'gray'}
-                          title={isPublished ? 'Visible store' : 'Hidden draft store'}
-                        >
-                          <Group gap={4} wrap="nowrap">
-                            {isPublished ? <IconEye size={12} /> : <IconEyeOff size={12} />}
-                          </Group>
-                        </Badge>
-                      </Group>
-                    );
-                  })()}
+                  <Group gap="xs" align="center" mb={2} wrap="wrap">
+                    <Title order={4}>{store.title}</Title>
+                  </Group>
                   <Text c="dimmed" size="sm" style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace' }}>
                     /{store.slug}
                   </Text>
@@ -260,8 +200,8 @@ export default function MeStoresPage() {
                   wrap="nowrap"
                   className="store-tile-cta"
                   style={{
-                    border: `1px solid ${markketColors.sections.shop.main}44`,
-                    color: markketColors.sections.shop.main,
+                    border: '1px solid rgba(15, 23, 42, 0.16)',
+                    color: '#0f172a',
                     background: '#fff',
                     borderRadius: 10,
                     padding: '6px 12px',

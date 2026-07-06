@@ -60,6 +60,26 @@ function imageOrFallback(...candidates: Array<string | undefined | null>): strin
   return candidates.find((item): item is string => typeof item === 'string' && item.length > 0);
 }
 
+function mediaImageUrl(media?: {
+  formats?: {
+    large?: { url?: string | null };
+    medium?: { url?: string | null };
+    small?: { url?: string | null };
+    thumbnail?: { url?: string | null };
+  };
+  url?: string | null;
+} | null): string | undefined {
+  if (!media) return undefined;
+
+  return imageOrFallback(
+    media.formats?.large?.url,
+    media.formats?.medium?.url,
+    media.formats?.small?.url,
+    media.formats?.thumbnail?.url,
+    media.url,
+  );
+}
+
 function railCardBasis(count: number) {
   if (count <= 2) return '0 0 320px';
   if (count <= 4) return '0 0 292px';
@@ -144,13 +164,33 @@ export default async function StorePage({
 
   const visibilityRef = String(store.documentId || store.slug || slug);
 
-  const [visibilityResponse, productsResponse, postsResponse, eventsResponse, pagesResponse] = await Promise.all([
+  const now = new Date();
+  const [visibilityResponse, productsResponse, postsResponse, upcomingEventsResponse, pagesResponse] = await Promise.all([
     strapiClient.getStoreVisibility(visibilityRef),
     strapiClient.getProducts({ page: 1, pageSize: 6 }, { filter: '', sort: 'updatedAt:desc' }, slug),
     strapiClient.getPosts({ page: 1, pageSize: 6 }, { sort: 'updatedAt:desc' }, slug),
-    strapiClient.getEvents(slug),
+    strapiClient.getEvents(slug, {
+      filter: { startDate: { $gte: now.toISOString() } },
+      sort: 'startDate:asc',
+      paginate: { page: 1, pageSize: 6 },
+      status: 'published',
+    }),
     strapiClient.getPages(slug),
   ]);
+
+  const pastEventsResponse = await (async () => {
+    const upcoming = (upcomingEventsResponse?.data || []) as Event[];
+    if (upcoming.length > 0) {
+      return null;
+    }
+
+    return await strapiClient.getEvents(slug, {
+      filter: { startDate: { $lt: now.toISOString() } },
+      sort: 'startDate:desc',
+      paginate: { page: 1, pageSize: 6 },
+      status: 'published',
+    });
+  })();
 
   const visibility = visibilityResponse;
   const visibilityCounts = visibility?.content_summary;
@@ -160,20 +200,17 @@ export default async function StorePage({
   const showAbout = visibility ? visibility.show_about : true;
   const products = (productsResponse?.data || []) as Product[];
   const posts = (postsResponse?.data || []) as Article[];
-  const events = (eventsResponse?.data || []) as Event[];
+  const upcomingEvents = (upcomingEventsResponse?.data || []) as Event[];
+  const pastEvents = (pastEventsResponse?.data || []) as Event[];
+  const eventsToDisplay = upcomingEvents.length > 0 ? upcomingEvents : pastEvents;
+  const isShowingPastOnly = upcomingEvents.length === 0 && pastEvents.length > 0;
   const pages = (pagesResponse?.data || []) as Page[];
   const publishedProducts = products.filter((item) => isPublishedEntry(item));
   const publishedPosts = posts.filter((item) => isPublishedEntry(item));
-  const publishedEvents = events.filter((item) => isPublishedEntry(item));
-  const now = new Date();
-  const upcomingEvents = publishedEvents.filter((e) => new Date(e.startDate) >= now).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  const pastEvents = publishedEvents.filter((e) => new Date(e.startDate) < now).sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-  const eventsToDisplay = upcomingEvents.length > 0 ? upcomingEvents : pastEvents;
-  const isShowingPastOnly = upcomingEvents.length === 0 && pastEvents.length > 0;
   const publishedPages = pages.filter((item) => isPublishedEntry(item));
   const slides = (store?.Slides || [])
     .map((slide) => ({
-      src: imageOrFallback(slide?.formats?.medium?.url, slide?.formats?.small?.url, slide?.url),
+      src: imageOrFallback(slide?.formats?.large?.url, slide?.formats?.medium?.url, slide?.formats?.small?.url, slide?.url),
       alt: slide?.alternativeText || slide?.caption || store?.title || 'Store slide',
       key: slide?.documentId || slide?.id || slide?.hash || slide?.url || 'slide',
     }))
@@ -181,22 +218,42 @@ export default async function StorePage({
 
   const storeImages = slides.length === 0
     ? ([
-      store?.Cover?.url && { src: store.Cover.url, alt: `${store.title} cover`, key: 'cover' },
+      imageOrFallback(store?.Cover?.formats?.large?.url, store?.Cover?.formats?.medium?.url, store?.Cover?.formats?.small?.url, store?.Cover?.url)
+      && {
+        src: imageOrFallback(store?.Cover?.formats?.large?.url, store?.Cover?.formats?.medium?.url, store?.Cover?.formats?.small?.url, store?.Cover?.url) as string,
+        alt: `${store.title} cover`,
+        key: 'cover',
+      },
       store?.Logo?.url && { src: store.Logo.url, alt: `${store.title} logo`, key: 'logo' },
-      store?.SEO?.socialImage?.url && { src: store.SEO.socialImage.url, alt: store.SEO?.metaTitle || store.title, key: 'social' },
+      imageOrFallback(store?.SEO?.socialImage?.formats?.large?.url, store?.SEO?.socialImage?.formats?.medium?.url, store?.SEO?.socialImage?.formats?.small?.url, store?.SEO?.socialImage?.url)
+      && {
+        src: imageOrFallback(store?.SEO?.socialImage?.formats?.large?.url, store?.SEO?.socialImage?.formats?.medium?.url, store?.SEO?.socialImage?.formats?.small?.url, store?.SEO?.socialImage?.url) as string,
+        alt: store.SEO?.metaTitle || store.title,
+        key: 'social',
+      },
     ].filter(Boolean) as { src: string; alt: string; key: string }[])
     : [];
 
   const descriptionText = richTextToPlainText(store.Description);
   const hasStoreDescription = Boolean(descriptionText?.trim());
   const shouldRenderRichDescription = !homePage?.Title && hasStoreDescription;
+  const storefrontFallbackImage = imageOrFallback(
+    store?.Cover?.formats?.large?.url,
+    store?.Cover?.formats?.medium?.url,
+    store?.Cover?.formats?.small?.url,
+    store?.Cover?.url,
+    store?.SEO?.socialImage?.formats?.large?.url,
+    store?.SEO?.socialImage?.formats?.medium?.url,
+    store?.SEO?.socialImage?.formats?.small?.url,
+    store?.SEO?.socialImage?.url,
+    slides[0]?.src,
+    storeImages[0]?.src,
+    store?.Logo?.url,
+  );
   const homePageImage = imageOrFallback(
-    homePage?.SEO?.socialImage?.formats?.medium?.url,
-    homePage?.SEO?.socialImage?.formats?.small?.url,
-    homePage?.SEO?.socialImage?.url,
-    homePage?.albums?.[0]?.cover?.formats?.medium?.url,
-    homePage?.albums?.[0]?.cover?.formats?.small?.url,
-    homePage?.albums?.[0]?.cover?.url,
+    mediaImageUrl(homePage?.SEO?.socialImage as any),
+    mediaImageUrl(homePage?.albums?.[0]?.cover as any),
+    storefrontFallbackImage,
   );
   const hasHomePageStory = Boolean(
     homePage?.Title ||
@@ -211,37 +268,20 @@ export default async function StorePage({
 
   const featuredProduct = publishedProducts[0];
   const featuredPost = publishedPosts[0];
-  const featuredEvent = [...publishedEvents]
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .find((event) => new Date(event.startDate).getTime() >= Date.now()) || publishedEvents[0];
+  const featuredEvent = eventsToDisplay[0];
   const featuredAbout = aboutPages[0];
   const heroImage = imageOrFallback(
-    store?.Logo?.url,
+    mediaImageUrl(store?.Cover as any),
+    mediaImageUrl(store?.SEO?.socialImage as any),
     slides[0]?.src,
     slides[1]?.src,
     slides[2]?.src,
-    store?.Cover?.formats?.large?.url,
-    store?.Cover?.formats?.medium?.url,
-    store?.Cover?.formats?.small?.url,
-    store?.Cover?.url,
-    store?.SEO?.socialImage?.formats?.large?.url,
-    store?.SEO?.socialImage?.formats?.medium?.url,
-    store?.SEO?.socialImage?.formats?.small?.url,
-    store?.SEO?.socialImage?.url,
-    featuredProduct?.Thumbnail?.url,
-    featuredPost?.cover?.formats?.large?.url,
-    featuredPost?.cover?.formats?.medium?.url,
-    featuredPost?.cover?.formats?.small?.url,
-    featuredPost?.cover?.url,
-    featuredEvent?.Thumbnail?.formats?.large?.url,
-    featuredEvent?.Thumbnail?.formats?.medium?.url,
-    featuredEvent?.Thumbnail?.formats?.small?.url,
-    featuredEvent?.Thumbnail?.url,
-    featuredAbout?.SEO?.socialImage?.formats?.large?.url,
-    featuredAbout?.SEO?.socialImage?.formats?.medium?.url,
-    featuredAbout?.SEO?.socialImage?.formats?.small?.url,
-    featuredAbout?.SEO?.socialImage?.url,
+    mediaImageUrl(featuredPost?.cover as any),
+    mediaImageUrl(featuredEvent?.Thumbnail as any),
+    mediaImageUrl(featuredAbout?.SEO?.socialImage as any),
+    mediaImageUrl(featuredProduct?.Thumbnail as any),
     storeImages[0]?.src,
+    store?.Logo?.url,
   );
 
   const signalCards = [
@@ -259,7 +299,7 @@ export default async function StorePage({
     },
     {
       label: 'Events',
-      value: publishedEvents.length,
+      value: eventsToDisplay.length,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
     },
@@ -283,9 +323,9 @@ export default async function StorePage({
       description: compactRich(featuredProduct?.Description, 96) || 'Browse your latest drops and essentials in one place.',
       hasContent: publishedProducts.length > 0,
       imageUrl: imageOrFallback(
-        featuredProduct?.Thumbnail?.url,
-        featuredProduct?.SEO?.socialImage?.formats?.small?.url,
-        featuredProduct?.SEO?.socialImage?.url,
+        mediaImageUrl(featuredProduct?.Thumbnail as any),
+        mediaImageUrl(featuredProduct?.SEO?.socialImage as any),
+        storefrontFallbackImage,
       ),
     },
     {
@@ -300,10 +340,9 @@ export default async function StorePage({
       description: compact(featuredPost?.SEO?.metaDescription || 'Read stories, updates, and ideas from this store.'),
       hasContent: publishedPosts.length > 0,
       imageUrl: imageOrFallback(
-        featuredPost?.cover?.formats?.small?.url,
-        featuredPost?.cover?.url,
-        featuredPost?.SEO?.socialImage?.formats?.small?.url,
-        featuredPost?.SEO?.socialImage?.url,
+        mediaImageUrl(featuredPost?.cover as any),
+        mediaImageUrl(featuredPost?.SEO?.socialImage as any),
+        storefrontFallbackImage,
       ),
     },
     {
@@ -313,15 +352,14 @@ export default async function StorePage({
       show: showEvents,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
-      countLabel: `${visibilityCounts?.events_count ?? publishedEvents.length} events`,
+      countLabel: `${visibilityCounts?.events_count ?? eventsToDisplay.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
       description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
-      hasContent: publishedEvents.length > 0,
+      hasContent: eventsToDisplay.length > 0,
       imageUrl: imageOrFallback(
-        featuredEvent?.Thumbnail?.formats?.small?.url,
-        featuredEvent?.Thumbnail?.url,
-        featuredEvent?.SEO?.socialImage?.formats?.small?.url,
-        featuredEvent?.SEO?.socialImage?.url,
+        mediaImageUrl(featuredEvent?.Thumbnail as any),
+        mediaImageUrl(featuredEvent?.SEO?.socialImage as any),
+        storefrontFallbackImage,
       ),
     },
     {
@@ -336,10 +374,10 @@ export default async function StorePage({
       description: compact(featuredAbout?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Learn the story and explore the world behind this store.'),
       hasContent: aboutPages.length > 0 || hasStoreDescription,
       imageUrl: imageOrFallback(
-        featuredAbout?.SEO?.socialImage?.formats?.small?.url,
-        featuredAbout?.SEO?.socialImage?.url,
-        store?.Cover?.url,
-        store?.SEO?.socialImage?.url,
+        mediaImageUrl(featuredAbout?.SEO?.socialImage as any),
+        mediaImageUrl(store?.Cover as any),
+        mediaImageUrl(store?.SEO?.socialImage as any),
+        storefrontFallbackImage,
       ),
     },
   ].filter((card) => card.show && card.hasContent);
@@ -369,13 +407,13 @@ export default async function StorePage({
       url: `/${slug}/events`,
       title: 'Events',
       description: (() => {
-        const upcoming = visibilityCounts?.upcoming_events_count ?? publishedEvents.filter((event) => new Date(event.startDate).getTime() >= Date.now()).length;
-        return upcoming > 0 ? `${upcoming} upcoming` : `${publishedEvents.length} events`;
+        const upcoming = visibilityCounts?.upcoming_events_count ?? upcomingEvents.length;
+        return upcoming > 0 ? `${upcoming} upcoming` : `${eventsToDisplay.length} events`;
       })(),
       show: showEvents,
       color: markketColors.sections.events.main,
       bgColor: markketColors.sections.events.light,
-      hasContent: publishedEvents.length > 0,
+      hasContent: eventsToDisplay.length > 0,
     },
     {
       url: `/${slug}/about`,
@@ -388,7 +426,7 @@ export default async function StorePage({
     }
   ].filter(link => link.show && link.hasContent);
 
-  const hasPublishedCollections = publishedProducts.length > 0 || publishedPosts.length > 0 || publishedEvents.length > 0 || aboutPages.length > 0;
+  const hasPublishedCollections = publishedProducts.length > 0 || publishedPosts.length > 0 || eventsToDisplay.length > 0 || aboutPages.length > 0;
   const hasPresentationContent = hasHomePageStory || hasStoreDescription || slides.length > 0 || storeImages.length > 0;
   const shouldShowEmptyLaunchState = !hasPublishedCollections && !hasPresentationContent;
   const siteUrl = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
@@ -703,7 +741,7 @@ export default async function StorePage({
               </Box>
             )}
 
-            {(publishedProducts.length > 0 || publishedPosts.length > 0 || publishedEvents.length > 0 || aboutPages.length > 0) && (
+            {(publishedProducts.length > 0 || publishedPosts.length > 0 || eventsToDisplay.length > 0 || aboutPages.length > 0) && (
               <Stack gap="lg">
                 {showShop && publishedProducts.length > 0 && (
                   <Stack gap="sm">
@@ -724,11 +762,10 @@ export default async function StorePage({
                     >
                       {publishedProducts.slice(0, 6).map((product, index) => {
                         const image = imageOrFallback(
-                          product?.Thumbnail?.url,
-                          product?.Slides?.[0]?.formats?.medium?.url,
-                          product?.Slides?.[0]?.formats?.small?.url,
-                          product?.Slides?.[0]?.url,
-                          product?.SEO?.socialImage?.url,
+                          mediaImageUrl(product?.Thumbnail as any),
+                          mediaImageUrl(product?.Slides?.[0] as any),
+                          mediaImageUrl(product?.SEO?.socialImage as any),
+                          storefrontFallbackImage,
                         );
 
                         return (
@@ -786,10 +823,9 @@ export default async function StorePage({
                     >
                       {publishedPosts.slice(0, 6).map((post, index) => {
                         const image = imageOrFallback(
-                          post?.cover?.formats?.medium?.url,
-                          post?.cover?.formats?.small?.url,
-                          post?.cover?.url,
-                          post?.SEO?.socialImage?.url,
+                          mediaImageUrl(post?.cover as any),
+                          mediaImageUrl(post?.SEO?.socialImage as any),
+                          storefrontFallbackImage,
                         );
 
                         return (
@@ -847,13 +883,10 @@ export default async function StorePage({
                     >
                       {eventsToDisplay.slice(0, 6).map((event, index) => {
                         const image = imageOrFallback(
-                          event?.Thumbnail?.formats?.medium?.url,
-                          event?.Thumbnail?.formats?.small?.url,
-                          event?.Thumbnail?.url,
-                          event?.Slides?.[0]?.formats?.medium?.url,
-                          event?.Slides?.[0]?.formats?.small?.url,
-                          event?.Slides?.[0]?.url,
-                          event?.SEO?.socialImage?.url,
+                          mediaImageUrl(event?.Thumbnail as any),
+                          mediaImageUrl(event?.Slides?.[0] as any),
+                          mediaImageUrl(event?.SEO?.socialImage as any),
+                          storefrontFallbackImage,
                         );
 
                         return (
@@ -919,10 +952,9 @@ export default async function StorePage({
                     >
                       {aboutPages.slice(0, 6).map((page, index) => {
                         const image = imageOrFallback(
-                          page?.SEO?.socialImage?.formats?.medium?.url,
-                          page?.SEO?.socialImage?.formats?.small?.url,
-                          page?.SEO?.socialImage?.url,
-                          store?.Cover?.url,
+                          mediaImageUrl(page?.SEO?.socialImage as any),
+                          mediaImageUrl(store?.Cover as any),
+                          storefrontFallbackImage,
                         );
 
                         return (

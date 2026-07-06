@@ -24,6 +24,19 @@ import { IconBuildingStore, IconPlus, IconCamera, IconPencil, IconSparkles, Icon
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient, strapiClient } from '@/markket/api';
+import { markketColors } from '@/markket/colors.config';
+
+type StoreStatusShape = {
+  status?: string;
+  publishedAt?: string | null;
+};
+
+function isStorePublished(store: StoreStatusShape) {
+  const status = String(store.status || '').toLowerCase();
+  if (status === 'published') return true;
+  if (status === 'draft') return false;
+  return Boolean(store.publishedAt);
+}
 
 /**
  * Dashboard home for logged in users
@@ -40,6 +53,8 @@ export default function MeHomePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [storeSearch, setStoreSearch] = useState('');
+  const storeCount = stores.length;
+  const publishedCount = stores.filter((store) => isStorePublished(store as StoreStatusShape)).length;
   const previewStores = [...stores]
     .filter((store) => {
       const query = storeSearch.trim().toLowerCase();
@@ -167,28 +182,6 @@ export default function MeHomePage() {
 
   return (
     <Container size="lg" py={{ base: 'md', md: 'xl' }} className="me-surface tech-vhs-surface">
-      <Group justify="space-between" align="end" mb="xl" wrap="wrap" gap="sm">
-        <Stack gap={6}>
-          <Group gap="md" align="center" wrap="wrap">
-            <Avatar src={user?.avatar?.url} size={56} radius="xl">
-              {(user?.displayName || user?.username || 'M').charAt(0).toUpperCase()}
-            </Avatar>
-            <Stack gap={2}>
-              <Title order={1}>
-                {user?.displayName || user?.username || 'Hey there'}
-              </Title>
-              <Text c="dimmed" size="sm">{user?.email}</Text>
-            </Stack>
-          </Group>
-        </Stack>
-
-        <Group>
-          <Button variant="light" component={Link} href="/me/account" radius="xl" color="pink">
-            Tune account
-          </Button>
-        </Group>
-      </Group>
-
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Paper withBorder p="lg" radius="xl" className="me-card me-card-enter">
           {(isLoading || !profileLoaded) ? (
@@ -218,7 +211,7 @@ export default function MeHomePage() {
                     <Text mt="xs" c="dimmed">
                       {isEditingProfile
                         ? (!displayName ? 'Welcome. Add a name and a short intro to set the tone.' : 'Adjust what you want, then save changes.')
-                        : 'Name, bio, and photo that represent you across your stores.'}
+                        : 'Name, bio, and photo'}
                     </Text>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -430,7 +423,6 @@ export default function MeHomePage() {
                   {stores.length === 0 ? ' Your First ' : ' Another '}
                   Store
                 </Button>
-                <Text c="dimmed"></Text>
               </>
             )}
             {(stores.length >= 2) && (

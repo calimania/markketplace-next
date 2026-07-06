@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Price, Product, Slide } from "@/markket/product";
 import { Store } from "@/markket";
 import CheckoutModal from "../../store/[slug]/checkout/CheckoutModal";
-import Markdown from '@/app/components/ui/page.markdown';
+import RichTextContent from '@/app/components/ui/richtext.content';
 import { motion } from 'framer-motion';
 import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
@@ -154,7 +154,7 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
               <Title order={2} size="h3" mb={40}>
                 Product Description
               </Title>
-              <Markdown content={product?.Description as string} />
+              <RichTextContent content={product?.Description as string} />
             </div>
 
             <motion.div

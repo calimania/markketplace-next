@@ -511,12 +511,13 @@ textarea:disabled {
 /* Shared clickable store tiles (/me and /tienda) */
 .store-tile-link {
   display: block;
-  border-radius: 16px;
+  border-radius: 20px;
 }
 
 .store-tile-card {
   transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease, background-color 170ms ease;
   cursor: pointer;
+  border-radius: 20px !important;
 }
 
 .store-tile-link:hover .store-tile-card,
@@ -534,6 +535,7 @@ textarea:disabled {
 
 .store-tile-cta {
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  border-radius: 999px;
 }
 
 .store-tile-link:hover .store-tile-cta,
@@ -750,6 +752,7 @@ textarea:disabled {
     border: 1px solid rgba(15, 23, 42, 0.06);
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  border-radius: 24px !important;
 }
 
 .me-card::before,
@@ -777,6 +780,7 @@ textarea:disabled {
   position: relative;
     overflow: hidden;
   transition: transform 140ms ease, border-color 160ms ease, background-color 160ms ease;
+  border-radius: 20px !important;
 }
 
 .me-store-card:hover {
@@ -805,6 +809,12 @@ textarea:disabled {
   border: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+  border-radius: 24px !important;
+  }
+  
+  .me-hero,
+  .tienda-hero {
+    border-radius: 28px !important;
 }
 
 .tienda-panel:hover {

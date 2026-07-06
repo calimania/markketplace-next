@@ -1,8 +1,10 @@
 # AGENTS.md
 
+## Markketplace NextTS client
+
 ## Markketplace Agents: Architecture, Best Practices & Learnings
 
-This document outlines the architecture, conventions, and best practices for building high-quality, maintainable agents and screens in the Markketplace Next.js project. Our codebase leverages the Next.js `app/` directory, API routes, React screens, and integrates with Strapi (ecommerce API), Stripe, SendGrid, and Zoom.
+Our codebase uses `app/` directory, API routes, React screens, and integrates with markket (strapi ecommerce API), Stripe, SendGrid, and Zoom
 
 ---
 
@@ -198,47 +200,7 @@ These rules apply to every session. The goal is to move fast without wasting tok
 - Do not add comments, docstrings, or console logs to code you did not touch.
 
 ### Thinking/Output Discipline
-- Skip preamble ("I will now…", "Let me check…"). Jump to the action.
+- Always check and confirm before making changes.
 - Omit summaries of what was done unless explicitly requested.
 - When reporting findings, use the structured format: severity → file path → one-line description.
 - Keep replies to 3-5 lines unless showing code or a checklist.
-
-### Task Sequencing
-- Work on must-fix items first; defer nice-to-haves without discussion.
-- Group related edits into one turn instead of one-edit-per-reply.
-- After each cluster of changes, run `get_errors` once to catch regressions, not after every single file.
-
----
-
-## 12. Launch Roadmap (Sprint: Dashboard Polish → Stripe Connect)
-
-Ordered by priority. Do not skip ahead; close each item before opening the next.
-
-### P0 — Dashboard Bug Fixes & UX Tightening
-- [ ] Event form: replace basic time input with a proper date-time picker (e.g. `<input type="datetime-local">` or a lightweight picker component).
-- [ ] Content boxes: add breathing room (padding, max-width prose) and a full-screen / expand toggle for long-form fields.
-- [ ] Rich-text fields: evaluate swapping plain `<textarea>` for Tiptap editor in Article / Page / Event description fields. Keep the existing form shell; swap only the input widget.
-
-### P1 — Free & Paid Pricing on Products & Events
-- [ ] Add `price` (number, default 0) and `currency` (string, default `USD`) fields to Product and Event forms if not already mapped.
-- [ ] Stripe payment-link flow: if price === 0, generate a $0 Stripe link (still captures email + order record for CRM).
-- [ ] Show "Free" badge on cards/detail pages when price is 0.
-- [ ] Product subscriptions: add `subscription` toggle (one-time vs. recurring) to Product form; wire to Stripe Price with `recurring` when enabled.
-
-### P2 — Stripe Connect Dashboard & Basic Stats
-- [ ] Store dashboard home: show aggregate stats card (total orders, total revenue, active subscribers count).
-- [ ] Stripe Connect: onboarding link if not connected; connected status badge if already linked.
-- [ ] Orders list: paginated table with status, amount, date, customer email.
-- [ ] CRM Subscribers: list view with email, subscribed date, source store.
-
-### P3 — QA Pass Before Ship
-- [ ] Public storefront smoke test: homepage, store listing, product/event/article/blog detail pages.
-- [ ] Empty-state audit: every list page must show a friendly empty state, not a blank screen.
-- [ ] Metadata audit: title + description on all key public routes.
-- [ ] Build passes with zero TypeScript errors (`npm run build`).
-
-### Defer (post-launch)
-- Zoom webinar integration
-- Advanced subscription tiers
-- Full CRM analytics
-- A/B testing on store cards

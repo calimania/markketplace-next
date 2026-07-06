@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './styles/tienda.css';  // Changed from @/styles to ./
 
 export const metadata: Metadata = {
   title: {
