@@ -1,4 +1,4 @@
-import { Group, Paper, Stack, Text, Title } from '@mantine/core';
+import { Badge, Group, Paper, Stack, Text, Title } from '@mantine/core';
 import type { ReactNode } from 'react';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import { markketColors } from '@/markket/colors.config';
@@ -62,33 +62,43 @@ export default function TiendaListShell({
     <Stack gap="md">
       <TinyBreadcrumbs items={breadcrumbs} />
 
-      <Group justify="space-between" align="end">
-        <div>
-          <Title order={1}>{title}</Title>
-          {!!routePath && (
-            <Text c="dimmed" mt={2}>
-              <span
-                className="accent-blue"
-                style={{
-                  color: toneStyle.main,
-                }}
-              >
-                {routePath}
-              </span>
+      <Paper
+        withBorder
+        radius="lg"
+        p="sm"
+        style={{
+          borderColor: `${toneStyle.main}26`,
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,250,250,0.94) 100%)',
+        }}
+      >
+        <Group justify="space-between" align="center" wrap="wrap" gap="sm">
+          <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+            <Group gap={8} wrap="wrap">
+              <Badge size="sm" variant="light" color="gray">
+                {sectionTitle}
+              </Badge>
+              {!!routePath && (
+                <Text size="xs" c="dimmed" style={{ color: toneStyle.main }}>
+                  {routePath}
+                </Text>
+              )}
+            </Group>
+            <Title order={2} style={{ fontSize: 'clamp(1.6rem, 2.6vw, 2rem)', letterSpacing: '-0.03em' }}>{title}</Title>
+            <Text size="xs" c="dimmed" maw={760}>
+              {subtitle}
             </Text>
-          )}
-          <Text size="xs" c="dimmed" mt={4}>{subtitle}</Text>
-        </div>
-        {!!actions && <Group>{actions}</Group>}
-      </Group>
+          </Stack>
+          {!!actions && <Group>{actions}</Group>}
+        </Group>
+      </Paper>
 
       <Paper
         withBorder
-        p="md"
+        p="sm"
         radius="md"
         style={{
           borderColor: `${toneStyle.main}3a`,
-          background: `linear-gradient(140deg, ${toneStyle.light} 0%, #ffffff 38%, #ffffff 100%)`,
+          background: `linear-gradient(140deg, ${toneStyle.light} 0%, #ffffff 42%, #ffffff 100%)`,
         }}
       >
         <Stack gap="sm">

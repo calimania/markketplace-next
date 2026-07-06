@@ -37,7 +37,7 @@ const features = [
   },
 ];
 
-const pickSmallestImage = (...values: Array<string | undefined | null>) => {
+const pickBestImage = (...values: Array<string | undefined | null>) => {
   return values.find((value): value is string => Boolean(value));
 };
 
@@ -92,7 +92,11 @@ const SectionLabel = ({ num, label, color }: { num: string; label: string; color
 );
 
 const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
-  const eventsToDisplay = communityEvents.filter(e => Boolean(e?.startDate));
+  const eventsToDisplay = [...communityEvents].sort((a, b) => {
+    const aTime = a?.startDate ? new Date(a.startDate).getTime() : Number.MAX_SAFE_INTEGER;
+    const bTime = b?.startDate ? new Date(b.startDate).getTime() : Number.MAX_SAFE_INTEGER;
+    return aTime - bTime;
+  });
 
   return (
     <main>
@@ -226,16 +230,17 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
                   <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
                     {communityPosts.slice(0, 6).map((post) => {
-                      const coverUrl = pickSmallestImage(
-                        post?.cover?.formats?.thumbnail?.url,
-                        post?.cover?.formats?.small?.url,
+                      const coverUrl = pickBestImage(
                         post?.cover?.formats?.medium?.url,
+                        post?.cover?.formats?.small?.url,
+                        post?.cover?.formats?.thumbnail?.url,
                         post?.cover?.url,
-                        post?.SEO?.socialImage?.formats?.thumbnail?.url,
+                        post?.SEO?.socialImage?.formats?.medium?.url,
                         post?.SEO?.socialImage?.formats?.small?.url,
+                        post?.SEO?.socialImage?.formats?.thumbnail?.url,
                         post?.SEO?.socialImage?.url,
-                        post?.store?.Logo?.formats?.thumbnail?.url,
                         post?.store?.Logo?.formats?.small?.url,
+                        post?.store?.Logo?.formats?.thumbnail?.url,
                         post?.store?.Logo?.url,
                       );
                       const storeSlug = post?.store?.slug;
@@ -343,20 +348,21 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                 {eventsToDisplay.slice(0, 6).map((event: Event) => {
-                  const thumbnailUrl = pickSmallestImage(
-                    event?.Thumbnail?.formats?.thumbnail?.url,
-                    event?.Thumbnail?.formats?.small?.url,
+                  const thumbnailUrl = pickBestImage(
                     event?.Thumbnail?.formats?.medium?.url,
+                    event?.Thumbnail?.formats?.small?.url,
+                    event?.Thumbnail?.formats?.thumbnail?.url,
                     event?.Thumbnail?.url,
-                    event?.Slides?.[0]?.formats?.thumbnail?.url,
-                    event?.Slides?.[0]?.formats?.small?.url,
                     event?.Slides?.[0]?.formats?.medium?.url,
+                    event?.Slides?.[0]?.formats?.small?.url,
+                    event?.Slides?.[0]?.formats?.thumbnail?.url,
                     event?.Slides?.[0]?.url,
-                    event?.SEO?.socialImage?.formats?.thumbnail?.url,
+                    event?.SEO?.socialImage?.formats?.medium?.url,
                     event?.SEO?.socialImage?.formats?.small?.url,
+                    event?.SEO?.socialImage?.formats?.thumbnail?.url,
                     event?.SEO?.socialImage?.url,
-                    (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
                     (event as any)?.stores?.[0]?.Logo?.formats?.small?.url,
+                    (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
                     (event as any)?.stores?.[0]?.Logo?.url,
                   );
                   const storeSlug = (event as any)?.stores?.[0]?.slug;
@@ -497,11 +503,11 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
                 {communityProducts.slice(0, 6).map((product) => {
-                  const productImage = pickSmallestImage(
+                  const productImage = pickBestImage(
                     product?.Thumbnail?.url,
-                    product?.Slides?.[0]?.formats?.thumbnail?.url,
-                    product?.Slides?.[0]?.formats?.small?.url,
                     product?.Slides?.[0]?.formats?.medium?.url,
+                    product?.Slides?.[0]?.formats?.small?.url,
+                    product?.Slides?.[0]?.formats?.thumbnail?.url,
                     product?.Slides?.[0]?.url,
                   );
                   const storeSlug = (product as any)?.stores?.[0]?.slug;
@@ -618,9 +624,9 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                 {communityPages.slice(0, 6).map((p) => {
                   const storeSlug = (p as any)?.store?.slug;
                   const href = storeSlug ? `/${storeSlug}/about/${p.slug}` : '/stores';
-                  const logoUrl = pickSmallestImage(
-                    (p as any)?.store?.Logo?.formats?.thumbnail?.url,
+                  const logoUrl = pickBestImage(
                     (p as any)?.store?.Logo?.formats?.small?.url,
+                    (p as any)?.store?.Logo?.formats?.thumbnail?.url,
                     (p as any)?.store?.Logo?.url,
                   );
 

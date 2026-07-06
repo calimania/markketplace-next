@@ -1083,16 +1083,16 @@ const ImageModal = ({
                       color="gray"
                       leftSection={<IconUpload size={16} />}
                       fullWidth
-                      title="Click to select an image from your device"
+                      title="Choose an image from your device"
                       {...props}
                     >
-                      Upload from Device
+                      Choose from Device
                     </Button>
                   )}
                 </FileButton>
               </Stack>
 
-              <Text size="xs" c="dimmed" style={{ marginBottom: 8 }}>💡 Click an image to load, or upload/search above</Text>
+              <Text size="xs" c="dimmed" style={{ marginBottom: 8 }}>Tap or click an image to load it, or choose/search above.</Text>
 
               {searchResults.length > 0 ? (
                 <Box
@@ -1145,7 +1145,11 @@ const ImageModal = ({
                     );
                   })}
                 </Box>
-              ) : null}
+              ) : (
+                <Text size="xs" c="dimmed">
+                  Search, paste an image URL, or choose a file from your device.
+                </Text>
+              )}
             </Stack>
           )}
 

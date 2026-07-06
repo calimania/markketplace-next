@@ -4,90 +4,24 @@
 
 ## 2026
 
-- [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
-- [ ] tienda dashboard: validate forms for price/date fields and show clear error states
-- [ ] stripe dashboard connection: reconnect and verify account status sync in tienda
-- [ ] payments QA: test successful payment, failed payment, and refund visibility paths
-- [ ] buyer side: introduce per-store cart flow (add/remove/update quantity)
-- [ ] buyer side: verify checkout supports single-item fast buy and cart checkout
-- [ ] payment form: improve in-app payment form reliability and preview state
-- [ ] payout form: add/verify payout setup form with status preview in dashboard
-- [ ] launch QA: technical pass (type checks, lint/build, critical route smoke tests)
-- [ ] CRM index view (single table): one unified list for customers/subscribers/orders/RSVP-derived records from `/api/crm/customers?storeRef=<slug>`
-- [ ] CRM category toggle: switch table lens between `All`, `Customers`, `Subscribers`, `Orders`, `RSVP` without leaving the page
-- [ ] CRM search + sort: text search (email/name/documentId) and sort by `lastOrderAt`, `lastRsvpAt`, `totalSpent`, `ordersCount`
-- [ ] CRM detail modal: click row to open modal with record summary + quick links/actions (`order-documentId`, `subscriber-documentId`, `rsvp-documentId`)
-- [ ] CRM modal actions (phase 1): subscriber sync + newsletter send hooks; deeper edit flows deferred
-- [ ] stripe connect option: define standard flow (connected account onboarding + dashboard handoff)
-- [ ] inbox widget in receipt page
-- [ ] slug for article starts with YEAR-
-- [ ] store.isMarketplace & conditional field stores?
-- [ ] strapi endpoint /related [products,pages,blogs,stores] in each service and controller
-- [ ] product attribute extensions fields
-- [ ] price editor, digital products, subscription options
-- [ ] Crowdfunding? template - https://crowdfundr.com/dropindust?ref=
-- [ ] Prixel printing kit - https://prixel.com/products/the-prixel-printing-kit
-- [ ] move Tags editing to item.view
-- [ ] use store settings reply-to email
-- [ ] use store settings support email
-- [ ] edit order status [crm dashboard]
-- [ ] notify buyer of order change
-- [ ] buyer order_id status page
-- [ ] order receipt email, store parameter
-- [ ] abstract componenets to cafecito
-- [ ] Xcelerator post
-- [ ] image modal lets you search from the library and pick an existing pic
-- [ ] layout, header store selection type autocomplete~ component
-- [ ] generate types from get-schema
-- [ ] POSTMAN automated tests
-- [ ] AUTOMATED REST POST tests after deploy
-- [ ] Static sites can be created via API
-- [ ] manage custom domain
-- [ ] github api - trigger build of github website
-- [ ] Deployment or Event ContentType
-- [ ] album tracks are edited in album item.view, individual image managers
-- [ ] add albums[/collections] to pages
-- [ ] add albums[/collections] to products
-- [ ] item form, display error when save create (store.slug)
-- [ ] Events send calendar invite after RSVP
-- [ ] Email event subscribers (zoom instructions, access, etc)
-- [ ] Product.Extensions format (JSON, lifecycle, and API processing)
-- [ ] SKU and price ids for events
-- [ ] react dev template
-- [ ] better debugging (console.log audits)
-- [ ] sendgrid templates & strapi?
-- [ ] 2FA for admin
-- [ ] soc2 plugin compliance
-- [ ] audit log
-- [ ] dynamically restrict content limits
-- [ ] postgres backups
-- [ ] trigger github actions build, via endpoint using store.extensions.credentials
-- [ ] create newsletter editions in dashboard
-- [ ] headers#anchor links in parsing Content
-- [ ] mattermost link
-- [ ] mercury ach/ stripe bypass (farmday)
-- [ ] custom next.CSS for custom themes
-- [ ] better afterSave action.helpers (stripe_sync, default_SEO)
-- [ ] read pages in english spanish
-- [ ] create/edit pages in english spanish
-- [ ] enable paid RSVP to events
-- [ ] custom stripe components payment
-- [ ] custom stripe components dashboard
-- [ ] list of previous events
-- [ ] create albums with tracks
-- [ ] shopping cart per store, with multiple products toggle with [store.extensions]
-- [ ] albums can include any content types
-- [ ] markket: newsletter sendgrid sync (add, remove)
-- [ ] markket: price|product settings, digital, ships_to
 
 ### v.0.3.3 July 2026
 
-- [x] Receive inbox by mail (slug@markket.place)
-- [x] Read inbox in /tienda
-- [x] Improve email templates
-- [x] Improve standard content (example content, SEO backfill)
-
-
+- [x] Add team button to Tienda home overview, not buried inside edit
+- [x] tweak /me and /tienda endppoints
+- [x] Fix event|product format missmatch
+- [x] Improve editor UX for mobile: better dynamic rich text editing
+- [x] Improve TipTap rich text toolbar/help for bold/links without annoying switching
+- [x] display correct image sizes in homepage, currently pixelated
+- [x] display correct fallback images, when some are not present
+- [x] Improve image upload modal and empty preview upload flows
+- [x] Support click-to-upload in empty preview areas
+- [x] Support drag-and-drop friendly image drop in desktop, as people expect it
+- [x] Avoid mobile wording like "drag and drop"; use less desktop-centric copy
+- [x] Add CRM inbox UI in the CRM section and fix navigation buttons
+- [x] Add dedicated inbox screen after the core Tienda UX and editor improvements
+- [x] repy to email uses markket api
+- [x] picsum placeholder grayscale images
 
 ### v0.9.0 May 2026
 

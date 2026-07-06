@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Badge, Box, Group, Stack, Text, Tooltip, rem } from '@mantine/core';
+import { Badge, Box, Button, Group, Stack, Text, Tooltip, rem } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconPhoto } from '@tabler/icons-react';
+import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import { tiendaClient } from '@/markket/api.tienda';
 import { markketColors } from '@/markket/colors.config';
 import { readTiendaAuthToken } from '@/markket/helpers.tienda';
@@ -235,12 +235,18 @@ function MediaSlot({
   slot,
   uploading,
   saved,
+  dragActive,
   onOpenEditor,
+  onDropFile,
+  onDragStateChange,
 }: {
   slot: ContentMediaSlot;
   uploading?: boolean;
   saved?: boolean;
+    dragActive?: boolean;
   onOpenEditor?: () => void;
+    onDropFile?: (file: File) => void;
+    onDragStateChange?: (active: boolean) => void;
 }) {
   const preview = slot.src;
 
@@ -254,7 +260,7 @@ function MediaSlot({
             :
         slot.disabled
           ? (slot.disabledMessage || `${slot.label} is preview-only right now`)
-              : `Click to edit ${slot.label}`
+              : `Tap or click to edit ${slot.label}`
       }
       withArrow
     >
@@ -275,11 +281,29 @@ function MediaSlot({
 
           onOpenEditor?.();
         }}
+        onDragOver={(event) => {
+          if (slot.disabled || uploading) return;
+          event.preventDefault();
+          onDragStateChange?.(true);
+        }}
+        onDragLeave={(event) => {
+          if (slot.disabled || uploading) return;
+          event.preventDefault();
+          onDragStateChange?.(false);
+        }}
+        onDrop={(event) => {
+          if (slot.disabled || uploading) return;
+          event.preventDefault();
+          onDragStateChange?.(false);
+          const droppedFile = event.dataTransfer.files?.[0];
+          if (!droppedFile) return;
+          onDropFile?.(droppedFile);
+        }}
         style={{
           width: rem(80),
           height: rem(80),
           borderRadius: rem(10),
-          border: `2px dashed ${preview ? markketColors.sections.about.main : '#d0d0d0'}`,
+          border: `2px dashed ${dragActive ? '#8b5cf6' : (preview ? markketColors.sections.about.main : '#d0d0d0')}`,
           background: preview ? 'transparent' : markketColors.sections.about.light,
           overflow: 'hidden',
           cursor: uploading ? 'progress' : (slot.disabled ? 'not-allowed' : 'pointer'),
@@ -302,6 +326,9 @@ function MediaSlot({
           <Stack gap={4} align="center">
             <IconPhoto size={22} color="#9E9E9E" />
             <Text size="xs" c="dimmed" ta="center" lh={1.2} style={{ fontSize: rem(9) }}>
+                Tap or click to upload
+              </Text>
+              <Text size="xs" c="dimmed" ta="center" lh={1.2} style={{ fontSize: rem(9), opacity: 0.75 }}>
               {slot.label}
             </Text>
           </Stack>
@@ -364,6 +391,7 @@ export default function ContentMediaPreview({
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [uploadingSlotKey, setUploadingSlotKey] = useState<string | null>(null);
   const [savedSlotKey, setSavedSlotKey] = useState<string | null>(null);
+  const [dragSlotKey, setDragSlotKey] = useState<string | null>(null);
   const [slotPreviewOverrides, setSlotPreviewOverrides] = useState<Record<string, string>>({});
   const [slotAltOverrides, setSlotAltOverrides] = useState<Record<string, string>>({});
   const slotBlobPreviewsRef = useRef<Record<string, string>>({});
@@ -431,19 +459,68 @@ export default function ContentMediaPreview({
 
   const selectedSlotEntry = normalizedSlots.find((slot) => slot.key === selectedSlotKey) || normalizedSlots[0];
 
-  const uploadFromModal = async ({ url, img, alt }: { url?: string; img?: File; alt?: string }) => {
-    if (!selectedSlotEntry) return;
-
+  const uploadFileToSlot = async ({
+    slot,
+    file,
+    alt,
+  }: {
+    slot: (ContentMediaSlot & { key: string });
+    file: File;
+    alt?: string;
+  }) => {
     try {
-      setUploadingSlotKey(selectedSlotEntry.key);
+      setUploadingSlotKey(slot.key);
       const nextAlt = (alt || '').trim();
       if (nextAlt) {
         setSlotAltOverrides((current) => ({
           ...current,
-          [selectedSlotEntry.key]: nextAlt,
+          [slot.key]: nextAlt,
         }));
       }
 
+      setSlotPreview(slot.key, URL.createObjectURL(file), true);
+
+      const nextUrl = await uploadContentMediaSlotImage({
+        storeRef,
+        contentType,
+        itemDocumentId,
+        slot,
+        file,
+      });
+
+      if (nextUrl) {
+        setSlotPreview(slot.key, nextUrl, false);
+        setSavedSlotKey(slot.key);
+        if (savedBadgeTimerRef.current) {
+          window.clearTimeout(savedBadgeTimerRef.current);
+        }
+        savedBadgeTimerRef.current = window.setTimeout(() => {
+          setSavedSlotKey((current) => (current === slot.key ? null : current));
+        }, 2200);
+        onUpload?.(slot.field, nextUrl);
+      }
+    } catch (error) {
+      if (slot.src) {
+        setSlotPreview(slot.key, slot.src, false);
+      } else {
+        clearSlotPreviewOverride(slot.key);
+      }
+      console.error('content.media.slot.upload.failed', error);
+      notifications.show({
+        title: 'Could not apply image work',
+        message: error instanceof Error ? error.message : 'Try again in a moment.',
+        color: 'red',
+      });
+    } finally {
+      setUploadingSlotKey(null);
+      setDragSlotKey(null);
+    }
+  };
+
+  const uploadFromModal = async ({ url, img, alt }: { url?: string; img?: File; alt?: string }) => {
+    if (!selectedSlotEntry) return;
+
+    try {
       let nextFile: File | null = img || null;
 
       if (!nextFile && url) {
@@ -467,43 +544,20 @@ export default function ContentMediaPreview({
         throw new Error('No image to upload');
       }
 
-      setSlotPreview(selectedSlotEntry.key, URL.createObjectURL(nextFile), true);
-
-      const nextUrl = await uploadContentMediaSlotImage({
-        storeRef,
-        contentType,
-        itemDocumentId,
+      await uploadFileToSlot({
         slot: selectedSlotEntry,
         file: nextFile,
+        alt,
       });
-
-      if (nextUrl) {
-        setSlotPreview(selectedSlotEntry.key, nextUrl, false);
-        setSavedSlotKey(selectedSlotEntry.key);
-        if (savedBadgeTimerRef.current) {
-          window.clearTimeout(savedBadgeTimerRef.current);
-        }
-        savedBadgeTimerRef.current = window.setTimeout(() => {
-          setSavedSlotKey((current) => (current === selectedSlotEntry.key ? null : current));
-        }, 2200);
-        onUpload?.(selectedSlotEntry.field, nextUrl);
-      }
 
       setImageModalOpen(false);
     } catch (error) {
-      if (selectedSlotEntry.src) {
-        setSlotPreview(selectedSlotEntry.key, selectedSlotEntry.src, false);
-      } else {
-        clearSlotPreviewOverride(selectedSlotEntry.key);
-      }
       console.error('content.media.modal.upload.failed', error);
       notifications.show({
         title: 'Could not apply image work',
         message: error instanceof Error ? error.message : 'Try again in a moment.',
         color: 'red',
       });
-    } finally {
-      setUploadingSlotKey(null);
     }
   };
 
@@ -536,9 +590,17 @@ export default function ContentMediaPreview({
               slot={slot}
               uploading={uploadingSlotKey === slot.key}
               saved={savedSlotKey === slot.key}
+              dragActive={dragSlotKey === slot.key}
               onOpenEditor={() => {
                 setSelectedSlotKey(slot.key);
                 setImageModalOpen(true);
+              }}
+              onDragStateChange={(active) => {
+                setDragSlotKey(active ? slot.key : null);
+              }}
+              onDropFile={(file) => {
+                setSelectedSlotKey(slot.key);
+                void uploadFileToSlot({ slot, file });
               }}
             />
             <Text size="xs" c="dimmed" ta="center" style={{ fontSize: rem(10) }}>
@@ -547,6 +609,24 @@ export default function ContentMediaPreview({
           </Stack>
         ))}
       </Group>
+
+      {selectedSlotEntry && !selectedSlotEntry.src && !selectedSlotEntry.disabled && (
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+          <Text size="xs" c="dimmed">
+            {selectedSlotEntry.label} is empty. Add an image to improve storefront quality.
+          </Text>
+          <Button
+            size="xs"
+            variant="light"
+            color="grape"
+            leftSection={<IconUpload size={14} />}
+            onClick={() => setImageModalOpen(true)}
+            disabled={Boolean(uploadingSlotKey)}
+          >
+            Upload {selectedSlotEntry.label}
+          </Button>
+        </Group>
+      )}
 
       <ImageModal
         imageModalOpen={imageModalOpen}

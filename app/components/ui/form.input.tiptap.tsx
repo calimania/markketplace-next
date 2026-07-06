@@ -10,7 +10,7 @@ import { Remarkable } from 'remarkable';
 import {
   Text, Paper, Tabs, Group, ActionIcon, TextInput, Button,
   Modal, Stack, FileButton, Progress, Image as MantineImage,
-  Box, SegmentedControl, Center, Loader, SimpleGrid
+  Box, SegmentedControl, Center, Loader, SimpleGrid, Badge
 } from '@mantine/core';
 import {
   IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
@@ -155,6 +155,18 @@ const ContentEditor = ({
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [libraryResults, setLibraryResults] = useState<string[]>([]);
   const [didCopySource, setDidCopySource] = useState(false);
+  const [contentStatus, setContentStatus] = useState<'saved' | 'editing'>('saved');
+  const contentStatusTimerRef = useRef<number | null>(null);
+
+  const markEditing = () => {
+    setContentStatus('editing');
+    if (contentStatusTimerRef.current) {
+      window.clearTimeout(contentStatusTimerRef.current);
+    }
+    contentStatusTimerRef.current = window.setTimeout(() => {
+      setContentStatus('saved');
+    }, 900);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -181,6 +193,14 @@ const ContentEditor = ({
       document.body.style.overflow = previousOverflow;
     };
   }, [isFullscreen]);
+
+  useEffect(() => {
+    return () => {
+      if (contentStatusTimerRef.current) {
+        window.clearTimeout(contentStatusTimerRef.current);
+      }
+    };
+  }, []);
 
   const uploadFile = async (file: File) => {
     try {
@@ -375,6 +395,7 @@ const ContentEditor = ({
     content: initialContentRef.current,
     // previously onUpdate would create a bug where the cursor was sent to the end after triggering a mantine/form change
     onBlur: ({ editor }) => {
+      markEditing();
       if (format == 'markdown') {
         isInternalUpdateRef.current = true;
         const markdown = getEditorMarkdown(editor);
@@ -392,6 +413,7 @@ const ContentEditor = ({
       }
     },
     onUpdate: ({ editor }) => {
+      markEditing();
       if (format == 'markdown') {
         isInternalUpdateRef.current = true;
         const markdown = getEditorMarkdown(editor);
@@ -586,6 +608,9 @@ const ContentEditor = ({
     : format === 'html'
       ? editor.getHTML()
       : getEditorMarkdown(editor);
+  const panelMinHeight = isFullscreen
+    ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)')
+    : minHeight;
 
   const copySourceContent = async () => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -626,7 +651,7 @@ const ContentEditor = ({
       >
         <Tabs value={activeTab} onChange={(a) => setActiveTab(a as string)}>
           <Group justify="space-between" px="md" pt="xs">
-            <Tabs.List>
+            <Tabs.List style={{ borderRadius: 999, padding: 2, background: 'var(--mantine-color-gray-0)' }}>
               <Tabs.Tab value="editor" leftSection={<IconCode size={16} />}>
                 Editor
               </Tabs.Tab>
@@ -667,10 +692,22 @@ const ContentEditor = ({
           <Tabs.Panel value="editor">
             <RichTextEditor
               editor={editor}
-              style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : minHeight, border: 'none' }}
+              style={{
+                minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : minHeight,
+                border: 'none',
+                background: '#fff',
+              }}
             >
 
-              <RichTextEditor.Toolbar sticky stickyOffset={isFullscreen ? (isCompactViewport ? 6 : 12) : 60}>
+              <RichTextEditor.Toolbar
+                sticky
+                stickyOffset={isFullscreen ? (isCompactViewport ? 6 : 12) : 60}
+                style={{
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255,255,255,0.92)',
+                  borderBottom: '1px solid var(--mantine-color-gray-2)',
+                }}
+              >
                 {isCompactViewport ? (
                   /* Mobile: minimal toolbar */
                   <>
@@ -742,7 +779,11 @@ const ContentEditor = ({
                 )}
               </RichTextEditor.Toolbar>
 
-              <RichTextEditor.Content />
+              <RichTextEditor.Content
+                style={{
+                  paddingBottom: isCompactViewport ? 'calc(env(safe-area-inset-bottom, 0px) + 72px)' : 12,
+                }}
+              />
 
               {isCompactViewport && (
                 <Group
@@ -839,17 +880,51 @@ const ContentEditor = ({
           </Tabs.Panel>
 
           <Tabs.Panel value="preview">
-            <div
-              className="blocks-content px-4 py-6"
-              style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
-            />
+            <Box
+              style={{
+                minHeight: panelMinHeight,
+                overflow: 'auto',
+                animation: 'fade-panel-in 180ms ease',
+                background: 'linear-gradient(180deg, rgba(249,250,251,0.65) 0%, rgba(255,255,255,1) 35%)',
+              }}
+            >
+              <div
+                className="blocks-content"
+                style={{
+                  padding: '22px 20px 28px',
+                  maxWidth: 920,
+                  margin: '0 auto',
+                  fontSize: isCompactViewport ? 15 : 16,
+                  lineHeight: 1.8,
+                  letterSpacing: '0.003em',
+                  color: 'var(--mantine-color-dark-8)',
+                }}
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            </Box>
           </Tabs.Panel>
 
-          <Tabs.Panel value="markdown" style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}>
-            <pre className="px-4 py-6 font-mono text-sm whitespace-pre-wrap">
-              {sourceContent}
-            </pre>
+          <Tabs.Panel value="markdown" style={{ minHeight: panelMinHeight, overflow: 'auto', animation: 'fade-panel-in 180ms ease' }}>
+            <Box px="md" py="sm">
+              <pre
+                style={{
+                  margin: 0,
+                  padding: '16px',
+                  borderRadius: 12,
+                  border: '1px solid var(--mantine-color-gray-2)',
+                  background: 'linear-gradient(180deg, #fbfcfd 0%, #f8fafc 100%)',
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                  fontSize: 13,
+                  lineHeight: 1.65,
+                  letterSpacing: '0.01em',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  color: 'var(--mantine-color-dark-7)',
+                }}
+              >
+                {sourceContent}
+              </pre>
+            </Box>
           </Tabs.Panel>
         </Tabs>
 
@@ -857,9 +932,13 @@ const ContentEditor = ({
           <Text size="xs" c="dimmed">
             {wordCount} words · {charCount} chars · {readMinutes} min read
           </Text>
-          <Text size="xs" c="dimmed">
-            Tips: Cmd/Ctrl+B bold, Cmd/Ctrl+I italic, Cmd/Ctrl+Z undo
-          </Text>
+          <Badge
+            size="xs"
+            variant="light"
+            color={contentStatus === 'editing' ? 'orange' : 'teal'}
+          >
+            {contentStatus === 'editing' ? 'Editing' : 'Saved'}
+          </Badge>
         </Group>
       </Paper>
 
@@ -1061,6 +1140,19 @@ const ContentEditor = ({
           </Group>
         </Stack>
       </Modal>
+
+      <style>{`
+        @keyframes fade-panel-in {
+          from {
+            opacity: 0;
+            transform: translateY(2px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };

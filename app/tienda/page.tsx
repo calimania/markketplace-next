@@ -7,6 +7,7 @@ import { Container, Title, Text, Paper, Stack, Group, Button, Skeleton, Segmente
 import { IconArrowLeft, IconChevronRight, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
+import { markketColors } from '@/markket/colors.config';
 
 export default function MeStoresPage() {
   const router = useRouter();

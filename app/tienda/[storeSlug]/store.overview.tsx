@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon, Box, Tabs } from '@mantine/core';
-import { IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles, IconPhoto, IconWorld, IconWorldOff, IconUsers, IconCreditCard } from '@tabler/icons-react';
+import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon, Box, Tabs, ActionIcon, Tooltip } from '@mantine/core';
+import { IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles, IconPhoto, IconWorld, IconWorldOff, IconUsers, IconCreditCard, IconMessageCircle, IconArrowUpRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
@@ -25,6 +25,29 @@ type StoreOverviewProps = {
   allProducts: Product[];
   upcomingEvents: Event[];
 };
+
+type CrmInboxThreadPreview = {
+  id?: number;
+  documentId?: string;
+  threadKey?: string;
+  subject?: string;
+  Name?: string;
+  email?: string;
+  from?: string;
+  latestMessageAt?: string;
+  updatedAt?: string;
+  estado?: string;
+  publicationState?: string;
+  archived?: boolean;
+};
+
+function toShortThreadId(value: string): string {
+  const source = String(value || '').trim();
+  if (!source) return '';
+
+  const segments = source.split('/').filter(Boolean);
+  return (segments[segments.length - 1] || source).trim();
+}
 
 function isStorePublished(store: Store) {
   const status = String((store as Store & { status?: string }).status || '').toLowerCase();
@@ -57,6 +80,9 @@ export default function StoreOverview({
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('latest');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [crmInboxThreads, setCrmInboxThreads] = useState<CrmInboxThreadPreview[]>([]);
+  const [crmInboxLoading, setCrmInboxLoading] = useState(false);
+  const [crmInboxError, setCrmInboxError] = useState<string | null>(null);
   const debugEnabled = process.env.NODE_ENV === 'development';
   const isAuthorized = confirmed() && stores.some((s) => s.slug === store.slug);
   const isPublished = useMemo(() => isStorePublished(currentStore), [currentStore]);
@@ -382,6 +408,75 @@ export default function StoreOverview({
     };
   }, [store.slug, isLoading, debugEnabled]);
 
+  useEffect(() => {
+    if (activeTab !== 'crm') return;
+    if (crmInboxLoading) return;
+
+    const token = readAuthToken();
+
+    if (!token) {
+      setCrmInboxError('Sign in to load inbox previews.');
+      return;
+    }
+
+    const storeId = String(currentStore.documentId || currentStore.slug || store.slug);
+    const storeSlug = String(currentStore.slug || store.slug || '');
+    if (!storeId && !storeSlug) return;
+
+    const loadInboxPreview = async () => {
+      setCrmInboxLoading(true);
+      setCrmInboxError(null);
+
+      try {
+        const params = new URLSearchParams();
+        params.set('storeId', storeId);
+        if (storeSlug) params.set('store', storeSlug);
+        params.set('includeMessages', 'false');
+        params.set('page', '1');
+        params.set('pageSize', '4');
+        params.set('sortBy', 'latestMessageAt');
+        params.set('sortOrder', 'desc');
+
+        const response = await fetch(`/api/crm/inbox?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const message = typeof payload?.error === 'string'
+            ? payload.error
+            : typeof payload?.message === 'string'
+              ? payload.message
+              : `Could not load inbox (${response.status})`;
+          throw new Error(message);
+        }
+
+        const items = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : Array.isArray(payload?.threads)
+              ? payload.threads
+              : [];
+
+        setCrmInboxThreads(items.slice(0, 4));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not load inbox preview.';
+        setCrmInboxError(message);
+      } finally {
+        setCrmInboxLoading(false);
+      }
+    };
+
+    loadInboxPreview();
+  }, [activeTab, currentStore.documentId, currentStore.slug, store.slug]);
+
   const handleTogglePublish = async () => {
     if (!isAuthorized || isSavingStatus) return;
     setPublishModalOpen(false);
@@ -426,7 +521,7 @@ export default function StoreOverview({
   };
 
   return (
-    <Stack gap="md" className="tech-vhs-surface">
+    <Stack gap="sm" className="tech-vhs-surface">
       <TinyBreadcrumbs
         items={[
           { label: 'Me', href: '/me' },
@@ -435,9 +530,9 @@ export default function StoreOverview({
         ]}
       />
 
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} className="tienda-panel">
-        <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
-          <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+      <Paper withBorder radius="lg" p={{ base: 'sm', sm: 'md' }} className="tienda-panel">
+        <Group justify="space-between" align="center" wrap="wrap" gap="sm">
+          <Stack gap={4} style={{ minWidth: 0, flex: 1 }}>
             <Group gap="xs" wrap="wrap">
               <Title order={1}>{currentStore.title || currentStore.slug}</Title>
             </Group>
@@ -452,8 +547,8 @@ export default function StoreOverview({
         </Paper>
       )}
 
-      <Paper withBorder radius="lg" p={{ base: 'md', sm: 'lg' }} className="tienda-panel">
-        <Stack gap="sm">
+      <Paper withBorder radius="lg" p={{ base: 'sm', sm: 'md' }} className="tienda-panel">
+        <Stack gap="xs">
           <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text fw={600}>Store Snapshot</Text>
             <Badge variant="light" radius="xl" color="yellow" leftSection={<IconSparkles size={12} />}>
@@ -510,7 +605,7 @@ export default function StoreOverview({
               );
             })}
           </SimpleGrid>
-          <Stack gap="xs">
+          <Stack gap={6}>
             <Group justify="space-between" align="center" wrap="wrap" gap="xs">
               <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
                 Media assets ({allMediaThumbs.length})
@@ -585,7 +680,7 @@ export default function StoreOverview({
             )}
           </Stack>
 
-          <Stack gap="xs">
+          <Stack gap={6}>
             <Group justify="space-between" align="center" wrap="wrap" gap="xs">
               <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: '0.08em' }}>
                 Social Links ({currentStore.URLS?.length || 0})
@@ -734,13 +829,85 @@ export default function StoreOverview({
             <Stack gap="sm">
               <Group justify="space-between" align="center" wrap="wrap" gap="xs">
                 <Text fw={600}><span className="accent-orange">CRM</span></Text>
-                <Button component="a" href={`/tienda/${store.slug}/crm`} variant="light" leftSection={<IconUsers size={14} />}>
-                  Manage CRM
-                </Button>
+                <Tooltip label="Open CRM workspace" withArrow>
+                  <ActionIcon
+                    component="a"
+                    href={`/tienda/${store.slug}/crm`}
+                    variant="light"
+                    color="orange"
+                    size="lg"
+                    aria-label="Open CRM workspace"
+                  >
+                    <IconArrowUpRight size={16} />
+                  </ActionIcon>
+                </Tooltip>
               </Group>
-              <Text size="sm" c="dimmed">
-                Your subscribers and customers will appear here.
-              </Text>
+
+              <Group gap="xs" wrap="wrap">
+                <Badge variant="light" color="orange" leftSection={<IconMessageCircle size={12} />}>
+                  Inbox {crmInboxThreads.length}
+                </Badge>
+                <Badge variant="light" color="pink" leftSection={<IconUsers size={12} />}>
+                  Subscribers
+                </Badge>
+              </Group>
+
+              {crmInboxLoading ? (
+                <Text size="sm" c="dimmed">Loading inbox preview...</Text>
+              ) : crmInboxError ? (
+                <Text size="sm" c="red">{crmInboxError}</Text>
+              ) : crmInboxThreads.length > 0 ? (
+                <Stack gap={6}>
+                  {crmInboxThreads.map((thread, index) => {
+                    const subject = (thread.subject || thread.Name || '').trim() || 'No subject';
+                    const sender = (thread.email || thread.from || '').trim() || 'Customer';
+                    const dateValue = thread.latestMessageAt || thread.updatedAt;
+                    const dateLabel = dateValue ? new Date(dateValue).toLocaleDateString() : 'No date';
+                    const threadId = toShortThreadId(String(thread.documentId || thread.id || '').trim());
+                    const estado = (thread.estado || '').toLowerCase().trim();
+                    const estadoLabel = !estado || estado === 'open' || estado === 'new' || estado === 'unread'
+                      ? 'New'
+                      : estado.charAt(0).toUpperCase() + estado.slice(1);
+                    const threadHref = threadId
+                      ? `/tienda/${store.slug}/crm/inbox/${encodeURIComponent(threadId)}`
+                      : `/tienda/${store.slug}/crm#crm-inbox`;
+
+                    return (
+                      <Paper
+                        key={thread.documentId || thread.id || index}
+                        withBorder
+                        radius="md"
+                        p="xs"
+                        component={Link}
+                        href={threadHref}
+                        style={{
+                          background: 'rgba(255,255,255,0.74)',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
+                          <div style={{ minWidth: 0 }}>
+                            <Text size="sm" fw={600} lineClamp={1}>{subject}</Text>
+                            <Group gap={6} wrap="wrap">
+                              <Text size="xs" c="dimmed" lineClamp={1}>{sender}</Text>
+                              <Badge size="xs" variant="light" color={estadoLabel === 'New' ? 'orange' : 'gray'}>
+                                {estadoLabel}
+                              </Badge>
+                            </Group>
+                          </div>
+                          <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>{dateLabel}</Text>
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                    </Stack>
+                  ) : (
+                      <Text size="sm" c="dimmed">
+                        No inbox messages yet. New conversations will appear here.
+                      </Text>
+              )}
             </Stack>
           </Paper>
         </Tabs.Panel>

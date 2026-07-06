@@ -131,6 +131,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
   const [selectedSlotId, setSelectedSlotId] = useState('Logo');
   const [altText, setAltText] = useState('');
   const [draftSlides, setDraftSlides] = useState<SlideMedia[]>(Array.isArray(store.Slides) ? store.Slides : []);
+  const [isDropActive, setIsDropActive] = useState(false);
 
   const readAuthToken = () => {
     if (typeof window === 'undefined') return '';
@@ -645,10 +646,30 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
               <Stack gap="sm">
                 <Box
                   {...props}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    if (loading) return;
+                    setIsDropActive(true);
+                  }}
+                  onDragLeave={(event) => {
+                    event.preventDefault();
+                    setIsDropActive(false);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setIsDropActive(false);
+
+                    if (loading) return;
+
+                    const droppedFile = event.dataTransfer.files?.[0];
+                    if (!droppedFile) return;
+
+                    void handleUpload(droppedFile, selectedSlot.field);
+                  }}
                   style={{
                     height: 340,
                     borderRadius: 10,
-                    border: '1px solid rgba(15,23,42,0.12)',
+                    border: isDropActive ? '2px dashed #8b5cf6' : '1px solid rgba(15,23,42,0.12)',
                     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
                     display: 'flex',
                     alignItems: 'center',
@@ -659,6 +680,21 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                     boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
                   }}
                 >
+                  {isDropActive && !loading && (
+                    <Box
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        zIndex: 3,
+                        background: 'rgba(139, 92, 246, 0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text size="sm" fw={700} c="grape.8">Drop image to upload {selectedSlot.label}</Text>
+                    </Box>
+                  )}
                   {loading && (
                     <Box
                       key="uploading-overlay"
@@ -681,7 +717,7 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                   {!selectedSlot?.src && (
                     <Stack key="empty-state" align="center" gap={4}>
                       <IconPhoto size={30} opacity={0.45} />
-                      <Text size="sm" c="dimmed">Click to upload {selectedSlot.label}</Text>
+                      <Text size="sm" c="dimmed">Tap or click to upload {selectedSlot.label}</Text>
                     </Stack>
                   )}
                   {selectedSlot?.src && (
