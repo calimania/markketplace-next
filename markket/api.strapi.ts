@@ -560,6 +560,7 @@ export class StrapiClient {
 
     return this.fetch<Page>({
       contentType: `pages`,
+      includeAuth: true,
       filters: {
         // Active: {
         // $eq: true
@@ -584,6 +585,7 @@ export class StrapiClient {
 
     return await this.fetch<Page>({
       contentType: `pages`,
+      includeAuth: true,
       filters: {
         store: {
           slug: {

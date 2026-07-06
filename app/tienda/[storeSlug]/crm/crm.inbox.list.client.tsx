@@ -203,6 +203,7 @@ export default function CrmInboxListClient({
   storeRef: string;
   storeSlug: string;
 }) {
+  const inboxContactEmail = `${storeSlug}@markket.place`;
   const [rows, setRows] = useState<InboxMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [missingAuth, setMissingAuth] = useState(false);
@@ -320,6 +321,17 @@ export default function CrmInboxListClient({
           style={{ width: 250 }}
         />
       </Group>
+
+      <Paper withBorder radius="md" p="sm" bg="var(--mantine-color-orange-0)">
+        <Stack gap={2}>
+          <Text size="xs" fw={700} c="dark.7">
+            Public contact inbox
+          </Text>
+          <Text size="xs" c="dimmed">
+            People can reach your store at <Text component="span" fw={700}>{inboxContactEmail}</Text>. New messages will show up here.
+          </Text>
+        </Stack>
+      </Paper>
 
       {filtered.length === 0 ? (
         <Paper withBorder radius="md" p="lg" bg="var(--mantine-color-gray-0)">

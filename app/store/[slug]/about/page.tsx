@@ -13,6 +13,7 @@ import { markketColors } from '@/markket/colors.config';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 import { cache } from 'react';
+import Link from 'next/link';
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getAboutPageCached = cache((slug: string) => strapiClient.getPage('about', slug));
@@ -60,6 +61,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
     .sort((a, b) => a.Title.localeCompare(b.Title)) || [];
 
   const image = aboutPage?.SEO?.socialImage || store?.SEO?.socialImage;
+  const storeSlug = store?.slug || slug;
+  const contactEmail = `${storeSlug}@markket.place`;
 
   return (
     <Container size="lg" py="xl">
@@ -78,6 +81,22 @@ export default async function AboutPage({ params }: AboutPageProps) {
         )}
 
         <PageContent params={{ page: aboutPage }} />
+
+        <Group justify="space-between" align="center" gap="sm" wrap="wrap">
+          <Text size="sm" c="dimmed">
+            Contact: <Text component="span" fw={700}>{contactEmail}</Text>
+          </Text>
+          <Text
+            component={Link}
+            href={`mailto:${contactEmail}`}
+            size="sm"
+            fw={600}
+            c={markketColors.sections.about.main}
+            style={{ textDecoration: 'none' }}
+          >
+            Email this store
+          </Text>
+        </Group>
 
         {customPages.length > 0 && (
           <Stack gap="md">
