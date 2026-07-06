@@ -6,7 +6,7 @@ import TiendaItemSkeleton from '@/app/components/ui/tienda.item.skeleton';
 import { IconExternalLink, } from '@tabler/icons-react';
 import SmartBackButton from '@/app/components/ui/smart.back.button';
 import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
-import Markdown from '@/app/components/ui/page.markdown';
+import RichTextContent from '@/app/components/ui/richtext.content';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import ProductItemActions from './product.item.actions';
@@ -178,7 +178,7 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
 
         {product.Description && (
           <Paper withBorder p="lg" radius="md" className="prose dark:prose-dark max-w-none">
-            <Markdown content={product.Description} />
+            <RichTextContent content={product.Description} />
           </Paper>
         )}
         {!product.Description && product.SEO?.metaDescription && (

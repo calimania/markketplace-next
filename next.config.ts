@@ -147,6 +147,14 @@ const nextConfig = {
         pathname: '/**',
         search: '',
       },
+      {
+        // Railway staging env
+        protocol: 'https',
+        hostname: 'markket-storage-yz8z7g6wj.t3.storageapi.dev',
+        port: '',
+        pathname: '/**',
+        search: '',
+      },
     ],
   },
   turbopack: {},

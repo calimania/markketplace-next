@@ -630,15 +630,14 @@ export default function StoreOverview({
         </Button>
         {isAuthorized && (
           <>
-            {/* <Button
+            <Button
               component="a"
-              href={`/tienda/${currentStore.slug}/design-system`}
-              target="_blank"
-              rel="noopener noreferrer"
-              leftSection={<IconPalette size={16} />}
+              href={`/tienda/${currentStore.slug}/team`}
+              variant="light"
+              leftSection={<IconUsers size={16} />}
             >
-              Open Design System
-            </Button> */}
+              Team
+            </Button>
             <PublishConfirmModal
               opened={publishModalOpen}
               onClose={() => setPublishModalOpen(false)}

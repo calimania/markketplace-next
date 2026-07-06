@@ -14,6 +14,7 @@ import {
   readTiendaAuthToken,
   slugifyTiendaValue,
 } from '@/markket/helpers.tienda';
+import { richTextToHtml } from '@/markket/richtext.utils';
 
 type ProductEditorFormProps = {
   storeSlug: string;
@@ -22,7 +23,7 @@ type ProductEditorFormProps = {
   initial?: {
     name?: string;
     slug?: string;
-    description?: string;
+    description?: unknown;
     seoTitle?: string;
     seoDescription?: string;
     sourceUrl?: string;
@@ -44,6 +45,18 @@ type ProductFormValues = {
   sourceUrl: string;
 };
 
+function normalizeProductDescription(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (!value) {
+    return '';
+  }
+
+  return richTextToHtml(value as never);
+}
+
 export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, initial }: ProductEditorFormProps) {
   const router = useRouter();
 
@@ -52,7 +65,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
     initialValues: {
       name: initial?.name || '',
       slug: initial?.slug || '',
-      description: initial?.description || '',
+      description: normalizeProductDescription(initial?.description),
       seoTitle: initial?.seoTitle || '',
       seoDescription: initial?.seoDescription || '',
       sourceUrl: initial?.sourceUrl || '',
@@ -257,7 +270,7 @@ export default function ProductEditorForm({ storeSlug, mode, itemDocumentId, ini
         value={form.values.description}
         onChange={(value) => form.setFieldValue('description', typeof value === 'string' ? value : '')}
         label="Description"
-        format="markdown"
+        format="html"
         minHeight={320}
         placeholder="Write product description..."
       />

@@ -10,6 +10,7 @@ import ContentEditor from '@/app/components/ui/form.input.tiptap';
 import { useStore } from '../store.provider';
 import type { Event } from '@/markket/event.d';
 import { IconBrowser } from '@tabler/icons-react';
+import { richTextToHtml } from '@/markket/richtext.utils';
 
 type EventLocationInput = {
   name: string;
@@ -42,7 +43,7 @@ type EventEditorFormProps = {
   initial?: {
     name?: string;
     slug?: string;
-    description?: string;
+    description?: unknown;
     seoTitle?: string;
     seoDescription?: string;
     sourceUrl?: string;
@@ -299,6 +300,18 @@ function isValidHttpUrl(value: string) {
   }
 }
 
+function normalizeEventDescription(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (!value) {
+    return '';
+  }
+
+  return richTextToHtml(value as never);
+}
+
 export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initial }: EventEditorFormProps) {
   const router = useRouter();
   const store = useStore();
@@ -311,7 +324,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
     initialValues: {
       name: initial?.name || '',
       slug: initial?.slug || '',
-      description: initial?.description || '',
+      description: normalizeEventDescription(initial?.description),
       seoTitle: initial?.seoTitle || '',
       seoDescription: initial?.seoDescription || '',
       sourceUrl: initial?.sourceUrl || '',
@@ -744,7 +757,7 @@ export default function EventEditorForm({ storeSlug, mode, itemDocumentId, initi
         value={form.values.description}
         onChange={(value) => form.setFieldValue('description', typeof value === 'string' ? value : '')}
         label="Description"
-        format="markdown"
+        format="html"
         minHeight={320}
         placeholder="Write event description..."
       />

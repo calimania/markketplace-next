@@ -80,6 +80,15 @@
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] markket: price|product settings, digital, ships_to
 
+### v.0.3.3 July 2026
+
+- [x] Receive inbox by mail (slug@markket.place)
+- [x] Read inbox in /tienda
+- [x] Improve email templates
+- [x] Improve standard content (example content, SEO backfill)
+
+
+
 ### v0.9.0 May 2026
 
 - [x] content QA: drafts are visible in dashboard lists and can open individual item screens reliably

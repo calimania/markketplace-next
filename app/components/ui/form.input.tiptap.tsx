@@ -6,14 +6,16 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import { Markdown } from 'tiptap-markdown';
+import { Remarkable } from 'remarkable';
 import {
-  Text, Paper, Tabs, Group, ActionIcon, Tooltip, TextInput, Button,
+  Text, Paper, Tabs, Group, ActionIcon, TextInput, Button,
   Modal, Stack, FileButton, Progress, Image as MantineImage,
   Box, SegmentedControl, Center, Loader, SimpleGrid
 } from '@mantine/core';
 import {
   IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
-  IconUpload, IconLink, IconX, IconCheck, IconMaximize, IconMinimize
+  IconUpload, IconLink, IconX, IconCheck, IconMaximize, IconMinimize,
+  IconBold, IconItalic, IconList, IconArrowBackUp, IconArrowForwardUp
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
@@ -65,11 +67,13 @@ const markdownToHtml = (editor: any, markdown: string): string => {
     return parser.render(markdown);
   }
 
-  // Fallback preserves line breaks if parser is temporarily unavailable.
-  return markdown
-    .split('\n')
-    .map((line) => `<p>${line || '<br>'}</p>`)
-    .join('');
+  // Fallback with real markdown support so headings/lists/images don't render as literal tokens.
+  const fallback = new Remarkable({
+    html: true,
+    breaks: true,
+  });
+
+  return fallback.render(markdown);
 };
 
 const escapeHtml = (input: string): string => {
@@ -88,6 +92,25 @@ const plainTextToPreservedHtml = (text: string): string => {
     .split(/\n{2,}/)
     .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
     .join('');
+};
+
+const looksLikeHtml = (value: string): boolean => /<\/?[a-z][\s\S]*>/i.test(value);
+
+const htmlToPlainText = (html: string): string => {
+  return html
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<\/h[1-6]>/gi, ' ')
+    .replace(/<\/li>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 const getBlocksValue = (editor: any) => {
@@ -131,6 +154,7 @@ const ContentEditor = ({
   const [libraryQuery, setLibraryQuery] = useState('');
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [libraryResults, setLibraryResults] = useState<string[]>([]);
+  const [didCopySource, setDidCopySource] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -296,7 +320,9 @@ const ContentEditor = ({
   const initialContentRef = useRef<string>(
     format === 'blocks' && Array.isArray(value) && value.length > 0
       ? blocksToHtml(value as any[])
-      : typeof value === 'string' ? value : '',
+      : format === 'markdown' || format === 'html'
+        ? ''
+        : typeof value === 'string' ? value : '',
   );
 
   const editor = useEditor({
@@ -383,8 +409,20 @@ const ContentEditor = ({
       }
     },
     onCreate: ({ editor }) => {
-      if (format == 'html') {
-        onChange(editor.getHTML());
+      if (format == 'markdown' && typeof value === 'string' && value.trim().length > 0) {
+        const parsedMarkdown = markdownToHtml(editor, value);
+        editor.commands.setContent(parsedMarkdown, {
+          emitUpdate: false,
+          parseOptions: { preserveWhitespace: 'full' },
+        });
+      }
+
+      if (format == 'html' && typeof value === 'string' && value.trim().length > 0) {
+        const parsedHtml = looksLikeHtml(value) ? value : markdownToHtml(editor, value);
+        editor.commands.setContent(parsedHtml, {
+          emitUpdate: false,
+          parseOptions: { preserveWhitespace: 'full' },
+        });
       }
 
       if (format == 'blocks') {
@@ -410,8 +448,14 @@ const ContentEditor = ({
 
     if (format == 'html') {
       const currentContent = editor.getHTML();
-      if (currentContent !== value) {
-        editor.commands.setContent(value as string);
+      const htmlValue = typeof value === 'string'
+        ? (looksLikeHtml(value) ? value : markdownToHtml(editor, value))
+        : '';
+      if (currentContent !== htmlValue) {
+        editor.commands.setContent(htmlValue, {
+          emitUpdate: false,
+          parseOptions: { preserveWhitespace: 'full' },
+        });
       }
       return;
     }
@@ -419,11 +463,24 @@ const ContentEditor = ({
     if (format == 'blocks') {
       if ((value as TiptapDoc)?.type !== 'doc') {
         const parsed = blocksToHtml(value as any[]);
-        editor.commands.setContent(parsed);
+        const currentContent = editor.getHTML();
+        if (currentContent !== parsed) {
+          editor.commands.setContent(parsed, {
+            emitUpdate: false,
+            parseOptions: { preserveWhitespace: 'full' },
+          });
+        }
         return;
       }
 
-      editor.commands.setContent(value);
+      const currentJson = JSON.stringify(editor.getJSON());
+      const nextJson = JSON.stringify(value);
+      if (currentJson !== nextJson) {
+        editor.commands.setContent(value, {
+          emitUpdate: false,
+          parseOptions: { preserveWhitespace: 'full' },
+        });
+      }
       return;
     }
 
@@ -518,6 +575,25 @@ const ContentEditor = ({
     return null;
   }
 
+  const previewHtml = renderPreview();
+  const plainText = htmlToPlainText(previewHtml);
+  const wordCount = plainText ? plainText.split(/\s+/).length : 0;
+  const charCount = plainText.length;
+  const readMinutes = Math.max(1, Math.ceil(wordCount / 220));
+  const sourceLabel = format === 'blocks' ? 'JSON' : format === 'html' ? 'HTML' : 'Markdown';
+  const sourceContent = format === 'blocks'
+    ? JSON.stringify(getBlocksValue(editor), null, 2)
+    : format === 'html'
+      ? editor.getHTML()
+      : getEditorMarkdown(editor);
+
+  const copySourceContent = async () => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+    await navigator.clipboard.writeText(sourceContent);
+    setDidCopySource(true);
+    setTimeout(() => setDidCopySource(false), 1200);
+  };
+
   return (
     <div>
       {label && (
@@ -538,11 +614,14 @@ const ContentEditor = ({
         style={{
           border: error ? '1px solid var(--mantine-color-red-6)' : undefined,
           position: isFullscreen ? 'fixed' : 'relative',
-          inset: isFullscreen ? (isCompactViewport ? '8px' : '16px') : undefined,
-          zIndex: isFullscreen ? 400 : undefined,
+          inset: isFullscreen ? 0 : undefined,
+          width: isFullscreen ? '100vw' : undefined,
+          height: isFullscreen ? '100dvh' : undefined,
+          zIndex: isFullscreen ? 2000 : undefined,
           background: isFullscreen ? '#fff' : undefined,
-          boxShadow: isFullscreen ? '0 22px 44px rgba(15, 23, 42, 0.22)' : undefined,
-          borderRadius: isFullscreen ? (isCompactViewport ? 10 : 14) : undefined,
+          boxShadow: isFullscreen ? '0 28px 60px rgba(15, 23, 42, 0.26)' : undefined,
+          borderRadius: isFullscreen ? 0 : undefined,
+          overflow: isFullscreen ? 'hidden' : undefined,
         }}
       >
         <Tabs value={activeTab} onChange={(a) => setActiveTab(a as string)}>
@@ -555,21 +634,32 @@ const ContentEditor = ({
                 Preview
               </Tabs.Tab>
               <Tabs.Tab value="markdown" leftSection={<IconMarkdown size={16} />}>
-                Markdown
+                {sourceLabel}
               </Tabs.Tab>
             </Tabs.List>
 
             <Group>
+              {activeTab === 'markdown' && (
+                <ActionIcon
+                  onClick={() => {
+                    void copySourceContent();
+                  }}
+                  variant="light"
+                  color={didCopySource ? 'green' : 'gray'}
+                  aria-label={didCopySource ? 'Copied source' : `Copy ${sourceLabel}`}
+                >
+                  {didCopySource ? <IconCheck size={16} /> : <IconCode size={16} />}
+                </ActionIcon>
+              )}
               {allowFullscreen && (
-                <Tooltip label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen editor'}>
-                  <ActionIcon
-                    onClick={() => setIsFullscreen((prev) => !prev)}
-                    variant="light"
-                    color={isFullscreen ? 'pink' : 'gray'}
-                  >
-                    {isFullscreen ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
-                  </ActionIcon>
-                </Tooltip>
+                <ActionIcon
+                  onClick={() => setIsFullscreen((prev) => !prev)}
+                  variant="light"
+                  color={isFullscreen ? 'pink' : 'gray'}
+                  aria-label={isFullscreen ? 'Exit fullscreen editor' : 'Open fullscreen editor'}
+                >
+                  {isFullscreen ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
+                </ActionIcon>
               )}
             </Group>
           </Group>
@@ -596,17 +686,15 @@ const ContentEditor = ({
                       <RichTextEditor.BulletList />
                       <RichTextEditor.Link />
                     </RichTextEditor.ControlsGroup>
-                    {(format === 'markdown' || format === 'blocks') && (
-                      <RichTextEditor.ControlsGroup>
-                        <ActionIcon
-                          variant="subtle"
-                          onClick={openImageModal}
-                          title="Insert image"
-                        >
-                          <IconPhotoPlus size={18} />
-                        </ActionIcon>
-                      </RichTextEditor.ControlsGroup>
-                    )}
+                    <RichTextEditor.ControlsGroup>
+                      <ActionIcon
+                        variant="subtle"
+                        onClick={openImageModal}
+                        aria-label="Insert image"
+                      >
+                        <IconPhotoPlus size={18} />
+                      </ActionIcon>
+                    </RichTextEditor.ControlsGroup>
                   </>
                 ) : (
                   /* Desktop: full toolbar */
@@ -642,21 +730,111 @@ const ContentEditor = ({
                       </RichTextEditor.ControlsGroup>
 
                       <RichTextEditor.ControlsGroup>
-                        {(format === 'markdown' || format === 'blocks') && (
-                          <ActionIcon
-                            variant="subtle"
-                            onClick={openImageModal}
-                            title="Insert image"
-                          >
-                            <IconPhotoPlus size={18} />
-                          </ActionIcon>
-                        )}
+                        <ActionIcon
+                          variant="subtle"
+                          onClick={openImageModal}
+                          aria-label="Insert image"
+                        >
+                          <IconPhotoPlus size={18} />
+                        </ActionIcon>
                       </RichTextEditor.ControlsGroup>
                   </>
                 )}
               </RichTextEditor.Toolbar>
 
               <RichTextEditor.Content />
+
+              {isCompactViewport && (
+                <Group
+                  justify="space-between"
+                  px="sm"
+                  py={8}
+                  style={{
+                    position: 'sticky',
+                    bottom: 0,
+                    zIndex: 5,
+                    background: 'rgba(255, 255, 255, 0.98)',
+                    borderTop: '1px solid var(--mantine-color-gray-3)',
+                    backdropFilter: 'blur(4px)',
+                    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+                  }}
+                >
+                  <Group gap={6} wrap="nowrap">
+                    <ActionIcon
+                      variant={editor.isActive('bold') ? 'filled' : 'subtle'}
+                      color={editor.isActive('bold') ? 'pink' : 'gray'}
+                      onClick={() => editor.chain().focus().toggleBold().run()}
+                      aria-label="Bold"
+                    >
+                      <IconBold size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant={editor.isActive('italic') ? 'filled' : 'subtle'}
+                      color={editor.isActive('italic') ? 'pink' : 'gray'}
+                      onClick={() => editor.chain().focus().toggleItalic().run()}
+                      aria-label="Italic"
+                    >
+                      <IconItalic size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant={editor.isActive('bulletList') ? 'filled' : 'subtle'}
+                      color={editor.isActive('bulletList') ? 'pink' : 'gray'}
+                      onClick={() => editor.chain().focus().toggleBulletList().run()}
+                      aria-label="Bullet list"
+                    >
+                      <IconList size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant={editor.isActive('link') ? 'filled' : 'subtle'}
+                      color={editor.isActive('link') ? 'pink' : 'gray'}
+                      onClick={() => {
+                        if (editor.isActive('link')) {
+                          editor.chain().focus().unsetLink().run();
+                          return;
+                        }
+
+                        const existingHref = editor.getAttributes('link')?.href as string | undefined;
+                        const href = window.prompt('Enter URL', existingHref || 'https://');
+                        if (!href) return;
+
+                        editor.chain().focus().setLink({ href }).run();
+                      }}
+                      title={editor.isActive('link') ? 'Remove link' : 'Add link'}
+                    >
+                      <IconLink size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={openImageModal}
+                      aria-label="Insert image"
+                    >
+                      <IconPhotoPlus size={16} />
+                    </ActionIcon>
+                  </Group>
+
+                  <Group gap={6} wrap="nowrap">
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => editor.chain().focus().undo().run()}
+                      disabled={!editor.can().chain().focus().undo().run()}
+                      aria-label="Undo"
+                    >
+                      <IconArrowBackUp size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => editor.chain().focus().redo().run()}
+                      disabled={!editor.can().chain().focus().redo().run()}
+                      aria-label="Redo"
+                    >
+                      <IconArrowForwardUp size={16} />
+                    </ActionIcon>
+                  </Group>
+                </Group>
+              )}
             </RichTextEditor>
           </Tabs.Panel>
 
@@ -664,16 +842,25 @@ const ContentEditor = ({
             <div
               className="blocks-content px-4 py-6"
               style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}
-              dangerouslySetInnerHTML={{ __html: renderPreview() }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </Tabs.Panel>
 
           <Tabs.Panel value="markdown" style={{ minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)') : minHeight, overflow: 'auto' }}>
             <pre className="px-4 py-6 font-mono text-sm whitespace-pre-wrap">
-              {getEditorMarkdown(editor)}
+              {sourceContent}
             </pre>
           </Tabs.Panel>
         </Tabs>
+
+        <Group justify="space-between" px="md" py={8} style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+          <Text size="xs" c="dimmed">
+            {wordCount} words · {charCount} chars · {readMinutes} min read
+          </Text>
+          <Text size="xs" c="dimmed">
+            Tips: Cmd/Ctrl+B bold, Cmd/Ctrl+I italic, Cmd/Ctrl+Z undo
+          </Text>
+        </Group>
       </Paper>
 
       {error && (

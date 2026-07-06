@@ -144,13 +144,33 @@ export default async function StorePage({
 
   const visibilityRef = String(store.documentId || store.slug || slug);
 
-  const [visibilityResponse, productsResponse, postsResponse, eventsResponse, pagesResponse] = await Promise.all([
+  const now = new Date();
+  const [visibilityResponse, productsResponse, postsResponse, upcomingEventsResponse, pagesResponse] = await Promise.all([
     strapiClient.getStoreVisibility(visibilityRef),
     strapiClient.getProducts({ page: 1, pageSize: 6 }, { filter: '', sort: 'updatedAt:desc' }, slug),
     strapiClient.getPosts({ page: 1, pageSize: 6 }, { sort: 'updatedAt:desc' }, slug),
-    strapiClient.getEvents(slug),
+    strapiClient.getEvents(slug, {
+      filter: { startDate: { $gte: now.toISOString() } },
+      sort: 'startDate:asc',
+      paginate: { page: 1, pageSize: 6 },
+      status: 'published',
+    }),
     strapiClient.getPages(slug),
   ]);
+
+  const pastEventsResponse = await (async () => {
+    const upcoming = (upcomingEventsResponse?.data || []) as Event[];
+    if (upcoming.length > 0) {
+      return null;
+    }
+
+    return await strapiClient.getEvents(slug, {
+      filter: { startDate: { $lt: now.toISOString() } },
+      sort: 'startDate:desc',
+      paginate: { page: 1, pageSize: 6 },
+      status: 'published',
+    });
+  })();
 
   const visibility = visibilityResponse;
   const visibilityCounts = visibility?.content_summary;
@@ -160,16 +180,13 @@ export default async function StorePage({
   const showAbout = visibility ? visibility.show_about : true;
   const products = (productsResponse?.data || []) as Product[];
   const posts = (postsResponse?.data || []) as Article[];
-  const events = (eventsResponse?.data || []) as Event[];
+  const upcomingEvents = (upcomingEventsResponse?.data || []) as Event[];
+  const pastEvents = (pastEventsResponse?.data || []) as Event[];
+  const eventsToDisplay = upcomingEvents.length > 0 ? upcomingEvents : pastEvents;
+  const isShowingPastOnly = upcomingEvents.length === 0 && pastEvents.length > 0;
   const pages = (pagesResponse?.data || []) as Page[];
   const publishedProducts = products.filter((item) => isPublishedEntry(item));
   const publishedPosts = posts.filter((item) => isPublishedEntry(item));
-  const publishedEvents = events.filter((item) => isPublishedEntry(item));
-  const now = new Date();
-  const upcomingEvents = publishedEvents.filter((e) => new Date(e.startDate) >= now).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  const pastEvents = publishedEvents.filter((e) => new Date(e.startDate) < now).sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-  const eventsToDisplay = upcomingEvents.length > 0 ? upcomingEvents : pastEvents;
-  const isShowingPastOnly = upcomingEvents.length === 0 && pastEvents.length > 0;
   const publishedPages = pages.filter((item) => isPublishedEntry(item));
   const slides = (store?.Slides || [])
     .map((slide) => ({
@@ -211,9 +228,7 @@ export default async function StorePage({
 
   const featuredProduct = publishedProducts[0];
   const featuredPost = publishedPosts[0];
-  const featuredEvent = [...publishedEvents]
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .find((event) => new Date(event.startDate).getTime() >= Date.now()) || publishedEvents[0];
+  const featuredEvent = eventsToDisplay[0];
   const featuredAbout = aboutPages[0];
   const heroImage = imageOrFallback(
     store?.Logo?.url,
@@ -259,7 +274,7 @@ export default async function StorePage({
     },
     {
       label: 'Events',
-      value: publishedEvents.length,
+      value: eventsToDisplay.length,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
     },
@@ -313,10 +328,10 @@ export default async function StorePage({
       show: showEvents,
       color: markketColors.sections.events.main,
       bg: markketColors.sections.events.light,
-      countLabel: `${visibilityCounts?.events_count ?? publishedEvents.length} events`,
+      countLabel: `${visibilityCounts?.events_count ?? eventsToDisplay.length} events`,
       headline: featuredEvent?.Name || 'Upcoming sessions',
       description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
-      hasContent: publishedEvents.length > 0,
+      hasContent: eventsToDisplay.length > 0,
       imageUrl: imageOrFallback(
         featuredEvent?.Thumbnail?.formats?.small?.url,
         featuredEvent?.Thumbnail?.url,
@@ -369,13 +384,13 @@ export default async function StorePage({
       url: `/${slug}/events`,
       title: 'Events',
       description: (() => {
-        const upcoming = visibilityCounts?.upcoming_events_count ?? publishedEvents.filter((event) => new Date(event.startDate).getTime() >= Date.now()).length;
-        return upcoming > 0 ? `${upcoming} upcoming` : `${publishedEvents.length} events`;
+        const upcoming = visibilityCounts?.upcoming_events_count ?? upcomingEvents.length;
+        return upcoming > 0 ? `${upcoming} upcoming` : `${eventsToDisplay.length} events`;
       })(),
       show: showEvents,
       color: markketColors.sections.events.main,
       bgColor: markketColors.sections.events.light,
-      hasContent: publishedEvents.length > 0,
+      hasContent: eventsToDisplay.length > 0,
     },
     {
       url: `/${slug}/about`,
@@ -388,7 +403,7 @@ export default async function StorePage({
     }
   ].filter(link => link.show && link.hasContent);
 
-  const hasPublishedCollections = publishedProducts.length > 0 || publishedPosts.length > 0 || publishedEvents.length > 0 || aboutPages.length > 0;
+  const hasPublishedCollections = publishedProducts.length > 0 || publishedPosts.length > 0 || eventsToDisplay.length > 0 || aboutPages.length > 0;
   const hasPresentationContent = hasHomePageStory || hasStoreDescription || slides.length > 0 || storeImages.length > 0;
   const shouldShowEmptyLaunchState = !hasPublishedCollections && !hasPresentationContent;
   const siteUrl = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
@@ -703,7 +718,7 @@ export default async function StorePage({
               </Box>
             )}
 
-            {(publishedProducts.length > 0 || publishedPosts.length > 0 || publishedEvents.length > 0 || aboutPages.length > 0) && (
+            {(publishedProducts.length > 0 || publishedPosts.length > 0 || eventsToDisplay.length > 0 || aboutPages.length > 0) && (
               <Stack gap="lg">
                 {showShop && publishedProducts.length > 0 && (
                   <Stack gap="sm">

@@ -7,7 +7,10 @@ import { Remarkable } from "remarkable";
  * @returns
  */
 const Markdown = ({ content }: { content: string }) => {
-  const md = new Remarkable({ breaks: true });
+  const md = new Remarkable({
+    breaks: true,
+    html: true,
+  });
 
   return (
     <div

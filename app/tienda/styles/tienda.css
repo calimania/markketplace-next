@@ -1,0 +1,36 @@
+/* Tienda Dashboard Styles */
+.tienda-card {
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+.tienda-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(98, 91, 255, 0.1);
+}
+
+.tienda-published {
+  border-left-color: var(--mantine-color-green-5);
+}
+.tienda-draft {
+  border-left-color: var(--mantine-color-orange-5);
+}
+
+.tienda-header {
+  background: linear-gradient(135deg, var(--mantine-color-rosa-light) 0%, white 100%);
+}
+
+@keyframes tiendaFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tienda-fade-in {
+  animation: tiendaFadeIn 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tienda-card,
+  .tienda-fade-in {
+    animation: none;
+    transition: none;
+  }
+}
