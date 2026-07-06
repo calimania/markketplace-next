@@ -257,10 +257,9 @@ function MediaSlot({
           ? `${slot.label} is uploading...`
           : saved
             ? `${slot.label} saved`
-            :
-        slot.disabled
-          ? (slot.disabledMessage || `${slot.label} is preview-only right now`)
-              : `Tap or click to edit ${slot.label}`
+            : slot.disabled
+              ? (slot.disabledMessage || `${slot.label} is preview-only right now`)
+              : (preview ? `Tap or click to edit ${slot.label}` : `Drop or click to add ${slot.label}`)
       }
       withArrow
     >
@@ -324,12 +323,9 @@ function MediaSlot({
           />
         ) : (
           <Stack gap={4} align="center">
-            <IconPhoto size={22} color="#9E9E9E" />
-            <Text size="xs" c="dimmed" ta="center" lh={1.2} style={{ fontSize: rem(9) }}>
-                Tap or click to upload
-              </Text>
+              <IconPhoto size={22} color="#9E9E9E" />
               <Text size="xs" c="dimmed" ta="center" lh={1.2} style={{ fontSize: rem(9), opacity: 0.75 }}>
-              {slot.label}
+                {dragActive ? 'Drop here' : slot.label}
             </Text>
           </Stack>
         )}
@@ -612,9 +608,6 @@ export default function ContentMediaPreview({
 
       {selectedSlotEntry && !selectedSlotEntry.src && !selectedSlotEntry.disabled && (
         <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-          <Text size="xs" c="dimmed">
-            {selectedSlotEntry.label} is empty. Add an image to improve storefront quality.
-          </Text>
           <Button
             size="xs"
             variant="light"

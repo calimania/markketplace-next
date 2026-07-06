@@ -670,7 +670,9 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                     height: 340,
                     borderRadius: 10,
                     border: isDropActive ? '2px dashed #8b5cf6' : '1px solid rgba(15,23,42,0.12)',
-                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                    background: isDropActive
+                      ? 'rgba(139, 92, 246, 0.08)'
+                      : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -717,7 +719,9 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
                   {!selectedSlot?.src && (
                     <Stack key="empty-state" align="center" gap={4}>
                       <IconPhoto size={30} opacity={0.45} />
-                      <Text size="sm" c="dimmed">Tap or click to upload {selectedSlot.label}</Text>
+                      <Text size="sm" fw={600} c="dimmed">
+                        {isDropActive ? 'Drop image here' : `Click or drop ${selectedSlot.label}`}
+                      </Text>
                     </Stack>
                   )}
                   {selectedSlot?.src && (
@@ -776,16 +780,12 @@ export default function StoreMedia({ store, onUpdate, onRefresh, onSaveSlides }:
 
                 <TextInput
                   label="Alt text"
-                  description={`This description is saved when you upload or replace the image${selectedSlot?.isSlide ? ' and when you save slides' : ' and can also be saved directly'}. ${selectedRule.helper}`}
+                  description={`Saved with uploads or replace actions.${selectedSlot?.isSlide ? ' Slides save alt text too.' : ''}`}
                   placeholder={`Describe ${selectedSlot.label.toLowerCase()} image`}
                   value={altText}
                   onChange={(event) => setAltText(event.currentTarget.value)}
                   size="xs"
                 />
-
-                <Text size="xs" c="dimmed">
-                  Max upload budget for {selectedSlot.label}: {selectedRule.maxWidth}x{selectedRule.maxHeight} and about {formatBytes(selectedRule.maxBytes)}.
-                </Text>
 
                 {selectedSlot?.isSlide && selectedSlot.id !== 'slide-add' && (
                   <>

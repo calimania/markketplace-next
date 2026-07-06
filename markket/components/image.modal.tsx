@@ -266,6 +266,7 @@ const ImageModal = ({
   const [shapeOpacity, setShapeOpacity] = useState(55);
   const [shapeWeight, setShapeWeight] = useState(6);
   const [imageAlt, setImageAlt] = useState(initialImageAlt);
+  const [isDropActive, setIsDropActive] = useState(false);
 
   const hasImage = Boolean(workingImage);
   const hasContent = hasImage || textLayer.value.trim();
@@ -696,6 +697,12 @@ const ImageModal = ({
   }, [imageModalOpen, initialImageUrl, initialImageAlt]);
 
   useEffect(() => {
+    if (!imageModalOpen) {
+      setIsDropActive(false);
+    }
+  }, [imageModalOpen]);
+
+  useEffect(() => {
     if (!imageModalOpen) return;
 
     setRendering(true);
@@ -744,14 +751,40 @@ const ImageModal = ({
     >
       <Stack gap="xs" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Paper withBorder p="xs" radius="md" style={{ flex: 1, minHeight: 0 }}>
-          <Center style={{ height: isMobile ? 250 : 520, background: 'var(--mantine-color-gray-0)', borderRadius: 10 }}>
+          <Center
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (!fileLoading) {
+                setIsDropActive(true);
+              }
+            }}
+            onDragLeave={(event) => {
+              event.preventDefault();
+              setIsDropActive(false);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setIsDropActive(false);
+
+              if (fileLoading) return;
+
+              const droppedFile = event.dataTransfer.files?.[0];
+              if (!droppedFile) return;
+
+              void loadImageFromFile(droppedFile);
+            }}
+            style={{
+              height: isMobile ? 250 : 520,
+              background: isDropActive ? 'rgba(228, 0, 124, 0.08)' : 'var(--mantine-color-gray-0)',
+              borderRadius: 10,
+              border: isDropActive ? '2px dashed #e4007c' : '1px solid transparent',
+              transition: 'background 120ms ease, border-color 120ms ease',
+            }}
+          >
             {!hasContent && !rendering && !fileLoading && (
               <Stack align="center" gap={12}>
                 <MantineImage src={PLACEHOLDER} alt="placeholder" w={220} h={140} fit="contain" />
-                <Stack gap={4} align="center">
-                  <Text size="sm" fw={600}>Start creating your image</Text>
-                  <Text size="xs" c="dimmed">Add text first, then use Source to upload or search</Text>
-                </Stack>
+                <Text size="sm" fw={600}>{isDropActive ? 'Drop image here' : 'Start creating your image'}</Text>
               </Stack>
             )}
 
@@ -781,8 +814,6 @@ const ImageModal = ({
             />
           </Center>
         </Paper>
-
-        <Text size="xs" c="dimmed">Use Source, Text, or Design below</Text>
 
         <SegmentedControl
           value={tab}
@@ -1091,8 +1122,6 @@ const ImageModal = ({
                   )}
                 </FileButton>
               </Stack>
-
-              <Text size="xs" c="dimmed" style={{ marginBottom: 8 }}>Tap or click an image to load it, or choose/search above.</Text>
 
               {searchResults.length > 0 ? (
                 <Box
