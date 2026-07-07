@@ -13,7 +13,12 @@ import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from '@/markket/colors.config';
 import { cache, } from 'react';
 import Link from 'next/link';
-import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+
+function createPicsumImageUrl(seed: string, width: number, height: number) {
+  const safeSeed = encodeURIComponent(seed || 'markket');
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${height}?grayscale&blur=1`;
+}
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getBlogPageCached = cache((slug: string) => strapiClient.getPage('blog', slug));
@@ -65,10 +70,16 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
   const posts = postsResponse?.data || [] as Article[];
   const featuredPost = posts[0] as Article | undefined;
   const remainingPosts = posts.slice(1);
+  const featuredContentImage = extractRichTextImageUrl(featuredPost?.Content);
   const featuredImage = featuredPost?.cover?.formats?.large?.url
     || featuredPost?.cover?.formats?.medium?.url
     || featuredPost?.cover?.url
     || featuredPost?.SEO?.socialImage?.url;
+  const featuredFallbackImage = createPicsumImageUrl(
+    [featuredPost?.Title, featuredPost?.slug, slug].filter(Boolean).join('-') || featuredPost?.id?.toString() || 'featured-post',
+    1200,
+    800,
+  );
   const featuredExcerpt = featuredPost
     ? (featuredPost?.SEO?.metaDescription || stripMarkdown(richTextToPlainText(featuredPost?.Content)) || '').slice(0, 240)
     : '';
@@ -103,11 +114,22 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
                   <Box
                     style={{
                       minHeight: 280,
-                      background: featuredImage
-                        ? `url(${featuredImage}) center/cover no-repeat`
-                        : `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #ffffff 100%)`,
+                      background: featuredContentImage || featuredImage
+                        ? `url(${featuredContentImage || featuredImage}) center/cover no-repeat`
+                        : `url(${featuredFallbackImage}) center/cover no-repeat`,
+                      position: 'relative',
                     }}
-                  />
+                  >
+                    {!featuredContentImage && !featuredImage && (
+                      <Box
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.42) 100%)',
+                        }}
+                      />
+                    )}
+                  </Box>
                   <Stack gap="md" p="xl" justify="center">
                     <Badge size="sm" radius="xl" variant="light" style={{ width: 'fit-content', background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}>
                       Featured Story

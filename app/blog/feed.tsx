@@ -4,8 +4,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Center, Loader, Button, Stack, Group, Card, Box, Badge } from '@mantine/core';
 import { IconArrowDown, IconArrowRight, IconCalendar } from '@tabler/icons-react';
 import type { Article } from '@/markket/article';
-import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import { markketColors } from '@/markket/colors.config';
+
+function createPicsumImageUrl(seed: string, width: number, height: number) {
+  const safeSeed = encodeURIComponent(seed || 'markket');
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${height}?grayscale&blur=1`;
+}
 
 interface BlogFeedProps {
   initialPosts: Article[];
@@ -67,7 +72,13 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
           const storeSlug = (post as Article & { store?: { slug?: string } })?.store?.slug;
           const prefix = storeSlug ? `${storeSlug}/blog` : 'docs';
           const isFeatured = index === 0;
-          const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
+          const contentImage = extractRichTextImageUrl(post?.Content);
+          const coverUrl = contentImage || post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
+          const fallbackCoverUrl = createPicsumImageUrl(
+            [post.Title, post.slug, post.documentId, storeSlug].filter(Boolean).join('-') || String(index),
+            isFeatured ? 1200 : 900,
+            isFeatured ? 800 : 600,
+          );
           const firstChild = post?.Content?.[0]?.children?.[0];
           const rawExcerpt = post?.SEO?.metaDescription
             || stripMarkdown(richTextToPlainText(post?.Content))
@@ -82,14 +93,10 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
           return (
             <Card
               key={post.documentId || post.id}
-              component="a"
-              href={`/${prefix}/${post.slug}`}
-              radius="lg"
               withBorder
               padding={0}
               style={{
                 overflow: 'hidden',
-                borderColor: markketColors.neutral.lightGray,
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
                 transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
                 textDecoration: 'none',
@@ -99,7 +106,6 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                 const el = e.currentTarget as HTMLElement;
                 el.style.transform = 'translateY(-3px)';
                 el.style.boxShadow = `0 14px 36px ${markketColors.sections.blog.main}18`;
-                el.style.borderColor = `${markketColors.sections.blog.main}3a`;
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
@@ -118,9 +124,7 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                 <Box
                   style={{
                     minHeight: isFeatured ? 300 : 220,
-                    background: coverUrl
-                      ? `url(${coverUrl}) center/cover no-repeat`
-                      : markketColors.sections.blog.light,
+                    background: coverUrl ? `url(${coverUrl}) center/cover no-repeat` : `url(${fallbackCoverUrl}) center/cover no-repeat`,
                     position: 'relative',
                   }}
                 >
@@ -130,14 +134,12 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                         position: 'absolute',
                         inset: 0,
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-start',
+                        padding: 16,
+                        background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.05) 0%, rgba(2, 6, 23, 0.5) 100%)',
                       }}
-                    >
-                      <Text size="sm" fw={600} c={markketColors.sections.blog.main}>
-                        Community story
-                      </Text>
-                    </Box>
+                    />
                   )}
                 </Box>
 

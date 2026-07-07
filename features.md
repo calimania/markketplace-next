@@ -20,8 +20,9 @@
 - [x] Avoid mobile wording like "drag and drop"; use less desktop-centric copy
 - [x] Add CRM inbox UI in the CRM section and fix navigation buttons
 - [x] Add dedicated inbox screen after the core Tienda UX and editor improvements
-- [x] repy to email uses markket api
+- [x] reply to email uses markket api
 - [x] picsum placeholder grayscale images
+- [x]
 
 ### v0.9.0 May 2026
 

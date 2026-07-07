@@ -5,7 +5,12 @@ import { IconCalendar, IconArrowRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Article } from '@/markket/article';
 import { markketColors } from '@/markket/colors.config';
-import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+
+function createPicsumImageUrl(seed: string, width: number, height: number) {
+  const safeSeed = encodeURIComponent(seed || 'markket');
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${height}?grayscale&blur=1`;
+}
 
 export interface BlogPostCardProps {
   post: Article;
@@ -17,8 +22,14 @@ export interface BlogPostCardProps {
 export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }: BlogPostCardProps) {
   const slug = post.slug;
   const linkHref = `/${prefix || 'docs'}/${slug}`;
-  const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
   const storeTitle = (post as Article & { store?: { title?: string } })?.store?.title;
+  const contentImage = extractRichTextImageUrl(post?.Content);
+  const coverUrl = post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
+  const fallbackCoverUrl = createPicsumImageUrl(
+    [post.Title, post.slug, post.documentId, storeTitle].filter(Boolean).join('-') || post.id?.toString() || 'docs-post',
+    800,
+    520,
+  );
   const excerpt = post?.SEO?.metaDescription
     || stripMarkdown(richTextToPlainText(post?.Content))
     || '';
@@ -56,25 +67,33 @@ export function BlogPostCard({ post, prefix, showStore, imageLoading = 'lazy' }:
         }}
       >
       <CardSection style={{ height: 180, overflow: 'hidden', flexShrink: 0 }}>
-        {coverUrl ? (
+          {contentImage || coverUrl ? (
           <img
-            src={coverUrl}
+              src={contentImage || coverUrl}
             alt={post?.Title}
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s ease' }}
             loading={imageLoading}
           />
         ) : (
-            <Box
-              style={{
-                height: '100%',
-                background: markketColors.sections.blog.light,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text size="sm" c="dimmed" fw={500}>No cover</Text>
-            </Box>
+              <Box
+                style={{
+                  height: '100%',
+                  background: `url(${fallbackCoverUrl}) center/cover no-repeat`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                }}
+              >
+                <Box
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'rgba(15, 23, 42, 0.14)',
+                    backdropFilter: 'blur(1px)',
+                  }}
+                />
+              </Box>
         )}
       </CardSection>
 
