@@ -78,7 +78,8 @@ export default function PageContent({ params, }: PageContentProps) {
             <img
               src={node.url}
               alt={label}
-              className="max-w-sm"
+              className="w-full"
+              style={{ maxWidth: 'min(100%, 980px)' }}
               loading="lazy"
             />
           </div>
@@ -173,7 +174,8 @@ export default function PageContent({ params, }: PageContentProps) {
         <img
           src={imageData.url}
           alt={imageData.alternativeText || ''}
-          className="rounded-lg w-full max-w-3xl mx-auto"
+          className="rounded-lg w-full"
+          style={{ maxWidth: 'min(100%, 980px)' }}
           width={imageData.width}
           height={imageData.height}
           loading="lazy"

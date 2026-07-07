@@ -82,7 +82,7 @@ export default function MeStoresPage() {
   }
 
   return (
-    <Container size="md" py="lg" className="tech-vhs-surface">
+    <Container size="lg" py="lg" className="tech-vhs-surface">
       <Stack gap="md" mb="lg">
         <TinyBreadcrumbs
           items={[

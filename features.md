@@ -4,6 +4,16 @@
 
 ## 2026
 
+- [ ] tweaks to headers and design, layout
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] stripe connect
+- [ ] item form, display error when save create (store.slug)
+- [ ] edit order status [crm dashboard]
+- [ ] notify buyer of order change
+- [ ] buyer order_id status page
+- [ ] order receipt email, store parameter
+- [ ] buyer can easy reply to order email to send inbox message reply-to slug@markket.place (domain)
 
 ### v.0.3.3 July 2026
 
@@ -22,6 +32,7 @@
 - [x] Add dedicated inbox screen after the core Tienda UX and editor improvements
 - [x] reply to email uses markket api
 - [x] picsum placeholder grayscale images
+- [x] revision to /storefront and /tienda pages
 
 ### v0.9.0 May 2026
 
