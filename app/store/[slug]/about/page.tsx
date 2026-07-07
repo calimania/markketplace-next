@@ -13,7 +13,6 @@ import { markketColors } from '@/markket/colors.config';
 import { StoreTabs } from '@/app/components/ui/store.tabs';
 import StoreCrosslinks from '@/app/components/ui/store.crosslinks';
 import { cache } from 'react';
-import Link from 'next/link';
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getAboutPageCached = cache((slug: string) => strapiClient.getPage('about', slug));
@@ -86,16 +85,15 @@ export default async function AboutPage({ params }: AboutPageProps) {
           <Text size="sm" c="dimmed">
             Contact: <Text component="span" fw={700}>{contactEmail}</Text>
           </Text>
-          <Text
-            component={Link}
-            href={`mailto:${contactEmail}`}
-            size="sm"
-            fw={600}
-            c={markketColors.sections.about.main}
-            style={{ textDecoration: 'none' }}
-          >
-            Email this store
-          </Text>
+          <a href={`mailto:${contactEmail}`} style={{ textDecoration: 'none' }}>
+            <Text
+              size="sm"
+              fw={600}
+              c={markketColors.sections.about.main}
+            >
+              Email this store
+            </Text>
+          </a>
         </Group>
 
         {customPages.length > 0 && (

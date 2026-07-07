@@ -22,7 +22,6 @@
 - [x] Add dedicated inbox screen after the core Tienda UX and editor improvements
 - [x] reply to email uses markket api
 - [x] picsum placeholder grayscale images
-- [x]
 
 ### v0.9.0 May 2026
 

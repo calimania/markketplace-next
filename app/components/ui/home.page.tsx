@@ -3,7 +3,7 @@
 import {
   IconRocket, IconBuildingStore,
   IconArticle, IconSparkles, IconArrowRight,
-  IconCalendar, IconPackage,
+  IconCalendar,
 } from "@tabler/icons-react";
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
@@ -12,10 +12,9 @@ import {
 import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from "@/markket/colors.config";
-import { stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, stripMarkdown } from '@/markket/richtext.utils';
 import { StorefrontCarousel } from '@/app/components/ui/storefront.carousel';
 import { FeatureCard } from '@/app/components/ui/feature.card';
-import { extractRichTextImageUrl } from '@/markket/richtext.utils';
 
 const features = [
   {
@@ -516,14 +515,16 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
 
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
                 {communityProducts.slice(0, 6).map((product) => {
+                  const storeSlug = (product as any)?.stores?.[0]?.slug;
+                  const contentImage = extractRichTextImageUrl(product?.Description as string);
                   const productImage = pickBestImage(
+                    contentImage,
                     product?.Thumbnail?.url,
                     product?.Slides?.[0]?.formats?.medium?.url,
                     product?.Slides?.[0]?.formats?.small?.url,
                     product?.Slides?.[0]?.formats?.thumbnail?.url,
                     product?.Slides?.[0]?.url,
                   );
-                  const storeSlug = (product as any)?.stores?.[0]?.slug;
                   const href = storeSlug ? `/${storeSlug}/products/${product.slug}` : '/stores';
                   const price = typeof product.usd_price === 'number' && product.usd_price > 0
                     ? `$${(product.usd_price / 100).toFixed(2)}`
@@ -560,17 +561,17 @@ const HomePage = ({ store, page, communityPosts = [], featuredStores = [], commu
                           <Box
                             style={{
                                 height: rem(190),
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                                background: markketColors.sections.shop.light,
-                                color: markketColors.sections.shop.main,
+                                background: `url(${createFallbackCoverUrl([product.Name, product.slug, storeSlug].filter(Boolean).join('-') || product.id?.toString() || 'product', 900, 520)}) center/cover no-repeat`,
+                                position: 'relative',
                             }}
                           >
-                            <Box style={{ textAlign: 'center' }}>
-                                <IconPackage size={32} />
-                                <Text size="sm" fw={500}>Product</Text>
-                            </Box>
+                              <Box
+                                style={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.38) 100%)',
+                                }}
+                              />
                           </Box>
                         )}
                       </CardSection>

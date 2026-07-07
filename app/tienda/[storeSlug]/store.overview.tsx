@@ -13,7 +13,7 @@ import type { Article } from '@/markket/article';
 import type { Page } from '@/markket/page';
 import type { Product } from '@/markket/product';
 import type { Event } from '@/markket/event';
-import { richTextToPlainText } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText } from '@/markket/richtext.utils';
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY, TIENDA_OVERVIEW_PREVIEW_LIMIT } from './content.list.queries';
 import type { StoreVisibility } from '@/markket/store.visibility.d';
@@ -135,6 +135,7 @@ export default function StoreOverview({
       href: `/tienda/${store.slug}/blog/${post.documentId || post.slug}`,
       icon: 'article' as const,
       thumbnailUrl: pickImage(
+        extractRichTextImageUrl(post.Content),
         post.cover?.formats?.thumbnail?.url,
         post.cover?.formats?.small?.url,
         post.cover?.url,
@@ -153,6 +154,7 @@ export default function StoreOverview({
       href: `/tienda/${store.slug}/about/${page.documentId || page.slug}`,
       icon: 'page' as const,
       thumbnailUrl: pickImage(
+        extractRichTextImageUrl(page.Content),
         page.SEO?.socialImage?.formats?.thumbnail?.url,
         page.SEO?.socialImage?.formats?.small?.url,
         page.SEO?.socialImage?.url,
@@ -168,6 +170,7 @@ export default function StoreOverview({
       href: `/tienda/${store.slug}/products/${product.documentId || product.slug}`,
       icon: 'product' as const,
       thumbnailUrl: pickImage(
+        extractRichTextImageUrl(product.Description),
         product.Thumbnail?.url,
         product.Slides?.[0]?.formats?.thumbnail?.url,
         product.Slides?.[0]?.formats?.small?.url,
@@ -187,6 +190,7 @@ export default function StoreOverview({
       href: `/tienda/${store.slug}/events/${event.documentId || event.slug}`,
       icon: 'event' as const,
       thumbnailUrl: pickImage(
+        extractRichTextImageUrl(event.Description),
         event.Thumbnail?.formats?.thumbnail?.url,
         event.Thumbnail?.formats?.small?.url,
         event.Thumbnail?.url,
