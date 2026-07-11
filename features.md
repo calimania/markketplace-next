@@ -4,8 +4,26 @@
 
 ## 2026
 
+- [ ] tweaks to headers and design, layout
+- [ ] markket: newsletter sendgrid sync (add, remove)
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] stripe connect
+- [ ] buyer order_id status page
+- [ ] order receipt email, store parameter
 
-### v.0.3.3 July 2026
+
+## July 2026
+
+### v0.4.20
+
+- [ ] Tienda: preview and edit prices in Product & Event
+- [ ] Storefront: display prices, click to buy
+- [ ] tienda: item form, display error when save create (store.slug)
+- [ ] auth: magic form & verify better errors
+- [ ] edit order status [crm dashboard]
+- [ ] tienda/me: combined stores inbox
+
+### v.0.3.3
 
 - [x] Add team button to Tienda home overview, not buried inside edit
 - [x] tweak /me and /tienda endppoints
@@ -20,8 +38,9 @@
 - [x] Avoid mobile wording like "drag and drop"; use less desktop-centric copy
 - [x] Add CRM inbox UI in the CRM section and fix navigation buttons
 - [x] Add dedicated inbox screen after the core Tienda UX and editor improvements
-- [x] repy to email uses markket api
+- [x] reply to email uses markket api
 - [x] picsum placeholder grayscale images
+- [x] revision to /storefront and /tienda pages
 
 ### v0.9.0 May 2026
 
