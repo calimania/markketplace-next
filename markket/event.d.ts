@@ -1,7 +1,7 @@
-import { Slide } from "./product";
-import { SEO, ImageData } from "./seo.d";
-import { Store } from "./store.d";
-import { Tag } from "./tag.d";
+import { Price, Slide } from "./product";
+import { SEO, ImageData } from "./seo";
+import { Store } from "./store";
+import { Tag } from "./tag";
 
 export interface Address {
   name?: string;
@@ -44,6 +44,7 @@ export interface Event {
   documentId: string;
   Name: string;
   usd_price: number;
+  PRICES?: Price[];
   startDate: string;
   Slides: Slide[];
   endDate: string;
