@@ -1072,3 +1072,38 @@ html[data-display-mode='embed'] .mantine-AppShell-main {
     /* each field fills full row on narrow screens */
   }
 }
+/* ─── Tienda: mobile stacking fixes ─────────────────────────────────────────
+ * Prevent panels and action rows from feeling cramped or colliding on narrow
+ * viewports. Applied only at ≤520px so desktop layouts are untouched.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+
+  /* Reduce inter-element gap inside panels so sections breathe better */
+  .tienda-panel {
+    border-radius: 16px !important;
+  }
+
+  /* Tabs strip: tighter padding so all three tabs fit without horizontal scroll */
+  .tienda-overview-tabs .mantine-Tabs-tab {
+    font-size: 12px;
+    padding-inline: 10px;
+    padding-block: 9px;
+  }
+
+  /* KPI tile grid: 2-column grid (already set), but ensure no text overflow */
+  .tienda-kpi-tile {
+    min-height: 68px;
+  }
+
+  /* Store overview action bar: wrap buttons and keep tap targets comfortable */
+  .tienda-panel .mantine-Group-root {
+    gap: var(--mantine-spacing-xs, 8px);
+  }
+}
+
+/* Stripe Connect compact banner: never let the CTA overflow on very small screens */
+@media (max-width: 380px) {
+  .stripe-connect-compact .mantine-Button-root {
+    align-self: flex-end;
+  }
+}

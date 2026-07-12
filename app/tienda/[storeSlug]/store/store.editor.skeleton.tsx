@@ -110,7 +110,7 @@ export default function StoreEditorSkeleton({
         </Group>
       </Group>
 
-      <Group>
+      <Group wrap="wrap" gap="xs">
         <Button component={Link} href={`/tienda/${store.slug}`} variant="default" leftSection={<IconArrowLeft size={16} />}>
           Back
         </Button>
