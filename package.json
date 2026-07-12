@@ -1,11 +1,12 @@
 {
   "name": "markket-next",
-  "version": "0.33.3",
+  "version": "0.4.20",
   "private": false,
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "packageManager": "yarn@1.22.22",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=24",
     "npm": ">=11.0.0"

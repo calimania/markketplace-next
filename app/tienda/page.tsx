@@ -9,6 +9,8 @@ import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import { markketColors } from '@/markket/colors.config';
 
+export const dynamic = 'force-dynamic';
+
 export default function MeStoresPage() {
   const router = useRouter();
   const { confirmed, stores, fetchStores, isLoading } = useAuth();

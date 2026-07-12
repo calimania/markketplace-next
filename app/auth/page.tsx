@@ -4,6 +4,8 @@ import { generateSEOMetadata } from '@/markket/metadata';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const [page] = (await strapiClient.getPage('auth', markketplace.slug))?.data || [];
 

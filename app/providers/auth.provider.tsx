@@ -91,6 +91,22 @@ const AuthContext = createContext<AuthContextType>({
   confirmed: () => false,
 });
 
+function parseStoredAuth(storage: Storage | null): Partial<User> | null {
+  if (!storage) return null;
+
+  const raw = storage.getItem('markket.auth');
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as Partial<User>;
+  } catch {
+    storage.removeItem('markket.auth');
+    return null;
+  }
+}
+
 
 /**
  * Provider to manage authentication state, and stores associated with the user
@@ -159,39 +175,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storage = getStorage();
     if (!storage) return null;
 
-    const storedAuth = storage.getItem('markket.auth');
-
-    if (storedAuth) {
-      try {
-        const parsedAuth = JSON.parse(storedAuth);
-        setUser(parsedAuth);
-        return parsedAuth;
-      } catch (error) {
-        console.error('Failed to parse stored auth data:', error);
-        storage.removeItem('markket.auth');
-      }
+    const parsedAuth = parseStoredAuth(storage);
+    if (parsedAuth) {
+      setUser(parsedAuth as User);
+      return parsedAuth;
     }
+
     return null;
   }
 
   const maybe = useCallback(() => {
     const storage = getStorage();
-    if (!storage) return false;
-
-    const _string = storage.getItem('markket.auth');
-
-    return !!_string;
+    const parsed = parseStoredAuth(storage);
+    return Boolean(parsed?.jwt);
   }, [getStorage]);
 
   const confirmed = useCallback(() => {
     const storage = getStorage();
-    if (!storage) return false;
-
-    const _string = storage.getItem('markket.auth');
-
-    const _json = JSON.parse(_string || '{}');
-
-    return !!_json?.jwt;
+    const parsed = parseStoredAuth(storage);
+    return Boolean(parsed?.jwt);
   }, [getStorage]);
 
   const fetchStores = useCallback(async (options?: { force?: boolean }) => {
@@ -236,7 +238,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const resolvedStores = readStoresFromPayload(response);
         if (Array.isArray(resolvedStores)) {
-          setStores(normalizeStoresForDashboard(resolvedStores));
+          const normalized = normalizeStoresForDashboard(resolvedStores);
+          setStores((previous) => {
+            const prevSignature = previous.map((entry) => `${entry.documentId || entry.slug || entry.id}:${entry.updatedAt || ''}`).join('|');
+            const nextSignature = normalized.map((entry) => `${entry.documentId || entry.slug || entry.id}:${entry.updatedAt || ''}`).join('|');
+            if (prevSignature === nextSignature) {
+              return previous;
+            }
+
+            return normalized;
+          });
           lastStoresFetchAtRef.current = Date.now();
         } else {
           // Keep current store state instead of degrading to empty when payload is transiently malformed.
@@ -300,8 +311,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (userData) {
         const storage = getStorage();
-        const storedAuth = storage?.getItem('markket.auth');
-        const { jwt } = JSON.parse(storedAuth || '{}');
+        const parsedAuth = parseStoredAuth(storage);
+        const jwt = parsedAuth?.jwt || '';
         setUser({ ...userData, jwt });
 
         // Set stores from user data if available

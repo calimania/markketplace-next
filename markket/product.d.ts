@@ -2,14 +2,14 @@ import { Store } from "./store";
 import { SEO, ImageData } from "./seo";
 import { Tag } from "./tag";
 
-interface Extras {
+export interface Extras {
   key: string;
   content: Record<string, any>;
   meta: Record<string, any>;
   active: boolean;
 }
 
-interface Price {
+export interface Price {
   id: number;
   Price: number;
   Currency: string;
@@ -20,10 +20,10 @@ interface Price {
   Name: string;
   hidden: boolean;
   ships_to?: string[];
-  extensions?: [];
+  extensions?: unknown[];
 }
 
-interface ImageFormat {
+export interface ImageFormat {
   ext: string;
   url: string;
   hash: string;
@@ -37,14 +37,14 @@ interface ImageFormat {
   alternativeText?: string;
 }
 
-interface ImageFormats {
+export interface ImageFormats {
   large?: ImageFormat;
   small?: ImageFormat;
   medium?: ImageFormat;
   thumbnail?: ImageFormat;
 }
 
-interface Slide {
+export interface Slide {
   id: number;
   name: string;
   alternativeText: string | null;

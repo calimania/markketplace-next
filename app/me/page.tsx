@@ -19,11 +19,14 @@ import {
   Divider,
   Skeleton,
   ThemeIcon,
+  Pagination,
+  Loader,
+  Center,
 } from '@mantine/core';
 import { IconBuildingStore, IconPlus, IconCamera, IconPencil, IconSparkles, IconChevronRight, IconEye, IconEyeOff, IconSearch } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@/app/providers/auth.provider';
-import { markketClient, strapiClient } from '@/markket/api';
+import { markketClient, strapiClient, tiendaClient } from '@/markket/api';
 import { markketColors } from '@/markket/colors.config';
 
 type StoreStatusShape = {
@@ -36,6 +39,210 @@ function isStorePublished(store: StoreStatusShape) {
   if (status === 'published') return true;
   if (status === 'draft') return false;
   return Boolean(store.publishedAt);
+}
+
+type InboxThreadSummary = {
+  id?: number | string;
+  key?: string;
+  documentId?: string;
+  threadKey?: string;
+  subject?: string;
+  email?: string;
+  from?: string;
+  latestMessage?: string;
+  latestDirection?: string | null;
+  latestEstado?: string | null;
+  latestEmail?: string;
+  latestAt?: string;
+  archived?: boolean;
+  unread?: boolean;
+  messagesCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  message?: string;
+  body?: string;
+  store?: {
+    documentId?: string;
+    title?: string;
+    slug?: string;
+  };
+};
+
+type InboxStoreSummary = {
+  store?: {
+    documentId?: string;
+    title?: string;
+    slug?: string;
+  };
+  unreadThreads?: number;
+  totalThreads?: number;
+};
+
+type InboxSummaryResponse = {
+  ok?: boolean;
+  data?: {
+    summary?: {
+      storesCount?: number;
+      threadsTotal?: number;
+      unreadThreads?: number;
+      archivedThreads?: number;
+      incomingMessages?: number;
+      outgoingMessages?: number;
+      filteredThreadsTotal?: number;
+      filteredUnreadThreads?: number;
+      filteredArchivedThreads?: number;
+    };
+    stores?: InboxStoreSummary[];
+    storesFiltered?: InboxStoreSummary[];
+    recentThreads?: InboxThreadSummary[];
+    threads?: {
+      data?: InboxThreadSummary[];
+      pagination?: {
+        page?: number;
+        pageSize?: number;
+        total?: number;
+        pages?: number;
+      };
+      search?: string;
+    };
+  };
+  error?: unknown;
+  message?: unknown;
+};
+
+function readAuthToken() {
+  if (typeof window === 'undefined') return '';
+
+  try {
+    const raw = localStorage.getItem('markket.auth');
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed?.jwt || '';
+  } catch {
+    return '';
+  }
+}
+
+function normalizeInboxText(value: string | null | undefined) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function labelFromUnknown(value: unknown): string {
+  if (typeof value === 'string') {
+    return normalizeInboxText(value);
+  }
+
+  if (typeof value === 'number') {
+    return String(value);
+  }
+
+  if (!value || typeof value !== 'object') {
+    return '';
+  }
+
+  const record = value as Record<string, unknown>;
+  const nestedCandidates = [
+    record.label,
+    record.title,
+    record.name,
+    record.slug,
+    record.subject,
+    record.threadKey,
+    record.email,
+    record.documentId,
+    record.id,
+  ];
+
+  for (const candidate of nestedCandidates) {
+    const resolved = labelFromUnknown(candidate);
+    if (resolved) {
+      return resolved;
+    }
+  }
+
+  return '';
+}
+
+function getInboxSummaryError(response: InboxSummaryResponse) {
+  if (typeof response?.error === 'string' && response.error.trim()) return response.error;
+  if (typeof response?.message === 'string' && response.message.trim()) return response.message;
+  return 'Could not load inbox summary.';
+}
+
+function resolveInboxStoreLabel(store: InboxStoreSummary | undefined, index: number) {
+  return labelFromUnknown(store?.store?.title)
+    || labelFromUnknown(store?.store?.slug)
+    || `Store ${index + 1}`;
+}
+
+function resolveInboxStoreSlug(store: InboxStoreSummary | undefined) {
+  return labelFromUnknown(store?.store?.slug);
+}
+
+function resolveInboxThreadStoreLabel(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.store?.title)
+    || labelFromUnknown(thread.store?.slug)
+    || 'All stores';
+}
+
+function resolveInboxThreadStoreSlug(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.store?.slug);
+}
+
+function resolveInboxThreadTitle(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.subject)
+    || labelFromUnknown(thread.threadKey)
+    || labelFromUnknown(thread.store?.title)
+    || labelFromUnknown(thread.store?.slug)
+    || labelFromUnknown(thread.id)
+    || 'Untitled thread';
+}
+
+function resolveInboxThreadEmail(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.latestEmail)
+    || labelFromUnknown(thread.email)
+    || labelFromUnknown(thread.from)
+    || 'No email';
+}
+
+function resolveInboxThreadPreview(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.latestMessage)
+    || labelFromUnknown(thread.message)
+    || labelFromUnknown(thread.body)
+    || 'No preview available';
+}
+
+function resolveInboxThreadDate(thread: InboxThreadSummary) {
+  const value = thread.latestAt || thread.updatedAt || thread.createdAt;
+  if (!value) return '-';
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString();
+}
+
+function resolveInboxThreadKey(thread: InboxThreadSummary) {
+  const source = labelFromUnknown(thread.threadKey)
+    || labelFromUnknown(thread.key)
+    || labelFromUnknown(thread.documentId)
+    || labelFromUnknown(thread.id);
+  if (!source) return '';
+
+  const segments = source.split('/').filter(Boolean);
+  return normalizeInboxText(segments[segments.length - 1] || source);
+}
+
+function resolveInboxThreadHref(thread: InboxThreadSummary) {
+  const storeSlug = resolveInboxThreadStoreSlug(thread);
+  const threadKey = resolveInboxThreadKey(thread);
+
+  if (!storeSlug || !threadKey) {
+    return '';
+  }
+
+  return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/${encodeURIComponent(threadKey)}`;
+}
+
+function resolveInboxStoreCount(store: InboxStoreSummary) {
+  return Number(store.unreadThreads ?? store.totalThreads ?? 0);
 }
 
 /**
@@ -53,6 +260,14 @@ export default function MeHomePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [storeSearch, setStoreSearch] = useState('');
+  const [inboxTab, setInboxTab] = useState<'inbox' | 'orders'>('inbox');
+  const [inboxSummary, setInboxSummary] = useState<InboxSummaryResponse | null>(null);
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [inboxError, setInboxError] = useState('');
+  const [inboxSearchInput, setInboxSearchInput] = useState('');
+  const [inboxSearch, setInboxSearch] = useState('');
+  const [inboxPage, setInboxPage] = useState(1);
+  const inboxPageSize = 20;
   const storeCount = stores.length;
   const publishedCount = stores.filter((store) => isStorePublished(store as StoreStatusShape)).length;
   const previewStores = [...stores]
@@ -94,6 +309,67 @@ export default function MeHomePage() {
       });
     }
   }, [confirmed, fetchStores, isLoading, stores.length]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setInboxSearch(normalizeInboxText(inboxSearchInput));
+      setInboxPage(1);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [inboxSearchInput]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!confirmed()) return;
+
+    const token = readAuthToken();
+    if (!token) {
+      setInboxError('Sign in again to view inbox threads.');
+      setInboxSummary(null);
+      return;
+    }
+
+    let active = true;
+
+    const loadInboxSummary = async () => {
+      setInboxLoading(true);
+      setInboxError('');
+
+      try {
+        const response = (await tiendaClient.fetchInboxSummary({
+          token,
+          page: inboxPage,
+          pageSize: inboxPageSize,
+          search: inboxSearch,
+        })) as InboxSummaryResponse;
+
+        if (!active) return;
+
+        if (response?.ok === false) {
+          throw new Error(getInboxSummaryError(response));
+        }
+
+        setInboxSummary(response);
+      } catch (error) {
+        if (!active) return;
+
+        console.error('Inbox summary load failed:', error);
+        setInboxSummary(null);
+        setInboxError(error instanceof Error ? error.message : 'Could not load inbox summary.');
+      } finally {
+        if (active) {
+          setInboxLoading(false);
+        }
+      }
+    };
+
+    void loadInboxSummary();
+
+    return () => {
+      active = false;
+    };
+  }, [confirmed, inboxPage, inboxPageSize, inboxSearch, isLoading]);
 
   const onSaveQuickProfile = async () => {
     if (!user?.id) return;
@@ -440,6 +716,127 @@ export default function MeHomePage() {
           </Stack>
         </Paper>
       </SimpleGrid>
+
+      <Paper withBorder p="md" radius="xl" className="me-card me-card-enter" mt="xl">
+        <Stack gap="sm">
+          <Group justify="space-between" align="flex-start" gap="sm" wrap="wrap">
+            <Stack gap={2} style={{ minWidth: 0 }}>
+              <Group gap={8} wrap="wrap">
+                <Title order={3}>Inbox</Title>
+                <Badge size="sm" variant="light" color="orange">
+                  {Number(inboxSummary?.data?.summary?.filteredUnreadThreads ?? inboxSummary?.data?.summary?.unreadThreads ?? 0)} unread
+                </Badge>
+                <Badge size="sm" variant="light" color="gray">
+                  {Number(inboxSummary?.data?.summary?.filteredThreadsTotal ?? inboxSummary?.data?.threads?.pagination?.total ?? inboxSummary?.data?.summary?.threadsTotal ?? 0)} total
+                </Badge>
+              </Group>
+              <Text c="dimmed" size="sm">
+                A quick read on everything coming in across all stores.
+              </Text>
+            </Stack>
+
+            <Group gap={6} wrap="wrap">
+              <Badge variant="light" color="grape">
+                {Number(inboxSummary?.data?.summary?.storesCount ?? inboxSummary?.data?.storesFiltered?.length ?? 0)} stores
+              </Badge>
+              <Badge variant="light" color="cyan">
+                page {Number(inboxSummary?.data?.threads?.pagination?.page ?? inboxPage)}
+              </Badge>
+            </Group>
+          </Group>
+
+          <TextInput
+            value={inboxSearchInput}
+            onChange={(event) => setInboxSearchInput(event.currentTarget.value)}
+            placeholder="Search inbox"
+            leftSection={<IconSearch size={14} />}
+          />
+
+          {inboxError ? (
+            <Paper withBorder radius="lg" p="sm">
+              <Text size="sm" c="red">{inboxError}</Text>
+            </Paper>
+          ) : null}
+
+          {inboxLoading ? (
+            <Paper withBorder radius="lg" p="md">
+              <Center py="lg">
+                <Loader size="sm" />
+              </Center>
+            </Paper>
+          ) : (
+            <Stack gap="xs">
+              {(inboxSummary?.data?.threads?.data || []).map((thread, index) => {
+                const key = resolveInboxThreadKey(thread) || thread.key || thread.documentId || thread.id || index;
+                const storeLabel = resolveInboxThreadStoreLabel(thread);
+                const threadHref = resolveInboxThreadHref(thread);
+
+                return (
+                  <Paper key={String(key)} withBorder radius="lg" p="sm" style={{ background: 'rgba(255,255,255,0.78)' }}>
+                    <Stack gap={4}>
+                      <Group justify="space-between" align="center" gap="xs" wrap="nowrap">
+                        <Text fw={700} size="sm" lineClamp={1}>{resolveInboxThreadTitle(thread)}</Text>
+                        <Text size="xs" c="dimmed">{resolveInboxThreadDate(thread)}</Text>
+                      </Group>
+                      <Group gap={6} wrap="wrap">
+                        <Badge size="xs" variant="light" color="gray">{resolveInboxThreadEmail(thread)}</Badge>
+                        <Badge size="xs" variant="light" color="teal">{storeLabel}</Badge>
+                        {threadHref ? (
+                          <Badge component={Link} href={threadHref} size="xs" variant="light" color="orange">
+                            Open thread
+                          </Badge>
+                        ) : null}
+                      </Group>
+                      <Text size="sm" c="dimmed" lineClamp={2}>{resolveInboxThreadPreview(thread)}</Text>
+                    </Stack>
+                  </Paper>
+                );
+              })}
+
+                {!(inboxSummary?.data?.threads?.data || []).length && inboxSearch.trim() === '' && (
+                  <Text size="sm" c="dimmed">
+                    No inbox yet.
+                  </Text>
+              )}
+                {!(inboxSummary?.data?.threads?.data || []).length && inboxSearch.trim() !== '' && (
+                  <Text size="sm" c="dimmed">
+                    No matches.
+                  </Text>
+                )}
+            </Stack>
+          )}
+
+          {!!(inboxSummary?.data?.threads?.pagination?.pages || 0) && Number(inboxSummary?.data?.threads?.pagination?.pages ?? 0) > 1 ? (
+            <Group justify="space-between" align="center" wrap="wrap">
+              <Text size="sm" c="dimmed">
+                {Number(inboxSummary?.data?.threads?.pagination?.total ?? 0)} threads total
+              </Text>
+              <Pagination
+                value={Number(inboxSummary?.data?.threads?.pagination?.page ?? inboxPage)}
+                onChange={setInboxPage}
+                total={Number(inboxSummary?.data?.threads?.pagination?.pages ?? 1)}
+                size="sm"
+              />
+            </Group>
+          ) : null}
+
+          {(inboxSummary?.data?.threads?.data || []).length > 0 ? (
+            <Paper withBorder radius="lg" p="sm" bg={markketColors.sections.about.light}>
+              <Group justify="space-between" align="center" gap="sm" wrap="wrap">
+                <Text size="sm" fw={600}>Stores in view</Text>
+                <Group gap={6} wrap="wrap">
+                  {(inboxSummary?.data?.storesFiltered || []).slice(0, 6).map((store, index) => (
+                    <Badge key={`${resolveInboxStoreLabel(store, index)}-${index}`} size="xs" variant="light" color="teal">
+                      {resolveInboxStoreLabel(store, index)}
+                      {resolveInboxStoreCount(store) ? ` · ${resolveInboxStoreCount(store)}` : ''}
+                    </Badge>
+                  ))}
+                </Group>
+              </Group>
+            </Paper>
+          ) : null}
+        </Stack>
+      </Paper>
     </Container>
   );
 }

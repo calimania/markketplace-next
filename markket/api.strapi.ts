@@ -35,6 +35,15 @@ type UploadImage = {
 const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const AVATAR_ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+function isDynamicServerUsageError(error: unknown): boolean {
+  return Boolean(
+    error
+    && typeof error === 'object'
+    && 'digest' in error
+    && (error as { digest?: string }).digest === 'DYNAMIC_SERVER_USAGE'
+  );
+}
+
 type UpdateMePayload = {
   displayName?: string;
   bio?: string;
@@ -64,7 +73,13 @@ export class StrapiClient {
     }
 
     const _string = localStorage.getItem('markket.auth');
-    const _json = _string ? JSON.parse(_string) : {};
+    let _json: any = {};
+    try {
+      _json = _string ? JSON.parse(_string) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      _json = {};
+    }
     const { jwt } = _json;
     return jwt;
   };
@@ -75,7 +90,13 @@ export class StrapiClient {
     }
 
     const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : {};
+    let parsed: any = {};
+    try {
+      parsed = raw ? JSON.parse(raw) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      parsed = {};
+    }
     const jwt = parsed?.jwt;
     const id = parsed?.id;
 
@@ -166,7 +187,13 @@ export class StrapiClient {
     if (typeof localStorage == 'undefined') { return null; }
 
     const _string = localStorage.getItem('markket.auth');
-    const _json = _string ? JSON.parse(_string) : {};
+    let _json: any = {};
+    try {
+      _json = _string ? JSON.parse(_string) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      _json = {};
+    }
     const { jwt, id } = _json;
 
     if (!jwt) {
@@ -338,7 +365,7 @@ export class StrapiClient {
           'Content-Type': 'application/json',
           ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
         },
-        next: { revalidate: 1 },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -348,7 +375,11 @@ export class StrapiClient {
 
       return response.json();
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // Next.js throws this during static pre-render when dynamic fetch is used.
+      // Avoid spamming logs with expected bailouts that are handled by route config.
+      if (!isDynamicServerUsageError(error)) {
+        console.error('Error fetching data:', error);
+      }
     }
 
     return { data: [] } as unknown as StrapiResponse<T>;
@@ -418,7 +449,7 @@ export class StrapiClient {
       status: (options?.status || 'published') as "published" | "draft" | "all",
       sort: options?.sort,
       paginate: options?.paginate,
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores',
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,PRICES,stores',
     });
   }
 
@@ -435,7 +466,7 @@ export class StrapiClient {
           $eq: event_slug
         }
       },
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,PRICES,stores'
     });
   }
 
@@ -473,7 +504,9 @@ export class StrapiClient {
       const payload = (await response.json()) as StoreVisibilityResponse | null;
       return this.normalizeStoreVisibility(payload);
     } catch (error) {
-      console.error('Error fetching store visibility:', error);
+      if (!isDynamicServerUsageError(error)) {
+        console.error('Error fetching store visibility:', error);
+      }
       return null;
     }
   }
@@ -679,7 +712,7 @@ export class StrapiClient {
       },
       status: 'published',
       paginate,
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,stores,stores.Logo',
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,PRICES,stores,stores.Logo',
     });
   }
 

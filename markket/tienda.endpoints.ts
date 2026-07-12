@@ -59,5 +59,9 @@ export const tiendaContract = {
       path: '/api/tienda/stores/:ref/media-targets',
       methods: ['GET'] as TiendaMethod[],
     },
+    inboxSummary: {
+      path: '/api/tienda/inbox/summary',
+      methods: ['GET'] as TiendaMethod[],
+    },
   },
 };

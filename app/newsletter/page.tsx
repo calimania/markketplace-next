@@ -10,6 +10,8 @@ import { Suspense } from 'react';
 import { markketColors } from '@/markket/colors.config';
 import { IconMailStar, } from '@tabler/icons-react';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const slug = 'newsletter';
   const response = await strapiClient.getPage(slug);

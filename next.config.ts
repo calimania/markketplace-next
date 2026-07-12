@@ -1,8 +1,8 @@
+const path = require('path');
 /** @type {import('next').NextConfig} */
-
 // const BUILD_MODE = process.env.BUILD_MODE || 'static' || 'api';
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = (process.env.NODE_ENV === 'production') as Boolean;
 
 const nextConfig = {
   basePath: '',
@@ -157,8 +157,9 @@ const nextConfig = {
       },
     ],
   },
-  turbopack: {},
-
+  turbopack: {
+    root: path.join(__dirname, '../../') // Adjust based on how deep your app is
+  },
 };
 
 export default nextConfig;

@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Price, Product, Slide } from "@/markket/product";
 import { Store } from "@/markket";
-import CheckoutModal from "../../store/[slug]/checkout/CheckoutModal";
 import RichTextContent from '@/app/components/ui/richtext.content';
 import { motion } from 'framer-motion';
 import { Page } from "@/markket/page";
 import PageContent from '@/app/components/ui/page.content';
-import { Box, Modal, Title, UnstyledButton } from "@mantine/core";
+import { Badge, Box, Button, Group, Modal, NumberInput, Paper, Select, Stack, Text, Title, UnstyledButton } from "@mantine/core";
 
 type GalleryImage = {
   id: string | number;
@@ -16,6 +15,19 @@ type GalleryImage = {
   alternativeText?: string | null;
   formats?: Slide['formats'];
 };
+
+type StoreCartItem = {
+  productSlug: string;
+  productDocumentId: string;
+  quantity: number;
+  tip: number;
+  selectedPriceId: string;
+  PRICES: Price[];
+};
+
+type StoreCartState = Record<string, { products: StoreCartItem[] }>;
+
+const STORE_CART_STORAGE_KEY = 'markket.cart';
 
 function buildProductGallery(product: Product): GalleryImage[] {
   const gallery: GalleryImage[] = [];
@@ -63,6 +75,19 @@ function externalHostLabel(value?: string) {
   }
 }
 
+function writeStoreCart(storeSlug: string | undefined, item: StoreCartItem) {
+  if (!storeSlug || typeof window === 'undefined') return;
+
+  try {
+    const raw = window.localStorage.getItem(STORE_CART_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) as StoreCartState : {} as StoreCartState;
+    parsed[storeSlug] = { products: [item] };
+    window.localStorage.setItem(STORE_CART_STORAGE_KEY, JSON.stringify(parsed));
+  } catch (error) {
+    console.error('Could not save checkout cart:', error);
+  }
+}
+
 /**
  * ProductDisplay Component
  * Displays a product with image gallery, description, and checkout options
@@ -76,6 +101,9 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
   const gallery = buildProductGallery(product);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | undefined>(gallery[0]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedPriceId, setSelectedPriceId] = useState<string>('');
+  const [quantity, setQuantity] = useState<number>(1);
+  const [tip, setTip] = useState<number>(0);
   const prices: Price[] = product.PRICES?.map((price) => ({
     ...price,
     currency: price.Currency || "USD",
@@ -83,6 +111,34 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
   const hasExternalPurchaseUrl = Boolean(product?.SEO?.metaUrl);
   const externalHost = externalHostLabel(product?.SEO?.metaUrl);
   const hasCheckoutOptions = prices.some((price) => !price.hidden && Boolean(price.STRIPE_ID));
+  const tippingEnabled = Boolean((product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled);
+  const visiblePrices = prices.filter((price) => !price.hidden && Boolean(price.STRIPE_ID));
+  const selectedPrice = visiblePrices.find((price) => price.STRIPE_ID === selectedPriceId) || visiblePrices[0];
+  const selectedInventory = typeof (selectedPrice as any)?.inventory !== 'undefined' && (selectedPrice as any)?.inventory !== null
+    ? Number((selectedPrice as any).inventory)
+    : undefined;
+  const maxQuantity = typeof selectedInventory === 'number' && selectedInventory > -1 ? selectedInventory : 99;
+  const checkoutHref = `/store/${store?.slug}/checkout`;
+  const checkoutTestQuery = product?.Name?.toLowerCase()?.includes('test') ? '&test=1' : '';
+
+  const handleContinueToCheckout = () => {
+    if (!selectedPrice || !store?.slug) return;
+
+    writeStoreCart(store.slug, {
+      productSlug: product.slug,
+      productDocumentId: product.documentId,
+      quantity,
+      tip,
+      selectedPriceId: selectedPrice.STRIPE_ID || '',
+      PRICES: prices,
+    });
+  };
+
+  useEffect(() => {
+    if (!selectedPriceId && visiblePrices.length > 0) {
+      setSelectedPriceId(visiblePrices[0].STRIPE_ID || '');
+    }
+  }, [selectedPriceId, visiblePrices]);
 
   return (
     <motion.div
@@ -175,11 +231,77 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
                   </a>
                 )}
 
-                {hasCheckoutOptions && (
-                  <CheckoutModal prices={prices} product={product} store={store} />
-                )}
+                {hasCheckoutOptions ? (
+                  <Paper withBorder radius="xl" p="md" className="border-gray-200 bg-white/90 shadow-sm">
+                    <Stack gap="md">
+                      <Group justify="space-between" align="center">
+                        <div>
+                          <Text fw={700}>Purchase options</Text>
+                          <Text size="sm" c="dimmed">Choose your option and continue to checkout.</Text>
+                        </div>
+                        <Badge variant="light" radius="xl" color="blue">
+                          {visiblePrices.length} option{visiblePrices.length === 1 ? '' : 's'}
+                        </Badge>
+                      </Group>
 
-                {!hasExternalPurchaseUrl && !hasCheckoutOptions && (
+                      <Select
+                        label="Choose an option"
+                        placeholder="Pick a variant..."
+                        value={selectedPrice?.STRIPE_ID || ''}
+                        onChange={(value) => setSelectedPriceId(value || '')}
+                        data={visiblePrices.map((price) => ({
+                          value: price.STRIPE_ID || '',
+                          label: `${(price.Name || '').replace(/_/gi, ' ')} - $${price.Price} ${price.Currency}`,
+                        }))}
+                        required
+                        clearable={false}
+                        searchable={false}
+                      />
+
+                      <Group grow align="end">
+                        <NumberInput
+                          label="Quantity"
+                          value={quantity}
+                          min={1}
+                          max={maxQuantity}
+                          onChange={(value) => setQuantity(Number(value ?? 1))}
+                        />
+
+                        {tippingEnabled && (
+                          <NumberInput
+                            label="Tip (optional)"
+                            value={tip}
+                            min={0}
+                            onChange={(value) => setTip(Number(value ?? 0))}
+                            prefix="$"
+                          />
+                        )}
+                      </Group>
+
+                      {selectedInventory === 0 && (
+                        <Text size="sm" c="red" fw={600}>Out of stock</Text>
+                      )}
+
+                      <Group justify="space-between" align="center">
+                        <Text size="sm" c="dimmed">
+                          {selectedPrice ? `${selectedPrice.Currency || 'USD'} ${Number(selectedPrice.Price || 0).toFixed(2)}` : 'Select a price to continue'}
+                        </Text>
+                        <Button
+                          component="a"
+                          href={checkoutHref
+                            ? `${checkoutHref.toString()}?product=${encodeURIComponent(product.slug)}&priceId=${encodeURIComponent(selectedPrice?.STRIPE_ID || '')}&quantity=${encodeURIComponent(String(quantity))}${tippingEnabled ? `&tip=${encodeURIComponent(String(tip))}` : ''}${checkoutTestQuery}`
+                            : '#'}
+                          onClick={handleContinueToCheckout}
+                          disabled={!selectedPrice || selectedInventory === 0}
+                          variant="filled"
+                          color="blue"
+                        >
+                          Continue to payment
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Paper>
+                ) : (
                   <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600">
                     Purchase options are not available yet for this product.
                   </p>
