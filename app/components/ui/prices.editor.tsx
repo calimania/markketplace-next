@@ -37,8 +37,17 @@ const SHIP_TO_OPTIONS = [
   { value: 'MX', label: 'Mexico' },
 ];
 
-function createEmptyPrice(index = 0): PriceItemDraft {
+const EVENT_PRICE_DEFAULT_NAMES = [
+  'GA',
+  'Early Bird',
+  'Last Call',
+];
+
+function createEmptyPrice(index = 0, contentType: 'product' | 'event' = 'product'): PriceItemDraft {
   const tempId = -Date.now() - index;
+  const defaultName = contentType === 'event'
+    ? EVENT_PRICE_DEFAULT_NAMES[index] || `Option ${index + 1}`
+    : '';
 
   return {
     id: tempId,
@@ -48,7 +57,7 @@ function createEmptyPrice(index = 0): PriceItemDraft {
     Description: '',
     inventory: undefined,
     count: 1,
-    Name: '',
+    Name: defaultName,
     hidden: false,
     ships_to: ['US'],
   };
@@ -190,7 +199,7 @@ export default function PricesEditor({
 
   const addPrice = () => {
     const nextIndex = drafts.length;
-    updateDrafts([...drafts, createEmptyPrice(nextIndex)]);
+    updateDrafts([...drafts, createEmptyPrice(nextIndex, contentType)]);
     setExpanded(true);
     setEditingIndex(nextIndex);
   };
