@@ -1,4 +1,4 @@
-import { Badge, Box, Container, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import { Badge, Box, Container, Group, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import Link from 'next/link';
 import { strapiClient } from '@/markket/api.strapi';
 import { markketplace } from '@/markket/config';
@@ -62,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     type: 'website',
     defaultTitle: 'About',
-    defaultDescription: 'About Markketplace, including terms, policies, and platform pages.',
+    defaultDescription: 'About Markketplace, including our story, terms, and policies.',
   });
 }
 
@@ -86,41 +86,86 @@ export default async function PlatformAboutPage() {
   const title = aboutPage?.Title || 'About Markketplace';
   const description = aboutPage?.SEO?.metaDescription
     || store?.SEO?.metaDescription
-    || 'Learn about Markketplace and browse our platform pages.';
+    || 'Learn about Markketplace and explore helpful pages.';
+  const contactEmail = `${PLATFORM_SLUG}@markket.place`;
 
   return (
     <Container size="lg" py="xl">
       <Stack gap="xl">
-        <Box
+        <Paper
+          withBorder
+          radius="xl"
+          p={{ base: 'lg', sm: 'xl' }}
           style={{
-            borderRadius: 20,
-            padding: '32px 24px',
-            background: `linear-gradient(135deg, ${markketColors.sections.about.light} 0%, #ffffff 70%)`,
-            border: `1px solid ${markketColors.sections.about.main}33`,
+            position: 'relative',
+            overflow: 'hidden',
+            borderColor: `${markketColors.sections.about.main}33`,
+            background: `linear-gradient(145deg, ${markketColors.sections.about.light} 0%, #ffffff 55%, #f7fbfc 100%)`,
           }}
         >
-          <Stack gap="sm">
+          <Box
+            style={{
+              position: 'absolute',
+              top: -26,
+              right: -18,
+              width: 140,
+              height: 140,
+              borderRadius: 26,
+              border: `1px solid ${markketColors.sections.about.main}44`,
+              transform: 'rotate(14deg)',
+              opacity: 0.55,
+              pointerEvents: 'none',
+            }}
+          />
+          <Stack gap="sm" style={{ position: 'relative', zIndex: 1 }}>
             <Badge
               variant="light"
-              radius="xl"
-              style={{ background: markketColors.sections.about.light, color: markketColors.sections.about.main, width: 'fit-content' }}
+              radius="sm"
+              style={{
+                width: 'fit-content',
+                background: `${markketColors.sections.about.main}1a`,
+                color: markketColors.sections.about.main,
+              }}
             >
-              Markketplace
+              About
             </Badge>
-            <Title order={1}>{title}</Title>
-            <Text c="dimmed" maw={760}>{description}</Text>
+            <Title
+              order={1}
+              style={{
+                color: markketColors.neutral.charcoal,
+                fontSize: 'clamp(1.8rem, 4vw, 2.7rem)',
+                letterSpacing: '-0.03em',
+              }}
+            >
+              {title}
+            </Title>
+            <Text c={markketColors.neutral.darkGray} maw={760} style={{ lineHeight: 1.7 }}>
+              {description}
+            </Text>
           </Stack>
-        </Box>
+        </Paper>
 
         {aboutPage ? (
-          <Paper withBorder radius="xl" p={{ base: 'md', sm: 'xl' }}>
+          <Paper
+            withBorder
+            radius="xl"
+            p={{ base: 'md', sm: 'xl' }}
+            style={{
+              borderColor: markketColors.neutral.lightGray,
+              background: '#ffffff',
+              boxShadow: '0 10px 24px rgba(15, 23, 42, 0.05)',
+            }}
+          >
             <PageContent params={{ page: aboutPage }} />
           </Paper>
         ) : null}
 
         {cmsPages.length > 0 ? (
           <Stack gap="md">
-            <Title order={2} size="h3">Pages from CMS</Title>
+            <Group justify="space-between" align="center" wrap="wrap">
+              <Title order={2} size="h3" style={{ letterSpacing: '-0.02em' }}>Explore</Title>
+              <Text size="sm" c="dimmed">{cmsPages.length} helpful pages</Text>
+            </Group>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               {cmsPages.map((page) => (
                 <Link key={page.documentId || page.id || page.slug} href={`/about/${page.slug}`} style={{ textDecoration: 'none' }}>
@@ -129,17 +174,34 @@ export default async function PlatformAboutPage() {
                     radius="lg"
                     p="md"
                     style={{
+                      position: 'relative',
+                      overflow: 'hidden',
                       height: '100%',
                       borderColor: `${markketColors.sections.about.main}2f`,
                       background: `linear-gradient(140deg, ${markketColors.sections.about.light} 0%, #ffffff 80%)`,
+                      boxShadow: '0 8px 18px rgba(15, 23, 42, 0.05)',
                     }}
                   >
-                    <Stack gap={6}>
+                    <Box
+                      style={{
+                        position: 'absolute',
+                        right: -12,
+                        top: -12,
+                        width: 70,
+                        height: 70,
+                        borderRadius: 14,
+                        border: `1px dashed ${markketColors.sections.about.main}44`,
+                        transform: 'rotate(12deg)',
+                        opacity: 0.6,
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <Stack gap={6} style={{ position: 'relative', zIndex: 1 }}>
                       <Text fw={700} style={{ color: markketColors.neutral.charcoal }}>
                         {page.Title || page.slug}
                       </Text>
                       <Text size="sm" c="dimmed" lineClamp={3}>
-                        {page?.SEO?.metaDescription || 'Open this page from CMS content.'}
+                        {page?.SEO?.metaDescription || 'Open this page to learn more.'}
                       </Text>
                     </Stack>
                   </Paper>
@@ -148,6 +210,20 @@ export default async function PlatformAboutPage() {
             </SimpleGrid>
           </Stack>
         ) : null}
+
+        <Paper
+          withBorder
+          radius="xl"
+          p="md"
+          style={{
+            borderColor: markketColors.neutral.lightGray,
+            background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+          }}
+        >
+          <Text size="sm" c="dimmed">
+            Contact: {contactEmail}
+          </Text>
+        </Paper>
       </Stack>
     </Container>
   );

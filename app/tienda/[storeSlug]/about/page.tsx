@@ -14,7 +14,7 @@ type TiendaAboutPageProps = {
 export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) {
   const { storeSlug } = await params;
 
-  const pagesResponse = await strapiClient.getPages(storeSlug);
+  const pagesResponse = await strapiClient.getPages(storeSlug, true);
 
   const pages = ((pagesResponse?.data || []) as Page[])
     .filter((page) => page.slug !== 'home');

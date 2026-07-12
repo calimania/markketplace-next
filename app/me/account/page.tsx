@@ -23,7 +23,7 @@ export default function MeAccountPage() {
 
   if (isLoading) {
     return (
-      <Container size="md" py="xl" className="tech-vhs-surface">
+      <Container size="lg" py="xl" className="tech-vhs-surface">
         <Text c="dimmed">Just a moment…</Text>
       </Container>
     );
@@ -34,7 +34,7 @@ export default function MeAccountPage() {
   }
 
   return (
-    <Container size="md" py="xl" className="tech-vhs-surface">
+    <Container size="lg" py="xl" className="tech-vhs-surface">
       <Group justify="space-between" mb="lg">
         <Stack gap={2}>
           <Title order={1}>My Settings</Title>

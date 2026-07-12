@@ -10,6 +10,12 @@
 - [ ] order receipt email, store parameter
 - [ ] tienda/me: combined stores inbox
 - [ ] tienda: display product orders next to product preview page
+- [ ] markket: price|product settings, digital, ships_to
+- [ ] stripe connect
+- [ ] item form, display error when save create (store.slug)
+- [ ] edit order status [crm dashboard]
+- [ ] notify buyer of order change
+- [ ] buyer can easy reply to order email to send inbox message reply-to slug@markket.place (domain)
 
 ## July 2026
 

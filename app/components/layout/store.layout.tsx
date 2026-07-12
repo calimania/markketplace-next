@@ -112,6 +112,8 @@ export function ClientLayout({
 
   const storeInitial = (store?.title || store?.SEO?.metaTitle || store?.slug || 'S').charAt(0).toUpperCase();
   const logoUrl = store?.Logo?.url;
+  const storeSlug = store?.slug || '';
+  const contactEmail = storeSlug ? `${storeSlug}@markket.place` : '';
   const hasProducts = visibility ? visibility.content_summary.products_count > 0 : true;
   const hasBlog = visibility ? visibility.content_summary.articles_count > 0 : true;
   const hasEvents = visibility ? visibility.content_summary.events_count > 0 : true;
@@ -299,6 +301,16 @@ export function ClientLayout({
                   <Text size="sm" c="dimmed">
                     {"(◕‿◕✿)"}
                   </Text>
+                  {contactEmail ? (
+                    <Anchor
+                      href={`mailto:${contactEmail}`}
+                      size="sm"
+                      c="dimmed"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      Contact: {contactEmail}
+                    </Anchor>
+                  ) : null}
                 </Box>
                 <Anchor component={Link} href="/" underline="never">
                   <Button

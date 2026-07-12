@@ -811,7 +811,7 @@ textarea:disabled {
   transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
   border-radius: 24px !important;
   }
-  
+
   .me-hero,
   .tienda-hero {
     border-radius: 28px !important;
@@ -993,6 +993,16 @@ html[data-display-mode='embed'] .mantine-AppShell-main {
   scroll-margin-top: 72px;
 }
 
+.tienda-editor-form .mantine-RichTextEditor-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.tienda-editor-form .ProseMirror {
+  touch-action: pan-y;
+}
 /* Compact clear-button inside text inputs */
 .tienda-editor-form .tienda-field-clear {
   display: flex;

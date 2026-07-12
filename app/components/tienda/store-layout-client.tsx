@@ -145,7 +145,7 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     return (
       <>
         <CompactBreadcrumbs storeSlug={store.slug} />
-        <Container size="md" py="xl" className="tech-vhs-surface">
+        <Container size="lg" py="xl" className="tech-vhs-surface">
           <Stack gap="md">
             <Paper withBorder radius="md" p="md" className="tienda-panel">
               <Stack gap="sm">
@@ -199,7 +199,7 @@ export default function StoreLayoutClient({ children, store }: StoreLayoutClient
     <>
       <CompactBreadcrumbs storeSlug={store.slug} />
       <MobileStoreSectionNav storeSlug={store.slug} pathname={pathname || ''} />
-      <Container size="md" py="xl" className="tech-vhs-surface">
+      <Container size="lg" py="xl" className="tech-vhs-surface">
         <Stack gap="md">
           {children}
         </Stack>

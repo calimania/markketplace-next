@@ -83,7 +83,7 @@ export default async function BlogPostPageContainer({
     }));
 
   return (
-    <Container size="md" py="xl">
+    <Container size="lg" py="xl">
       <Stack gap="xl">
         {post.cover?.url && (
           <LightboxImage

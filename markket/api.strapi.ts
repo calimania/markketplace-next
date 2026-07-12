@@ -589,10 +589,11 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPages(store_slug: string = this.storeSlug) {
+  async getPages(store_slug: string = this.storeSlug, includeAuth = false) {
 
     return this.fetch<Page>({
       contentType: `pages`,
+      includeAuth,
       filters: {
         // Active: {
         // $eq: true
@@ -613,10 +614,11 @@ export class StrapiClient {
    * @param slug
    * @returns
    */
-  async getPage(slug: string, store_slug: string = this.storeSlug) {
+  async getPage(slug: string, store_slug: string = this.storeSlug, includeAuth = false) {
 
     return await this.fetch<Page>({
       contentType: `pages`,
+      includeAuth,
       filters: {
         store: {
           slug: {

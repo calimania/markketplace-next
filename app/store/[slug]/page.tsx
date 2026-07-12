@@ -15,7 +15,7 @@ import { markketplace } from '@/markket/config';
 import { Store } from "@/markket/store.d";
 import { Metadata } from "next";
 import { Album } from '@/markket/album';
-import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { Product } from '@/markket/product';
 import type { Article } from '@/markket/article';
 import type { Event } from '@/markket/event';
@@ -251,6 +251,7 @@ export default async function StorePage({
     store?.Logo?.url,
   );
   const homePageImage = imageOrFallback(
+    extractRichTextImageUrl(homePage?.Content),
     mediaImageUrl(homePage?.SEO?.socialImage as any),
     mediaImageUrl(homePage?.albums?.[0]?.cover as any),
     storefrontFallbackImage,
@@ -271,6 +272,7 @@ export default async function StorePage({
   const featuredEvent = eventsToDisplay[0];
   const featuredAbout = aboutPages[0];
   const heroImage = imageOrFallback(
+    extractRichTextImageUrl(homePage?.Content),
     mediaImageUrl(store?.Cover as any),
     mediaImageUrl(store?.SEO?.socialImage as any),
     slides[0]?.src,
@@ -323,6 +325,7 @@ export default async function StorePage({
       description: compactRich(featuredProduct?.Description, 96) || 'Browse your latest drops and essentials in one place.',
       hasContent: publishedProducts.length > 0,
       imageUrl: imageOrFallback(
+        extractRichTextImageUrl(featuredProduct?.Description as any),
         mediaImageUrl(featuredProduct?.Thumbnail as any),
         mediaImageUrl(featuredProduct?.SEO?.socialImage as any),
         storefrontFallbackImage,
@@ -340,6 +343,7 @@ export default async function StorePage({
       description: compact(featuredPost?.SEO?.metaDescription || 'Read stories, updates, and ideas from this store.'),
       hasContent: publishedPosts.length > 0,
       imageUrl: imageOrFallback(
+        extractRichTextImageUrl(featuredPost?.Content),
         mediaImageUrl(featuredPost?.cover as any),
         mediaImageUrl(featuredPost?.SEO?.socialImage as any),
         storefrontFallbackImage,
@@ -357,6 +361,7 @@ export default async function StorePage({
       description: compactRich(featuredEvent?.Description, 96) || 'Discover upcoming events, launches, and gatherings.',
       hasContent: eventsToDisplay.length > 0,
       imageUrl: imageOrFallback(
+        extractRichTextImageUrl(featuredEvent?.Description),
         mediaImageUrl(featuredEvent?.Thumbnail as any),
         mediaImageUrl(featuredEvent?.SEO?.socialImage as any),
         storefrontFallbackImage,
@@ -374,6 +379,7 @@ export default async function StorePage({
       description: compact(featuredAbout?.SEO?.metaDescription || store?.SEO?.metaDescription || 'Learn the story and explore the world behind this store.'),
       hasContent: aboutPages.length > 0 || hasStoreDescription,
       imageUrl: imageOrFallback(
+        extractRichTextImageUrl(featuredAbout?.Content),
         mediaImageUrl(featuredAbout?.SEO?.socialImage as any),
         mediaImageUrl(store?.Cover as any),
         mediaImageUrl(store?.SEO?.socialImage as any),
