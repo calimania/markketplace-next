@@ -20,7 +20,6 @@ import { IconCheck, IconChevronDown, IconChevronUp, IconDeviceFloppy, IconPencil
 import { notifications } from '@mantine/notifications';
 import { tiendaClient } from '@/markket/api.tienda';
 import { readTiendaAuthToken } from '@/app/tienda/[storeSlug]/content.find';
-import { useStore } from '@/app/tienda/[storeSlug]/store.provider';
 import { markketColors } from '@/markket/colors.config';
 import type { Price } from '@/markket/product';
 
@@ -175,22 +174,22 @@ export default function PricesEditor({
   label = 'Prices',
   description,
 }: PricesEditorProps) {
-  const store = useStore();
   const accent = contentType === 'event' ? markketColors.sections.events : markketColors.sections.shop;
-  const canEditPrices = Boolean(store?.STRIPE_CUSTOMER_ID);
   const [expanded, setExpanded] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drafts, setDrafts] = useState<PriceItemDraft[]>(normalizePrices(value));
   const [saving, setSaving] = useState(false);
-
-  if (!canEditPrices) {
-    return null;
-  }
+  // @TODO: review, restrict PRICES restrictions - subscription options
+  const canEditPrices = true;
 
   useEffect(() => {
     setDrafts(normalizePrices(value));
     setEditingIndex(null);
   }, [value]);
+
+  if (!canEditPrices) {
+    return null;
+  }
 
   const summary = useMemo(() => summarizePrices(drafts), [drafts]);
 
@@ -563,7 +562,7 @@ export default function PricesEditor({
                         {contentType !== 'event' ? (
                           <Stack gap="xs">
                             <Switch
-                              label="Is digital?"
+                              label="Ships to?"
                               checked={Array.isArray(price.ships_to) && price.ships_to.length > 0}
                               onChange={(event) => setPriceValue(index, 'ships_to', event.currentTarget.checked ? (price.ships_to?.length ? price.ships_to : ['US']) : [])}
                               description="Digital items do not request a shipping address at checkout. Leave this on if you want to email buyers extra info instead."

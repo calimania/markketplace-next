@@ -27,6 +27,8 @@
 - [ ] tienda: stripe: connect features
 - [ ] tienda: start stripe connect flow
 - [ ] tienda: display basic stripe dashboard
+- [ ] tienda: product.prices subscription options
+- [ ] storefront: product, display subscription options
 
 ### v0.4.20
 

@@ -110,9 +110,8 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
   })) || [];
   const hasExternalPurchaseUrl = Boolean(product?.SEO?.metaUrl);
   const externalHost = externalHostLabel(product?.SEO?.metaUrl);
-  const hasCheckoutOptions = prices.some((price) => !price.hidden && Boolean(price.STRIPE_ID));
   const tippingEnabled = Boolean((product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled);
-  const visiblePrices = prices.filter((price) => !price.hidden && Boolean(price.STRIPE_ID));
+  const visiblePrices = prices.filter((price) => !price.hidden && !!price.STRIPE_ID);
   const selectedPrice = visiblePrices.find((price) => price.STRIPE_ID === selectedPriceId) || visiblePrices[0];
   const selectedInventory = typeof (selectedPrice as any)?.inventory !== 'undefined' && (selectedPrice as any)?.inventory !== null
     ? Number((selectedPrice as any).inventory)
@@ -230,8 +229,7 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
                     Preview on {externalHost}
                   </a>
                 )}
-
-                {hasCheckoutOptions ? (
+                {!!(visiblePrices?.length > 0) ? (
                   <Paper withBorder radius="xl" p="md" className="border-gray-200 bg-white/90 shadow-sm">
                     <Stack gap="md">
                       <Group justify="space-between" align="center">
