@@ -35,6 +35,15 @@ type UploadImage = {
 const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const AVATAR_ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+function isDynamicServerUsageError(error: unknown): boolean {
+  return Boolean(
+    error
+    && typeof error === 'object'
+    && 'digest' in error
+    && (error as { digest?: string }).digest === 'DYNAMIC_SERVER_USAGE'
+  );
+}
+
 type UpdateMePayload = {
   displayName?: string;
   bio?: string;
@@ -348,7 +357,11 @@ export class StrapiClient {
 
       return response.json();
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // Next.js throws this during static pre-render when dynamic fetch is used.
+      // Avoid spamming logs with expected bailouts that are handled by route config.
+      if (!isDynamicServerUsageError(error)) {
+        console.error('Error fetching data:', error);
+      }
     }
 
     return { data: [] } as unknown as StrapiResponse<T>;
@@ -473,7 +486,9 @@ export class StrapiClient {
       const payload = (await response.json()) as StoreVisibilityResponse | null;
       return this.normalizeStoreVisibility(payload);
     } catch (error) {
-      console.error('Error fetching store visibility:', error);
+      if (!isDynamicServerUsageError(error)) {
+        console.error('Error fetching store visibility:', error);
+      }
       return null;
     }
   }
