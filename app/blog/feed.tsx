@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Center, Loader, Button, Stack, Group, Card, Box, Badge } from '@mantine/core';
 import { IconArrowDown, IconArrowRight, IconCalendar, IconPhoto } from '@tabler/icons-react';
+import Link from 'next/link';
 import type { Article } from '@/markket/article';
 import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import { markketColors } from '@/markket/colors.config';
@@ -86,7 +87,10 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
       <Stack gap="lg">
         {posts.map((post, index) => {
           const storeSlug = (post as Article & { store?: { slug?: string } })?.store?.slug;
-          const prefix = storeSlug ? `${storeSlug}/blog` : 'docs';
+          const articleSlug = post?.slug || post?.documentId || String(post?.id || '');
+          const articleHref = storeSlug
+            ? `/${storeSlug}/blog/${articleSlug}`
+            : `/docs/blog/${articleSlug}`;
           const isFeatured = index === 0;
           const contentImage = extractRichTextImageUrl(post?.Content);
           const coverUrl = contentImage || post?.cover?.formats?.medium?.url || post?.cover?.formats?.small?.url || post?.cover?.url || post.SEO?.socialImage?.formats?.small?.url;
@@ -110,29 +114,33 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
             || `${post.Title} cover image`;
 
           return (
-            <Card
+            <Link
               key={post.documentId || post.id}
-              withBorder
-              padding={0}
-              style={{
-                overflow: 'hidden',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.transform = 'translateY(-3px)';
-                el.style.boxShadow = `0 14px 36px ${markketColors.sections.blog.main}18`;
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.transform = '';
-                el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.06)';
-                el.style.borderColor = markketColors.neutral.lightGray;
-              }}
+              href={articleHref}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
             >
+              <Card
+                withBorder
+                padding={0}
+                style={{
+                  overflow: 'hidden',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                  transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.transform = 'translateY(-3px)';
+                  el.style.boxShadow = `0 14px 36px ${markketColors.sections.blog.main}18`;
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.transform = '';
+                  el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.06)';
+                  el.style.borderColor = markketColors.neutral.lightGray;
+                }}
+              >
               <Stack gap="md" p="md" hiddenFrom="md">
                 <Text
                   fw={800}
@@ -336,7 +344,8 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                   </Group>
                 </Stack>
               </Box>
-            </Card>
+              </Card>
+            </Link>
           );
         })}
       </Stack>
