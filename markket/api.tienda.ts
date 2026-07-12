@@ -258,4 +258,12 @@ export const tiendaClient = {
   syncEventRsvps(ref: TiendaRef, eventId: TiendaItemId, options: TiendaRequestOptions) {
     return tiendaFetch('POST', `/api/tienda/stores/${ref}/events/${eventId}/rsvps/sync`, options);
   },
+
+  syncProductStripe(ref: TiendaRef, productId: TiendaItemId, options: TiendaRequestOptions) {
+    return tiendaFetch('POST', `/api/tienda/stores/${ref}/products/${productId}/stripe-sync`, options);
+  },
+
+  syncEventStripe(ref: TiendaRef, eventId: TiendaItemId, options: TiendaRequestOptions) {
+    return tiendaFetch('POST', `/api/tienda/stores/${ref}/events/${eventId}/stripe-sync`, options);
+  },
 };

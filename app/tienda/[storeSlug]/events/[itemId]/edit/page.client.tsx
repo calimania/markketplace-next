@@ -8,6 +8,7 @@ import EventEditorForm from '../../event.editor.form';
 import { findEvent } from '../../events.find';
 import { readTiendaAuthToken } from '../../../content.find';
 import type { Event } from '@/markket/event';
+import type { Price } from '@/markket/product';
 
 type TiendaEventEditPageClientProps = {
   storeSlug: string;

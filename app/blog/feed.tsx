@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Center, Loader, Button, Stack, Group, Card, Box, Badge } from '@mantine/core';
-import { IconArrowDown, IconArrowRight, IconCalendar } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowRight, IconCalendar, IconPhoto } from '@tabler/icons-react';
 import type { Article } from '@/markket/article';
 import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import { markketColors } from '@/markket/colors.config';
@@ -78,6 +78,9 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
           const publishedDateLabel = publishedDate && !Number.isNaN(publishedDate.getTime())
             ? publishedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'Draft';
+          const imageCaption = post?.cover?.caption?.trim()
+            || post?.cover?.alternativeText?.trim()
+            || `${post.Title} cover image`;
 
           return (
             <Card
@@ -108,22 +111,67 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                 el.style.borderColor = markketColors.neutral.lightGray;
               }}
             >
-              <Box
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isFeatured ? 'minmax(240px, 420px) minmax(0, 1fr)' : 'minmax(220px, 360px) minmax(0, 1fr)',
-                }}
-                className="max-md:grid-cols-1"
-              >
+              <Stack gap="md" p="md" hiddenFrom="md">
+                <Text
+                  fw={800}
+                  style={{
+                    fontSize: isFeatured ? 'clamp(1.45rem, 6vw, 2rem)' : 'clamp(1.2rem, 5vw, 1.55rem)',
+                    lineHeight: 1.12,
+                    color: markketColors.neutral.charcoal,
+                    letterSpacing: '-0.03em',
+                  }}
+                >
+                  {post.Title}
+                </Text>
+
+                <Text size="sm" c="dimmed" style={{ lineHeight: 1.7 }} lineClamp={isFeatured ? 4 : 3}>
+                  {excerpt}
+                </Text>
+
+                <Group justify="space-between" align="center" wrap="wrap">
+                  <Group gap={4}>
+                    <IconCalendar size={12} color={markketColors.neutral.mediumGray} />
+                    <Text size="xs" c="dimmed">
+                      {publishedDateLabel}
+                    </Text>
+                  </Group>
+                  <Text size="sm" fw={600} style={{ color: markketColors.sections.blog.main, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    Read story <IconArrowRight size={14} />
+                  </Text>
+                </Group>
+
                 <Box
                   style={{
-                    minHeight: isFeatured ? 300 : 220,
+                    minHeight: isFeatured ? 220 : 180,
+                    borderRadius: 16,
                     background: coverUrl
                       ? `url(${coverUrl}) center/cover no-repeat`
                       : markketColors.sections.blog.light,
                     position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
+                  {coverUrl && (
+                    <Box
+                      style={{
+                        position: 'absolute',
+                        inset: 'auto 0 0 0',
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.62) 100%)',
+                        padding: '30px 12px 10px',
+                      }}
+                    >
+                      <Text
+                        size="xs"
+                        fw={600}
+                        c="white"
+                        lineClamp={1}
+                        style={{ letterSpacing: '0.01em' }}
+                      >
+                        {imageCaption}
+                      </Text>
+                    </Box>
+                  )}
+
                   {!coverUrl && (
                     <Box
                       style={{
@@ -141,39 +189,119 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
                   )}
                 </Box>
 
-                <Stack gap="md" p={{ base: 'md', md: 'xl' }} style={{ justifyContent: 'space-between' }}>
-                  <Stack gap="sm">
-                    <Group gap="xs" wrap="wrap">
-                      <Badge
-                        variant="light"
-                        radius="md"
-                        style={{ background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}
+                <Group gap="xs" wrap="wrap">
+                  <Badge
+                    variant="light"
+                    radius="md"
+                    style={{ background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}
+                  >
+                    Blog
+                  </Badge>
+                  {storeSlug && (
+                    <Badge variant="outline" radius="md" style={{ borderColor: markketColors.neutral.lightGray, color: markketColors.neutral.darkGray }}>
+                      {storeSlug}
+                    </Badge>
+                  )}
+                </Group>
+
+                <Group gap={6} align="center">
+                  <IconPhoto size={12} color={markketColors.neutral.mediumGray} />
+                  <Text size="xs" c="dimmed" lineClamp={1}>
+                    {imageCaption}
+                  </Text>
+                </Group>
+              </Stack>
+
+              <Box hiddenFrom="sm" style={{ display: 'none' }} />
+
+              <Box visibleFrom="md">
+                <Stack gap="md" p={{ base: 'md', md: 'xl' }}>
+                  <Text
+                    fw={800}
+                    style={{
+                      fontSize: isFeatured ? 'clamp(1.6rem, 3vw, 2.4rem)' : 'clamp(1.25rem, 2.4vw, 1.8rem)',
+                      lineHeight: 1.08,
+                      color: markketColors.neutral.charcoal,
+                      letterSpacing: '-0.03em',
+                    }}
+                  >
+                    {post.Title}
+                  </Text>
+
+                  <Box
+                    style={{
+                      minHeight: isFeatured ? 320 : 250,
+                      borderRadius: 18,
+                      background: coverUrl
+                        ? `url(${coverUrl}) center/cover no-repeat`
+                        : markketColors.sections.blog.light,
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {coverUrl && (
+                      <Box
+                        style={{
+                          position: 'absolute',
+                          inset: 'auto 0 0 0',
+                          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.58) 100%)',
+                          padding: '34px 14px 12px',
+                        }}
                       >
-                        Blog
-                      </Badge>
-                      {storeSlug && (
-                        <Badge variant="outline" radius="md" style={{ borderColor: markketColors.neutral.lightGray, color: markketColors.neutral.darkGray }}>
-                          {storeSlug}
-                        </Badge>
-                      )}
-                    </Group>
+                        <Text
+                          size="xs"
+                          fw={600}
+                          c="white"
+                          lineClamp={1}
+                          style={{ letterSpacing: '0.01em' }}
+                        >
+                          {imageCaption}
+                        </Text>
+                      </Box>
+                    )}
 
-                    <Text
-                      fw={800}
-                      style={{
-                        fontSize: isFeatured ? 'clamp(1.6rem, 3vw, 2.4rem)' : 'clamp(1.25rem, 2.4vw, 1.8rem)',
-                        lineHeight: 1.08,
-                        color: markketColors.neutral.charcoal,
-                        letterSpacing: '-0.03em',
-                      }}
+                    {!coverUrl && (
+                      <Box
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text size="sm" fw={600} c={markketColors.sections.blog.main}>
+                          Community story
+                        </Text>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Group gap="xs" wrap="wrap">
+                    <Badge
+                      variant="light"
+                      radius="md"
+                      style={{ background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}
                     >
-                      {post.Title}
-                    </Text>
+                      Blog
+                    </Badge>
+                    {storeSlug && (
+                      <Badge variant="outline" radius="md" style={{ borderColor: markketColors.neutral.lightGray, color: markketColors.neutral.darkGray }}>
+                        {storeSlug}
+                      </Badge>
+                    )}
+                  </Group>
 
-                    <Text size="sm" c="dimmed" style={{ lineHeight: 1.75, maxWidth: 760 }} lineClamp={isFeatured ? 5 : 4}>
-                      {excerpt}
+                  <Text size="sm" c="dimmed" style={{ lineHeight: 1.75, maxWidth: 760 }} lineClamp={isFeatured ? 5 : 4}>
+                    {excerpt}
+                  </Text>
+
+                  <Group gap={6} align="center">
+                    <IconPhoto size={12} color={markketColors.neutral.mediumGray} />
+                    <Text size="xs" c="dimmed" lineClamp={1}>
+                      {imageCaption}
                     </Text>
-                  </Stack>
+                  </Group>
 
                   <Group justify="space-between" align="center" wrap="wrap">
                     <Group gap={4}>

@@ -10,6 +10,7 @@ import EventItemActions from './event.item.actions';
 import EventDetailTabs from './event.detail.tabs';
 import { findEvent } from './events.find';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
+import PricesEditor from '@/app/components/ui/prices.editor';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
 import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
 import { readTiendaAuthToken } from '../content.find';
@@ -217,6 +218,16 @@ export default function TiendaEventItemPageClient({ storeSlug, itemId }: TiendaE
                 alt: `${event.Name || 'Event'} slide`,
               },
             ]}
+          />
+
+          <PricesEditor
+            storeRef={storeRef}
+            contentType="event"
+            itemDocumentId={itemDocumentId}
+            value={event.PRICES || []}
+            onSaved={() => {
+              void refreshEventAfterUpload();
+            }}
           />
 
           <Divider label={<Badge variant="dot" color="gray" size="sm">Description</Badge>} labelPosition="left" />

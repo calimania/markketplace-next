@@ -9,6 +9,7 @@ import TiendaDetailShell from '@/app/components/ui/tienda.detail.shell';
 import RichTextContent from '@/app/components/ui/richtext.content';
 import ContentMediaPreview from '@/app/components/ui/content.media.preview';
 import PublicLinkActions from '@/app/components/ui/public.link.actions';
+import PricesEditor from '@/app/components/ui/prices.editor';
 import ProductItemActions from './product.item.actions';
 import { findProduct } from './products.find';
 import { getPublishLabel, isPublished } from '@/markket/helpers.publication';
@@ -172,6 +173,16 @@ export default function TiendaProductItemPageClient({ storeSlug, itemId }: Tiend
               alt: `${product.Name || 'Product'} slide`,
             },
           ]}
+        />
+
+        <PricesEditor
+          storeRef={storeSlug}
+          contentType="product"
+          itemDocumentId={itemDocumentId}
+          value={product.PRICES || []}
+          onSaved={() => {
+            void refreshProductAfterUpload();
+          }}
         />
 
         <Divider label={<Badge variant="dot" color="gray" size="sm">Description</Badge>} labelPosition="left" />

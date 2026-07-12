@@ -95,14 +95,65 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
           </Group>
         )}
 
+        <Group gap="xs" align="center">
+          <Badge
+            size="sm"
+            radius="xl"
+            variant="light"
+            style={{ background: `${markketColors.sections.blog.main}14`, color: markketColors.sections.blog.main }}
+          >
+            From {store.title}
+          </Badge>
+          <Text size="sm" c="dimmed">
+            Store stories, updates, and featured posts.
+          </Text>
+        </Group>
+
         {posts.length > 0 ? (
           <Stack gap="xl">
             {featuredPost && (
               <Paper withBorder radius="xl" style={{ overflow: 'hidden', borderColor: `${markketColors.sections.blog.main}33` }}>
-                <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0}>
+                <Stack gap="md" p="md" hiddenFrom="md">
+                  <Badge size="sm" radius="xl" variant="light" style={{ width: 'fit-content', background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}>
+                    Featured Story
+                  </Badge>
+                  <Text size="xs" fw={600} c="dimmed">
+                    {store.title}
+                  </Text>
+                  <Title order={2} style={{ color: markketColors.neutral.charcoal, fontSize: 'clamp(1.25rem, 6vw, 1.8rem)' }}>
+                    {featuredPost.Title}
+                  </Title>
+                  {featuredExcerpt && (
+                    <Text c="dimmed" size="sm" style={{ lineHeight: 1.6 }}>
+                      {featuredExcerpt}{featuredExcerpt.length >= 240 ? '...' : ''}
+                    </Text>
+                  )}
+                  <Link
+                    href={`/${slug}/blog/${featuredPost.slug}`}
+                    style={{
+                      color: markketColors.sections.blog.main,
+                      width: 'fit-content',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Read feature
+                  </Link>
                   <Box
                     style={{
-                      minHeight: 280,
+                      minHeight: 180,
+                      borderRadius: 16,
+                      background: featuredImage
+                        ? `url(${featuredImage}) center/cover no-repeat`
+                        : `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #ffffff 100%)`,
+                    }}
+                  />
+                </Stack>
+
+                <SimpleGrid cols={{ base: 1, md: 2 }} spacing={0} visibleFrom="md">
+                  <Box
+                    style={{
+                      minHeight: 320,
                       background: featuredImage
                         ? `url(${featuredImage}) center/cover no-repeat`
                         : `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #ffffff 100%)`,
@@ -112,7 +163,10 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
                     <Badge size="sm" radius="xl" variant="light" style={{ width: 'fit-content', background: markketColors.sections.blog.light, color: markketColors.sections.blog.main }}>
                       Featured Story
                     </Badge>
-                    <Title order={2} style={{ color: markketColors.neutral.charcoal }}>
+                    <Text size="xs" fw={600} c="dimmed">
+                      {store.title}
+                    </Text>
+                    <Title order={2} style={{ color: markketColors.neutral.charcoal, fontSize: 'clamp(1.35rem, 4vw, 2rem)' }}>
                       {featuredPost.Title}
                     </Title>
                     {featuredExcerpt && (
@@ -143,6 +197,7 @@ export default async function StoreBlogPage({ params }: BlogPageProps) {
                     key={(post as Article)?.id}
                     post={post as Article}
                     prefix={`${slug}/blog`}
+                    showStore
                     imageLoading="lazy"
                   />
                 ))}

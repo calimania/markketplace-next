@@ -418,7 +418,7 @@ export class StrapiClient {
       status: (options?.status || 'published') as "published" | "draft" | "all",
       sort: options?.sort,
       paginate: options?.paginate,
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores',
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,PRICES,stores',
     });
   }
 
@@ -435,7 +435,7 @@ export class StrapiClient {
           $eq: event_slug
         }
       },
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,stores'
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,Slides,PRICES,stores'
     });
   }
 
@@ -677,7 +677,7 @@ export class StrapiClient {
       },
       status: 'published',
       paginate,
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,stores,stores.Logo',
+      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,PRICES,stores,stores.Logo',
     });
   }
 
