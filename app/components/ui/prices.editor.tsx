@@ -174,22 +174,22 @@ export default function PricesEditor({
   label = 'Prices',
   description,
 }: PricesEditorProps) {
-  // const store = useStore();
   const accent = contentType === 'event' ? markketColors.sections.events : markketColors.sections.shop;
-  const canEditPrices = true; //  Boolean(store?.STRIPE_CUSTOMER_ID);
   const [expanded, setExpanded] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drafts, setDrafts] = useState<PriceItemDraft[]>(normalizePrices(value));
   const [saving, setSaving] = useState(false);
-
-  if (!canEditPrices) {
-    return null;
-  }
+  // @TODO: review, restrict PRICES restrictions - subscription options
+  const canEditPrices = true;
 
   useEffect(() => {
     setDrafts(normalizePrices(value));
     setEditingIndex(null);
   }, [value]);
+
+  if (!canEditPrices) {
+    return null;
+  }
 
   const summary = useMemo(() => summarizePrices(drafts), [drafts]);
 
