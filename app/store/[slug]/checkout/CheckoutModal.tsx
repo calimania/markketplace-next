@@ -138,14 +138,17 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
 
     try {
       const ships_to = selectedPrice?.ships_to;
+      const countries = Array.isArray(ships_to)
+        ? ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        : [];
       // @TODO: improve shipping options extra data
       await createPaymentLink({
         ...options,
         stripe_test: !!product?.Name?.toLowerCase()?.includes('test'),
-        includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
+        includes_shipping: countries.length > 0,
         store_id: store?.documentId,
         redirect_to_url: new URL(`/${store?.slug}/receipt`, markketplace.markket_url).toString(),
-        countries: Array.isArray(ships_to) ? ships_to?.filter(p => typeof p == 'string') : ['US'],
+        countries,
       });
     } catch (error: any) {
       console.error('Payment link error:', error);
@@ -312,6 +315,9 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
   const selectedInv = (selectedPrice as any)?.inventory;
   const selectedInvNum = typeof selectedInv !== 'undefined' && selectedInv !== null ? Number(selectedInv) : undefined;
   const isSelectedOutOfStock = typeof selectedInvNum === 'number' && selectedInvNum === 0;
+  const selectedPriceShipsTo = Array.isArray(selectedPrice?.ships_to)
+    ? selectedPrice.ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    : [];
 
   return (
     <>
@@ -407,6 +413,11 @@ const CheckoutModal: FC<Props> = ({ prices, product, store }: Props) => {
               )}
               {typeof selectedInvNum === 'number' && selectedInvNum > 0 && selectedInvNum < 10 && (
                 <Text size="sm" c="dimmed">Only {selectedInvNum} {selectedInvNum > 1 && 'more'} available</Text>
+              )}
+              {selectedPriceShipsTo.length > 0 ? (
+                <Text size="sm" c="dimmed">Ships to: {selectedPriceShipsTo.join(', ')}</Text>
+              ) : (
+                <Text size="sm" c="dimmed">Digital item: checkout will not ask for a shipping address.</Text>
               )}
               {(product.extras || []).find((e: any) => e.key == 'markket:product:tipping')?.content?.enabled && (
                 <NumberInput

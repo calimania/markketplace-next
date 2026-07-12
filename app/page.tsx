@@ -57,6 +57,25 @@ const productHasImage = (product: Product) => Boolean(
   product?.SEO?.socialImage?.url,
 );
 
+const getStorefrontKey = <T extends { store?: { slug?: string } }>(item: T, fallback: string) => {
+  return item?.store?.slug || fallback;
+};
+
+const limitOnePerStorefront = <T extends { store?: { slug?: string }; documentId?: string | number; id?: string | number }>(items: T[]): T[] => {
+  const seen = new Set<string>();
+
+  return items.filter((item, index) => {
+    const key = getStorefrontKey(item, `${item.documentId || item.id || index}`);
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
 const toAbsoluteUrl = (path?: string) => {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
@@ -105,11 +124,14 @@ export default async function Home() {
   const [store] = storeRes?.data || [];
   const [page] = pageRes?.data || [];
 
-  const communityPosts = prioritizeWithImage((communityPostsResponse?.data || []) as Article[], articleHasImage);
+  const communityPosts = prioritizeWithImage(
+    limitOnePerStorefront((communityPostsResponse?.data || []) as Article[]),
+    articleHasImage,
+  );
   const featuredStores = prioritizeWithImage((storesResponse?.data || []) as Store[], storeHasImage);
   const allPages = (communityPagesResponse?.data || []) as Page[];
   const communityPages = prioritizeWithImage(
-    allPages.filter(p => !EXCLUDED_PAGE_SLUGS.includes((p as any)?.slug || '')),
+    limitOnePerStorefront(allPages.filter(p => !EXCLUDED_PAGE_SLUGS.includes((p as any)?.slug || ''))),
     pageHasImage,
   );
   const communityEvents = prioritizeWithImage((communityEventsResponse?.data || []) as Event[], eventHasImage);

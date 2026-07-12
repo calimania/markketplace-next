@@ -15,6 +15,15 @@ type TiendaOverviewListOptions = {
   queries?: Partial<Record<'article' | 'page' | 'product' | 'event', TiendaRequestOptions['query']>>;
 };
 
+type TiendaInboxSummaryOptions = {
+  token: string;
+  page?: number;
+  pageSize?: number;
+  limit?: number;
+  search?: string;
+  baseUrl?: string;
+};
+
 type TiendaUploadOptions = {
   token: string;
   files: File[];
@@ -189,6 +198,38 @@ async function tiendaUpload(ref: TiendaRef, options: TiendaUploadOptions) {
 }
 
 export const tiendaClient = {
+  fetchInboxSummary(options: TiendaInboxSummaryOptions) {
+    const { token, page, pageSize, limit, search, baseUrl } = options;
+    const params = new URLSearchParams();
+
+    if (typeof page === 'number' && Number.isFinite(page) && page >= 1) {
+      params.set('page', String(Math.max(1, Math.floor(page))));
+    }
+
+    const resolvedPageSize = typeof pageSize === 'number' && Number.isFinite(pageSize)
+      ? Math.min(100, Math.max(1, Math.floor(pageSize)))
+      : undefined;
+
+    const resolvedLimit = typeof limit === 'number' && Number.isFinite(limit)
+      ? Math.min(100, Math.max(1, Math.floor(limit)))
+      : undefined;
+
+    if (resolvedPageSize !== undefined) {
+      params.set('pageSize', String(resolvedPageSize));
+      params.set('limit', String(resolvedPageSize));
+    } else if (resolvedLimit !== undefined) {
+      params.set('limit', String(resolvedLimit));
+    }
+
+    const query = typeof search === 'string' ? search.trim() : '';
+    if (query) {
+      params.set('search', query);
+    }
+
+    const path = params.toString() ? `/api/tienda/inbox/summary?${params.toString()}` : '/api/tienda/inbox/summary';
+    return tiendaFetch('GET', path, { token, baseUrl });
+  },
+
   async getStore(ref: TiendaRef, options: TiendaRequestOptions) {
     const primaryPath = withQuery(`/api/tienda/stores/${ref}`, options.query);
     const primaryResponse = await tiendaFetch('GET', primaryPath, options);

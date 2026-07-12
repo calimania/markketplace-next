@@ -7,6 +7,22 @@ import { markketColors } from '@/markket/colors.config';
 import BlogFeed from './feed';
 import type { Article } from '@/markket/article';
 
+const limitOnePerStorefront = (items: Article[]) => {
+  const seen = new Set<string>();
+
+  return items.filter((item, index) => {
+    const storefrontKey = item?.store?.slug || item?.store?.documentId || item?.store?.id || item.documentId || item.id || index;
+    const key = String(storefrontKey);
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     slug: 'blog',
@@ -26,7 +42,7 @@ export default async function BlogDiscoveryPage() {
     { sort: 'publishedAt:desc' },
   );
 
-  const posts = (response?.data || []) as Article[];
+  const posts = limitOnePerStorefront((response?.data || []) as Article[]);
   const total = response?.meta?.pagination?.total ?? 0;
   const hasMore = posts.length < total;
 

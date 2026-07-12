@@ -12,6 +12,22 @@ interface BlogFeedProps {
   initialHasMore: boolean;
 }
 
+const limitOnePerStorefront = (items: Article[]) => {
+  const seen = new Set<string>();
+
+  return items.filter((item, index) => {
+    const storefrontKey = item?.store?.slug || item?.store?.documentId || item?.store?.id || item.documentId || item.id || index;
+    const key = String(storefrontKey);
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
 export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps) {
   const [posts, setPosts] = useState<Article[]>(initialPosts);
   const [page, setPage] = useState(2);
@@ -26,10 +42,10 @@ export default function BlogFeed({ initialPosts, initialHasMore }: BlogFeedProps
       const res = await fetch(`/api/blog?page=${page}&pageSize=12`);
       const data = await res.json();
       const next = (data?.data || []) as Article[];
-      setPosts((prev) => [...prev, ...next]);
+      setPosts((prev) => limitOnePerStorefront([...prev, ...next]));
       setPage((p) => p + 1);
       const total = data?.meta?.pagination?.total ?? 0;
-      const loaded = posts.length + next.length;
+      const loaded = limitOnePerStorefront([...posts, ...next]).length;
       setHasMore(loaded < total);
     } catch {
       // fail silently, user can retry

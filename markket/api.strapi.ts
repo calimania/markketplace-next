@@ -338,7 +338,7 @@ export class StrapiClient {
           'Content-Type': 'application/json',
           ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
         },
-        next: { revalidate: 1 },
+        cache: 'no-store',
       });
 
       if (!response.ok) {

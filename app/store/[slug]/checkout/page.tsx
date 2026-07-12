@@ -119,7 +119,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ slug: strin
 
     const subtotal = Number(selectedPrice.Price || 0) * selection.quantity;
     const totalPrice = subtotal + selection.tip;
-    const shipsTo = Array.isArray(selectedPrice.ships_to) ? selectedPrice.ships_to.filter((item) => typeof item === 'string') : ['US'];
+    const shipsTo = Array.isArray(selectedPrice.ships_to)
+      ? selectedPrice.ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+      : [];
+    const includesShipping = shipsTo.length > 0;
     const prices: Price[] = [
       {
         ...selectedPrice,
@@ -145,7 +148,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ slug: strin
       totalPrice,
       product: product.documentId,
       prices,
-      includes_shipping: !selectedPrice?.Name?.toLowerCase()?.includes('digital'),
+      includes_shipping: includesShipping,
       stripe_test: isTestTransaction,
       store_id: store.documentId,
       redirect_to_url: new URL(`/${storeSlug}/receipt`, markketplace.markket_url).toString(),
@@ -178,6 +181,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ slug: strin
     }
   };
 
+  const selectedPriceShipsTo = Array.isArray(selectedPrice?.ships_to)
+    ? selectedPrice.ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    : [];
   const selectedPriceLabel = selectedPrice
     ? `${selectedPrice.Name || 'Selected option'} · ${selectedPrice.Currency || 'USD'} ${Number(selectedPrice.Price || 0).toFixed(2)}`
     : 'No option selected';
@@ -264,7 +270,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ slug: strin
                 <Text size="sm">{selectedPriceLabel}</Text>
                 <Text size="sm">Quantity: {selection.quantity}</Text>
                 {selection.tip > 0 && <Text size="sm">Tip: ${selection.tip.toFixed(2)}</Text>}
-                <Text size="sm" c="dimmed">Ships to: {(selectedPrice.ships_to || ['US']).join(', ')}</Text>
+                {selectedPriceShipsTo.length > 0 ? (
+                  <Text size="sm" c="dimmed">Ships to: {selectedPriceShipsTo.join(', ')}</Text>
+                ) : (
+                  <Text size="sm" c="dimmed">Digital item: no shipping address will be requested at checkout.</Text>
+                )}
               </Stack>
             </Paper>
 

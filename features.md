@@ -6,9 +6,6 @@
 
 - [ ] tweaks to headers and design, layout
 - [ ] markket: newsletter sendgrid sync (add, remove)
-- [ ] markket: price|product settings, digital, ships_to
-- [ ] tienda: start stripe connect flow
-- [ ] tienda: display basic stripe dashboard
 - [ ] buyer order_id status page
 - [ ] order receipt email, store parameter
 - [ ] tienda/me: combined stores inbox
@@ -16,13 +13,21 @@
 
 ## July 2026
 
-### v0.4.20
-
-- [ ] Tienda: preview and edit prices in Product & Event
-- [ ] Storefront: display prices, click to buy
+- [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
+- [ ] tienda dashboard: validate forms for price/date fields and show clear error states
 - [ ] tienda: item form, display error when save create (store.slug)
 - [ ] auth: magic form & verify better errors
 - [ ] edit order status [crm dashboard]
+- [ ] tienda: stripe: connect features
+- [ ] tienda: start stripe connect flow
+- [ ] tienda: display basic stripe dashboard
+
+### v0.4.20
+
+- [x] Tienda: preview and edit prices in Product & Event
+- [x] Storefront: display prices, click to buy
+- [x] markket: price|product settings, digital, ships_to
+- [x] tienda: me: inbox from all stores
 
 ### v.0.3.3
 

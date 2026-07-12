@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
   NumberInput,
+  Textarea,
 } from '@mantine/core';
 import { IconCheck, IconChevronDown, IconChevronUp, IconDeviceFloppy, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -59,7 +60,7 @@ function createEmptyPrice(index = 0, contentType: 'product' | 'event' = 'product
     count: 1,
     Name: defaultName,
     hidden: false,
-    ships_to: ['US'],
+    ships_to: [],
   };
 }
 
@@ -82,7 +83,7 @@ export function normalizePrices(prices?: Array<Partial<PriceItemDraft> | null | 
       count: typeof price?.count === 'number' ? price.count : 1,
       Name: price?.Name || '',
       hidden: Boolean(price?.hidden),
-      ships_to: Array.isArray(price?.ships_to) && price.ships_to.length > 0 ? price.ships_to : ['US'],
+      ships_to: Array.isArray(price?.ships_to) ? price.ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0) : [],
     }));
 
   return normalized.length > 0 ? normalized : [];
@@ -98,7 +99,7 @@ export function serializePricesForPayload(prices: PriceItemDraft[]) {
     inventory: typeof price.inventory === 'number' ? price.inventory : undefined,
     Name: price.Name || '',
     hidden: Boolean(price.hidden),
-    ships_to: Array.isArray(price.ships_to) ? price.ships_to : ['US'],
+    ships_to: Array.isArray(price.ships_to) ? price.ships_to.filter((item): item is string => typeof item === 'string' && item.trim().length > 0) : [],
   }));
 }
 
@@ -134,9 +135,9 @@ function formatPriceLine(price: PriceItemDraft, includeShipping = true) {
   const label = price.Name?.trim() || 'Untitled price';
   const hiddenLabel = price.hidden ? 'Hidden' : 'Visible';
   const inventoryLabel = typeof price.inventory === 'number' ? `Inventory ${price.inventory}` : 'Inventory not set';
-  const shipsToLabel = includeShipping && Array.isArray(price.ships_to) && price.ships_to.length > 0
-    ? price.ships_to.join(', ')
-    : includeShipping ? 'USA' : '';
+  const shipsToLabel = includeShipping
+    ? (Array.isArray(price.ships_to) && price.ships_to.length > 0 ? `Ships to ${price.ships_to.join(', ')}` : 'Digital · no shipping')
+    : '';
 
   return [label, `${currency} ${amount.toFixed(2)}`, inventoryLabel, includeShipping ? shipsToLabel : '', hiddenLabel]
     .filter(Boolean)
@@ -549,22 +550,41 @@ export default function PricesEditor({
                           />
                         </div>
 
+                        <Textarea
+                          label="Description"
+                          value={price.Description || ''}
+                          onChange={(event) => setPriceValue(index, 'Description', event.currentTarget.value)}
+                          minRows={3}
+                          autosize
+                          placeholder="Add details like print quality, materials, sizing notes, or what you will email after purchase."
+                          description="This helps buyers understand exactly what they are getting."
+                        />
+
                         {contentType !== 'event' ? (
-                          <div className="form-cols">
-                            <MultiSelect
-                              label="Ships to"
-                              data={SHIP_TO_OPTIONS}
-                              value={price.ships_to || ['US']}
-                              onChange={(nextValue) => setPriceValue(index, 'ships_to', nextValue.length > 0 ? nextValue : ['US'])}
-                              searchable={false}
-                              clearable={false}
+                          <Stack gap="xs">
+                            <Switch
+                              label="Is digital?"
+                              checked={Array.isArray(price.ships_to) && price.ships_to.length > 0}
+                              onChange={(event) => setPriceValue(index, 'ships_to', event.currentTarget.checked ? (price.ships_to?.length ? price.ships_to : ['US']) : [])}
+                              description="Digital items do not request a shipping address at checkout. Leave this on if you want to email buyers extra info instead."
                             />
+                            {Array.isArray(price.ships_to) && price.ships_to.length > 0 && (
+                              <MultiSelect
+                                label="Ships to"
+                                data={SHIP_TO_OPTIONS}
+                                value={price.ships_to || []}
+                                onChange={(nextValue) => setPriceValue(index, 'ships_to', nextValue)}
+                                searchable={false}
+                                clearable
+                                description="Checkout will request a shipping address for these destinations."
+                              />
+                            )}
                             <Switch
                               label="Hidden"
                               checked={Boolean(price.hidden)}
                               onChange={(event) => setPriceValue(index, 'hidden', event.currentTarget.checked)}
                             />
-                          </div>
+                          </Stack>
                         ) : (
                           <Group justify="flex-end">
                             <Switch
