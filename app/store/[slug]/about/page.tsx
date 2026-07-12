@@ -60,6 +60,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
     .sort((a, b) => a.Title.localeCompare(b.Title)) || [];
 
   const image = aboutPage?.SEO?.socialImage || store?.SEO?.socialImage;
+  const storeSlug = store?.slug || slug;
+  const contactEmail = `${storeSlug}@markket.place`;
 
   return (
     <Container size="lg" py="xl">
@@ -78,6 +80,21 @@ export default async function AboutPage({ params }: AboutPageProps) {
         )}
 
         <PageContent params={{ page: aboutPage }} />
+
+        <Group justify="space-between" align="center" gap="sm" wrap="wrap">
+          <Text size="sm" c="dimmed">
+            Contact: <Text component="span" fw={700}>{contactEmail}</Text>
+          </Text>
+          <a href={`mailto:${contactEmail}`} style={{ textDecoration: 'none' }}>
+            <Text
+              size="sm"
+              fw={600}
+              c={markketColors.sections.about.main}
+            >
+              Email this store
+            </Text>
+          </a>
+        </Group>
 
         {customPages.length > 0 && (
           <Stack gap="md">

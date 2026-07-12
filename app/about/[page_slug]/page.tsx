@@ -92,16 +92,32 @@ export default async function AboutDetailPage({ params }: AboutDetailPageProps) 
     .sort((a, b) => (a?.Title || '').localeCompare(b?.Title || ''));
 
   return (
-    <Container size="md" py="xl">
+    <Container size="lg" py="xl">
       <Stack gap="xl">
         <Box
           style={{
-            borderRadius: 18,
-            padding: '28px 22px',
-            background: `linear-gradient(135deg, ${markketColors.sections.about.light} 0%, #ffffff 75%)`,
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: 20,
+            padding: '30px 24px',
+            background: `linear-gradient(145deg, ${markketColors.sections.about.light} 0%, #ffffff 56%, #f7fbfc 100%)`,
             border: `1px solid ${markketColors.sections.about.main}33`,
           }}
         >
+          <Box
+            style={{
+              position: 'absolute',
+              top: -20,
+              right: -12,
+              width: 120,
+              height: 120,
+              borderRadius: 22,
+              border: `1px solid ${markketColors.sections.about.main}44`,
+              transform: 'rotate(12deg)',
+              opacity: 0.55,
+              pointerEvents: 'none',
+            }}
+          />
           <Stack gap="xs">
             <Badge variant="light" radius="xl" style={{ width: 'fit-content', color: markketColors.sections.about.main }}>
               About
@@ -111,7 +127,16 @@ export default async function AboutDetailPage({ params }: AboutDetailPageProps) 
           </Stack>
         </Box>
 
-        <Paper withBorder radius="xl" p={{ base: 'md', sm: 'xl' }}>
+        <Paper
+          withBorder
+          radius="xl"
+          p={{ base: 'md', sm: 'xl' }}
+          style={{
+            borderColor: markketColors.neutral.lightGray,
+            background: '#ffffff',
+            boxShadow: '0 10px 24px rgba(15, 23, 42, 0.05)',
+          }}
+        >
           <PageContent params={{ page }} />
         </Paper>
 
@@ -134,7 +159,7 @@ export default async function AboutDetailPage({ params }: AboutDetailPageProps) 
                 >
                   <Stack gap={6}>
                     <Badge variant="filled" radius="md" style={{ width: 'fit-content' }}>About Home</Badge>
-                    <Text size="sm" c="dimmed">Back to the platform about landing page.</Text>
+                    <Text size="sm" c="dimmed">Back to the about home page.</Text>
                   </Stack>
                 </Paper>
               </Link>
@@ -155,7 +180,7 @@ export default async function AboutDetailPage({ params }: AboutDetailPageProps) 
                         {p.Title || p.slug}
                       </Text>
                       <Text size="sm" c="dimmed" lineClamp={3}>
-                        {p?.SEO?.metaDescription || 'Open this page from CMS content.'}
+                        {p?.SEO?.metaDescription || 'Open this page to learn more.'}
                       </Text>
                     </Stack>
                   </Paper>

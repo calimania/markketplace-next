@@ -103,7 +103,7 @@ export default async function StoreDesignSystemPage({ params }: PageProps) {
       { sort: 'publishedAt:desc' },
       demoSlug,
     ),
-    strapiClient.getPages(demoSlug),
+    strapiClient.getPages(demoSlug, true),
   ]);
 
   const store = storeResponse?.data?.[0] as Store | undefined;

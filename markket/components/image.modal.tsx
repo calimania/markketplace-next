@@ -230,6 +230,14 @@ function resolveAssetUrl(url: string) {
   return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
+function createPicsumUrl() {
+  const seed = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID().slice(0, 8)
+    : `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+
+  return `https://picsum.photos/seed/${seed}/1600/1000`;
+}
+
 const ImageModal = ({
   imageModalOpen,
   handleCloseModal,
@@ -492,6 +500,12 @@ const ImageModal = ({
     }
 
     await runLibrarySearch(nextValue);
+  };
+
+  const handleRandomPicsum = async () => {
+    const url = createPicsumUrl();
+    setSearchQuery(url);
+    await loadFromUrl(url);
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1098,6 +1112,18 @@ const ImageModal = ({
                     Search
                   </Button>
                 </Stack>
+                <Button
+                  size="sm"
+                  variant="light"
+                  color="cyan"
+                  leftSection={<IconSparkles size={16} />}
+                  onClick={() => void handleRandomPicsum()}
+                  loading={urlLoading}
+                  fullWidth={isMobile}
+                  title="Load a random royalty-free placeholder image"
+                >
+                  Random Picsum
+                </Button>
                 <FileButton
                   ref={fileInputRef}
                   onChange={(file) => {
@@ -1176,7 +1202,7 @@ const ImageModal = ({
                 </Box>
               ) : (
                 <Text size="xs" c="dimmed">
-                  Search, paste an image URL, or choose a file from your device.
+                    Search, paste an image URL, grab a random Picsum image, or choose a file from your device.
                 </Text>
               )}
             </Stack>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import '@mantine/tiptap/styles.css';
 import { useEditor } from '@tiptap/react';
@@ -13,9 +13,9 @@ import {
   Box, SegmentedControl, Center, Loader, SimpleGrid, Badge
 } from '@mantine/core';
 import {
-  IconMarkdown, IconPhoto, IconEye, IconCode, IconPhotoPlus,
+  IconMarkdown, IconEye, IconCode, IconPhotoPlus,
   IconUpload, IconLink, IconX, IconCheck, IconMaximize, IconMinimize,
-  IconBold, IconItalic, IconList, IconArrowBackUp, IconArrowForwardUp
+  IconBold, IconItalic, IconList, IconArrowBackUp, IconArrowForwardUp, IconKeyboardHide, IconDeviceFloppy
 } from '@tabler/icons-react';
 import { strapiClient } from '@/markket/api.strapi';
 import { blocksToHtml, JSONDocToBlocks } from '@/markket/helpers.blocks';
@@ -56,6 +56,12 @@ interface ContentEditorProps {
   onUploadImage?: (file: File, altText?: string) => Promise<string | undefined>;
   allowFullscreen?: boolean;
 }
+
+type LocalDraftPayload = {
+  format: 'markdown' | 'blocks' | 'html';
+  sourceContent: string;
+  updatedAt: number;
+};
 
 const getEditorMarkdown = (editor: any): string => {
   return editor?.storage?.markdown?.getMarkdown?.() ?? '';
@@ -140,6 +146,7 @@ const ContentEditor = ({
   const [activeTab, setActiveTab] = useState<string>('editor');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
@@ -156,7 +163,12 @@ const ContentEditor = ({
   const [libraryResults, setLibraryResults] = useState<string[]>([]);
   const [didCopySource, setDidCopySource] = useState(false);
   const [contentStatus, setContentStatus] = useState<'saved' | 'editing'>('saved');
+  const [autosaveKey, setAutosaveKey] = useState<string | null>(null);
+  const [draftAvailableAt, setDraftAvailableAt] = useState<number | null>(null);
+  const [didCheckDraft, setDidCheckDraft] = useState(false);
+  const [isDraftRestoring, setIsDraftRestoring] = useState(false);
   const contentStatusTimerRef = useRef<number | null>(null);
+  const draftSaveTimerRef = useRef<number | null>(null);
 
   const markEditing = () => {
     setContentStatus('editing');
@@ -172,20 +184,54 @@ const ContentEditor = ({
     if (typeof window === 'undefined') return;
 
     const media = window.matchMedia('(max-width: 768px)');
+    const coarsePointerMedia = window.matchMedia('(pointer: coarse)');
     const sync = () => setIsCompactViewport(media.matches);
+    const syncTouchDevice = () => setIsTouchDevice(coarsePointerMedia.matches || navigator.maxTouchPoints > 0);
     sync();
+    syncTouchDevice();
 
     if (typeof media.addEventListener === 'function') {
       media.addEventListener('change', sync);
-      return () => media.removeEventListener('change', sync);
+
+      if (typeof coarsePointerMedia.addEventListener === 'function') {
+        coarsePointerMedia.addEventListener('change', syncTouchDevice);
+        return () => {
+          media.removeEventListener('change', sync);
+          coarsePointerMedia.removeEventListener('change', syncTouchDevice);
+        };
+      }
+
+      coarsePointerMedia.addListener(syncTouchDevice);
+      return () => {
+        media.removeEventListener('change', sync);
+        coarsePointerMedia.removeListener(syncTouchDevice);
+      };
     }
 
     media.addListener(sync);
-    return () => media.removeListener(sync);
+    coarsePointerMedia.addListener(syncTouchDevice);
+    return () => {
+      media.removeListener(sync);
+      coarsePointerMedia.removeListener(syncTouchDevice);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isFullscreen || typeof document === 'undefined') return;
+    if (typeof window === 'undefined') return;
+
+    const pageKey = window.location.pathname || 'unknown';
+    const labelKey = (label || 'content').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    setAutosaveKey(`markket:editor-draft:${pageKey}:${format}:${labelKey}`);
+  }, [format, label]);
+
+  useEffect(() => {
+    if ((isCompactViewport || isTouchDevice) && isFullscreen) {
+      setIsFullscreen(false);
+    }
+  }, [isCompactViewport, isFullscreen, isTouchDevice]);
+
+  useEffect(() => {
+    if (!isFullscreen || isCompactViewport || typeof document === 'undefined') return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -198,6 +244,9 @@ const ContentEditor = ({
     return () => {
       if (contentStatusTimerRef.current) {
         window.clearTimeout(contentStatusTimerRef.current);
+      }
+      if (draftSaveTimerRef.current) {
+        window.clearTimeout(draftSaveTimerRef.current);
       }
     };
   }, []);
@@ -593,24 +642,173 @@ const ContentEditor = ({
     return editor.getHTML();
   };
 
-  if (!editor) {
-    return null;
-  }
-
   const previewHtml = renderPreview();
   const plainText = htmlToPlainText(previewHtml);
   const wordCount = plainText ? plainText.split(/\s+/).length : 0;
   const charCount = plainText.length;
   const readMinutes = Math.max(1, Math.ceil(wordCount / 220));
   const sourceLabel = format === 'blocks' ? 'JSON' : format === 'html' ? 'HTML' : 'Markdown';
-  const sourceContent = format === 'blocks'
-    ? JSON.stringify(getBlocksValue(editor), null, 2)
-    : format === 'html'
-      ? editor.getHTML()
-      : getEditorMarkdown(editor);
+  const sourceContent = !editor
+    ? ''
+    : format === 'blocks'
+      ? JSON.stringify(getBlocksValue(editor), null, 2)
+      : format === 'html'
+        ? editor.getHTML()
+        : getEditorMarkdown(editor);
   const panelMinHeight = isFullscreen
     ? (isCompactViewport ? 'calc(100dvh - 160px)' : 'calc(100dvh - 200px)')
     : minHeight;
+  const editorMinHeight = isCompactViewport ? Math.min(minHeight, 260) : minHeight;
+  const canUseFullscreen = allowFullscreen && !isCompactViewport && !isTouchDevice;
+  const tabsListStyle: CSSProperties = isCompactViewport
+    ? {
+      borderRadius: 12,
+      padding: 2,
+      background: 'var(--mantine-color-gray-0)',
+      display: 'flex',
+      flexWrap: 'nowrap',
+      overflowX: 'auto',
+      maxWidth: '100%',
+      WebkitOverflowScrolling: 'touch' as CSSProperties['WebkitOverflowScrolling'],
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    }
+    : { borderRadius: 999, padding: 2, background: 'var(--mantine-color-gray-0)' };
+
+  const exitEditorFocus = () => {
+    if (!editor) return;
+    editor.chain().blur().run();
+
+    if (typeof document === 'undefined') return;
+
+    const formActions = document.querySelector('.tienda-form-actions');
+    if (formActions instanceof HTMLElement) {
+      formActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  const clearSavedDraft = () => {
+    if (!autosaveKey || typeof window === 'undefined') return;
+    try {
+      window.localStorage.removeItem(autosaveKey);
+    } catch {
+      // no-op: localStorage can be blocked in private browsing
+    }
+    setDraftAvailableAt(null);
+  };
+
+  const restoreSavedDraft = () => {
+    if (!autosaveKey || !editor || typeof window === 'undefined') return;
+
+    try {
+      const raw = window.localStorage.getItem(autosaveKey);
+      if (!raw) return;
+
+      const payload = JSON.parse(raw) as LocalDraftPayload;
+      if (!payload?.sourceContent || payload.format !== format) return;
+
+      setIsDraftRestoring(true);
+
+      if (format === 'markdown') {
+        const parsedMarkdown = markdownToHtml(editor, payload.sourceContent);
+        editor.commands.setContent(parsedMarkdown, {
+          parseOptions: { preserveWhitespace: 'full' },
+        });
+      }
+
+      if (format === 'html') {
+        const parsedHtml = looksLikeHtml(payload.sourceContent)
+          ? payload.sourceContent
+          : markdownToHtml(editor, payload.sourceContent);
+        editor.commands.setContent(parsedHtml, {
+          parseOptions: { preserveWhitespace: 'full' },
+        });
+      }
+
+      if (format === 'blocks') {
+        try {
+          const parsed = JSON.parse(payload.sourceContent) as unknown;
+          if ((parsed as TiptapDoc)?.type === 'doc') {
+            editor.commands.setContent(parsed as TiptapDoc, {
+              parseOptions: { preserveWhitespace: 'full' },
+            });
+          } else if (Array.isArray(parsed)) {
+            editor.commands.setContent(blocksToHtml(parsed as any[]), {
+              parseOptions: { preserveWhitespace: 'full' },
+            });
+          }
+        } catch {
+          // Ignore malformed JSON drafts.
+        }
+      }
+
+      setDraftAvailableAt(null);
+      markEditing();
+    } catch {
+      // no-op
+    } finally {
+      setIsDraftRestoring(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!autosaveKey || !editor || didCheckDraft || typeof window === 'undefined') return;
+
+    try {
+      const raw = window.localStorage.getItem(autosaveKey);
+      if (!raw) {
+        setDidCheckDraft(true);
+        return;
+      }
+
+      const payload = JSON.parse(raw) as LocalDraftPayload;
+      const validPayload =
+        payload
+        && typeof payload.sourceContent === 'string'
+        && typeof payload.updatedAt === 'number'
+        && payload.format === format;
+
+      if (!validPayload) {
+        setDidCheckDraft(true);
+        return;
+      }
+
+      if (payload.sourceContent.trim() && payload.sourceContent !== sourceContent) {
+        setDraftAvailableAt(payload.updatedAt);
+      }
+    } catch {
+      // no-op
+    } finally {
+      setDidCheckDraft(true);
+    }
+  }, [autosaveKey, didCheckDraft, editor, format, sourceContent]);
+
+  useEffect(() => {
+    if (!autosaveKey || !didCheckDraft || !editor || isDraftRestoring || typeof window === 'undefined') return;
+
+    if (draftSaveTimerRef.current) {
+      window.clearTimeout(draftSaveTimerRef.current);
+    }
+
+    draftSaveTimerRef.current = window.setTimeout(() => {
+      try {
+        const payload: LocalDraftPayload = {
+          format,
+          sourceContent,
+          updatedAt: Date.now(),
+        };
+        window.localStorage.setItem(autosaveKey, JSON.stringify(payload));
+      } catch {
+        // no-op
+      }
+    }, 700);
+
+    return () => {
+      if (draftSaveTimerRef.current) {
+        window.clearTimeout(draftSaveTimerRef.current);
+      }
+    };
+  }, [autosaveKey, didCheckDraft, editor, format, isDraftRestoring, sourceContent]);
 
   const copySourceContent = async () => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -618,6 +816,10 @@ const ContentEditor = ({
     setDidCopySource(true);
     setTimeout(() => setDidCopySource(false), 1200);
   };
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div>
@@ -647,18 +849,39 @@ const ContentEditor = ({
           boxShadow: isFullscreen ? '0 28px 60px rgba(15, 23, 42, 0.26)' : undefined,
           borderRadius: isFullscreen ? 0 : undefined,
           overflow: isFullscreen ? 'hidden' : undefined,
+          paddingTop: isFullscreen ? 'calc(env(safe-area-inset-top, 0px) + 4px)' : undefined,
         }}
       >
+        {canUseFullscreen && isFullscreen && (
+          <Button
+            size="xs"
+            variant="filled"
+            color="pink"
+            leftSection={<IconMinimize size={14} />}
+            onClick={() => setIsFullscreen(false)}
+            aria-label="Exit fullscreen editor"
+            style={{
+              position: 'fixed',
+              top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+              left: 10,
+              zIndex: 2200,
+              boxShadow: '0 6px 18px rgba(15, 23, 42, 0.25)',
+            }}
+          >
+            Exit fullscreen
+          </Button>
+        )}
+
         <Tabs value={activeTab} onChange={(a) => setActiveTab(a as string)}>
           <Group justify="space-between" px="md" pt="xs">
-            <Tabs.List style={{ borderRadius: 999, padding: 2, background: 'var(--mantine-color-gray-0)' }}>
-              <Tabs.Tab value="editor" leftSection={<IconCode size={16} />}>
+            <Tabs.List style={tabsListStyle}>
+              <Tabs.Tab value="editor" leftSection={<IconCode size={16} />} style={isCompactViewport ? { flex: '0 0 auto' } : undefined}>
                 Editor
               </Tabs.Tab>
-              <Tabs.Tab value="preview" leftSection={<IconEye size={16} />}>
+              <Tabs.Tab value="preview" leftSection={<IconEye size={16} />} style={isCompactViewport ? { flex: '0 0 auto' } : undefined}>
                 Preview
               </Tabs.Tab>
-              <Tabs.Tab value="markdown" leftSection={<IconMarkdown size={16} />}>
+              <Tabs.Tab value="markdown" leftSection={<IconMarkdown size={16} />} style={isCompactViewport ? { flex: '0 0 auto' } : undefined}>
                 {sourceLabel}
               </Tabs.Tab>
             </Tabs.List>
@@ -676,7 +899,7 @@ const ContentEditor = ({
                   {didCopySource ? <IconCheck size={16} /> : <IconCode size={16} />}
                 </ActionIcon>
               )}
-              {allowFullscreen && (
+              {canUseFullscreen && !isFullscreen && (
                 <ActionIcon
                   onClick={() => setIsFullscreen((prev) => !prev)}
                   variant="light"
@@ -689,11 +912,36 @@ const ContentEditor = ({
             </Group>
           </Group>
 
+          {draftAvailableAt && (
+            <Group
+              justify="space-between"
+              px="md"
+              py={6}
+              style={{
+                borderTop: '1px solid var(--mantine-color-gray-2)',
+                borderBottom: '1px solid var(--mantine-color-gray-2)',
+                background: 'var(--mantine-color-yellow-0)',
+              }}
+            >
+              <Text size="xs" c="dark.7">
+                Local draft from {new Date(draftAvailableAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+              <Group gap={6}>
+                <Button size="compact-xs" variant="subtle" color="gray" onClick={clearSavedDraft}>
+                  Dismiss
+                </Button>
+                <Button size="compact-xs" onClick={restoreSavedDraft}>
+                  Restore
+                </Button>
+              </Group>
+            </Group>
+          )}
+
           <Tabs.Panel value="editor">
             <RichTextEditor
               editor={editor}
               style={{
-                minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : minHeight,
+                minHeight: isFullscreen ? (isCompactViewport ? 'calc(100dvh - 150px)' : 'calc(100dvh - 190px)') : editorMinHeight,
                 border: 'none',
                 background: '#fff',
               }}
@@ -782,6 +1030,8 @@ const ContentEditor = ({
               <RichTextEditor.Content
                 style={{
                   paddingBottom: isCompactViewport ? 'calc(env(safe-area-inset-bottom, 0px) + 72px)' : 12,
+                  touchAction: 'pan-y',
+                  WebkitOverflowScrolling: 'touch',
                 }}
               />
 
@@ -872,6 +1122,24 @@ const ContentEditor = ({
                       aria-label="Redo"
                     >
                       <IconArrowForwardUp size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={exitEditorFocus}
+                      aria-label="Done editing"
+                      title="Done"
+                    >
+                      <IconKeyboardHide size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="teal"
+                      onClick={exitEditorFocus}
+                      aria-label="Go to save buttons"
+                      title="Go to Save"
+                    >
+                      <IconDeviceFloppy size={16} />
                     </ActionIcon>
                   </Group>
                 </Group>

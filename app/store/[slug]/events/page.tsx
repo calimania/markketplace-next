@@ -8,10 +8,15 @@ import StorePageHeader from '@/app/components/ui/store.page.header';
 import { markketColors } from '@/markket/colors.config';
 import Link from 'next/link';
 import PageContent from '@/app/components/ui/page.content';
-import { richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { RichTextValue, StoredRichText } from '@/markket/richtext';
 import { cache } from 'react';
 import './events.css';
+
+function createPicsumImageUrl(seed: string, width: number, height: number) {
+  const safeSeed = encodeURIComponent(seed || 'markket');
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${height}?grayscale&blur=1`;
+}
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getEventsPageCached = cache((slug: string) => strapiClient.getPage('events', slug));
@@ -151,7 +156,13 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
                   {upcomingEvents.map((event) => {
-                    const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const contentImage = extractRichTextImageUrl(event.Description);
+                    const image = contentImage || event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const fallbackImage = createPicsumImageUrl(
+                      [event.Name, event.slug, slug].filter(Boolean).join('-') || event.id?.toString() || 'event',
+                      1200,
+                      675,
+                    );
                     const excerpt = getEventExcerpt(event.Description);
                     const locationLabel = getEventListLocationLabel(event);
 
@@ -192,10 +203,18 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                               style={{
                                 width: '100%',
                                 height: 200,
-                                background: `linear-gradient(135deg, ${markketColors.sections.events.light} 0%, #ffffff 100%)`,
-                                borderBottom: `1px solid ${markketColors.sections.events.main}33`,
-                              }}
-                            />
+                                  background: `url(${fallbackImage}) center/cover no-repeat`,
+                                  position: 'relative',
+                                }}
+                              >
+                                <Box
+                                  style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.38) 100%)',
+                                  }}
+                                />
+                              </Box>
                           )}
 
                           <Stack gap="sm" p="lg" style={{ flex: 1 }}>
@@ -274,7 +293,13 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
 
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
                   {pastEvents.map((event) => {
-                    const image = event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const contentImage = extractRichTextImageUrl(event.Description);
+                    const image = contentImage || event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
+                    const fallbackImage = createPicsumImageUrl(
+                      [event.Name, event.slug, slug, 'past'].filter(Boolean).join('-') || event.id?.toString() || 'event',
+                      1200,
+                      675,
+                    );
                     const excerpt = getEventExcerpt(event.Description);
                     const locationLabel = getEventListLocationLabel(event);
 
@@ -327,10 +352,19 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                               style={{
                                 width: '100%',
                                 height: 200,
-                                background: `linear-gradient(135deg, ${markketColors.neutral.lightGray} 0%, ${markketColors.neutral.offWhite} 100%)`,
-                                borderBottom: `1px solid ${markketColors.neutral.mediumGray}33`,
-                              }}
-                            />
+                                  background: `url(${fallbackImage}) center/cover no-repeat`,
+                                  position: 'relative',
+                                  filter: 'grayscale(1)',
+                                }}
+                              >
+                                <Box
+                                  style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.42) 100%)',
+                                  }}
+                                />
+                              </Box>
                           )}
 
                           <Stack gap="sm" p="lg" style={{ flex: 1 }}>

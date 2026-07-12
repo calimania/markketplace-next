@@ -2,11 +2,22 @@ import { Product } from "@/markket/product";
 import Link from "next/link";
 import { Badge } from '@mantine/core';
 import { markketColors } from '@/markket/colors.config';
-import { stripMarkdown } from '@/markket/richtext.utils';
+import { extractRichTextImageUrl, stripMarkdown } from '@/markket/richtext.utils';
+
+function createPicsumImageUrl(seed: string, width: number, height: number) {
+  const safeSeed = encodeURIComponent(seed || 'markket');
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${height}?grayscale&blur=1`;
+}
 
 export default function ProductCard({ product, slug }: { product: Product; slug: string }) {
+  const contentImage = extractRichTextImageUrl(product.Description);
   const imageUrl = product.Slides?.[0]?.formats?.medium?.url ||
     product?.SEO?.socialImage?.url;
+  const fallbackImageUrl = createPicsumImageUrl(
+    [product.Name, product.slug, slug].filter(Boolean).join('-') || product.id?.toString() || 'product',
+    1200,
+    675,
+  );
 
   const rawDesc = product.SEO?.metaDescription || product.Description?.split("\n")[0];
   const description = stripMarkdown(rawDesc);
@@ -17,10 +28,10 @@ export default function ProductCard({ product, slug }: { product: Product; slug:
     <Link href={`/store/${slug}/products/${product.slug}`} style={{ textDecoration: 'none' }}>
       <div className="group relative bg-white transition-all duration-200 cursor-pointer overflow-hidden" style={{ borderRadius: 20, boxShadow: '0 4px 14px rgba(15, 23, 42, 0.06)', border: `1px solid ${markketColors.neutral.lightGray}` }}>
         <div className="aspect-[16/9] overflow-hidden bg-gray-50">
-          {imageUrl ? (
+          {contentImage || imageUrl ? (
             <div className="relative h-full w-full">
               <img
-                src={imageUrl}
+                src={contentImage || imageUrl}
                 alt={product.Name}
                 className="h-full w-full object-cover transform transition-transform duration-500 group-hover:scale-110"
               />
@@ -36,8 +47,20 @@ export default function ProductCard({ product, slug }: { product: Product; slug:
               )}
             </div>
           ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-              <span className="text-gray-400 text-sm">No image available</span>
+              <div
+                className="h-full w-full flex items-center justify-center"
+                style={{
+                  background: `url(${fallbackImageUrl}) center/cover no-repeat`,
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.38) 100%)',
+                  }}
+                />
             </div>
           )}
         </div>

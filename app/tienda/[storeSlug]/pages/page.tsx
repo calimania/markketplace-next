@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: TiendaPagesPageProps): Promis
 export default async function TiendaPagesPage({ params }: TiendaPagesPageProps) {
   const { storeSlug } = await params;
 
-  const pagesResponse = await strapiClient.getPages(storeSlug);
+  const pagesResponse = await strapiClient.getPages(storeSlug, true);
   const pages = (pagesResponse?.data || []) as Page[];
 
   return (

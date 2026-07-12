@@ -2,7 +2,7 @@ import { Container, Group, Paper, Skeleton, Stack } from '@mantine/core';
 
 export default function TiendaIndexLoading() {
   return (
-    <Container size="md" py="xl">
+    <Container size="lg" py="xl">
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Skeleton height={30} width="42%" radius="md" />
