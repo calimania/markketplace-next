@@ -39,7 +39,13 @@ export class markketClient {
     if (!localStorage) { return null; }
 
     const _string = localStorage.getItem('markket.auth');
-    const _json = _string ? JSON.parse(_string) : {};
+    let _json: any = {};
+    try {
+      _json = _string ? JSON.parse(_string) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      _json = {};
+    }
     const { jwt, id } = _json;
 
     this.token = jwt;

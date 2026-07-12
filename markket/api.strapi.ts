@@ -73,7 +73,13 @@ export class StrapiClient {
     }
 
     const _string = localStorage.getItem('markket.auth');
-    const _json = _string ? JSON.parse(_string) : {};
+    let _json: any = {};
+    try {
+      _json = _string ? JSON.parse(_string) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      _json = {};
+    }
     const { jwt } = _json;
     return jwt;
   };
@@ -84,7 +90,13 @@ export class StrapiClient {
     }
 
     const raw = localStorage.getItem('markket.auth');
-    const parsed = raw ? JSON.parse(raw) : {};
+    let parsed: any = {};
+    try {
+      parsed = raw ? JSON.parse(raw) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      parsed = {};
+    }
     const jwt = parsed?.jwt;
     const id = parsed?.id;
 
@@ -175,7 +187,13 @@ export class StrapiClient {
     if (typeof localStorage == 'undefined') { return null; }
 
     const _string = localStorage.getItem('markket.auth');
-    const _json = _string ? JSON.parse(_string) : {};
+    let _json: any = {};
+    try {
+      _json = _string ? JSON.parse(_string) : {};
+    } catch {
+      localStorage.removeItem('markket.auth');
+      _json = {};
+    }
     const { jwt, id } = _json;
 
     if (!jwt) {
