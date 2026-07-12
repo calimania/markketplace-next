@@ -12,6 +12,8 @@ import StoresFeed from './feed';
 
 const PAGE_SIZE = 41;
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const response = await strapiClient.getPage('stores', markketplace.slug);
   const page = response?.data?.[0] as Page;

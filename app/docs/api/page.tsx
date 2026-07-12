@@ -11,6 +11,8 @@ import { Metadata } from "next";
 import PageContent from "@/app/components/ui/page.content";
 import PreviewRequest from '@/app/components/ui/api.requests';
 
+export const dynamic = 'force-dynamic';
+
 interface DocsPageProps {
   params: Promise<{ article_slug: string }>;
 }

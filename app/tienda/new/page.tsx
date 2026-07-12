@@ -22,6 +22,8 @@ import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
 import { useAuth } from '@/app/providers/auth.provider';
 import { markketClient } from '@/markket/api';
 
+export const dynamic = 'force-dynamic';
+
 type CreateStoreForm = {
   title: string;
   slug: string;

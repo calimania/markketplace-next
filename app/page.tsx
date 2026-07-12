@@ -82,6 +82,8 @@ const toAbsoluteUrl = (path?: string) => {
   return `${markketplace.markket_url.replace(/\/$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const [page] = (await strapiClient.getPage('home'))?.data || [];
   const storeSlug = process.env.NEXT_PUBLIC_MARKKET_STORE_SLUG || markketplace.slug;

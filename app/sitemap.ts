@@ -7,6 +7,8 @@ import type { Page } from '@/markket/page.d';
 import type { Event } from '@/markket/event.d';
 import type { Product } from '@/markket/product.d';
 
+export const dynamic = 'force-dynamic';
+
 const MARKKETPLACE_URL = process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || 'https://markket.place';
 
 const SITEMAP_LIMITS = {

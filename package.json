@@ -6,6 +6,7 @@
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "packageManager": "yarn@1.22.22",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=24",
     "npm": ">=11.0.0"

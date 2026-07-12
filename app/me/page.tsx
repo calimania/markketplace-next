@@ -43,41 +43,54 @@ function isStorePublished(store: StoreStatusShape) {
 
 type InboxThreadSummary = {
   id?: number | string;
+  key?: string;
   documentId?: string;
   threadKey?: string;
   subject?: string;
   email?: string;
   from?: string;
-  latestMessageAt?: string;
+  latestMessage?: string;
+  latestDirection?: string | null;
+  latestEstado?: string | null;
+  latestEmail?: string;
+  latestAt?: string;
+  archived?: boolean;
+  unread?: boolean;
+  messagesCount?: number;
   createdAt?: string;
   updatedAt?: string;
   message?: string;
   body?: string;
-  store?: string;
-  storeSlug?: string;
-  storeTitle?: string;
+  store?: {
+    documentId?: string;
+    title?: string;
+    slug?: string;
+  };
 };
 
 type InboxStoreSummary = {
-  id?: number | string;
-  documentId?: string;
-  label?: string;
-  name?: string;
-  title?: string;
-  slug?: string;
-  store?: string;
+  store?: {
+    documentId?: string;
+    title?: string;
+    slug?: string;
+  };
   unreadThreads?: number;
   totalThreads?: number;
-  count?: number;
 };
 
 type InboxSummaryResponse = {
   ok?: boolean;
   data?: {
     summary?: {
+      storesCount?: number;
+      threadsTotal?: number;
       unreadThreads?: number;
-      totalThreads?: number;
-      activeStores?: number;
+      archivedThreads?: number;
+      incomingMessages?: number;
+      outgoingMessages?: number;
+      filteredThreadsTotal?: number;
+      filteredUnreadThreads?: number;
+      filteredArchivedThreads?: number;
     };
     stores?: InboxStoreSummary[];
     storesFiltered?: InboxStoreSummary[];
@@ -113,7 +126,7 @@ function normalizeInboxText(value: string | null | undefined) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
-function labelFromUnknown(value: unknown) {
+function labelFromUnknown(value: unknown): string {
   if (typeof value === 'string') {
     return normalizeInboxText(value);
   }
@@ -155,29 +168,51 @@ function getInboxSummaryError(response: InboxSummaryResponse) {
   return 'Could not load inbox summary.';
 }
 
+function resolveInboxStoreLabel(store: InboxStoreSummary | undefined, index: number) {
+  return labelFromUnknown(store?.store?.title)
+    || labelFromUnknown(store?.store?.slug)
+    || `Store ${index + 1}`;
+}
+
+function resolveInboxStoreSlug(store: InboxStoreSummary | undefined) {
+  return labelFromUnknown(store?.store?.slug);
+}
+
+function resolveInboxThreadStoreLabel(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.store?.title)
+    || labelFromUnknown(thread.store?.slug)
+    || 'All stores';
+}
+
+function resolveInboxThreadStoreSlug(thread: InboxThreadSummary) {
+  return labelFromUnknown(thread.store?.slug);
+}
+
 function resolveInboxThreadTitle(thread: InboxThreadSummary) {
   return labelFromUnknown(thread.subject)
     || labelFromUnknown(thread.threadKey)
-    || labelFromUnknown(thread.storeTitle)
-    || labelFromUnknown(thread.store)
+    || labelFromUnknown(thread.store?.title)
+    || labelFromUnknown(thread.store?.slug)
     || labelFromUnknown(thread.id)
     || 'Untitled thread';
 }
 
 function resolveInboxThreadEmail(thread: InboxThreadSummary) {
-  return labelFromUnknown(thread.email)
+  return labelFromUnknown(thread.latestEmail)
+    || labelFromUnknown(thread.email)
     || labelFromUnknown(thread.from)
     || 'No email';
 }
 
 function resolveInboxThreadPreview(thread: InboxThreadSummary) {
-  return labelFromUnknown(thread.message)
+  return labelFromUnknown(thread.latestMessage)
+    || labelFromUnknown(thread.message)
     || labelFromUnknown(thread.body)
     || 'No preview available';
 }
 
 function resolveInboxThreadDate(thread: InboxThreadSummary) {
-  const value = thread.latestMessageAt || thread.updatedAt || thread.createdAt;
+  const value = thread.latestAt || thread.updatedAt || thread.createdAt;
   if (!value) return '-';
 
   const date = new Date(value);
@@ -185,7 +220,10 @@ function resolveInboxThreadDate(thread: InboxThreadSummary) {
 }
 
 function resolveInboxThreadKey(thread: InboxThreadSummary) {
-  const source = labelFromUnknown(thread.threadKey) || labelFromUnknown(thread.documentId) || labelFromUnknown(thread.id);
+  const source = labelFromUnknown(thread.threadKey)
+    || labelFromUnknown(thread.key)
+    || labelFromUnknown(thread.documentId)
+    || labelFromUnknown(thread.id);
   if (!source) return '';
 
   const segments = source.split('/').filter(Boolean);
@@ -193,7 +231,7 @@ function resolveInboxThreadKey(thread: InboxThreadSummary) {
 }
 
 function resolveInboxThreadHref(thread: InboxThreadSummary) {
-  const storeSlug = labelFromUnknown(thread.storeSlug);
+  const storeSlug = resolveInboxThreadStoreSlug(thread);
   const threadKey = resolveInboxThreadKey(thread);
 
   if (!storeSlug || !threadKey) {
@@ -203,17 +241,8 @@ function resolveInboxThreadHref(thread: InboxThreadSummary) {
   return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/${encodeURIComponent(threadKey)}`;
 }
 
-function resolveInboxStoreLabel(store: InboxStoreSummary, index: number) {
-  return labelFromUnknown(store.label)
-    || labelFromUnknown(store.title)
-    || labelFromUnknown(store.name)
-    || labelFromUnknown(store.store)
-    || labelFromUnknown(store.slug)
-    || `Store ${index + 1}`;
-}
-
 function resolveInboxStoreCount(store: InboxStoreSummary) {
-  return Number(store.unreadThreads ?? store.totalThreads ?? store.count ?? 0);
+  return Number(store.unreadThreads ?? store.totalThreads ?? 0);
 }
 
 /**
@@ -695,10 +724,10 @@ export default function MeHomePage() {
               <Group gap={8} wrap="wrap">
                 <Title order={3}>Inbox</Title>
                 <Badge size="sm" variant="light" color="orange">
-                  {Number(inboxSummary?.data?.summary?.unreadThreads ?? 0)} unread
+                  {Number(inboxSummary?.data?.summary?.filteredUnreadThreads ?? inboxSummary?.data?.summary?.unreadThreads ?? 0)} unread
                 </Badge>
                 <Badge size="sm" variant="light" color="gray">
-                  {Number(inboxSummary?.data?.threads?.pagination?.total ?? 0)} total
+                  {Number(inboxSummary?.data?.summary?.filteredThreadsTotal ?? inboxSummary?.data?.threads?.pagination?.total ?? inboxSummary?.data?.summary?.threadsTotal ?? 0)} total
                 </Badge>
               </Group>
               <Text c="dimmed" size="sm">
@@ -708,7 +737,7 @@ export default function MeHomePage() {
 
             <Group gap={6} wrap="wrap">
               <Badge variant="light" color="grape">
-                {Number(inboxSummary?.data?.summary?.activeStores ?? inboxSummary?.data?.storesFiltered?.length ?? 0)} stores
+                {Number(inboxSummary?.data?.summary?.storesCount ?? inboxSummary?.data?.storesFiltered?.length ?? 0)} stores
               </Badge>
               <Badge variant="light" color="cyan">
                 page {Number(inboxSummary?.data?.threads?.pagination?.page ?? inboxPage)}
@@ -738,11 +767,8 @@ export default function MeHomePage() {
           ) : (
             <Stack gap="xs">
               {(inboxSummary?.data?.threads?.data || []).map((thread, index) => {
-                const key = resolveInboxThreadKey(thread) || thread.documentId || thread.id || index;
-                const storeLabel = labelFromUnknown(thread.storeTitle)
-                  || labelFromUnknown(thread.storeSlug)
-                  || labelFromUnknown(thread.store)
-                  || 'All stores';
+                const key = resolveInboxThreadKey(thread) || thread.key || thread.documentId || thread.id || index;
+                const storeLabel = resolveInboxThreadStoreLabel(thread);
                 const threadHref = resolveInboxThreadHref(thread);
 
                 return (
@@ -767,11 +793,16 @@ export default function MeHomePage() {
                 );
               })}
 
-              {!(inboxSummary?.data?.threads?.data || []).length && (
+                {!(inboxSummary?.data?.threads?.data || []).length && inboxSearch.trim() === '' && (
                   <Text size="sm" c="dimmed">
                     No inbox yet.
                   </Text>
               )}
+                {!(inboxSummary?.data?.threads?.data || []).length && inboxSearch.trim() !== '' && (
+                  <Text size="sm" c="dimmed">
+                    No matches.
+                  </Text>
+                )}
             </Stack>
           )}
 
@@ -797,6 +828,7 @@ export default function MeHomePage() {
                   {(inboxSummary?.data?.storesFiltered || []).slice(0, 6).map((store, index) => (
                     <Badge key={`${resolveInboxStoreLabel(store, index)}-${index}`} size="xs" variant="light" color="teal">
                       {resolveInboxStoreLabel(store, index)}
+                      {resolveInboxStoreCount(store) ? ` · ${resolveInboxStoreCount(store)}` : ''}
                     </Badge>
                   ))}
                 </Group>
