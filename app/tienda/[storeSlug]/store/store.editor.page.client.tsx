@@ -94,7 +94,7 @@ export default function StoreEditorClientPage({ storeSlug }: StoreEditorClientPa
   const [store, setStore] = useState<Store | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
   const [minSkeletonElapsed, setMinSkeletonElapsed] = useState(false);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editorNotice, setEditorNotice] = useState<string | null>(null);

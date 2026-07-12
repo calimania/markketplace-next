@@ -138,7 +138,6 @@ export default function StripePage({ store, stripe }: { store: Store, stripe: St
                   <option value="CO">Colombia</option>
                   <option value="MX">Mexico</option>
                   <option value="SV">El Salvador</option>
-                  <option value="IL">Israel</option>
                 </select>
                 <Text size="xs" className="text-sky-700">Choose the country where your business or bank is located.</Text>
                 <Text size="xs">

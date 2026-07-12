@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Paper, Stack, Title, Text, Group, Button, Badge, SimpleGrid, ThemeIcon, Box, Tabs, ActionIcon, Tooltip } from '@mantine/core';
 import { IconEdit, IconNews, IconFileText, IconShoppingCart, IconCalendarEvent, IconPlus, IconExternalLink, IconSparkles, IconPhoto, IconWorld, IconWorldOff, IconUsers, IconCreditCard, IconMessageCircle, IconArrowUpRight } from '@tabler/icons-react';
+import StripeConnectBlock from '@/app/components/dashboard/stripe.view';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/auth.provider';
 import TinyBreadcrumbs from '@/app/components/ui/tiny.breadcrumbs';
@@ -17,6 +18,7 @@ import { extractRichTextImageUrl, richTextToPlainText } from '@/markket/richtext
 import { tiendaClient } from '@/markket/api.tienda';
 import { TIENDA_CONTENT_LIST_QUERY, TIENDA_OVERVIEW_PREVIEW_LIMIT } from './content.list.queries';
 import type { StoreVisibility } from '@/markket/store.visibility.d';
+import { redirect } from 'next/navigation';
 
 type StoreOverviewProps = {
   store: Store;
@@ -538,7 +540,7 @@ export default function StoreOverview({
         <Group justify="space-between" align="center" wrap="wrap" gap="sm">
           <Stack gap={4} style={{ minWidth: 0, flex: 1 }}>
             <Group gap="xs" wrap="wrap">
-              <Title order={1}>{currentStore.title || currentStore.slug}</Title>
+              <Title order={2}>{currentStore.title || currentStore.slug}</Title>
             </Group>
             <Text size="xs" c="dimmed">Updated {formatDate(latestUpdatedAt)}</Text>
           </Stack>
@@ -766,6 +768,13 @@ export default function StoreOverview({
         )}
       </Group>
 
+      <StripeConnectBlock
+        store={currentStore}
+        variant="compact"
+        storeSlug={store.slug}
+        onAction={() => redirect(`/tienda/${store?.slug}/payouts`)}
+      />
+
       <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'latest')} keepMounted={false} className="tienda-overview-tabs">
         <Tabs.List
           style={{
@@ -920,14 +929,16 @@ export default function StoreOverview({
           <Paper withBorder radius="lg" p="md" className="tienda-panel">
             <Stack gap="sm">
               <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                <Text fw={600}>Payouts</Text>
-                <Button component="a" disabled href={`/tienda/${store.slug}/payouts`} variant="light" leftSection={<IconCreditCard size={14} />}>
-                  View payouts
-                </Button>
+                <Text fw={600}><span className="accent-cyan">Payouts</span></Text>
+                <Badge variant="light" color="cyan" leftSection={<IconCreditCard size={12} />}>
+                  Stripe Connect
+                </Badge>
               </Group>
-              <Text size="sm" c="dimmed">
-                Activate Stripe Connect here when you are ready. Once it is live, your payout information will show up here.
-              </Text>
+              <StripeConnectBlock
+                store={currentStore}
+                variant="full"
+                storeSlug={store.slug}
+              />
             </Stack>
           </Paper>
         </Tabs.Panel>
