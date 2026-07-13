@@ -6,13 +6,18 @@ import { IconSearch } from '@tabler/icons-react';
 
 type CrmOrder = {
   documentId: string;
-  status?: string;
-  total?: number;
-  currency?: string;
-  email?: string;
+  Status?: string;
+  Amount?: number;
+  Currency?: string;
   createdAt?: string;
   updatedAt?: string;
-  stripe_session_id?: string;
+  STRIPE_PAYMENT_ID: string;
+  extra: {
+    stripe_session_id: string;
+  };
+  Shipping_Address: {
+    email: string;
+  }
 };
 
 type OrdersResponse = {
@@ -53,25 +58,25 @@ const STATUS_COLORS: Record<string, string> = {
 export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) {
   const [rows, setRows] = useState<CrmOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [missingAuth, setMissingAuth] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     const token = readAuthToken();
+
     if (!token) {
-      setMissingAuth(true);
       setLoading(false);
       return;
     }
 
     const load = async () => {
       try {
-        const url = `/api/crm/orders?storeRef=${encodeURIComponent(storeRef)}&page=1&pageSize=50`;
+        const url = `/api/crm/orders?storeRef=${encodeURIComponent(storeRef)}&page=1&pageSize=50&status=paid`;
         const res = await fetch(url, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         });
+
         const payload = (await res.json()) as OrdersResponse;
         if (!res.ok) throw new Error((payload as any)?.error || `Request failed (${res.status})`);
         setRows(Array.isArray(payload?.data) ? payload.data : []);
@@ -86,7 +91,12 @@ export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) 
   }, [storeRef]);
 
   const filtered = search.trim()
-    ? rows.filter(r => r.email?.toLowerCase().includes(search.toLowerCase()) || r.documentId?.includes(search))
+    ? rows.filter(
+      r => r?.Shipping_Address?.email?.toLowerCase().includes(search.toLowerCase())
+        || r.documentId?.includes(search)
+        || r.extra.stripe_session_id?.includes(search)
+        || r.STRIPE_PAYMENT_ID?.includes(search)
+    )
     : rows;
 
   if (loading) {
@@ -100,16 +110,6 @@ export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) 
     );
   }
 
-  if (missingAuth) {
-    return (
-      <Paper withBorder radius="xl" p="md">
-        <Stack gap={4} align="center">
-          <Text c="dimmed" size="sm" fw={600}>You need to be signed in</Text>
-          <Text c="dimmed" size="xs" ta="center">Sign in again to see your order history.</Text>
-        </Stack>
-      </Paper>
-    );
-  }
 
   if (error) {
     return (
@@ -154,7 +154,7 @@ export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) 
                 <Table.Tr>
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Customer</Table.Th>
-                  <Table.Th>Total</Table.Th>
+                    <Table.Th>Amount</Table.Th>
                   <Table.Th>Date</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -165,18 +165,18 @@ export default function CrmOrdersListClient({ storeRef }: { storeRef: string }) 
                       <Badge
                         size="sm"
                         variant="light"
-                        color={STATUS_COLORS[order.status?.toLowerCase() || ''] || 'gray'}
+                        color={STATUS_COLORS[order.Status?.toLowerCase() || ''] || 'gray'}
                       >
-                        {order.status || 'unknown'}
+                        {order.Status || 'unknown'}
                       </Badge>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="sm">{order.email || '-'}</Text>
+                      <Text size="sm">{order.Shipping_Address?.email || '-'}</Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm" fw={600}>
-                        {order.total != null
-                          ? `${(order.total / 100).toFixed(2)} ${(order.currency || 'USD').toUpperCase()}`
+                        {!!order.Amount
+                          ? `${((order.Amount)).toFixed(2)} ${(order.Currency || 'USD').toUpperCase()}`
                           : '-'}
                       </Text>
                     </Table.Td>
