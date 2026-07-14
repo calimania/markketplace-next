@@ -7,31 +7,35 @@
 - [ ] tweaks to headers and design, layout
 - [ ] markket: newsletter sendgrid sync (add, remove)
 - [ ] buyer order_id status page
-- [ ] order receipt email, store parameter
-- [ ] tienda/me: combined stores inbox
 - [ ] tienda: display product orders next to product preview page
-- [ ] markket: price|product settings, digital, ships_to
-- [ ] stripe connect
 - [ ] item form, display error when save create (store.slug)
 - [ ] edit order status [crm dashboard]
 - [ ] notify buyer of order change
-- [ ] buyer can easy reply to order email to send inbox message reply-to slug@markket.place (domain)
 
 ## July 2026
 
-- [ ] tienda dashboard: adding/editing Product prices works end-to-end (draft -> save -> list -> detail)
 - [ ] tienda dashboard: validate forms for price/date fields and show clear error states
 - [ ] tienda: item form, display error when save create (store.slug)
 - [ ] auth: magic form & verify better errors
 - [ ] edit order status [crm dashboard]
-- [ ] tienda: stripe: connect features
-- [ ] tienda: start stripe connect flow
-- [ ] tienda: display basic stripe dashboard
 - [ ] tienda: product.prices subscription options
 - [ ] storefront: product, display subscription options
 - [ ] tienda: display received invitations
-- [ ] debug: events in store front
 - [ ] debug: receiving inbox
+- [ ] storefront: not found page custom to store <notfound store>
+- [ ] buyer can easy reply to order email to send via inbox
+
+### v0.5.3
+- [x] debug: events in store front
+
+### v.0.5.1
+- [x] tienda: stripe: connect features
+- [x] markket: price|product settings, digital, ships_to
+- [x] tienda: start stripe connect flow
+- [x] tienda: display basic stripe dashboard
+- [x] tienda dashboard: adding/editing Product prices
+- [x] tienda dashboard: adding/editing Product stripe sync
+- [x] tienda/me: combined stores inbox
 
 ### v0.4.20
 
