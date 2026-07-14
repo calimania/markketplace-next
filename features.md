@@ -29,6 +29,9 @@
 - [ ] tienda: display basic stripe dashboard
 - [ ] tienda: product.prices subscription options
 - [ ] storefront: product, display subscription options
+- [ ] tienda: display received invitations
+- [ ] debug: events in store front
+- [ ] debug: receiving inbox
 
 ### v0.4.20
 
