@@ -1,4 +1,4 @@
-import { Store, Page, Event } from "@/markket";
+import { type Store, type Page, type Event } from "@/markket";
 import { strapiClient } from "@/markket/api.strapi";
 import { generateSEOMetadata } from "@/markket/metadata";
 import { notFound } from "next/navigation";
@@ -11,6 +11,7 @@ import PageContent from '@/app/components/ui/page.content';
 import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { RichTextValue, StoredRichText } from '@/markket/richtext';
 import { cache } from 'react';
+import { subDays, format, addDays } from 'date-fns';
 import './events.css';
 
 function createPicsumImageUrl(seed: string, width: number, height: number) {
@@ -110,19 +111,33 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const response = await getEventsPageCached(slug);
   const eventPage = response?.data?.[0] as Page;
 
+  const today = new Date();
+
+  const upcomingEvents = (await strapiClient.getEvents(slug, {
+    filter: {
+      endDate: {
+        $gt: format(addDays(today, 1), 'yyyy-MM-dd')
+      },
+    },
+    sort: 'startDate:asc'
+  }));
+
+  const pastEvents = (await strapiClient.getEvents(slug, {
+    filter: {
+      endDate: {
+        $lt: format(subDays(today, 1), 'yyyy-MM-dd')
+      },
+    },
+    sort: 'endDate:desc',
+    paginate: {
+      page: 1,
+      pageSize: 8,
+    }
+  }));
+
   if (!store) {
     notFound();
   }
-
-  const eventsResponse = await getEventsCached(slug);
-  const events = (eventsResponse?.data || []) as Event[];
-  const now = new Date();
-  const upcomingEvents = events
-    .filter((e) => new Date(e.startDate).getTime() >= now.getTime())
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  const pastEvents = events
-    .filter((e) => new Date(e.startDate).getTime() < now.getTime())
-    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
   return (
     <Container size="lg" py="xl">
@@ -136,9 +151,9 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
           iconColor={markketColors.sections.events.main}
         />
 
-        {events.length > 0 ? (
+        {(upcomingEvents?.data?.length > 0 || pastEvents?.data?.length > 0) ? (
           <>
-            {upcomingEvents.length > 0 && (
+            {upcomingEvents?.data?.length > 0 && (
               <Stack gap="md">
                 <Group gap="xs" align="center">
                   <Badge
@@ -150,12 +165,12 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                       border: `1px solid ${markketColors.sections.events.main}44`,
                     }}
                   >
-                    {upcomingEvents.length} Upcoming
+                    {upcomingEvents.meta?.pagination?.total} Upcoming
                   </Badge>
                 </Group>
 
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-                  {upcomingEvents.map((event) => {
+                  {(upcomingEvents?.data as Event[])?.map((event) => {
                     const contentImage = extractRichTextImageUrl(event.Description);
                     const image = contentImage || event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
                     const fallbackImage = createPicsumImageUrl(
@@ -266,9 +281,9 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
               </Stack>
             )}
 
-            {pastEvents.length > 0 && (
+            {pastEvents?.data?.length > 0 && (
               <Stack gap="md">
-                {upcomingEvents.length > 0 && (
+                {pastEvents?.data?.length > 0 && (
                   <Box
                     style={{
                       borderTop: `2px solid ${markketColors.neutral.lightGray}`,
@@ -287,12 +302,12 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
                       color: markketColors.neutral.mediumGray,
                     }}
                   >
-                    {pastEvents.length} Past
+                    {pastEvents.meta?.pagination?.total} Past
                   </Badge>
                 </Group>
 
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-                  {pastEvents.map((event) => {
+                  {(pastEvents?.data as Event[]).map((event) => {
                     const contentImage = extractRichTextImageUrl(event.Description);
                     const image = contentImage || event.Thumbnail?.url || event.SEO?.socialImage?.url || event.Slides?.[0]?.url;
                     const fallbackImage = createPicsumImageUrl(
