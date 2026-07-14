@@ -11,7 +11,7 @@ import PageContent from '@/app/components/ui/page.content';
 import { extractRichTextImageUrl, richTextToPlainText, stripMarkdown } from '@/markket/richtext.utils';
 import type { RichTextValue, StoredRichText } from '@/markket/richtext';
 import { cache } from 'react';
-import { subDays, format, addDays } from 'date-fns';
+import { subDays, format, } from 'date-fns';
 import './events.css';
 
 function createPicsumImageUrl(seed: string, width: number, height: number) {
@@ -21,7 +21,6 @@ function createPicsumImageUrl(seed: string, width: number, height: number) {
 
 const getStoreCached = cache((slug: string) => strapiClient.getStore(slug));
 const getEventsPageCached = cache((slug: string) => strapiClient.getPage('events', slug));
-const getEventsCached = cache((slug: string) => strapiClient.getEvents(slug));
 
 interface EventsPageProps {
   params: Promise<{ slug: string }>;
@@ -75,14 +74,19 @@ export async function generateMetadata({ params }: EventsPageProps) {
 
   const pageResponse = await getEventsPageCached(slug);
   const page = pageResponse?.data?.[0] as Page;
+  const today = new Date;
 
-  const eventsResponse = await getEventsCached(slug);
-  const events = (eventsResponse?.data || []) as Event[];
+  const upcomingEvents = await strapiClient.getEvents(slug, {
+    filter: {
+      endDate: {
+        $gt: format(subDays(today, 1), 'yyyy-MM-dd')
+      },
+    },
+    sort: 'startDate:asc'
+  });
 
-  const eventCount = events.length;
-  const eventNames = events.slice(0, 5).map((e) => e.Name).filter(Boolean);
-  const upcomingEvents = events.filter((e) => new Date(e.startDate) > new Date());
-  const upcomingCount = upcomingEvents.length;
+  const upcomingCount = upcomingEvents?.meta?.pagination?.total || 0;
+  const eventNames = upcomingEvents?.data?.slice(0, 5).map((e) => (e as Event).Name).filter(Boolean);
 
   return generateSEOMetadata({
     slug,
@@ -94,14 +98,13 @@ export async function generateMetadata({ params }: EventsPageProps) {
     },
     type: 'website',
     defaultTitle: 'Events',
-    defaultDescription: upcomingCount > 0
-      ? `Join us for ${upcomingCount} upcoming events: ${eventNames.slice(0, 3).join(', ')}${eventNames.length > 3 ? ' and more' : ''}.`
-      : eventCount > 0
-        ? `Explore ${eventCount} events: ${eventNames.slice(0, 3).join(', ')}${eventNames.length > 3 ? ' and more' : ''}.`
+    defaultDescription:
+      upcomingCount > 0
+        ? `Join us for ${upcomingCount} upcoming events: ${eventNames?.slice(0, 3).join(', ')}${eventNames?.length > 3 ? ' and more' : ''}.`
         : 'Discover our events, workshops, and gatherings.',
-    keywords: ['events', 'calendar', 'workshops', 'meetups', ...eventNames.slice(0, 5)],
+    keywords: ['events', 'calendar', 'workshops', 'meetups', ...eventNames?.slice(0, 5)],
   });
-}
+};
 
 export default async function StoreEventsPage({ params }: EventsPageProps) {
   const { slug } = await params;
@@ -116,7 +119,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const upcomingEvents = (await strapiClient.getEvents(slug, {
     filter: {
       endDate: {
-        $gt: format(addDays(today, 1), 'yyyy-MM-dd')
+        $gt: format(subDays(today, 1), 'yyyy-MM-dd')
       },
     },
     sort: 'startDate:asc'
@@ -125,7 +128,7 @@ export default async function StoreEventsPage({ params }: EventsPageProps) {
   const pastEvents = (await strapiClient.getEvents(slug, {
     filter: {
       endDate: {
-        $lt: format(subDays(today, 1), 'yyyy-MM-dd')
+        $lt: format(subDays(today, 2), 'yyyy-MM-dd')
       },
     },
     sort: 'endDate:desc',
