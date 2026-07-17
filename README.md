@@ -6,11 +6,11 @@
 
 ## Typescript Client
 
-## NextJS & npm utilities
+## NextTS
 
 For  Markkëtplace stores & managers
 
-Self host for full instnace control, or `npm i` individual components
+Self host for full instance control
 
 ### Store Dashboard
 
@@ -30,7 +30,6 @@ The markkët API is powered by Strapi, Postgres, Docker & Redis
 
 This client uses typescript, react, tailwind, mantine, tabler & is open to community contributions
 
-
 ## Getting Started
 
 ## ENV VARS
@@ -39,43 +38,16 @@ Use the following ENV Vars to connect to our live API. This applications adds ex
 
 ```bash
 # // .env.example
-MARKKET_URL=https://api.markket.place/
-MARKKET_STORE_SLUG=next
-NODE_ENV=development
-MARKKET_API_KEY=
+MARKKET_URL=https://apis.markket.place/
+MARKKET_STORE_SLUG=staging
 ```
 
 First, run the development server:
 
-We recommend using Turbo
 
 ```bash
-turbo dev
+yarn dev
 ```
-
-### Admin || Markket instance
-
-When self-hosting the API, you can create an API KEY to perform administrative operations
-
-Is necesary to enable /dashboard and other functionalities for users in your instance
-
-## ENV VARS
-
-Configure your instance with the following variables, refer to `.env.example` for defaults
-
-
-```bash
-NODE_ENV=development
-NEXT_PUBLIC_MARKKET_STORE_SLUG=next
-NEXT_PUBLIC_MARKKET_API=https://api.markket.place/
-NEXT_PUBLIC_MARKKETPLACE_URL=http://localhost:4020/
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Mobile Domain Association
 

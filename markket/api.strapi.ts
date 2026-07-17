@@ -3,7 +3,6 @@ import { Store } from './store';
 import { Page } from './page';
 import type { StoreVisibility, StoreVisibilityResponse } from './store.visibility.d';
 import qs from 'qs';
-import Markdown from "@/app/components/ui/page.markdown";
 
 export { type StrapiResponse, type FetchOptions };
 
@@ -20,6 +19,8 @@ interface EnhancedFetchOptions extends Omit<FetchOptions, 'filters'> {
   filters?: {
     [key: string]: FilterValue | string | number | boolean;
   };
+  fields?: string[];
+  populate?: string;
 };
 
 type uploadAvatarOptions = {
@@ -333,6 +334,10 @@ export class StrapiClient {
       fields.forEach(field => params.append('populate[]', field.trim()));
     }
 
+    if ((fields?.length || 0) > 0) {
+      fields?.forEach(field => params.append('field[]', field.trim()));
+    }
+
     if (paginate?.limit) params.append('pagination[limit]', paginate.limit.toString());
     if (paginate?.page) params.append('pagination[page]', paginate.page.toString());
     if (paginate?.pageSize) params.append('pagination[pageSize]', paginate.pageSize.toString());
@@ -344,9 +349,7 @@ export class StrapiClient {
   }
 
   async fetch<T>(options: FetchOptions): Promise<StrapiResponse<T>> {
-    const { populate, fields } = options;
     const url = this.buildUrl(options as EnhancedFetchOptions);
-
 
     try {
       let authToken = options?.headers?.Authorization as string || '';
@@ -707,7 +710,7 @@ export class StrapiClient {
         return localStartOfToday;
       })();
 
-    return this.fetch({
+    const r = this.fetch({
       contentType: 'events',
       sort,
       filters: {
@@ -720,6 +723,9 @@ export class StrapiClient {
       status: 'published',
       paginate,
     });
+    console.log({ r });
+
+    return r;
   }
 
   async getCommunityProducts(paginate: { page: number; pageSize: number }, options: { sort: string }) {
