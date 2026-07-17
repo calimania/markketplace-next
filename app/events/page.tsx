@@ -9,21 +9,21 @@ import { Event } from '@/markket';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
-    slug: 'blog',
-    entity: { url: '/blog' },
-    defaultTitle: 'Blog',
-    defaultDescription: 'Stories, updates, and ideas from the community.',
-    keywords: ['blog', 'articles', 'stories', 'community', 'creators'],
+    slug: 'events',
+    entity: { url: '/events' },
+    defaultTitle: 'Events',
+    defaultDescription: 'Upcoming events from the community',
+    keywords: ['events', 'stories', 'community', 'creators'],
     type: 'website',
   });
 }
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 6;
 
 export default async function EventDiscoveryPage() {
   const response = await strapiClient.getCommunityEvents(
     { page: 1, pageSize: PAGE_SIZE },
-    { sort: 'publishedAt:desc' },
+    { sort: 'startDate:asc' },
   );
 
   const events = response?.data || [];
@@ -82,7 +82,7 @@ export default async function EventDiscoveryPage() {
             </Text>
           </Stack>
         </Paper>
-        <EventsFeed initialEvents={events as Event[]} initialHasMore={hasMore} />
+        <EventsFeed initialEvents={events as Event[]} initialHasMore={hasMore} pageSize={PAGE_SIZE} />
       </Stack>
     </Container>
   );

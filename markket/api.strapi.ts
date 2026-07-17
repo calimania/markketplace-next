@@ -355,9 +355,8 @@ export class StrapiClient {
       let authToken = options?.headers?.Authorization as string || '';
 
       if (!authToken && options.includeAuth) {
-        // Server-side: use API key; client-side: use JWT from localStorage
         if (typeof window === 'undefined') {
-          authToken = process.env.MARKKET_API_KEY || '';
+          // authToken = process.env.MARKKET_API_KEY || '';
         } else {
           authToken = this._token();
         }
@@ -388,9 +387,7 @@ export class StrapiClient {
     return { data: [] } as unknown as StrapiResponse<T>;
   };
 
-
   public get = async (type: string, slug: string, store_slug = this.storeSlug) => {
-
 
     return await this.fetch<Store>({
       contentType: type,
@@ -719,11 +716,10 @@ export class StrapiClient {
         },
       },
       fields: ['Name', 'startDate', 'endDate', 'usd_price', 'slug', 'Description'],
-      populate: 'Thumbnail,SEO,SEO.socialImage,stores',
+      populate: 'Thumbnail,SEO,SEO.socialImage,stores,PRICES',
       status: 'published',
       paginate,
     });
-    console.log({ r });
 
     return r;
   }

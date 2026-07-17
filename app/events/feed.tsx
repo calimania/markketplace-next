@@ -2,18 +2,20 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Center, Loader, Button, Grid, Group, Card, Box, Badge, Flex, Stack } from '@mantine/core';
-import { IconArrowDown, IconCalendar, IconMapPin, IconTicket } from '@tabler/icons-react';
-import Link from 'next/link';
+import { IconArrowDown, IconCalendar, IconTicket } from '@tabler/icons-react';
 import { markketColors } from '@/markket/colors.config';
 import { Event } from '@/markket';
 import Markdown from "@/app/components/ui/page.markdown";
+import { stripMarkdown } from '@/markket/richtext.utils';
+import Link from 'next/link';
 
 interface EventFeedProps {
   initialEvents: Event[];
   initialHasMore: boolean;
+  pageSize?: number;
 }
 
-export default function EventFeed({ initialEvents, initialHasMore }: EventFeedProps) {
+export default function EventFeed({ initialEvents, initialHasMore, pageSize = 12 }: EventFeedProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [page, setPage] = useState(2);
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function EventFeed({ initialEvents, initialHasMore }: EventFeedPr
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/events?page=${page}&pageSize=12`);
+      const res = await fetch(`/api/events?page=${page}&pageSize=${pageSize}`);
       const data = await res.json();
       const next = (data?.data || []) as Event[];
       setEvents((prev) => [...prev, ...next]);
@@ -64,201 +66,196 @@ export default function EventFeed({ initialEvents, initialHasMore }: EventFeedPr
 
   return (
     <Stack gap="xl">
-      {/* Responsive Grid Layout */}
-      <Grid gutter={{ base: 'md', md: 'lg' }}>
-        {events.map((event, index) => {
-          const storeSlug = (event as Event & { store?: { slug?: string } })?.store?.slug;
+      <Grid gap="md">
+        {events.map((event) => {
+          const storeSlug = event?.stores?.[0]?.slug;
           const eventSlug = event?.slug || event?.documentId || '';
           const eventHref = `/${storeSlug}/events/${eventSlug}`;
 
-          // Beautiful cover fallbacks or direct URLs
           const coverUrl = event.Thumbnail?.formats?.small?.url || event.SEO?.socialImage?.formats?.small?.url;
 
-          // Format Event Start Date nicely (e.g. "Jul 17, 2026")
-          const eventStartDate = event.startDate ? new Date(event.startDate) : null;
-          const dateLabel = eventStartDate && !Number.isNaN(eventStartDate.getTime())
-            ? eventStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            : 'TBD';
+          const dateLabel = (() => {
+            if (!event.startDate) return 'TBD';
+            const date = new Date(event.startDate);
+            if (Number.isNaN(date.getTime())) return 'TBD';
 
-          // Render nicely formatted price
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const month = months[date.getUTCMonth()];
+            const day = date.getUTCDate();
+            const year = date.getUTCFullYear();
+
+            return `${month} ${day}, ${year}`;
+          })();
           const priceLabel = event.usd_price ? `$${Number(event.usd_price).toFixed(2)}` : '';
 
           return (
             <Grid.Col key={event.documentId} span={{ base: 12, sm: 6, lg: 4 }}>
-              <Link
+              <Card
+                withBorder
+                padding={0}
+                radius="lg"
                 href={eventHref}
-                style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
-              >
-                <Card
-                  withBorder
-                  padding={0}
-                  radius="lg"
-                  style={{
+                component={Link}
+                styles={{
+                  root: {
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',
                     backgroundColor: '#fff',
-                    borderColor: markketColors.neutral.lightGray,
                     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
                     transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.transform = 'translateY(-6px)';
-                    el.style.boxShadow = `0 16px 32px ${markketColors.sections.blog.main}12`;
-                    el.style.borderColor = markketColors.sections.blog.main;
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.transform = '';
-                    el.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.03)';
-                    el.style.borderColor = markketColors.neutral.lightGray;
-                  }}
-                >
-                  {/* Image Container */}
-                  <Box style={{ position: 'relative', overflow: 'hidden', height: 200 }}>
-                    {coverUrl ? (
-                      <Box
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          background: `url(${coverUrl}) center center / cover no-repeat`,
-                          transition: 'transform 0.4s ease',
-                        }}
-                        className="card-image"
-                      />
-                    ) : (
-                      // Geometric fallback background with subtle branding colors
-                      <Flex
-                        align="center"
-                        justify="center"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          background: `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #fff 100%)`,
-                        }}
-                      >
-                          <Text fw={600} size="sm" c={markketColors.sections.blog.main}>
-                            No Event Image
-                          </Text>
-                      </Flex>
-                    )}
+                    borderColor: markketColors.neutral.lightGray,
 
-                    {/* Floating Badges inside Image */}
-                    <Group gap="xs" style={{ position: 'absolute', top: 12, left: 12, zIndex: 2 }}>
+                    '&:hover': {
+                      transform: 'translateY(-6px)',
+                      boxShadow: `0 16px 32px ${markketColors.sections.blog.main}12`,
+                      borderColor: markketColors.sections.blog.main,
+                    }
+                  }
+                }}
+              >
+                {/* Image Container */}
+                <Box style={{ position: 'relative', overflow: 'hidden', height: 200 }}>
+                  {coverUrl ? (
+                    <Box
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        background: `url(${coverUrl}) center center / cover no-repeat`,
+                        transition: 'transform 0.4s ease',
+                      }}
+                      className="card-image"
+                    />
+                  ) : (
+                    <Flex
+                      align="center"
+                      justify="center"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        background: `linear-gradient(135deg, ${markketColors.sections.blog.light} 0%, #fff 100%)`,
+                      }}
+                    >
+                      <Text fw={600} size="sm" c={markketColors.sections.blog.main}>
+                        No Event Image
+                      </Text>
+                    </Flex>
+                  )}
+
+                  {/* Floating Badges inside Image */}
+                  <Group gap="xs" style={{ position: 'absolute', top: 12, left: 12, zIndex: 2 }}>
+                    <Badge
+                      variant="filled"
+                      radius="sm"
+                      size="sm"
+                      style={{
+                        background: markketColors.sections.blog.main,
+                        color: '#fff',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Event
+                    </Badge>
+                    {storeSlug && (
                       <Badge
-                        variant="filled"
+                        variant="white"
                         radius="sm"
                         size="sm"
                         style={{
-                          background: markketColors.sections.blog.main,
-                          color: '#fff',
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
+                          color: markketColors.neutral.charcoal,
+                          fontWeight: 600,
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                         }}
                       >
-                        Event
+                        {storeSlug}
                       </Badge>
-                      {storeSlug && (
-                        <Badge
-                          variant="white"
-                          radius="sm"
-                          size="sm"
-                          style={{
-                            color: markketColors.neutral.charcoal,
-                            fontWeight: 600,
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                          }}
-                        >
-                          {storeSlug}
-                        </Badge>
-                      )}
+                    )}
+                  </Group>
+
+                  {/* Floating Ticket Price Badge */}
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      bottom: 12,
+                      right: 12,
+                      zIndex: 2,
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    <Group gap={4}>
+                      <IconTicket size={12} color={markketColors.sections.blog.main} />
+                      <Text size="xs" fw={700} style={{ color: markketColors.neutral.charcoal }}>
+                        {priceLabel}
+                      </Text>
+                    </Group>
+                  </Box>
+                </Box>
+
+                {/* Text Content */}
+                <Stack gap="xs" p="md" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <Stack gap={6}>
+                    {/* Date Row */}
+                    <Group gap={4}>
+                      <IconCalendar size={13} color={markketColors.neutral.mediumGray} />
+                      <Text size="xs" fw={600} c="dimmed" suppressHydrationWarning>
+                        {dateLabel}
+                      </Text>
                     </Group>
 
-                    {/* Floating Ticket Price Badge */}
-                    <Box
+                    {/* Event Title */}
+                    <Text
+                      fw={700}
+                      lineClamp={2}
                       style={{
-                        position: 'absolute',
-                        bottom: 12,
-                        right: 12,
-                        zIndex: 2,
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        padding: '4px 10px',
-                        borderRadius: 6,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                        backdropFilter: 'blur(4px)',
+                        fontSize: '1.1rem',
+                        lineHeight: 1.3,
+                        color: markketColors.neutral.charcoal,
                       }}
                     >
-                      <Group gap={4}>
-                        <IconTicket size={12} color={markketColors.sections.blog.main} />
-                        <Text size="xs" fw={700} style={{ color: markketColors.neutral.charcoal }}>
-                          {priceLabel}
-                        </Text>
-                      </Group>
-                    </Box>
-                  </Box>
+                      {event.Name}
+                    </Text>
 
-                  {/* Text Content */}
-                  <Stack gap="xs" p="md" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <Stack gap={6}>
-                      {/* Date Row */}
-                      <Group gap={4}>
-                        <IconCalendar size={13} color={markketColors.neutral.mediumGray} />
-                        <Text size="xs" fw={600} c="dimmed">
-                          {dateLabel}
-                        </Text>
-                      </Group>
+                    {/* Short description preview safely wrapped in layout box */}
+                    {event.Description && (
+                      <Box style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.4 }}>
+                        <div className="prose space-y-6 text-xs text-gray-500 dark:prose-invert">
+                          <Markdown content={stripMarkdown(event?.Description || "")} />
+                        </div>
+                      </Box>
+                    )}
+                  </Stack>
 
-                      {/* Event Title */}
-                      <Text
-                        fw={700}
-                        lineClamp={2}
-                        style={{
-                          fontSize: '1.1rem',
-                          lineHeight: 1.3,
-                          color: markketColors.neutral.charcoal,
-                        }}
-                      >
-                        {event.Name}
-                      </Text>
-
-                      {/* Short description if available */}
-                      {event.Description && (
-                        <Text size="xs" c="dimmed" lineClamp={2} style={{ lineHeight: 1.4 }}>
-                          <div className="prose space-y-6 text-base text-gray-700 dark:prose-invert">
-                            <Markdown content={event?.Description || ""} />
-                          </div>
-                        </Text>
-                      )}
-                    </Stack>
-
-                    {/* Footer Action */}
-                    <Group justify="space-between" mt="md" pt="xs" style={{ borderTop: `1px solid ${markketColors.neutral.lightGray}` }}>
-                      <Group gap={4}>
-                        <Text size="xs" c="dimmed" fw={500}>
-                          {storeSlug ? `${storeSlug}` : ' '}
-                        </Text>
-                      </Group>
-
-                      <Text
-                        size="xs"
-                        fw={700}
-                        style={{
-                          color: markketColors.sections.blog.main,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 3,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                        }}
-                      >
-                        View Details <IconArrowDown size={12} style={{ transform: 'rotate(-90deg)' }} />
+                  {/* Footer Action */}
+                  <Group justify="space-between" mt="md" pt="xs" style={{ borderTop: `1px solid ${markketColors.neutral.lightGray}` }}>
+                    <Group gap={4}>
+                      <Text size="xs" c="dimmed" fw={500}>
+                        {storeSlug ? `${storeSlug}` : ' '}
                       </Text>
                     </Group>
-                  </Stack>
-                </Card>
-              </Link>
+
+                    <Text
+                      size="xs"
+                      fw={700}
+                      style={{
+                        color: markketColors.sections.blog.main,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      View Details <IconArrowDown size={12} style={{ transform: 'rotate(-90deg)' }} />
+                    </Text>
+                  </Group>
+                </Stack>
+              </Card>
             </Grid.Col>
           );
         })}

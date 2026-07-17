@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await strapiClient.getCommunityEvents(
       { page, pageSize },
-      { sort: 'startAt:asc' },
+      { sort: 'startDate:asc' },
     );
 
     return NextResponse.json(response);

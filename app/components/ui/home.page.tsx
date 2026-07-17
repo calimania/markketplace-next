@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import {
   IconRocket, IconBuildingStore,
   IconSparkles, IconArrowRight,
@@ -15,20 +16,20 @@ import { FeatureCard } from '@/app/components/ui/feature.card';
 const features = [
   {
     icon: IconRocket,
-    title: "Launch in Minutes",
-    description: "Verify email, add products, start selling. Simple as that.",
+    title: "Launch an Online Store in Minutes",
+    description: "Verify your email, list digital or physical products, and start accepting global payments securely.",
     color: markketColors.sections.events.main,
   },
   {
     icon: IconBuildingStore,
-    title: "Own Your Content",
-    description: "No ads or invasive trackers",
+    title: "100% Data & Content Ownership",
+    description: "Build a brand completely free of invasive third-party trackers, pop-up ads, or marketplace interference.",
     color: markketColors.sections.shop.main,
   },
   {
     icon: IconSparkles,
-    title: "Customizable",
-    description: "Open source, headless, self-host, community support.",
+    title: "Fully Customizable & Self-Hosted",
+    description: "Enjoy an open-source, headless e-commerce stack with active community support and multi-theme customization.",
     color: markketColors.rosa.main,
   },
 ];
@@ -97,71 +98,72 @@ const HomePage = ({
   const eventsToDisplay = communityEvents;
 
   return (
-    <main className="min-h-screen bg-white selection:bg-rose-100 selection:text-rose-900">
+    <main className="min-h-screen bg-white text-gray-900 selection:bg-rose-100 selection:text-rose-900 antialiased">
 
       {/* ── 00 — STORES ───────────────────────────────────── */}
-      <section className="py-16 border-b border-gray-100">
+      <section className="py-20 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
             <div>
-              <SectionLabel num="00" label="Stores" color={markketColors.sections.shop.main} />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-950 mt-1">
-                Discover Creators
+              <SectionLabel num="00" label="Digital Storefronts" color={markketColors.sections.shop.main} />
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 mt-1">
+                Shop Independent Creators
               </h2>
+              <p className="text-gray-500 text-sm mt-1">Explore custom, modern shops built by small businesses and digital makers.</p>
             </div>
-            <a
+            <Link
               href="/stores"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-950 transition-colors group"
             >
-              All stores <IconArrowRight size={14} />
-            </a>
+              Browse all stores <IconArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
 
           {featuredStores.length > 0 ? (
             <StorefrontCarousel stores={featuredStores} />
           ) : (
-              <div className="flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50">
-                <p className="text-gray-500 mb-4 font-medium">No stores yet — be the first!</p>
-                <a
+              <div className="flex flex-col items-center justify-center text-center p-16 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 backdrop-blur-sm">
+                <p className="text-gray-500 mb-4 font-medium text-lg">No stores live just yet — jump in and set up shop!</p>
+                <Link
                   href="/auth/magic"
-                  className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow-sm hover:opacity-90 transition-opacity"
+                  className="px-6 py-3 text-sm font-bold text-white rounded-xl shadow-md hover:opacity-95 hover:shadow-lg transition-all active:scale-[0.98]"
                   style={{ backgroundColor: markketColors.rosa.main }}
                 >
-                  Create your store
-              </a>
+                  Launch Your Custom Storefront
+                </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* ── 01 — PLATFORM ───────────────────────────────────── */}
+      {/* ── 01 — PLATFORM / HERO ───────────────────────────── */}
       <section
-        className="py-20 border-b border-gray-100"
+        className="py-24 border-b border-gray-100 relative overflow-hidden"
         style={{ backgroundColor: markketColors.neutral.offWhite }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-            <div className="md:col-span-7">
-              <SectionLabel num="01" label="Platform" />
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-950 mt-2 leading-[1.05]">
-                {store?.SEO?.metaTitle || 'Markkët'}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7">
+              <SectionLabel num="01" label="E-commerce Content Management Stack" />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-950 mt-2 leading-[1.08]">
+                {store?.SEO?.metaTitle || 'Markkët E-Commerce'}
                 <br />
-                <span style={{ color: markketColors.rosa.main }}>Content Manager</span>
+                <span style={{ color: markketColors.rosa.main }}>Headless Content Manager</span>
               </h1>
             </div>
-            <div className="md:col-span-5 flex flex-col gap-6">
-              <p className="text-gray-600 text-lg leading-relaxed">
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <p className="text-gray-600 text-lg leading-relaxed font-normal">
                 {store?.SEO?.metaDescription ||
-                  'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
+                  'Create beautiful standalone digital storefronts and blog networks for independent creators, artists, and modern agile brands.'}
               </p>
               <div>
-                <a
+                <Link
                   href="/auth/magic"
-                  className="inline-flex items-center gap-2 px-6 py-3.5 font-semibold text-white rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0"
+                  className="inline-flex items-center gap-2 px-7 py-4 font-bold text-white rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0"
                   style={{ backgroundColor: markketColors.rosa.main }}
                 >
-                  <IconSparkles size={16} /> Create your store
-                </a>
+                  <IconSparkles size={16} /> Start Selling Online Today
+                </Link>
               </div>
             </div>
           </div>
@@ -170,20 +172,20 @@ const HomePage = ({
 
       {/* ── 02 — BLOG ───────────────────────────────────────── */}
       {communityPosts.length > 0 && (
-        <section className="py-20">
+        <section className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
               <div>
-                <SectionLabel num="02" label="Blog" color={markketColors.sections.blog.main} />
-                <h2 className="text-3xl font-extrabold text-gray-950 mt-1">Latest Stories</h2>
-                <p className="text-gray-500 mt-1">Fresh writing from creators across the community.</p>
+                <SectionLabel num="02" label="Creator Ecosystem Journals" color={markketColors.sections.blog.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Latest Insights & Stories</h2>
+                <p className="text-gray-500 mt-1">Fresh articles, project diaries, and strategy updates directly from community creators.</p>
               </div>
-              <a
+              <Link
                 href="/blog"
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                See all stories <IconArrowRight size={16} />
-              </a>
+                Read all articles <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -212,11 +214,11 @@ const HomePage = ({
                 );
 
                 return (
-                  <a
+                  <Link
                     key={post.documentId || post.id}
                     href={href}
-                    className="group flex flex-col overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                    aria-label={`Read blog post ${post.Title}`}
+                    className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    aria-label={`Read fully-optimized article: ${post.Title}`}
                   >
                     <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
                       {coverUrl ? (
@@ -238,9 +240,9 @@ const HomePage = ({
 
                     <div className="flex flex-col flex-1 p-6">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md">Blog</span>
+                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md">Article</span>
                         {post?.store?.title && (
-                          <span className="text-xs text-gray-500 font-medium">{post.store.title}</span>
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{post.store.title}</span>
                         )}
                       </div>
 
@@ -248,17 +250,17 @@ const HomePage = ({
                         {post.Title}
                       </h3>
                       <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed mb-4">
-                        {post?.SEO?.metaDescription || '...'}
+                        {post?.SEO?.metaDescription || 'Click to dive deep into this featured community insight piece...'}
                       </p>
 
                       <span
                         className="text-sm font-semibold mt-auto flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
                         style={{ color: markketColors.sections.blog.main }}
                       >
-                        Read story <IconArrowRight size={14} className="stroke-[2.5]" />
+                        Read full post <IconArrowRight size={14} className="stroke-[2.5]" />
                       </span>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -269,22 +271,22 @@ const HomePage = ({
       {/* ── 03 — EVENTS ──────────────────────────────────── */}
       {eventsToDisplay.length > 0 && (
         <section
-          className="py-20 border-t border-gray-100"
-          style={{ backgroundColor: `${markketColors.sections.events.light}30` }}
+          className="py-24 border-t border-gray-100"
+          style={{ backgroundColor: `${markketColors.sections.events.light}25` }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
               <div>
-                <SectionLabel num="03" label="Events" color={markketColors.sections.events.main} />
-                <h2 className="text-3xl font-extrabold text-gray-950 mt-1">Join upcoming events</h2>
-                <p className="text-gray-500 mt-1">Workshops, launches, and meetups from community stores.</p>
+                <SectionLabel num="03" label="Interactive Experiences" color={markketColors.sections.events.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Join Live Marketplace Events</h2>
+                <p className="text-gray-500 mt-1">Educational workshops, product drops, and global meetups Hosted by store owners.</p>
               </div>
-              <a
+              <Link
                 href="/events"
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-white hover:border-gray-300 transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                More Events <IconArrowRight size={16} />
-              </a>
+                Explore more events <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -311,11 +313,11 @@ const HomePage = ({
                 const eventDate = formatEventDate(event.startDate, event.timezone);
 
                 return (
-                  <a
+                  <Link
                     key={event.documentId || event.id}
                     href={href}
                     className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                    aria-label={`Learn more about event ${event.Name}`}
+                    aria-label={`Register for community event: ${event.Name}`}
                   >
                     <div className="relative aspect-video w-full overflow-hidden bg-gray-50">
                       {thumbnailUrl ? (
@@ -330,8 +332,8 @@ const HomePage = ({
                             className="w-full h-full flex flex-col items-center justify-center p-6 text-center"
                             style={{ backgroundColor: markketColors.sections.events.light, color: markketColors.sections.events.main }}
                           >
-                          <IconCalendar size={32} className="mb-1" />
-                          <span className="text-sm font-semibold">Event</span>
+                            <IconCalendar size={32} className="mb-1 animate-pulse" />
+                            <span className="text-sm font-bold tracking-wide">Live Stream / Meetup</span>
                         </div>
                       )}
                     </div>
@@ -342,7 +344,7 @@ const HomePage = ({
                           <IconCalendar size={12} /> {eventDate}
                         </span>
                         {(event as any)?.stores?.[0]?.title && (
-                          <span className="text-xs text-gray-500 font-medium">{(event as any).stores[0].title}</span>
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{(event as any).stores[0].title}</span>
                         )}
                       </div>
 
@@ -350,17 +352,17 @@ const HomePage = ({
                         {event.Name}
                       </h3>
                       <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
-                        {event?.SEO?.metaDescription || 'Join us for this event'}
+                        {event?.SEO?.metaDescription || 'Discover dates, speaker bios, topics, and access details for this collective community run workshop.'}
                       </p>
 
                       <span
                         className="text-sm font-semibold mt-auto flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
                         style={{ color: markketColors.sections.events.main }}
                       >
-                        View event <IconArrowRight size={14} className="stroke-[2.5]" />
+                        View event schedule <IconArrowRight size={14} className="stroke-[2.5]" />
                       </span>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -371,12 +373,12 @@ const HomePage = ({
       {/* ── 05 — FEATURES ───────────────────────────────── */}
       {communityProducts.length > 0 && (
         <section
-          className="py-16 border-b border-gray-100"
+          className="py-20 border-b border-gray-100"
           style={{ backgroundColor: markketColors.neutral.offWhite }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
-              <SectionLabel num="05" label="Features" />
+            <div className="mb-10">
+              <SectionLabel num="05" label="Core Open Architecture Capabilities" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
@@ -397,22 +399,22 @@ const HomePage = ({
       {/* ── 06 — SHOP ───────────────────────────────────── */}
       {communityProducts.length > 0 && (
         <section
-          className="py-20"
-          style={{ backgroundColor: `${markketColors.sections.shop.light}30` }}
+          className="py-24"
+          style={{ backgroundColor: `${markketColors.sections.shop.light}25` }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
               <div>
-                <SectionLabel num="06" label="Shop" color={markketColors.sections.shop.main} />
-                <h2 className="text-3xl font-extrabold text-gray-950 mt-1">Shop Community Picks</h2>
-                <p className="text-gray-500 mt-1">Featured products from active stores.</p>
+                <SectionLabel num="06" label="Handpicked Commercial Offerings" color={markketColors.sections.shop.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Shop Community Top Picks</h2>
+                <p className="text-gray-500 mt-1">Directly purchase digital downloads, visual art templates, physical items, and courses safely.</p>
               </div>
-              <a
+              <Link
                 href="/stores"
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 bg-white text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                Browse Stores <IconArrowRight size={16} />
-              </a>
+                Explore creator catalogs <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -428,16 +430,15 @@ const HomePage = ({
                   product?.Slides?.[0]?.url,
                 );
                 const href = storeSlug ? `/${storeSlug}/products/${product.slug}` : '/stores';
-                const price = typeof product.usd_price === 'number' && product.usd_price > 0
-                  ? `$${(product.usd_price / 100).toFixed(2)}`
-                  : 'See details';
+                const _price = product.usd_price || product.PRICES?.[0]?.Price;
+                const price = _price && _price > 0 ? `$${((_price)).toFixed(2)}` : ' / ';
 
                 return (
-                  <a
+                  <Link
                     key={product.documentId || product.id}
                     href={href}
-                    className="group flex flex-col overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                    aria-label={`View product ${product.Name}`}
+                    className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    aria-label={`Purchase or read specs for: ${product.Name}`}
                   >
                     <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
                       {productImage ? (
@@ -457,32 +458,32 @@ const HomePage = ({
                       )}
                     </div>
 
-                    <div className="flex flex-col p-6">
+                    <div className="flex flex-col flex-1 p-6">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md">Product</span>
+                        <span className="text-xs font-bold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md">Market Product</span>
                         {(product as any)?.stores?.[0]?.title && (
-                          <span className="text-xs text-gray-500 font-medium">{(product as any).stores[0].title}</span>
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{(product as any).stores[0].title}</span>
                         )}
                       </div>
 
                       <h3 className="text-lg font-bold text-gray-950 group-hover:text-cyan-600 transition-colors line-clamp-2 leading-snug mb-1">
                         {product.Name}
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">
-                        {product?.SEO?.metaDescription || stripMarkdown(product?.Description as string) || 'Discover this product from the Markket community.'}
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {product?.SEO?.metaDescription || stripMarkdown(product?.Description as string) || 'Review sizing, feature sets, technical specifications, and distribution delivery parameters.'}
                       </p>
 
-                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
-                        <span className="text-sm font-bold text-gray-900">{price}</span>
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                        <span className="text-base font-black text-gray-950 tracking-tight">{price}</span>
                         <span
                           className="text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
                           style={{ color: markketColors.sections.shop.main }}
                         >
-                          View Product <IconArrowRight size={14} className="stroke-[2.5]" />
+                          View Details <IconArrowRight size={14} className="stroke-[2.5]" />
                         </span>
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -492,7 +493,7 @@ const HomePage = ({
 
       {/* ── CUSTOM PAGE CONTENT ───────────────────────────── */}
       {page?.Content && (
-        <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <PageContent params={{ page }} />
         </section>
       )}
@@ -500,14 +501,14 @@ const HomePage = ({
       {/* ── 04 — PAGES ──────────────────────────────────── */}
       {communityPages.length > 0 && (
         <section
-          className="py-20 border-t border-gray-100"
+          className="py-24 border-t border-gray-100"
           style={{ backgroundColor: markketColors.neutral.offWhite }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
-              <SectionLabel num="04" label="Pages" color={markketColors.sections.about.main} />
-              <h2 className="text-3xl font-extrabold text-gray-950 mt-1">From the Community</h2>
-              <p className="text-gray-500 mt-1">Evergreen pages from creators, studios, and brands.</p>
+              <SectionLabel num="04" label="Evergreen Brand Portfolios" color={markketColors.sections.about.main} />
+              <h2 className="text-3xl font-black text-gray-950 mt-1">Profiles from the E-commerce Community</h2>
+              <p className="text-gray-500 mt-1">Read about pages, mission statements, and brand lookbooks from dynamic network shops.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -521,17 +522,17 @@ const HomePage = ({
                 );
 
                 return (
-                  <a
+                  <Link
                     key={p.documentId || p.id}
                     href={href}
-                    className="group flex flex-col p-6 min-h-[160px] bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                    aria-label={`Read page ${p.Title}`}
+                    className="group flex flex-col p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full"
+                    aria-label={`Explore information index: ${p.Title}`}
                   >
                     {logoUrl && (
-                      <div className="relative h-24 w-full rounded-lg overflow-hidden bg-gray-100 mb-4">
+                      <div className="relative h-24 w-full rounded-xl overflow-hidden bg-gray-100 mb-4 border border-gray-50">
                         <img
                           src={logoUrl}
-                          alt={(p as any)?.store?.title || storeSlug || 'Store'}
+                          alt={(p as any)?.store?.title || storeSlug || 'Creator brand hub logo'}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
@@ -546,18 +547,18 @@ const HomePage = ({
                       <h3 className="text-lg font-bold text-gray-950 group-hover:text-indigo-600 transition-colors leading-snug">
                         {p.Title}
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                        {p.SEO?.metaDescription || 'Read this page from the community.'}
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {p.SEO?.metaDescription || 'Read through official manifestos, custom landing profiles, and local vendor dynamic documentations.'}
                       </p>
 
                       <span
                         className="text-sm font-semibold mt-auto pt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
                         style={{ color: markketColors.sections.about.main }}
                       >
-                        Read page <IconArrowRight size={14} className="stroke-[2.5]" />
+                        Read directory profile <IconArrowRight size={14} className="stroke-[2.5]" />
                       </span>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -567,34 +568,33 @@ const HomePage = ({
 
       {/* ── CTA ─────────────────────────────────────────── */}
       <section
-        className="py-24 relative overflow-hidden"
+        className="py-28 relative overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)` }}
       >
-        {/* Abstract decorative graphic overlay for polish */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
-            Ready to Launch?
+            Ready to Launch Your Brand?
           </h2>
-          <p className="text-lg sm:text-xl text-white/90 font-medium mb-8">
-            Join creators and businesses already selling on Markkët
+          <p className="text-lg sm:text-xl text-white/90 font-medium mb-10 max-w-xl mx-auto">
+            Join independent creators and modern companies already hosting custom storefronts natively on Markkët.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            <Link
               href="/auth/magic"
               className="px-8 py-4 bg-white text-base font-bold rounded-2xl shadow-xl shadow-black/10 hover:shadow-2xl hover:bg-gray-50 active:scale-95 transition-all duration-150"
               style={{ color: markketColors.rosa.main }}
             >
-              Create your store
-            </a>
-            <a
+              Build Your Online Store
+            </Link>
+            <Link
               href="/about"
-              className="px-8 py-4 border border-white/40 text-base font-bold text-white rounded-2xl hover:bg-white/10 hover:border-white/60 active:scale-95 transition-all duration-150"
+              className="px-8 py-4 border border-white/30 text-base font-bold text-white rounded-2xl hover:bg-white/10 hover:border-white/50 active:scale-95 transition-all duration-150 backdrop-blur-sm"
             >
-              About & Policies
-            </a>
+              Explore Terms & Documentation
+            </Link>
           </div>
         </div>
       </section>
