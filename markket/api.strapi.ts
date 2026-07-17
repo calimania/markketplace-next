@@ -3,6 +3,7 @@ import { Store } from './store';
 import { Page } from './page';
 import type { StoreVisibility, StoreVisibilityResponse } from './store.visibility.d';
 import qs from 'qs';
+import Markdown from "@/app/components/ui/page.markdown";
 
 export { type StrapiResponse, type FetchOptions };
 
@@ -318,7 +319,7 @@ export class StrapiClient {
 
   // @TODO - if we have a store?.id, is faster to search that way instead of slug
   private buildUrl(options: EnhancedFetchOptions): string {
-    const { contentType, filters, populate, paginate, sort, status } = options;
+    const { contentType, filters, populate, fields, paginate, sort, status } = options;
     const params = new URLSearchParams();
 
     const filterString = this.buildFilterString(filters);
@@ -343,9 +344,8 @@ export class StrapiClient {
   }
 
   async fetch<T>(options: FetchOptions): Promise<StrapiResponse<T>> {
-
+    const { populate, fields } = options;
     const url = this.buildUrl(options as EnhancedFetchOptions);
-
 
 
     try {
@@ -692,27 +692,33 @@ export class StrapiClient {
       populate: 'SEO.socialImage,store,store.Logo',
     });
   }
-
-  async getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string; from?: Date }) {
+  getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string; from?: Date }) {
     const { sort } = options;
 
-    const fromDate = options.from ?? (() => {
-      const d = new Date();
-      d.setHours(0, 0, 0, 0);
-      return d;
-    })();
+    const fromDateString = options.from
+      ? options.from.toISOString()
+      : (() => {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        const localStartOfToday = `${year}-${month}-${day}T00:00:00.000Z`;
+        return localStartOfToday;
+      })();
 
     return this.fetch({
       contentType: 'events',
       sort,
       filters: {
         startDate: {
-          $gte: fromDate.toISOString(),
+          $gte: fromDateString,
         },
       },
+      fields: ['Name', 'startDate', 'endDate', 'usd_price', 'slug', 'Description'],
+      populate: 'Thumbnail,SEO,SEO.socialImage,stores',
       status: 'published',
       paginate,
-      populate: 'SEO,SEO.socialImage,Tag,Thumbnail,PRICES,stores,stores.Logo',
     });
   }
 

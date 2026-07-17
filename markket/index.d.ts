@@ -48,6 +48,7 @@ export interface FetchOptions {
   contentType: string;
   filters?: Record<string, string | number | object>;
   populate?: string;
+  fields?: string[],
   sort?: string;
   status?: 'published' | 'draft' | 'all';
   includeAuth?: boolean;
