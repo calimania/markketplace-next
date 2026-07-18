@@ -768,13 +768,6 @@ export default function StoreOverview({
         )}
       </Group>
 
-      <StripeConnectBlock
-        store={currentStore}
-        variant="compact"
-        storeSlug={store.slug}
-        onAction={() => redirect(`/tienda/${store?.slug}/payouts`)}
-      />
-
       <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'latest')} keepMounted={false} className="tienda-overview-tabs">
         <Tabs.List
           style={{
@@ -790,7 +783,7 @@ export default function StoreOverview({
             Latest content
           </Tabs.Tab>
           <Tabs.Tab value="crm" data-accent="orange" style={{ flex: '0 0 auto', paddingInline: 14, paddingBlock: 11, borderRadius: 0 }}>
-            CRM
+            Inbox
           </Tabs.Tab>
           <Tabs.Tab value="payouts" data-accent="gray" style={{ flex: '0 0 auto', paddingInline: 14, paddingBlock: 11, borderRadius: 0 }}>
             Payouts
@@ -934,6 +927,14 @@ export default function StoreOverview({
                   Stripe Connect
                 </Badge>
               </Group>
+
+              <StripeConnectBlock
+                store={currentStore}
+                variant="compact"
+                storeSlug={store.slug}
+                onAction={() => redirect(`/tienda/${store?.slug}/payouts`)}
+              />
+
               <StripeConnectBlock
                 store={currentStore}
                 variant="full"
