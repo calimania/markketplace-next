@@ -1,14 +1,11 @@
 'use client';
 
+import Link from "next/link";
 import {
   IconRocket, IconBuildingStore,
-  IconArticle, IconSparkles, IconArrowRight,
+  IconSparkles, IconArrowRight,
   IconCalendar,
 } from "@tabler/icons-react";
-import {
-  Container, Title, Text, Button, Group, Stack, SimpleGrid,
-  Box, rem, Badge, Card, CardSection, Grid, GridCol
-} from "@mantine/core";
 import { Store, Page, Article, Event, Product } from "@/markket";
 import PageContent from '@/app/components/ui/page.content';
 import { markketColors } from "@/markket/colors.config";
@@ -19,20 +16,20 @@ import { FeatureCard } from '@/app/components/ui/feature.card';
 const features = [
   {
     icon: IconRocket,
-    title: "Launch in Minutes",
-    description: "Verify email, add products, start selling. Simple as that.",
+    title: "Launch an Online Store in Minutes",
+    description: "Verify your email, list digital or physical products, and start accepting global payments securely.",
     color: markketColors.sections.events.main,
   },
   {
     icon: IconBuildingStore,
-    title: "Own Your Content",
-    description: "No ads or invasive trackers",
+    title: "100% Data & Content Ownership",
+    description: "Build a brand completely free of invasive third-party trackers, pop-up ads, or marketplace interference.",
     color: markketColors.sections.shop.main,
   },
   {
     icon: IconSparkles,
-    title: "Customizable",
-    description: "Open source, headless, self-host, community support.",
+    title: "Fully Customizable & Self-Hosted",
+    description: "Enjoy an open-source, headless e-commerce stack with active community support and multi-theme customization.",
     color: markketColors.rosa.main,
   },
 ];
@@ -81,671 +78,528 @@ type HomePageProps = {
 };
 
 const SectionLabel = ({ num, label, color }: { num: string; label: string; color?: string }) => (
-  <Text
-    size="xs"
-    fw={600}
-    mb={4}
-    style={{
-      fontFamily: 'monospace',
-      letterSpacing: '0.12em',
-      textTransform: 'uppercase',
-      color: color || markketColors.neutral.mediumGray,
-    }}
+  <span
+    className="block text-xs font-semibold uppercase tracking-widest font-mono mb-1"
+    style={{ color: color || markketColors.neutral.mediumGray }}
   >
     {num} — {label}
-  </Text>
+  </span>
 );
 
-const HomePage = ({ store, page, communityPosts = [], featuredStores = [], communityPages = [], communityEvents = [], communityProducts = [] }: HomePageProps) => {
-  const eventsToDisplay = [...communityEvents].sort((a, b) => {
-    const aTime = a?.startDate ? new Date(a.startDate).getTime() : Number.MAX_SAFE_INTEGER;
-    const bTime = b?.startDate ? new Date(b.startDate).getTime() : Number.MAX_SAFE_INTEGER;
-    return aTime - bTime;
-  });
+const HomePage = ({
+  store,
+  page,
+  communityPosts = [],
+  featuredStores = [],
+  communityPages = [],
+  communityEvents = [],
+  communityProducts = []
+}: HomePageProps) => {
+  const eventsToDisplay = communityEvents;
 
   return (
-    <main>
-      {/* ── 00 — STORES ─────────────────────────────────────── */}
-      <Box py={60} style={{ borderBottom: `1px solid ${markketColors.neutral.lightGray}` }}>
-        <Container size="lg">
-          <Stack gap={32}>
-            <Group justify="space-between" align="flex-end">
-              <Box>
-                <SectionLabel num="00" label="Stores" color={markketColors.sections.shop.main} />
-                <Title
-                  order={2}
-                  style={{
-                    fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
-                    fontWeight: 800,
-                    letterSpacing: '-0.025em',
-                    color: markketColors.neutral.charcoal,
-                  }}
-                >
-                  Discover Creators
-                </Title>
-              </Box>
-              <Button
-                component="a"
-                href="/stores"
-                variant="subtle"
-                size="sm"
-                rightSection={<IconArrowRight size={14} />}
-                style={{ color: markketColors.neutral.darkGray }}
-              >
-                All stores
-              </Button>
-            </Group>
+    <main className="min-h-screen bg-white text-gray-900 selection:bg-rose-100 selection:text-rose-900 antialiased">
 
-            {featuredStores.length > 0 ? (
-              <StorefrontCarousel stores={featuredStores} />
-            ) : (
-                <Box
-                  style={{
-                    borderRadius: 20,
-                    border: `1px dashed ${markketColors.neutral.mediumGray}`,
-                    padding: rem(48),
-                    textAlign: 'center',
-                  }}
-                >
-                <Text c="dimmed" mb="md">No stores yet — be the first!</Text>
-                <Button
-                  component="a"
+      {/* ── 00 — STORES ───────────────────────────────────── */}
+      <section className="py-20 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
+            <div>
+              <SectionLabel num="00" label="Digital Storefronts" color={markketColors.sections.shop.main} />
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 mt-1">
+                Shop Independent Creators
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">Explore custom, modern shops built by small businesses and digital makers.</p>
+            </div>
+            <Link
+              href="/stores"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-950 transition-colors group"
+            >
+              Browse all stores <IconArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          {featuredStores.length > 0 ? (
+            <StorefrontCarousel stores={featuredStores} />
+          ) : (
+              <div className="flex flex-col items-center justify-center text-center p-16 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 backdrop-blur-sm">
+                <p className="text-gray-500 mb-4 font-medium text-lg">No stores live just yet — jump in and set up shop!</p>
+                <Link
                   href="/auth/magic"
-                  style={{ background: markketColors.rosa.main, color: 'white' }}
+                  className="px-6 py-3 text-sm font-bold text-white rounded-xl shadow-md hover:opacity-95 hover:shadow-lg transition-all active:scale-[0.98]"
+                  style={{ backgroundColor: markketColors.rosa.main }}
                 >
-                  Create your store
-                </Button>
-              </Box>
-            )}
-          </Stack>
-        </Container>
-      </Box>
-
-      {/* ── 01 — PLATFORM ───────────────────────────────────── */}
-      <Box
-        py={64}
-        style={{
-          background: markketColors.neutral.offWhite,
-          borderBottom: `1px solid ${markketColors.neutral.lightGray}`,
-        }}
-      >
-        <Container size="lg">
-          <Grid gap={{ base: 'xl', md: 'xl' }}>
-            <GridCol span={{ base: 12, md: 7 }}>
-              <Stack gap={16}>
-                <SectionLabel num="01" label="Platform" />
-                <Title
-                  order={2}
-                  style={{
-                    fontSize: 'clamp(2rem, 5vw, 3.25rem)',
-                    fontWeight: 900,
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1.08,
-                    color: markketColors.neutral.charcoal,
-                  }}
-                >
-                  {store?.SEO?.metaTitle || 'Markkët'}
-                  <br />
-                  <span style={{ color: markketColors.rosa.main }}>Content Manager</span>
-                </Title>
-              </Stack>
-            </GridCol>
-            <GridCol span={{ base: 12, md: 5 }}>
-              <Stack gap={24}>
-                <Text style={{ color: markketColors.neutral.darkGray, lineHeight: 1.65, fontSize: '1.05rem' }}>
-                  {store?.SEO?.metaDescription ||
-                    'Beautiful storefronts for creators, artists, and small businesses. Start selling today.'}
-                </Text>
-                <Group gap={12} wrap="wrap">
-                  <Button
-                    component="a"
-                    href="/auth/magic"
-                    size="md"
-                    radius="md"
-                    leftSection={<IconSparkles size={16} />}
-                    style={{ background: markketColors.rosa.main, color: 'white' }}
-                  >
-                    Create your store
-                  </Button>
-                </Group>
-              </Stack>
-            </GridCol>
-          </Grid>
-        </Container>
-      </Box>
-
-      <Container size="lg" py={80}>
-        <Stack gap={48}>
-          {communityPosts.length > 0 && (
-            <Container size="lg" py={80}>
-              <div>
-                <Stack gap={32}>
-                  <Group justify="space-between" align="flex-end">
-                    <div>
-                      <SectionLabel num="02" label="Blog" color={markketColors.sections.blog.main} />
-                      <Title order={2} size={rem(36)} style={{ color: markketColors.neutral.charcoal }}>
-                        Latest Stories
-                      </Title>
-                      <Text c="dimmed">Fresh writing from creators across the community.</Text>
-                    </div>
-                    <Button component="a" href="/blog" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                      See all stories
-                    </Button>
-                  </Group>
-
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-                    {communityPosts.slice(0, 6).map((post) => {
-                      const contentImage = extractRichTextImageUrl(post?.Content);
-                      const coverUrl = pickBestImage(
-                        contentImage,
-                        post?.cover?.formats?.medium?.url,
-                        post?.cover?.formats?.small?.url,
-                        post?.cover?.formats?.thumbnail?.url,
-                        post?.cover?.url,
-                        post?.SEO?.socialImage?.formats?.medium?.url,
-                        post?.SEO?.socialImage?.formats?.small?.url,
-                        post?.SEO?.socialImage?.formats?.thumbnail?.url,
-                        post?.SEO?.socialImage?.url,
-                        post?.store?.Logo?.formats?.small?.url,
-                        post?.store?.Logo?.formats?.thumbnail?.url,
-                        post?.store?.Logo?.url,
-                      );
-                      const storeSlug = post?.store?.slug;
-                      const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
-                      const fallbackCoverUrl = createFallbackCoverUrl(
-                        [post.Title, post.slug, post.documentId, storeSlug].filter(Boolean).join('-') || post.id?.toString() || 'blog-post',
-                        900,
-                        520,
-                      );
-
-                      return (
-                        <Card
-                          key={post.documentId || post.id}
-                          withBorder
-                          radius="lg"
-                          padding={0}
-                          component="a"
-                          href={href}
-                          aria-label={`Read blog post ${post.Title}`}
-                          style={{
-                            overflow: 'hidden',
-                            borderColor: markketColors.neutral.lightGray,
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                            textDecoration: 'none',
-                            transition: 'transform 0.15s, box-shadow 0.15s',
-                          }}
-                          className="hover:scale-[1.02]"
-                        >
-                          <CardSection>
-                            {coverUrl ? (
-                              <img
-                                src={coverUrl}
-                                alt={post.Title}
-                                style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            ) : (
-                              <Box
-                                style={{
-                                  height: rem(190),
-                                    background: `url(${fallbackCoverUrl}) center/cover no-repeat`,
-                                    position: 'relative',
-                                }}
-                              >
-                                  <Box
-                                    style={{
-                                      position: 'absolute',
-                                      inset: 0,
-                                      background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.08) 0%, rgba(2, 6, 23, 0.42) 100%)',
-                                    }}
-                                  />
-                              </Box>
-                            )}
-                          </CardSection>
-
-                          <Stack gap="sm" p="md">
-                            <Group gap="xs">
-                              <Badge variant="outline" color="pink">Blog</Badge>
-                              {post?.store?.title && (
-                                <Text size="xs" style={{ color: markketColors.neutral.darkGray }}>{post.store.title}</Text>
-                              )}
-                            </Group>
-
-                            <Title order={3} size="h4" style={{ lineHeight: 1.25 }}>{post.Title}</Title>
-                            <Text size="sm" style={{ color: markketColors.neutral.darkGray }} lineClamp={3}>
-                              {post?.SEO?.metaDescription || '...'}
-                            </Text>
-
-                            <Text
-                              size="sm"
-                              fw={500}
-                              style={{ color: markketColors.sections.blog.main, marginTop: rem(4) }}
-                            >
-                              Read story →
-                            </Text>
-                          </Stack>
-                        </Card>
-                      );
-                    })}
-                  </SimpleGrid>
-                </Stack>
-              </div>
-            </Container>
+                  Launch Your Custom Storefront
+                </Link>
+            </div>
           )}
+        </div>
+      </section>
 
+      {/* ── 01 — PLATFORM / HERO ───────────────────────────── */}
+      <section
+        className="py-24 border-b border-gray-100 relative overflow-hidden"
+        style={{ backgroundColor: markketColors.neutral.offWhite }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7">
+              <SectionLabel num="01" label="E-commerce Content Management Stack" />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-950 mt-2 leading-[1.08]">
+                {store?.SEO?.metaTitle || 'Markkët E-Commerce'}
+                <br />
+                <span style={{ color: markketColors.rosa.main }}>Headless Content Manager</span>
+              </h1>
+            </div>
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <p className="text-gray-600 text-lg leading-relaxed font-normal">
+                {store?.SEO?.metaDescription ||
+                  'Create beautiful standalone digital storefronts and blog networks for independent creators, artists, and modern agile brands.'}
+              </p>
+              <div>
+                <Link
+                  href="/auth/magic"
+                  className="inline-flex items-center gap-2 px-7 py-4 font-bold text-white rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0"
+                  style={{ backgroundColor: markketColors.rosa.main }}
+                >
+                  <IconSparkles size={16} /> Start Selling Online Today
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        </Stack>
-      </Container>
+      {/* ── 02 — BLOG ───────────────────────────────────────── */}
+      {communityPosts.length > 0 && (
+        <section className="py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+              <div>
+                <SectionLabel num="02" label="Creator Ecosystem Journals" color={markketColors.sections.blog.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Latest Insights & Stories</h2>
+                <p className="text-gray-500 mt-1">Fresh articles, project diaries, and strategy updates directly from community creators.</p>
+              </div>
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
+              >
+                Read all articles <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {communityPosts.slice(0, 6).map((post) => {
+                const contentImage = extractRichTextImageUrl(post?.Content);
+                const coverUrl = pickBestImage(
+                  contentImage,
+                  post?.cover?.formats?.medium?.url,
+                  post?.cover?.formats?.small?.url,
+                  post?.cover?.formats?.thumbnail?.url,
+                  post?.cover?.url,
+                  post?.SEO?.socialImage?.formats?.medium?.url,
+                  post?.SEO?.socialImage?.formats?.small?.url,
+                  post?.SEO?.socialImage?.formats?.thumbnail?.url,
+                  post?.SEO?.socialImage?.url,
+                  post?.store?.Logo?.formats?.small?.url,
+                  post?.store?.Logo?.formats?.thumbnail?.url,
+                  post?.store?.Logo?.url,
+                );
+                const storeSlug = post?.store?.slug;
+                const href = storeSlug ? `/${storeSlug}/blog/${post.slug}` : '/docs';
+                const fallbackCoverUrl = createFallbackCoverUrl(
+                  [post.Title, post.slug, post.documentId, storeSlug].filter(Boolean).join('-') || post.id?.toString() || 'blog-post',
+                  900,
+                  520,
+                );
+
+                return (
+                  <Link
+                    key={post.documentId || post.id}
+                    href={href}
+                    className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    aria-label={`Read fully-optimized article: ${post.Title}`}
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+                      {coverUrl ? (
+                        <img
+                          src={coverUrl}
+                          alt={post.Title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                        />
+                      ) : (
+                          <div
+                            className="w-full h-full bg-cover bg-center relative"
+                            style={{ backgroundImage: `url(${fallbackCoverUrl})` }}
+                          >
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col flex-1 p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md">Article</span>
+                        {post?.store?.title && (
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{post.store.title}</span>
+                        )}
+                      </div>
+
+                      <h3 className="text-lg font-bold text-gray-950 group-hover:text-rose-600 transition-colors line-clamp-2 leading-snug mb-2">
+                        {post.Title}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed mb-4">
+                        {post?.SEO?.metaDescription || 'Click to dive deep into this featured community insight piece...'}
+                      </p>
+
+                      <span
+                        className="text-sm font-semibold mt-auto flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
+                        style={{ color: markketColors.sections.blog.main }}
+                      >
+                        Read full post <IconArrowRight size={14} className="stroke-[2.5]" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── 03 — EVENTS ──────────────────────────────────── */}
       {eventsToDisplay.length > 0 && (
-        <Box
-          py={80}
-          style={{
-            background: `${markketColors.sections.events.light}80`,
-            borderTop: `1px solid ${markketColors.neutral.lightGray}`,
-          }}
+        <section
+          className="py-24 border-t border-gray-100"
+          style={{ backgroundColor: `${markketColors.sections.events.light}25` }}
         >
-          <Container size="lg">
-            <Stack gap={32}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
               <div>
-                <SectionLabel num="03" label="Events" color={markketColors.sections.events.main} />
-                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
-                  Join upcoming events
-                </Title>
-                <Text c="dimmed">Workshops, launches, and meetups from community stores.</Text>
+                <SectionLabel num="03" label="Interactive Experiences" color={markketColors.sections.events.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Join Live Marketplace Events</h2>
+                <p className="text-gray-500 mt-1">Educational workshops, product drops, and global meetups Hosted by store owners.</p>
               </div>
+              <Link
+                href="/events"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
+              >
+                Explore more events <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
 
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {eventsToDisplay.slice(0, 6).map((event: Event) => {
-                  const thumbnailUrl = pickBestImage(
-                    event?.Thumbnail?.formats?.medium?.url,
-                    event?.Thumbnail?.formats?.small?.url,
-                    event?.Thumbnail?.formats?.thumbnail?.url,
-                    event?.Thumbnail?.url,
-                    event?.Slides?.[0]?.formats?.medium?.url,
-                    event?.Slides?.[0]?.formats?.small?.url,
-                    event?.Slides?.[0]?.formats?.thumbnail?.url,
-                    event?.Slides?.[0]?.url,
-                    event?.SEO?.socialImage?.formats?.medium?.url,
-                    event?.SEO?.socialImage?.formats?.small?.url,
-                    event?.SEO?.socialImage?.formats?.thumbnail?.url,
-                    event?.SEO?.socialImage?.url,
-                    (event as any)?.stores?.[0]?.Logo?.formats?.small?.url,
-                    (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
-                    (event as any)?.stores?.[0]?.Logo?.url,
-                  );
-                  const storeSlug = (event as any)?.stores?.[0]?.slug;
-                  const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
-                  const eventDate = formatEventDate(event.startDate, event.timezone);
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {eventsToDisplay.slice(0, 9).map((event: Event) => {
+                const thumbnailUrl = pickBestImage(
+                  event?.Thumbnail?.formats?.medium?.url,
+                  event?.Thumbnail?.formats?.small?.url,
+                  event?.Thumbnail?.formats?.thumbnail?.url,
+                  event?.Thumbnail?.url,
+                  event?.Slides?.[0]?.formats?.medium?.url,
+                  event?.Slides?.[0]?.formats?.small?.url,
+                  event?.Slides?.[0]?.formats?.thumbnail?.url,
+                  event?.Slides?.[0]?.url,
+                  event?.SEO?.socialImage?.formats?.medium?.url,
+                  event?.SEO?.socialImage?.formats?.small?.url,
+                  event?.SEO?.socialImage?.formats?.thumbnail?.url,
+                  event?.SEO?.socialImage?.url,
+                  (event as any)?.stores?.[0]?.Logo?.formats?.small?.url,
+                  (event as any)?.stores?.[0]?.Logo?.formats?.thumbnail?.url,
+                  (event as any)?.stores?.[0]?.Logo?.url,
+                );
+                const storeSlug = (event as any)?.stores?.[0]?.slug;
+                const href = storeSlug ? `/${storeSlug}/events/${event.slug}` : '/stores';
+                const eventDate = formatEventDate(event.startDate, event.timezone);
 
-                  return (
-                    <Card
-                      key={event.documentId || event.id}
-                      withBorder
-                      radius="lg"
-                      padding={0}
-                      component="a"
-                      href={href}
-                      aria-label={`Learn more about event ${event.Name}`}
-                      style={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        borderColor: markketColors.neutral.lightGray,
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                        textDecoration: 'none',
-                        transition: 'transform 0.15s, box-shadow 0.15s',
-                      }}
-                      className="hover:scale-[1.02]"
-                    >
-                      <CardSection>
-                        {thumbnailUrl ? (
-                          <img
-                            src={thumbnailUrl}
-                            alt={event.Name}
-                            style={{ width: '100%', height: rem(170), objectFit: 'cover' }}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <Box
-                            style={{
-                                height: rem(170),
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                                background: markketColors.sections.events.light,
-                                color: markketColors.sections.events.main,
-                            }}
+                return (
+                  <Link
+                    key={event.documentId || event.id}
+                    href={href}
+                    className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    aria-label={`Register for community event: ${event.Name}`}
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden bg-gray-50">
+                      {thumbnailUrl ? (
+                        <img
+                          src={thumbnailUrl}
+                          alt={event.Name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                        />
+                      ) : (
+                          <div
+                            className="w-full h-full flex flex-col items-center justify-center p-6 text-center"
+                            style={{ backgroundColor: markketColors.sections.events.light, color: markketColors.sections.events.main }}
                           >
-                            <Box style={{ textAlign: 'center' }}>
-                                <IconCalendar size={30} />
-                                <Text size="sm" fw={500}>Event</Text>
-                            </Box>
-                          </Box>
+                            <IconCalendar size={32} className="mb-1 animate-pulse" />
+                            <span className="text-sm font-bold tracking-wide">Live Stream / Meetup</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col flex-1 p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
+                          <IconCalendar size={12} /> {eventDate}
+                        </span>
+                        {(event as any)?.stores?.[0]?.title && (
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{(event as any).stores[0].title}</span>
                         )}
-                      </CardSection>
+                      </div>
 
-                      <Stack gap="sm" p="md" style={{ flex: 1 }}>
-                        <Group gap="xs">
-                          <Badge variant="outline" color="green" leftSection={<IconCalendar size={12} />}>{eventDate}</Badge>
-                          {(event as any)?.stores?.[0]?.title && (
-                            <Text size="xs" style={{ color: markketColors.neutral.darkGray }}>{(event as any).stores[0].title}</Text>
-                          )}
-                        </Group>
+                      <h3 className="text-lg font-bold text-gray-950 group-hover:text-emerald-600 transition-colors line-clamp-2 leading-snug mb-2">
+                        {event.Name}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {event?.SEO?.metaDescription || 'Discover dates, speaker bios, topics, and access details for this collective community run workshop.'}
+                      </p>
 
-                        <Title order={3} size="h4" style={{ lineHeight: 1.25 }}>{event.Name}</Title>
-                        <Text size="sm" style={{ color: markketColors.neutral.darkGray, flex: 1 }} lineClamp={2}>
-                          {event?.SEO?.metaDescription || 'Join us for this event'}
-                        </Text>
-
-                        <Text
-                          size="sm"
-                          fw={500}
-                          style={{ color: markketColors.sections.events.main, marginTop: 'auto' }}
-                        >
-                          View event →
-                        </Text>
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </SimpleGrid>
-            </Stack>
-          </Container>
-        </Box>
+                      <span
+                        className="text-sm font-semibold mt-auto flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
+                        style={{ color: markketColors.sections.events.main }}
+                      >
+                        View event schedule <IconArrowRight size={14} className="stroke-[2.5]" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ── 05 — FEATURES ───────────────────────────────── */}
       {communityProducts.length > 0 && (
-        <Box
-          py={60}
-          style={{
-            background: markketColors.neutral.offWhite,
-          }}
+        <section
+          className="py-20 border-b border-gray-100"
+          style={{ backgroundColor: markketColors.neutral.offWhite }}
         >
-          <Container size="lg">
-            <Stack gap={28}>
-              <Box mb={4}>
-                <SectionLabel num="05" label="Features" />
-              </Box>
-              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={32}>
-                {features.map((feature, index) => (
-                  <FeatureCard
-                    key={feature.title}
-                    icon={feature.icon}
-                    title={feature.title}
-                    description={feature.description}
-                    color={feature.color}
-                    index={index}
-                  />
-                ))}
-              </SimpleGrid>
-            </Stack>
-          </Container>
-        </Box>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-10">
+              <SectionLabel num="05" label="Core Open Architecture Capabilities" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {features.map((feature, index) => (
+                <FeatureCard
+                  key={feature.title}
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
+                  color={feature.color}
+                  index={index}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ── 06 — SHOP ───────────────────────────────────── */}
       {communityProducts.length > 0 && (
-        <Box
-          py={72}
-          style={{
-            background: `${markketColors.sections.shop.light}54`,
-          }}
+        <section
+          className="py-24"
+          style={{ backgroundColor: `${markketColors.sections.shop.light}25` }}
         >
-          <Container size="lg">
-            <Stack gap={32}>
-              <Group justify="space-between" align="flex-end">
-                <div>
-                  <SectionLabel num="06" label="Shop" color={markketColors.sections.shop.main} />
-                  <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
-                    Shop Community Picks
-                  </Title>
-                  <Text c="dimmed">Featured products from active stores.</Text>
-                </div>
-                <Button component="a" href="/stores" variant="outline" rightSection={<IconArrowRight size={16} />}>
-                  Browse Stores
-                </Button>
-              </Group>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+              <div>
+                <SectionLabel num="06" label="Handpicked Commercial Offerings" color={markketColors.sections.shop.main} />
+                <h2 className="text-3xl font-black text-gray-950 mt-1">Shop Community Top Picks</h2>
+                <p className="text-gray-500 mt-1">Directly purchase digital downloads, visual art templates, physical items, and courses safely.</p>
+              </div>
+              <Link
+                href="/stores"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
+              >
+                Explore creator catalogs <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
 
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-                {communityProducts.slice(0, 6).map((product) => {
-                  const storeSlug = (product as any)?.stores?.[0]?.slug;
-                  const contentImage = extractRichTextImageUrl(product?.Description as string);
-                  const productImage = pickBestImage(
-                    contentImage,
-                    product?.Thumbnail?.url,
-                    product?.Slides?.[0]?.formats?.medium?.url,
-                    product?.Slides?.[0]?.formats?.small?.url,
-                    product?.Slides?.[0]?.formats?.thumbnail?.url,
-                    product?.Slides?.[0]?.url,
-                  );
-                  const href = storeSlug ? `/${storeSlug}/products/${product.slug}` : '/stores';
-                  const price = typeof product.usd_price === 'number' && product.usd_price > 0
-                    ? `$${(product.usd_price / 100).toFixed(2)}`
-                    : 'See details';
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {communityProducts.slice(0, 6).map((product) => {
+                const storeSlug = (product as any)?.stores?.[0]?.slug;
+                const contentImage = extractRichTextImageUrl(product?.Description as string);
+                const productImage = pickBestImage(
+                  contentImage,
+                  product?.Thumbnail?.url,
+                  product?.Slides?.[0]?.formats?.medium?.url,
+                  product?.Slides?.[0]?.formats?.small?.url,
+                  product?.Slides?.[0]?.formats?.thumbnail?.url,
+                  product?.Slides?.[0]?.url,
+                );
+                const href = storeSlug ? `/${storeSlug}/products/${product.slug}` : '/stores';
+                const _price = product.usd_price || product.PRICES?.[0]?.Price;
+                const price = _price && _price > 0 ? `$${((_price)).toFixed(2)}` : ' / ';
 
-                  return (
-                    <Card
-                      key={product.documentId || product.id}
-                      withBorder
-                      radius="lg"
-                      padding={0}
-                      component="a"
-                      href={href}
-                      aria-label={`View product ${product.Name}`}
-                      style={{
-                        overflow: 'hidden',
-                        borderColor: markketColors.neutral.lightGray,
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-                        textDecoration: 'none',
-                        transition: 'transform 0.15s, box-shadow 0.15s',
-                      }}
-                      className="hover:scale-[1.02]"
-                    >
-                      <CardSection>
-                        {productImage ? (
-                          <img
-                            src={productImage}
-                            alt={product.Name}
-                            style={{ width: '100%', height: rem(190), objectFit: 'cover' }}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <Box
-                            style={{
-                                height: rem(190),
-                                background: `url(${createFallbackCoverUrl([product.Name, product.slug, storeSlug].filter(Boolean).join('-') || product.id?.toString() || 'product', 900, 520)}) center/cover no-repeat`,
-                                position: 'relative',
-                            }}
+                return (
+                  <Link
+                    key={product.documentId || product.id}
+                    href={href}
+                    className="group flex flex-col h-full overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    aria-label={`Purchase or read specs for: ${product.Name}`}
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+                      {productImage ? (
+                        <img
+                          src={productImage}
+                          alt={product.Name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                        />
+                      ) : (
+                          <div
+                            className="w-full h-full bg-cover bg-center relative"
+                            style={{ backgroundImage: `url(${createFallbackCoverUrl([product.Name, product.slug, storeSlug].filter(Boolean).join('-') || product.id?.toString() || 'product', 900, 520)})` }}
                           >
-                              <Box
-                                style={{
-                                  position: 'absolute',
-                                  inset: 0,
-                                  background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.38) 100%)',
-                                }}
-                              />
-                          </Box>
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col flex-1 p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md">Market Product</span>
+                        {(product as any)?.stores?.[0]?.title && (
+                          <span className="text-xs text-gray-500 font-medium tracking-wide">{(product as any).stores[0].title}</span>
                         )}
-                      </CardSection>
+                      </div>
 
-                      <Stack gap="sm" p="md">
-                        <Group gap="xs">
-                          <Badge variant="outline" color="cyan">Product</Badge>
-                          {(product as any)?.stores?.[0]?.title && (
-                            <Text size="xs" style={{ color: markketColors.neutral.darkGray }}>{(product as any).stores[0].title}</Text>
-                          )}
-                        </Group>
+                      <h3 className="text-lg font-bold text-gray-950 group-hover:text-cyan-600 transition-colors line-clamp-2 leading-snug mb-1">
+                        {product.Name}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {product?.SEO?.metaDescription || stripMarkdown(product?.Description as string) || 'Review sizing, feature sets, technical specifications, and distribution delivery parameters.'}
+                      </p>
 
-                        <Title order={3} size="h4" style={{ lineHeight: 1.25 }}>{product.Name}</Title>
-                        <Text size="sm" style={{ color: markketColors.neutral.darkGray }} lineClamp={2}>
-                          {product?.SEO?.metaDescription || stripMarkdown(product?.Description as string) || 'Discover this product from the Markket community.'}
-                        </Text>
-                        <Text size="sm" fw={600} style={{ color: markketColors.sections.shop.main }}>
-                          {price}
-                        </Text>
-
-                        <Text
-                          size="sm"
-                          fw={500}
-                          style={{ color: markketColors.sections.shop.main, marginTop: rem(4) }}
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                        <span className="text-base font-black text-gray-950 tracking-tight">{price}</span>
+                        <span
+                          className="text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
+                          style={{ color: markketColors.sections.shop.main }}
                         >
-                          View Product →
-                        </Text>
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </SimpleGrid>
-            </Stack>
-          </Container>
-        </Box>
+                          View Details <IconArrowRight size={14} className="stroke-[2.5]" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
+      {/* ── CUSTOM PAGE CONTENT ───────────────────────────── */}
       {page?.Content && (
-        <Container size="lg" py={60}>
+        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <PageContent params={{ page }} />
-        </Container>
+        </section>
       )}
 
       {/* ── 04 — PAGES ──────────────────────────────────── */}
       {communityPages.length > 0 && (
-        <Box
-          py={80}
-          style={{
-            background: markketColors.neutral.offWhite,
-            borderTop: `1px solid ${markketColors.neutral.lightGray}`,
-          }}
+        <section
+          className="py-24 border-t border-gray-100"
+          style={{ backgroundColor: markketColors.neutral.offWhite }}
         >
-          <Container size="lg">
-            <Stack gap={32}>
-              <div>
-                <SectionLabel num="04" label="Pages" color={markketColors.sections.about.main} />
-                <Title order={2} size={rem(32)} style={{ color: markketColors.neutral.charcoal }}>
-                  From the Community
-                </Title>
-                <Text c="dimmed">Evergreen pages from creators, studios, and brands.</Text>
-              </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-12">
+              <SectionLabel num="04" label="Evergreen Brand Portfolios" color={markketColors.sections.about.main} />
+              <h2 className="text-3xl font-black text-gray-950 mt-1">Profiles from the E-commerce Community</h2>
+              <p className="text-gray-500 mt-1">Read about pages, mission statements, and brand lookbooks from dynamic network shops.</p>
+            </div>
 
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {communityPages.slice(0, 6).map((p) => {
-                  const storeSlug = (p as any)?.store?.slug;
-                  const href = storeSlug ? `/${storeSlug}/about/${p.slug}` : '/stores';
-                  const logoUrl = pickBestImage(
-                    (p as any)?.store?.Logo?.formats?.small?.url,
-                    (p as any)?.store?.Logo?.formats?.thumbnail?.url,
-                    (p as any)?.store?.Logo?.url,
-                  );
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {communityPages.slice(0, 6).map((p) => {
+                const storeSlug = (p as any)?.store?.slug;
+                const href = storeSlug ? `/${storeSlug}/about/${p.slug}` : '/stores';
+                const logoUrl = pickBestImage(
+                  (p as any)?.store?.Logo?.formats?.small?.url,
+                  (p as any)?.store?.Logo?.formats?.thumbnail?.url,
+                  (p as any)?.store?.Logo?.url,
+                );
 
-                  return (
-                    <Card
-                      key={p.documentId || p.id}
-                      withBorder
-                      radius="lg"
-                      padding="md"
-                      component="a"
-                      href={href}
-                      aria-label={`Read page ${p.Title}`}
-                      style={{
-                        height: '100%',
-                        minHeight: rem(160),
-                        borderColor: markketColors.neutral.lightGray,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
-                        textDecoration: 'none',
-                        transition: 'transform 0.15s, box-shadow 0.15s',
-                      }}
-                      className="hover:scale-[1.02]"
-                    >
-                      {logoUrl && (
-                        <CardSection mb="sm">
-                          <img
-                            src={logoUrl}
-                            alt={(p as any)?.store?.title || storeSlug || 'Store'}
-                            style={{ width: '100%', height: rem(100), objectFit: 'cover' }}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </CardSection>
+                return (
+                  <Link
+                    key={p.documentId || p.id}
+                    href={href}
+                    className="group flex flex-col p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full"
+                    aria-label={`Explore information index: ${p.Title}`}
+                  >
+                    {logoUrl && (
+                      <div className="relative h-24 w-full rounded-xl overflow-hidden bg-gray-100 mb-4 border border-gray-50">
+                        <img
+                          src={logoUrl}
+                          alt={(p as any)?.store?.title || storeSlug || 'Creator brand hub logo'}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col flex-1 gap-2">
+                      {storeSlug && (
+                        <span className="text-[10px] font-bold tracking-wider uppercase text-gray-400">
+                          {(p as any)?.store?.title || storeSlug}
+                        </span>
                       )}
-                      <Stack gap="xs">
-                        {storeSlug && (
-                          <Text size="xs" fw={600} tt="uppercase" style={{ color: markketColors.neutral.darkGray }}>
-                            {(p as any)?.store?.title || storeSlug}
-                          </Text>
-                        )}
-                        <Title order={3} size="h4" style={{ lineHeight: 1.25, color: markketColors.neutral.charcoal }}>
-                          {p.Title}
-                        </Title>
-                        <Text size="sm" style={{ color: markketColors.neutral.darkGray }} lineClamp={2}>
-                          {p.SEO?.metaDescription || 'Read this page from the community.'}
-                        </Text>
-                        <Text
-                          size="sm"
-                          fw={500}
-                          style={{ color: markketColors.sections.about.main, marginTop: rem(4) }}
-                        >
-                          Read page →
-                        </Text>
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </SimpleGrid>
-            </Stack>
-          </Container>
-        </Box>
+                      <h3 className="text-lg font-bold text-gray-950 group-hover:text-indigo-600 transition-colors leading-snug">
+                        {p.Title}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                        {p.SEO?.metaDescription || 'Read through official manifestos, custom landing profiles, and local vendor dynamic documentations.'}
+                      </p>
+
+                      <span
+                        className="text-sm font-semibold mt-auto pt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
+                        style={{ color: markketColors.sections.about.main }}
+                      >
+                        Read directory profile <IconArrowRight size={14} className="stroke-[2.5]" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ── CTA ─────────────────────────────────────────── */}
-      <Box
-        py={80}
-        style={{
-          background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)`,
-          borderTop: `1px solid rgba(255,255,255,0.08)`,
-        }}
+      <section
+        className="py-28 relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${markketColors.rosa.main} 0%, ${markketColors.sections.blog.main} 100%)` }}
       >
-        <Container size="md">
-          <Stack gap={24} align="center">
-            <Title order={2} ta="center" size={rem(36)} style={{ color: 'white', lineHeight: 1.2 }}>
-              Ready to Launch?
-            </Title>
-            <Text size="lg" ta="center" style={{ color: 'rgba(255,255,255,0.9)' }}>
-              Join creators and businesses already selling on Markkët
-            </Text>
-            <Group gap={16} justify="center" wrap="wrap">
-              <Button
-                component="a"
-                href="/auth/magic"
-                size="lg"
-                radius="md"
-                style={{ background: 'white', color: markketColors.rosa.main, fontWeight: 600 }}
-              >
-                Create your store
-              </Button>
-              <Button
-                component="a"
-                href="/about"
-                size="lg"
-                radius="md"
-                variant="outline"
-                style={{ borderColor: 'rgba(255,255,255,0.6)', color: 'white' }}
-              >
-                About & Policies
-              </Button>
-            </Group>
-          </Stack>
-        </Container>
-      </Box>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+
+        <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+            Ready to Launch Your Brand?
+          </h2>
+          <p className="text-lg sm:text-xl text-white/90 font-medium mb-10 max-w-xl mx-auto">
+            Join independent creators and modern companies already hosting custom storefronts natively on Markkët.
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            <Link
+              href="/auth/magic"
+              className="px-8 py-4 bg-white text-base font-bold rounded-2xl shadow-xl shadow-black/10 hover:shadow-2xl hover:bg-gray-50 active:scale-95 transition-all duration-150"
+              style={{ color: markketColors.rosa.main }}
+            >
+              Build Your Online Store
+            </Link>
+            <Link
+              href="/about"
+              className="px-8 py-4 border border-white/30 text-base font-bold text-white rounded-2xl hover:bg-white/10 hover:border-white/50 active:scale-95 transition-all duration-150 backdrop-blur-sm"
+            >
+              Explore Terms & Documentation
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
 
 export default HomePage;
-
