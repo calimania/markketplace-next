@@ -127,19 +127,85 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const response = await getStoreCached(slug);
   const store = response?.data?.[0] as Store;
+  const slides = store?.Slides;
+  const siteUrl = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
+  const storefrontUrl = siteUrl ? `${siteUrl}/${slug}` : `/${slug}`;
+  const homepageUrl = siteUrl || '/';
+  const structuredImage = toAbsoluteUrl(imageOrFallback(slides[0]?.url, store?.SEO?.socialImage?.url, store?.Logo?.url));
+  const structuredLogo = toAbsoluteUrl(imageOrFallback(store?.Logo?.url, store?.SEO?.socialImage?.url));
+  const structuredDescription = compact(
+    store?.SEO?.metaDescription
+    || `Discover ${store?.title || slug}`,
+    200
+  );
 
-  return generateSEOMetadata({
+  const storefrontJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${storefrontUrl}#webpage`,
+        url: storefrontUrl,
+        name: store?.title || slug,
+        description: structuredDescription,
+        isPartOf: {
+          '@id': `${homepageUrl}#website`,
+        },
+        about: {
+          '@id': `${storefrontUrl}#store`,
+        },
+        primaryImageOfPage: structuredImage ? { '@type': 'ImageObject', url: structuredImage } : undefined,
+      },
+      {
+        '@type': 'Store',
+        '@id': `${storefrontUrl}#store`,
+        name: store?.title || slug,
+        url: storefrontUrl,
+        description: structuredDescription,
+        image: structuredImage,
+        logo: structuredLogo,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: homepageUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: store?.title || slug,
+            item: storefrontUrl,
+          },
+        ],
+      },
+    ],
+  };
+
+  const seoMetadata = await generateSEOMetadata({
     slug,
     entity: {
-      url: `/${slug}`,
       SEO: store?.SEO,
       Description: store?.Description || undefined,
       Logo: store?.Logo,
       id: store?.id?.toString(),
+      url: `/${slug}`,
     },
     type: 'website',
     defaultDescription: `Welcome to ${store?.title || 'our store'}`,
+    keywords: ['homepage', 'stores', 'products', 'events', 'marketplace'],
   });
+
+  return {
+    ...seoMetadata,
+    other: {
+      ...seoMetadata.other,
+      'jsonld': JSON.stringify(storefrontJsonLd),
+    }
+  };
 };
 
 export default async function StorePage({
@@ -435,68 +501,9 @@ export default async function StorePage({
   const hasPublishedCollections = publishedProducts.length > 0 || publishedPosts.length > 0 || eventsToDisplay.length > 0 || aboutPages.length > 0;
   const hasPresentationContent = hasHomePageStory || hasStoreDescription || slides.length > 0 || storeImages.length > 0;
   const shouldShowEmptyLaunchState = !hasPublishedCollections && !hasPresentationContent;
-  const siteUrl = (process.env.NEXT_PUBLIC_MARKKETPLACE_URL || markketplace.markket_url || '').replace(/\/$/, '');
-  const storefrontUrl = siteUrl ? `${siteUrl}/${slug}` : `/${slug}`;
-  const homepageUrl = siteUrl || '/';
-  const structuredImage = toAbsoluteUrl(imageOrFallback(heroImage, slides[0]?.src, storeImages[0]?.src, store?.SEO?.socialImage?.url, store?.Logo?.url));
-  const structuredLogo = toAbsoluteUrl(imageOrFallback(store?.Logo?.url, store?.SEO?.socialImage?.url));
-  const structuredDescription = compact(
-    homePage?.SEO?.metaDescription
-    || store?.SEO?.metaDescription
-    || descriptionText
-    || `Discover ${store?.title || slug}`,
-    200
-  );
-
-  const storefrontJsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'CollectionPage',
-        '@id': `${storefrontUrl}#webpage`,
-        url: storefrontUrl,
-        name: store?.title || slug,
-        description: structuredDescription,
-        isPartOf: {
-          '@id': `${homepageUrl}#website`,
-        },
-        about: {
-          '@id': `${storefrontUrl}#store`,
-        },
-        primaryImageOfPage: structuredImage ? { '@type': 'ImageObject', url: structuredImage } : undefined,
-      },
-      {
-        '@type': 'Store',
-        '@id': `${storefrontUrl}#store`,
-        name: store?.title || slug,
-        url: storefrontUrl,
-        description: structuredDescription,
-        image: structuredImage,
-        logo: structuredLogo,
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: homepageUrl,
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: store?.title || slug,
-            item: storefrontUrl,
-          },
-        ],
-      },
-    ],
-  };
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(storefrontJsonLd) }} />
       <div>
         {/* Hero */}
         <Box
