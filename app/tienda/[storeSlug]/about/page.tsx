@@ -16,8 +16,7 @@ export default async function TiendaAboutPage({ params }: TiendaAboutPageProps) 
 
   const pagesResponse = await strapiClient.getPages(storeSlug, true);
 
-  const pages = ((pagesResponse?.data || []) as Page[])
-    .filter((page) => page.slug !== 'home');
+  const pages = ((pagesResponse?.data || []) as Page[]);
   const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'No date');
 
   return (

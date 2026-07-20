@@ -1,6 +1,6 @@
 {
   "name": "markket-next",
-  "version": "0.6.66",
+  "version": "0.6.7",
   "private": false,
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

@@ -5,4 +5,4 @@ export const TIENDA_CONTENT_LIST_QUERY = {
   event: { sort: 'startDate:asc', pageSize: 200 },
 } as const;
 
-export const TIENDA_OVERVIEW_PREVIEW_LIMIT = 5;
+export const TIENDA_OVERVIEW_PREVIEW_LIMIT = 8;
