@@ -25,7 +25,7 @@
 - [ ] storefront: not found page custom to store <notfound store>
 - [ ] buyer can easy reply to order email to send via inbox
 
-### 0.6.7
+### 0.6.9
 - [x] hiding is_headless stores in /stores
 - [x] using next 16.3.0
 

@@ -232,8 +232,7 @@ function resolveInboxThreadKey(thread: InboxThreadSummary) {
 
 function resolveInboxThreadHref(thread: InboxThreadSummary) {
   const storeSlug = resolveInboxThreadStoreSlug(thread);
-  const threadKey = resolveInboxThreadKey(thread);
-  console.log({ thread })
+  // const threadKey = resolveInboxThreadKey(thread);
 
   if (!storeSlug) {
     return '';
