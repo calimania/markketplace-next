@@ -232,13 +232,12 @@ function resolveInboxThreadKey(thread: InboxThreadSummary) {
 
 function resolveInboxThreadHref(thread: InboxThreadSummary) {
   const storeSlug = resolveInboxThreadStoreSlug(thread);
-  // const threadKey = resolveInboxThreadKey(thread);
 
   if (!storeSlug) {
     return '';
   }
 
-  return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/${thread.key}`;
+  return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/`;
 }
 
 function resolveInboxStoreCount(store: InboxStoreSummary) {
