@@ -36,11 +36,10 @@ export default async function StoresPage() {
       { page: 1, pageSize: PAGE_SIZE },
       {
         filter: {
-          meta: {
-            is_headless: {
-              $ne: true
-            }
-          }
+          $or: [
+            { is_headless: { $eq: false } },
+            { is_headless: { $null: true } }
+          ]
         },
         sort: 'active:desc,updatedAt:desc'
       }

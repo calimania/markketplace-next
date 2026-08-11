@@ -312,7 +312,7 @@ export class StrapiClient {
 
   private buildFilterString(filters: any): string {
     if (!filters || Object.keys(filters).length === 0) return '';
-    return qs.stringify({ filters }, { arrayFormat: 'brackets', encodeValuesOnly: true });
+    return qs.stringify({ filters }, { arrayFormat: 'indices', encodeValuesOnly: true });
   }
 
 

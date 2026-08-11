@@ -2,7 +2,7 @@
 
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
-import { JSX, useEffect } from 'react'
+import { JSX, useEffect, } from 'react'
 import PostHogPageView from "@/app/components/pageView"
 import { markketplace } from '@/markket/config'
 
@@ -19,20 +19,24 @@ const resolvePostHogHost = () => {
 };
 
 export function PostHogProvider({ children }: { children: JSX.Element }) {
+
   useEffect(() => {
     if (!markketplace.extensions.posthog.api_key) {
       return;
     }
 
     try {
-      posthog.init(markketplace.extensions.posthog.api_key, {
-        api_host: resolvePostHogHost(),
-        ui_host: 'https://us.posthog.com',
-        capture_pageview: false,
-        autocapture: true,
-        disable_surveys: true,
-        person_profiles: 'identified_only',
-      });
+      if (!posthog.__loaded) {
+        posthog.init(markketplace.extensions.posthog.api_key, {
+          api_host: resolvePostHogHost(),
+          ui_host: 'https://us.posthog.com',
+          capture_pageview: false,
+          autocapture: true,
+          disable_surveys: true,
+          person_profiles: 'identified_only',
+        });
+      }
+
     } catch (error) {
       console.error('[PostHog] Initialization failed.', error);
     }
