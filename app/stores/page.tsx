@@ -1,6 +1,5 @@
 import { Container, Title, Text, Stack, Box, Group, Badge } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
-import StoreGrid from '@/app/components/stores/grid';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
