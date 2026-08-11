@@ -311,11 +311,9 @@ export class StrapiClient {
   }
 
   private buildFilterString(filters: any): string {
-    return qs.stringify({ filters }, {
-      arrayFormat: 'brackets',
-      encodeValuesOnly: true,
-    });
-  };
+    if (!filters || Object.keys(filters).length === 0) return '';
+    return qs.stringify({ filters }, { arrayFormat: 'brackets', encodeValuesOnly: true });
+  }
 
 
   // @TODO - if we have a store?.id, is faster to search that way instead of slug

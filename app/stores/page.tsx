@@ -35,7 +35,16 @@ export default async function StoresPage() {
     strapiClient.getStore(),
     strapiClient.getStores(
       { page: 1, pageSize: PAGE_SIZE },
-      { filter: {}, sort: 'active:desc,updatedAt:desc' }
+      {
+        filter: {
+          meta: {
+            is_headless: {
+              $ne: true
+            }
+          }
+        },
+        sort: 'active:desc,updatedAt:desc'
+      }
     ),
     strapiClient.getPage('stores'),
   ]);
