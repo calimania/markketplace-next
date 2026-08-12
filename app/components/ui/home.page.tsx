@@ -16,20 +16,20 @@ import { FeatureCard } from '@/app/components/ui/feature.card';
 const features = [
   {
     icon: IconRocket,
-    title: "Launch an Online Store in Minutes",
-    description: "Verify your email, list digital or physical products, and start accepting global payments securely.",
+    title: "Launch Your Stores in Minutes",
+    description: "Sell digital or physical products with secure, payments powered by Stripe",
     color: markketColors.sections.events.main,
   },
   {
     icon: IconBuildingStore,
-    title: "100% Data & Content Ownership",
-    description: "Build a brand completely free of invasive third-party trackers, pop-up ads, or marketplace interference.",
+    title: "Explore your Brands",
+    description: "Build without invasive trackers or platform interference",
     color: markketColors.sections.shop.main,
   },
   {
     icon: IconSparkles,
-    title: "Fully Customizable & Self-Hosted",
-    description: "Enjoy an open-source, headless e-commerce stack with active community support and multi-theme customization.",
+    title: "Headless Flexibility & Control",
+    description: "Customize everything with open-source components, modern developer tools, and templates",
     color: markketColors.rosa.main,
   },
 ];
@@ -115,7 +115,7 @@ const HomePage = ({
               href="/stores"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-950 transition-colors group"
             >
-              Browse all stores <IconArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              /stores <IconArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
@@ -144,11 +144,11 @@ const HomePage = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7">
-              <SectionLabel num="01" label="E-commerce Content Management Stack" />
+              <SectionLabel num="01" label="/tienda" />
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-950 mt-2 leading-[1.08]">
-                {store?.SEO?.metaTitle || 'Markkët E-Commerce'}
+                {store?.SEO?.metaTitle || 'Markkët Next'}
                 <br />
-                <span style={{ color: markketColors.rosa.main }}>Headless Content Manager</span>
+                <span style={{ color: markketColors.rosa.main }}>Content Manager System</span>
               </h1>
             </div>
             <div className="lg:col-span-5 flex flex-col gap-6">
@@ -162,7 +162,7 @@ const HomePage = ({
                   className="inline-flex items-center gap-2 px-7 py-4 font-bold text-white rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0"
                   style={{ backgroundColor: markketColors.rosa.main }}
                 >
-                  <IconSparkles size={16} /> Start Selling Online Today
+                  <IconSparkles size={16} /> Create Account
                 </Link>
               </div>
             </div>
@@ -184,7 +184,7 @@ const HomePage = ({
                 href="/blog"
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                Read all articles <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                /blog <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
@@ -285,7 +285,7 @@ const HomePage = ({
                 href="/events"
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                Explore more events <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                /events <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
@@ -359,7 +359,7 @@ const HomePage = ({
                         className="text-sm font-semibold mt-auto flex items-center gap-1 group-hover:gap-2 transition-all duration-150"
                         style={{ color: markketColors.sections.events.main }}
                       >
-                        View event schedule <IconArrowRight size={14} className="stroke-[2.5]" />
+                        Details <IconArrowRight size={14} className="stroke-[2.5]" />
                       </span>
                     </div>
                   </Link>
@@ -413,7 +413,7 @@ const HomePage = ({
                 href="/stores"
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] group"
               >
-                Explore creator catalogs <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                /stores <IconArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
 
@@ -593,7 +593,7 @@ const HomePage = ({
               href="/about"
               className="px-8 py-4 border border-white/30 text-base font-bold text-white rounded-2xl hover:bg-white/10 hover:border-white/50 active:scale-95 transition-all duration-150 backdrop-blur-sm"
             >
-              Explore Terms & Documentation
+              /about
             </Link>
           </div>
         </div>

@@ -688,6 +688,14 @@ export class StrapiClient {
       status: 'published',
       paginate,
       populate: 'SEO.socialImage,store,store.Logo',
+      filters: {
+        store: {
+          $or: [
+            { is_headless: { $eq: false } },
+            { is_headless: { $null: true } }
+          ]
+        }
+      }
     });
   }
   getCommunityEvents(paginate: { page: number; pageSize: number }, options: { sort: string; from?: Date }) {
@@ -701,8 +709,7 @@ export class StrapiClient {
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
 
-        const localStartOfToday = `${year}-${month}-${day}T00:00:00.000Z`;
-        return localStartOfToday;
+        return `${year}-${month}-${day}T00:00:00.000Z`;
       })();
 
     const r = this.fetch({
@@ -712,6 +719,12 @@ export class StrapiClient {
         startDate: {
           $gte: fromDateString,
         },
+        stores: {
+          $or: [
+            { is_headless: { $eq: false } },
+            { is_headless: { $null: true } }
+          ]
+        }
       },
       fields: ['Name', 'startDate', 'endDate', 'usd_price', 'slug', 'Description'],
       populate: 'Thumbnail,SEO,SEO.socialImage,stores,PRICES',
