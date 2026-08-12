@@ -294,7 +294,7 @@ export default function ProductDisplay({ product, page, store }: { product: Prod
                           variant="filled"
                           color="blue"
                         >
-                          Continue to payment
+                          Checkout
                         </Button>
                       </Group>
                     </Stack>
