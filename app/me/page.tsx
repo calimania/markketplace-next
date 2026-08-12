@@ -232,13 +232,12 @@ function resolveInboxThreadKey(thread: InboxThreadSummary) {
 
 function resolveInboxThreadHref(thread: InboxThreadSummary) {
   const storeSlug = resolveInboxThreadStoreSlug(thread);
-  const threadKey = resolveInboxThreadKey(thread);
 
-  if (!storeSlug || !threadKey) {
+  if (!storeSlug) {
     return '';
   }
 
-  return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/${encodeURIComponent(threadKey)}`;
+  return `/tienda/${encodeURIComponent(storeSlug)}/crm/inbox/`;
 }
 
 function resolveInboxStoreCount(store: InboxStoreSummary) {
@@ -260,7 +259,6 @@ export default function MeHomePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [storeSearch, setStoreSearch] = useState('');
-  const [inboxTab, setInboxTab] = useState<'inbox' | 'orders'>('inbox');
   const [inboxSummary, setInboxSummary] = useState<InboxSummaryResponse | null>(null);
   const [inboxLoading, setInboxLoading] = useState(false);
   const [inboxError, setInboxError] = useState('');
@@ -268,8 +266,6 @@ export default function MeHomePage() {
   const [inboxSearch, setInboxSearch] = useState('');
   const [inboxPage, setInboxPage] = useState(1);
   const inboxPageSize = 20;
-  const storeCount = stores.length;
-  const publishedCount = stores.filter((store) => isStorePublished(store as StoreStatusShape)).length;
   const previewStores = [...stores]
     .filter((store) => {
       const query = storeSearch.trim().toLowerCase();
@@ -775,7 +771,11 @@ export default function MeHomePage() {
                   <Paper key={String(key)} withBorder radius="lg" p="sm" style={{ background: 'rgba(255,255,255,0.78)' }}>
                     <Stack gap={4}>
                       <Group justify="space-between" align="center" gap="xs" wrap="nowrap">
-                        <Text fw={700} size="sm" lineClamp={1}>{resolveInboxThreadTitle(thread)}</Text>
+                        <Text fw={700} size="sm" lineClamp={1}>
+                          <Link href={threadHref}>
+                            {resolveInboxThreadTitle(thread)}
+                          </Link>
+                        </Text>
                         <Text size="xs" c="dimmed">{resolveInboxThreadDate(thread)}</Text>
                       </Group>
                       <Group gap={6} wrap="wrap">
@@ -783,7 +783,7 @@ export default function MeHomePage() {
                         <Badge size="xs" variant="light" color="teal">{storeLabel}</Badge>
                         {threadHref ? (
                           <Badge component={Link} href={threadHref} size="xs" variant="light" color="orange">
-                            Open thread
+                            Open
                           </Badge>
                         ) : null}
                       </Group>

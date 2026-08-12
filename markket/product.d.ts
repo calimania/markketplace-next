@@ -21,6 +21,9 @@ export interface Price {
   hidden: boolean;
   ships_to?: string[];
   extensions?: unknown[];
+  billing_type?: string;
+  billing_interval?: string;
+  billing_interval_count?: number;
 }
 
 export interface ImageFormat {

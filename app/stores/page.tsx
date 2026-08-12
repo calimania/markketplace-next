@@ -1,6 +1,5 @@
 import { Container, Title, Text, Stack, Box, Group, Badge } from "@mantine/core";
 import { strapiClient } from '@/markket/api.strapi';
-import StoreGrid from '@/app/components/stores/grid';
 import { generateSEOMetadata } from '@/markket/metadata';
 import { Page } from "@/markket/page";
 import { Metadata } from "next";
@@ -35,7 +34,15 @@ export default async function StoresPage() {
     strapiClient.getStore(),
     strapiClient.getStores(
       { page: 1, pageSize: PAGE_SIZE },
-      { filter: {}, sort: 'active:desc,updatedAt:desc' }
+      {
+        filter: {
+          $or: [
+            { is_headless: { $eq: false } },
+            { is_headless: { $null: true } }
+          ]
+        },
+        sort: 'active:desc,updatedAt:desc'
+      }
     ),
     strapiClient.getPage('stores'),
   ]);

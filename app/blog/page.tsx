@@ -92,10 +92,10 @@ export default async function BlogDiscoveryPage() {
               c="white"
               style={{ fontSize: 'clamp(1.6rem, 5vw, 2.8rem)', fontWeight: 800, lineHeight: 1.2 }}
             >
-              Stories
+              /blog
             </Title>
-            <Text size="md" ta="center" c="rgba(255,255,255,0.85)" maw={480}>
-              Fresh writing from creators, makers, and builders from the community.
+            <Text size="lg" ta="center" c="rgba(255,255,255,0.85)" maw={480}>
+              Fresh writing from the community
             </Text>
           </Stack>
         </Paper>

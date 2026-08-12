@@ -6,10 +6,9 @@ export default function PostHogClient() {
     return null;
   }
 
-  const posthogClient = new PostHog(markketplace.extensions.posthog.api_key, {
+  return new PostHog(markketplace.extensions.posthog.api_key, {
     host: markketplace.extensions.posthog.host,
     flushAt: 1,
     flushInterval: 0
-  })
-  return posthogClient
+  });
 };

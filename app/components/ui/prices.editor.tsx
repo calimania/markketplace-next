@@ -180,6 +180,9 @@ export default function PricesEditor({
   const [drafts, setDrafts] = useState<PriceItemDraft[]>(normalizePrices(value));
   const [saving, setSaving] = useState(false);
   // @TODO: review, restrict PRICES restrictions - subscription options
+  // billing_type?: string;
+  // billing_interval?: string;
+  // billing_interval_count?: number;
   const canEditPrices = true;
 
   useEffect(() => {

@@ -24,24 +24,6 @@ type CrmSection = {
 
 const CRM_SECTIONS: CrmSection[] = [
   {
-    id: 'customers',
-    label: 'Customers',
-    icon: IconUsers,
-    accent: '#0ea5e9',
-  },
-  {
-    id: 'orders',
-    label: 'Orders',
-    icon: IconShoppingBag,
-    accent: '#8b5cf6',
-  },
-  {
-    id: 'subscribers',
-    label: 'Subscribers',
-    icon: IconMail,
-    accent: '#ec4899',
-  },
-  {
     id: 'inbox',
     label: 'Inbox',
     icon: IconMessageCircle,

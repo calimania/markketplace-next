@@ -24,6 +24,12 @@
 - [ ] debug: receiving inbox
 - [ ] storefront: not found page custom to store <notfound store>
 - [ ] buyer can easy reply to order email to send via inbox
+- [ ] me: debug inbox preview, thread creations
+- [ ] tienda: unauthorized store flashes when redirecting after create store
+
+### 0.6.9
+- [x] hiding is_headless stores in /stores
+- [x] using next 16.3.0
 
 ### v0.5.3
 - [x] debug: events in store front

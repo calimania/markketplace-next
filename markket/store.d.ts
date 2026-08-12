@@ -52,4 +52,6 @@ export interface Store {
   URLS: URL[],
   SEO: SEO;
   Slides: ImageData[];
+  meta?: {};
+  is_headless?: boolean;
 };
