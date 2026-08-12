@@ -29,7 +29,7 @@ const features = [
   {
     icon: IconSparkles,
     title: "Headless Flexibility & Control",
-    description: "Customize everything with open-source components, modern developer tools, and templates",
+    description: "Customize with open standards, dev tools, and templates",
     color: markketColors.rosa.main,
   },
 ];
@@ -587,7 +587,9 @@ const HomePage = ({
               className="px-8 py-4 bg-white text-base font-bold rounded-2xl shadow-xl shadow-black/10 hover:shadow-2xl hover:bg-gray-50 active:scale-95 transition-all duration-150"
               style={{ color: markketColors.rosa.main }}
             >
-              Build Your Online Store
+              {
+                ['Start a Blog', 'Share your Creations', 'Tell Your Story', 'Build Your Brand'][Math.floor(Math.random() * 4)]
+              }
             </Link>
             <Link
               href="/about"
